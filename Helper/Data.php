@@ -51,15 +51,20 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
      * @var \Magento\Framework\Module\ModuleList\Loader
      */
     protected $_loader;
-    
+    /**
+     * @var \Mailchimp
+     */
+    protected $_api;
 
     /**
+     * Data constructor.
      * @param \Magento\Framework\App\Helper\Context $context
      * @param \Magento\Store\Model\StoreManagerInterface $storeManager
      * @param \Ebizmarts\MailChimp\Model\Logger\Logger $logger
      * @param \Magento\Customer\Model\GroupRegistry $groupRegistry
      * @param \Magento\Framework\App\State $state
      * @param \Magento\Framework\Module\ModuleList\Loader $loader
+     * @param \Mailchimp $api
      */
     public function __construct(
         \Magento\Framework\App\Helper\Context $context,
@@ -67,7 +72,8 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         \Ebizmarts\MailChimp\Model\Logger\Logger $logger,
         \Magento\Customer\Model\GroupRegistry $groupRegistry,
         \Magento\Framework\App\State $state,
-        \Magento\Framework\Module\ModuleList\Loader $loader
+        \Magento\Framework\Module\ModuleList\Loader $loader,
+        \Mailchimp $api
     ) {
     
         $this->_storeManager    = $storeManager;
@@ -77,6 +83,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         $this->_request         = $context->getRequest();
         $this->_state           = $state;
         $this->_loader          = $loader;
+        $this->_api             = $api;
         parent::__construct($context);
     }
 
@@ -107,9 +114,16 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         return $this->getConfigValue(self::XML_PATH_APIKEY, $store);
     }
 
+    /**
+     * @param \Mailchimp $pi
+     * @param null $store
+     * @return \Mailchimp
+     */
     public function getApi($store = null)
     {
-        return new \Mailchimp($this->getApiKey($store), null, 'Mailchimp4Magento2' . (string)$this->getModuleVersion());
+        $this->_api->setApiKey($this->getApiKey($store));
+        $this->_api->setUserAgent('Mailchimp4Magento2' . (string)$this->getModuleVersion());
+        return $this->_api;
     }
 
     /**

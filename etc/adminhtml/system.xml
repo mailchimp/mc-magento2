@@ -38,7 +38,7 @@
                 <field id="oauth" translate="button_label" type="button" sortOrder="25" showInDefault="1" showInWebsite="0" showInStore="1">
                     <label></label>
                     <button_label>Get API credentials</button_label>
-                    <frontend_model>Ebizmarts\MageMonkey\Block\Adminhtml\System\Config\OauthWizard</frontend_model>
+                    <frontend_model>Ebizmarts\MailChimp\Block\Adminhtml\System\Config\OauthWizard</frontend_model>
                 </field>
                 <field id="account_details" translate="label" type="textarea" sortOrder="30" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Account Details</label>
