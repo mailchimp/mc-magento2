@@ -54,13 +54,13 @@
                         <!--<field id="*/*/active">1</field>-->
                     <!--</depends>-->
                 <!--</field>&ndash;&gt;-->
-                <!--<field id="list" translate="label" type="select" sortOrder="60" showInDefault="1" showInWebsite="1" showInStore="1">-->
-                    <!--<label>General Subscription</label>-->
-                    <!--<source_model>Ebizmarts\MailChimp\Model\Config\Source\Monkeylist</source_model>-->
-                    <!--<depends>-->
-                        <!--<field id="*/*/active">1</field>-->
-                    <!--</depends>-->
-                <!--</field>-->
+                <field id="list" translate="label" type="select" sortOrder="60" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>General Subscription</label>
+                    <source_model>Ebizmarts\MailChimp\Model\Config\Source\Monkeylist</source_model>
+                    <depends>
+                        <field id="*/*/active">1</field>
+                    </depends>
+                </field>
                 <field id="log" translate="label" type="select" sortOrder="70" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Enable Log</label>
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
