@@ -20,9 +20,9 @@ class Hint extends \Magento\Backend\Block\Template implements \Magento\Framework
     /**
      * @var \Magento\Framework\App\ProductMetadataInterface
      */
-    protected $_metaData;
+    private $_metaData;
     
-    protected $_helper;
+    private $_helper;
     
     /**
      * @param \Magento\Backend\Block\Template\Context $context
@@ -34,12 +34,11 @@ class Hint extends \Magento\Backend\Block\Template implements \Magento\Framework
         \Magento\Backend\Block\Template\Context $context,
         \Magento\Framework\App\ProductMetadataInterface $productMetaData,
         \Ebizmarts\MailChimp\Helper\Data $helper,
-        
         array $data = []
     ) {
         parent::__construct($context, $data);
         $this->_metaData = $productMetaData;
-        $this->_helper = $helper;    
+        $this->_helper = $helper;
     }
     /**
      * @param \Magento\Framework\Data\Form\Element\AbstractElement $element

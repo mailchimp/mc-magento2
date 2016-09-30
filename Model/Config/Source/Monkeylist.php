@@ -17,15 +17,13 @@ class Monkeylist implements \Magento\Framework\Option\ArrayInterface
     /**
      * @var \Ebizmarts\MailChimp\Helper\Data
      */
-    protected $_helper = null;
-    protected $_options = null;
+    private $_helper = null;
+    private $_options = null;
     /**
      * Monkeylist constructor.
      * @param \Ebizmarts\MailChimp\Helper\Data $helper
      */
-    public function __construct(
-        \Ebizmarts\MailChimp\Helper\Data $helper
-    )
+    public function __construct(\Ebizmarts\MailChimp\Helper\Data $helper)
     {
         $this->_helper = $helper;
         if ($this->_helper->getApiKey()) {
@@ -35,7 +33,7 @@ class Monkeylist implements \Magento\Framework\Option\ArrayInterface
     public function toOptionArray()
     {
         if (is_array($this->_options)) {
-            $rc = array();
+            $rc = [];
             foreach ($this->_options['lists'] as $list) {
                 $memberCount = $list['stats']['member_count'];
                 $memberText = __('members');
@@ -49,7 +47,7 @@ class Monkeylist implements \Magento\Framework\Option\ArrayInterface
     }
     public function toArray()
     {
-        $rc = array();
+        $rc = [];
         foreach ($this->_options['lists'] as $list) {
             $rc[$list['id']] = $list['name'];
         }

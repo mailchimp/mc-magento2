@@ -17,7 +17,7 @@ class Logger extends \Monolog\Logger
     public function mailchimpLog($message)
     {
         try {
-            if (is_null($message)) {
+            if ($message===null) {
                 $message = "NULL";
             }
             if (is_array($message)) {

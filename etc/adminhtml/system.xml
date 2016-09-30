@@ -57,6 +57,7 @@
                 <field id="list" translate="label" type="select" sortOrder="60" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>General Subscription</label>
                     <source_model>Ebizmarts\MailChimp\Model\Config\Source\Monkeylist</source_model>
+                    <backend_model>Ebizmarts\MailChimp\Model\Config\Backend\Monkeylist</backend_model>
                     <depends>
                         <field id="*/*/active">1</field>
                     </depends>
@@ -87,6 +88,34 @@
                         <field id="*/*/active">1</field>
                     </depends>
                 </field>-->
+            </group>
+            <group id="ecommerce" translate="label" type="text" sortOrder="110" showInDefault="1" showInWebsite="1" showInStore="1">
+                <label>Ecommerce Configuration</label>
+                <field id="active" translate="label" type="select" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Enabled</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
+            </group>
+            <group id="abandonedcart" translate="label" type="text" sortOrder="130" showInDefault="1" showInWebsite="1" showInStore="1">
+                <label>Abandoned Cart Configuration</label>
+                <field id="active" translate="label" type="select" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Enabled</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
+                <field id="firstdate" translate="label" type="date" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>First Date</label>
+                    <frontend_model>Ebizmarts\MailChimp\Block\Adminhtml\System\Config\Date</frontend_model>
+                    <depends>
+                        <field id="*/*/active">1</field>
+                    </depends>
+                </field>
+                <field id="page" translate="label" type="select" sortOrder="40" showInDefault="1" showInStore="0" showInWebsite="0">
+                    <label>Redirect Page</label>
+                    <source_model>Ebizmarts\MailChimp\Model\Config\Source\Cmspage</source_model>
+                    <depends>
+                        <field id="*/*/active">1</field>
+                    </depends>
+                </field>
             </group>
         </section>
     </system>

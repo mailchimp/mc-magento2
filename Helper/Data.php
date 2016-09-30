@@ -26,19 +26,19 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     /**
      * @var \Magento\Store\Model\StoreManagerInterface
      */
-    protected $_storeManager;
+    private $_storeManager;
     /**
      * @var \Ebizmarts\MailChimp\Model\Logger\Logger
      */
-    protected $_mlogger;
+    private $_mlogger;
     /**
      * @var \Magento\Customer\Model\GroupRegistry
      */
-    protected $_groupRegistry;
+    private $_groupRegistry;
     /**
      * @var \Magento\Framework\App\Config\ScopeConfigInterface
      */
-    protected $_scopeConfig;
+    private $_scopeConfig;
     /**
      * @var \Magento\Framework\App\RequestInterface
      */
@@ -46,15 +46,15 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     /**
      * @var \Magento\Framework\App\State
      */
-    protected $_state;
+    private $_state;
     /**
      * @var \Magento\Framework\Module\ModuleList\Loader
      */
-    protected $_loader;
+    private $_loader;
     /**
      * @var \Mailchimp
      */
-    protected $_api;
+    private $_api;
 
     /**
      * Data constructor.
@@ -136,19 +136,39 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     {
         $areaCode = $this->_state->getAreaCode();
         if ($storeId !== null) {
-            $configValue = $this->scopeConfig->getValue($path, \Magento\Store\Model\ScopeInterface::SCOPE_STORE, $storeId);
+            $configValue = $this->scopeConfig->getValue(
+                $path,
+                \Magento\Store\Model\ScopeInterface::SCOPE_STORE,
+                $storeId
+            );
         } elseif ($areaCode == 'frontend') {
             $frontStoreId = $this->_storeManager->getStore()->getId();
-            $configValue = $this->scopeConfig->getValue($path, \Magento\Store\Model\ScopeInterface::SCOPE_STORE, $frontStoreId);
+            $configValue = $this->scopeConfig->getValue(
+                $path,
+                \Magento\Store\Model\ScopeInterface::SCOPE_STORE,
+                $frontStoreId
+            );
         } else {
             $storeId = $this->_request->getParam(\Magento\Store\Model\ScopeInterface::SCOPE_STORE);
             $websiteId = $this->_request->getParam(\Magento\Store\Model\ScopeInterface::SCOPE_WEBSITE);
             if (!empty($storeId)) {
-                $configValue = $this->scopeConfig->getValue($path, \Magento\Store\Model\ScopeInterface::SCOPE_STORE, $storeId);
+                $configValue = $this->scopeConfig->getValue(
+                    $path,
+                    \Magento\Store\Model\ScopeInterface::SCOPE_STORE,
+                    $storeId
+                );
             } elseif (!empty($websiteId)) {
-                $configValue = $this->scopeConfig->getValue($path, \Magento\Store\Model\ScopeInterface::SCOPE_WEBSITE, $websiteId);
+                $configValue = $this->scopeConfig->getValue(
+                    $path,
+                    \Magento\Store\Model\ScopeInterface::SCOPE_WEBSITE,
+                    $websiteId
+                );
             } else {
-                $configValue = $this->scopeConfig->getValue($path, \Magento\Store\Model\ScopeInterface::SCOPE_WEBSITE, 0);
+                $configValue = $this->scopeConfig->getValue(
+                    $path,
+                    \Magento\Store\Model\ScopeInterface::SCOPE_WEBSITE,
+                    0
+                );
             }
         }
         return $configValue;
@@ -160,7 +180,11 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
      */
     public function getDefaultList($store = null)
     {
-        return $this->_scopeConfig->getValue(self::XML_PATH_LIST, \Magento\Store\Model\ScopeInterface::SCOPE_STORE, $store);
+        return $this->_scopeConfig->getValue(
+            self::XML_PATH_LIST,
+            \Magento\Store\Model\ScopeInterface::SCOPE_STORE,
+            $store
+        );
     }
 
     /**
@@ -195,113 +219,4 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         }
         return $v;
     }
-//    public function getMergeVars($customer, $store = null)
-//    {
-//        $merge_vars = [];
-//        $mergeVars  = unserialize($this->_scopeConfig->getValue(self::XML_PATH_MAPPING, \Magento\Store\Model\ScopeInterface::SCOPE_STORE, $store));
-//
-//        if (!$mergeVars) {
-//            return $merge_vars;
-//        }
-//
-//        foreach ($mergeVars as $map) {
-//            $merge_vars = array_merge($merge_vars, $this->_getMergeVarsValue($map, $customer));
-//        }
-//        return $merge_vars;
-//    }
-//
-//    protected function _getMergeVarsValue($map, $customer)
-//    {
-//        $merge_vars = [];
-//        $customAtt = $map['magento'];
-//        $chimpTag  = $map['mailchimp'];
-//        if ($chimpTag && $customAtt) {
-//            $key = strtoupper($chimpTag);
-//            switch ($customAtt) {
-//                case 'fname':
-//                    $val = $customer->getFirstname();
-//                    $merge_vars[$key] = $val;
-//                    break;
-//                case 'lname':
-//                    $val = $customer->getLastname();
-//                    $merge_vars[$key] = $val;
-//                    break;
-//                case 'gender':
-//                    $val = (int)$customer->getData(strtolower($customAtt));
-//                    if ($val == 1) {
-//                        $merge_vars[$key] = 'Male';
-//                    } elseif ($val == 2) {
-//                        $merge_vars[$key] = 'Female';
-//                    }
-//                    break;
-//                case 'dob':
-//                    $dob = $customer->getData(strtolower($customAtt));
-//                    if ($dob) {
-//                        $merge_vars[$key] = (substr($dob, 5, 2) . '/' . substr($dob, 8, 2));
-//                    }
-//                    break;
-//                case 'billing_address':
-//                case 'shipping_address':
-//                    $addr = explode('_', $customAtt);
-//                    $merge_vars = array_merge($merge_vars, $this->_updateMergeVars($key, ucfirst($addr[0]), $customer));
-//                    break;
-//                case 'telephone':
-//                    if ($address = $customer->{'getDefaultBillingAddress'}()) {
-//                        $telephone = $address->getTelephone();
-//                        if ($telephone) {
-//                            $merge_vars[$key] = $telephone;
-//                        }
-//                    }
-//                    break;
-//                case 'company':
-//                    if ($address = $customer->{'getDefaultBillingAddress'}()) {
-//                        $company = $address->getCompany();
-//                        if ($company) {
-//                            $merge_vars[$key] = $company;
-//                        }
-//                    }
-//                    break;
-//                case 'group_id':
-//                    $merge_vars = array_merge($merge_vars, $this->_getCustomerGroup($customer, $key));
-//                    break;
-//                default:
-//                    if (($value = (string)$customer->getData(strtolower($customAtt)))) {
-//                        $merge_vars[$key] = (string)$customer->getData(strtolower($customAtt));
-//                    }
-//                    break;
-//            }
-//            return $merge_vars;
-//        }
-//    }
-//    protected function _getCustomerGroup($customer, $key)
-//    {
-//        $merge_vars = [];
-//        $group_id = (int) $customer->getGroupId();
-//        if ($group_id == 0) {
-//            $merge_vars[$key] = 'NOT LOGGED IN';
-//        } else {
-//            try {
-//                $customerGroup = $this->_groupRegistry->retrieve($group_id);
-//                $merge_vars[$key] = $customerGroup->getCode();
-//            } catch (\Exception $e) {
-//                throw new \Exception($e->getMessage());
-//            }
-//        }
-//        return $merge_vars;
-//    }
-//    protected function _updateMergeVars($key, $type, $customer)
-//    {
-//        $merge_vars = [];
-//        if ($address = $customer->{'getDefault' . $type . 'Address'}()) {
-//            $merge_vars[$key] = [
-//                'addr1' => $address->getStreetLine(1),
-//                'addr2' => $address->getStreetLine(2),
-//                'city' => $address->getCity(),
-//                'state' => (!$address->getRegion() ? $address->getCity() : $address->getRegion()),
-//                'zip' => $address->getPostcode(),
-//                'country' => $address->getCountryId()
-//            ];
-//        }
-//        return $merge_vars;
-//    }
 }

@@ -17,11 +17,11 @@ class Details implements \Magento\Framework\Option\ArrayInterface
     /**
      * @var null
      */
-    protected $_options = null;
+    private $_options = null;
     /**
      * @var \Ebizmarts\MailChimp\Helper\Data|null
      */
-    protected $_helper  = null;
+    private $_helper  = null;
 
     /**
      * @param \Ebizmarts\MailChimp\Helper\Data $helper
@@ -50,28 +50,28 @@ class Details implements \Magento\Framework\Option\ArrayInterface
     public function toOptionArray()
     {
         $ret = '';
-        if (is_array($this->_options)){
+        if (is_array($this->_options)) {
             if (isset($this->_options['account_name'])) {
-                $ret = array(
-                    array('value' => 'Username', 'label' => $this->_options['account_name']),
-                    array('value' => 'Data uploaded to MailChimp', 'label' => ''),
-                    array('value' => '    Total Subscribers', 'label' => $this->_options['total_subscribers'])
-                );
+                $ret = [
+                    ['value' => 'Username', 'label' => $this->_options['account_name']],
+                    ['value' => 'Data uploaded to MailChimp', 'label' => ''],
+                    ['value' => '    Total Subscribers', 'label' => $this->_options['total_subscribers']]
+                ];
                 if (isset($this->_options['store_exists']) && $this->_options['store_exists']) {
-                    $ret = array_merge(array(
-                        array('value' => '  Total Customers', 'label' => $this->_options['total_customers']),
-                        array('value' => '  Total Products', 'label' => $this->_options['total_products']),
-                        array('value' => '  Total Orders', 'label' => $this->_options['total_orders']),
-                        array('value' => '  Total Carts', 'label' => $this->_options['total_carts'])
-                    ), $ret);
+                    $ret = array_merge([
+                        ['value' => '  Total Customers', 'label' => $this->_options['total_customers']],
+                        ['value' => '  Total Products', 'label' => $this->_options['total_products']],
+                        ['value' => '  Total Orders', 'label' => $this->_options['total_orders']],
+                        ['value' => '  Total Carts', 'label' => $this->_options['total_carts']]
+                    ], $ret);
                 }
             }
         } elseif (!$this->_options) {
-            $ret = array(
-                array('value' => 'Error', 'label' => __('--- Invalid API Key ---'))
-            );
+            $ret = [
+                ['value' => 'Error', 'label' => __('--- Invalid API Key ---')]
+            ];
         } else {
-            $ret = array(array('value' => 'Important', 'label' => __($this->_options)));
+            $ret = [['value' => 'Important', 'label' => __($this->_options)]];
         }
         return $ret;
     }
