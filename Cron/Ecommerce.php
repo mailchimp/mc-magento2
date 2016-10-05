@@ -40,5 +40,10 @@ class Ecommerce
     public function execute()
     {
         $this->_helper->log(__METHOD__);
+
+    }
+    protected function _sendEcommerceData()
+    {
+
     }
 }

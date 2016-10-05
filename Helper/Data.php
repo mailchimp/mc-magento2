@@ -12,6 +12,8 @@
 namespace Ebizmarts\MailChimp\Helper;
 
 use Magento\Store\Model\Store;
+use Magento\Framework\App\Config\ScopeConfigInterface;
+use Symfony\Component\Config\Definition\Exception\Exception;
 
 class Data extends \Magento\Framework\App\Helper\AbstractHelper
 {
@@ -22,6 +24,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     const XML_PATH_LOG               = 'mailchimp/general/log';
     const XML_PATH_MAPPING           = 'mailchimp/general/mapping';
     const XML_PATH_CONFIRMATION_FLAG = 'newsletter/subscription/confirm';
+    const XML_PATH_STORE             = 'mailchimp/ecommerce/store';
 
     /**
      * @var \Magento\Store\Model\StoreManagerInterface
@@ -218,5 +221,34 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
             $v = $modules['Ebizmarts_MailChimp']['setup_version'];
         }
         return $v;
+    }
+    public function deleteStore()
+    {
+        try {
+            $storeId = $this->getConfigValue(self::XML_PATH_STORE);
+            $this->getApi()->ecommerce->stores->delete($storeId);
+        } catch (Exception $e)
+        {
+
+        }
+    }
+    public function createStore($listId=null)
+    {
+        if ($listId) {
+            //generate store id
+            $date = date('Y-m-d-His');
+            $baseUrl = $this->_storeManager->getStore()->getBaseUrl();
+            $storeId = parse_url($baseUrl, PHP_URL_HOST) . '_' . $date;
+            $currencyCode = $this->_storeManager->getStore()->getDefaultCurrencyCode();
+//            //create store in mailchimp
+            try {
+                $this->getApi()->ecommerce->stores->add($storeId,$listId,$storeId,$currencyCode);
+                return $storeId;
+
+            } catch (Exception $e) {
+                return null;
+            }
+        }
+        return null;
     }
 }
