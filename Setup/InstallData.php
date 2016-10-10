@@ -113,5 +113,7 @@ class InstallData implements InstallDataInterface
                 'apply_to' => implode(',',[Type::TYPE_SIMPLE,Type::TYPE_VIRTUAL,'downloadable',Configurable::TYPE_CODE])
             ]
         );
+
+
     }
 }
