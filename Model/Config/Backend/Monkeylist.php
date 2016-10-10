@@ -25,7 +25,24 @@ class Monkeylist extends \Magento\Framework\App\Config\Value
      * @var \Magento\Config\Model\ResourceModel\Config
      */
     protected $resourceConfig;
+    /**
+     * @var \Magento\Framework\Stdlib\DateTime\DateTime
+     */
+    private $_date;
 
+    /**
+     * Monkeylist constructor.
+     * @param \Magento\Framework\Model\Context $context
+     * @param \Magento\Framework\Registry $registry
+     * @param ScopeConfigInterface $config
+     * @param \Magento\Framework\App\Cache\TypeListInterface $cacheTypeList
+     * @param \Magento\Config\Model\ResourceModel\Config $resourceConfig
+     * @param \Magento\Framework\Model\ResourceModel\AbstractResource|null $resource
+     * @param \Magento\Framework\Data\Collection\AbstractDb|null $resourceCollection
+     * @param \Magento\Framework\Stdlib\DateTime\DateTime $date
+     * @param \Ebizmarts\MailChimp\Helper\Data $helper
+     * @param array $data
+     */
     public function __construct(
         \Magento\Framework\Model\Context $context,
         \Magento\Framework\Registry $registry,
@@ -34,11 +51,13 @@ class Monkeylist extends \Magento\Framework\App\Config\Value
         \Magento\Config\Model\ResourceModel\Config $resourceConfig,
         \Magento\Framework\Model\ResourceModel\AbstractResource $resource = null,
         \Magento\Framework\Data\Collection\AbstractDb $resourceCollection = null,
+        \Magento\Framework\Stdlib\DateTime\DateTime $date,
         \Ebizmarts\MailChimp\Helper\Data $helper,
         array $data = []
     ) {
         $this->_helper = $helper;
         $this->resourceConfig = $resourceConfig;
+        $this->_date = $date;
         parent::__construct($context, $registry, $config, $cacheTypeList, $resource, $resourceCollection, $data);
     }
 
@@ -53,8 +72,9 @@ class Monkeylist extends \Magento\Framework\App\Config\Value
             }
             $store = $this->_helper->createStore($this->getValue());
             if ($store) {
-                $path = 'mailchimp/ecommerce/store';
-                $this->resourceConfig->saveConfig($path, $store, ScopeConfigInterface::SCOPE_TYPE_DEFAULT, 0);
+                $this->resourceConfig->saveConfig(\Ebizmarts\Mailchimp\Helper\Data::XML_PATH_STORE, $store, ScopeConfigInterface::SCOPE_TYPE_DEFAULT, 0);
+                $this->resourceConfig->saveConfig(\Ebizmarts\MailChimp\Helper\Data::XML_PATH_SYNC_DATE,$this->_date->gmtDate(),
+                    ScopeConfigInterface::SCOPE_TYPE_DEFAULT,0);
             }
 
 
