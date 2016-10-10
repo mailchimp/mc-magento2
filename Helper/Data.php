@@ -25,6 +25,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     const XML_PATH_MAPPING           = 'mailchimp/general/mapping';
     const XML_PATH_CONFIRMATION_FLAG = 'newsletter/subscription/confirm';
     const XML_PATH_STORE             = 'mailchimp/ecommerce/store';
+    const XML_PATH_SYNC_DATE         = 'mailchimp/general/mcminsyncdateflag';
 
     /**
      * @var \Magento\Store\Model\StoreManagerInterface
@@ -240,7 +241,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
             $baseUrl = $this->_storeManager->getStore()->getBaseUrl();
             $storeId = parse_url($baseUrl, PHP_URL_HOST) . '_' . $date;
             $currencyCode = $this->_storeManager->getStore()->getDefaultCurrencyCode();
-//            //create store in mailchimp
+            //create store in mailchimp
             try {
                 $this->getApi()->ecommerce->stores->add($storeId,$listId,$storeId,$currencyCode);
                 return $storeId;
@@ -250,5 +251,9 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
             }
         }
         return null;
+    }
+    public function getMCMinSyncDateFlag()
+    {
+        return $this->getConfigValue(self::XML_PATH_SYNC_DATE);
     }
 }
