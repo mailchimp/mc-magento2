@@ -72,9 +72,17 @@ class Monkeylist extends \Magento\Framework\App\Config\Value
             }
             $store = $this->_helper->createStore($this->getValue());
             if ($store) {
-                $this->resourceConfig->saveConfig(\Ebizmarts\Mailchimp\Helper\Data::XML_PATH_STORE, $store, ScopeConfigInterface::SCOPE_TYPE_DEFAULT, 0);
-                $this->resourceConfig->saveConfig(\Ebizmarts\MailChimp\Helper\Data::XML_PATH_SYNC_DATE,$this->_date->gmtDate(),
-                    ScopeConfigInterface::SCOPE_TYPE_DEFAULT,0);
+                $this->resourceConfig->saveConfig(
+                    \Ebizmarts\Mailchimp\Helper\Data::XML_PATH_STORE, $store,
+                    ScopeConfigInterface::SCOPE_TYPE_DEFAULT,
+                    0
+                );
+                $this->resourceConfig->saveConfig(
+                    \Ebizmarts\MailChimp\Helper\Data::XML_PATH_SYNC_DATE,
+                    $this->_date->gmtDate(),
+                    ScopeConfigInterface::SCOPE_TYPE_DEFAULT,
+                    0
+                );
             }
 
 

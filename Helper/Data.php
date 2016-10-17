@@ -25,7 +25,14 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     const XML_PATH_MAPPING           = 'mailchimp/general/mapping';
     const XML_PATH_CONFIRMATION_FLAG = 'newsletter/subscription/confirm';
     const XML_PATH_STORE             = 'mailchimp/ecommerce/store';
+    const XML_PATH_ECOMMERCE_ACTIVE  = 'mailchimp/ecommerce/active';
     const XML_PATH_SYNC_DATE         = 'mailchimp/general/mcminsyncdateflag';
+
+    const IS_CUSTOMER   = "CUS";
+    const IS_PRODUCT    = "PRO";
+    const IS_ORDER      = "ORD";
+    const IS_QUOTE      = "QUO";
+    const IS_SUBSCRIBER = "SUB";
 
     /**
      * @var \Magento\Store\Model\StoreManagerInterface
@@ -255,5 +262,9 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     public function getMCMinSyncDateFlag()
     {
         return $this->getConfigValue(self::XML_PATH_SYNC_DATE);
+    }
+    public function getBaseDir()
+    {
+        return BP;
     }
 }
