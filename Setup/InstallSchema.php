@@ -15,9 +15,17 @@ namespace Ebizmarts\MailChimp\Setup;
 use Magento\Framework\Setup\InstallSchemaInterface;
 use Magento\Framework\Setup\ModuleContextInterface;
 use Magento\Framework\Setup\SchemaSetupInterface;
+use Symfony\Component\Config\Definition\Exception\Exception;
 
 class InstallSchema implements InstallSchemaInterface
 {
+    private $_helper;
+
+    public function __construct(\Ebizmarts\MailChimp\Helper\Data $helper)
+    {
+        $this->_helper = $helper;
+    }
+
     /**
      * {@inheritdoc}
      * @SuppressWarnings(PHPMD.ExcessiveMethodLength)
@@ -39,8 +47,8 @@ class InstallSchema implements InstallSchemaInterface
             )
             ->addColumn(
                 'store_id',
-                \Magento\Framework\DB\Ddl\Table::TYPE_INTEGER,
-                null,
+                \Magento\Framework\DB\Ddl\Table::TYPE_TEXT,
+                50,
                 ['unsigned' => true, 'nullable' => false],
                 'Store Id'
             )
@@ -58,11 +66,62 @@ class InstallSchema implements InstallSchemaInterface
                 [],
                 'Status'
             )
-
         ;
 
         $installer->getConnection()->createTable($table);
 
+        $table = $installer->getConnection()
+            ->newTable($installer->getTable('mailchimp_errors'))
+            ->addColumn(
+                'id',
+                \Magento\Framework\DB\Ddl\Table::TYPE_INTEGER,
+                null,
+                ['identity' => true, 'unsigned' => true, 'nullable' => false, 'primary' => true],
+                'Batch Id'
+            )
+            ->addColumn(
+                'type',
+                \Magento\Framework\DB\Ddl\Table::TYPE_TEXT,
+                256,
+                [],
+                'type'
+            )
+            ->addColumn(
+                'title',
+                \Magento\Framework\DB\Ddl\Table::TYPE_TEXT,
+                128,
+                [],
+                'title'
+            )
+            ->addColumn(
+                'status',
+                \Magento\Framework\DB\Ddl\Table::TYPE_INTEGER,
+                null,
+                [],
+                'status'
+            )
+            ->addColumn(
+                'errors',
+                \Magento\Framework\DB\Ddl\Table::TYPE_TEXT,
+                256,
+                [],
+                'errors'
+            )
+            ->addColumn(
+                'regtype',
+                \Magento\Framework\DB\Ddl\Table::TYPE_TEXT,
+                3,
+                [],
+                'regtype'
+            );
+
+        $installer->getConnection()->createTable($table);
+        $path = $this->_helper->getBaseDir() . DIRECTORY_SEPARATOR . 'var' . DIRECTORY_SEPARATOR . 'Mailchimp';
+        try {
+            mkdir($path);
+        } catch(Exception $e) {
+            $this->_helper->log($e->getMessage());
+        }
         $installer->endSetup();
     }
 }
