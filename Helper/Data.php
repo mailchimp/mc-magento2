@@ -133,7 +133,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     public function getApi($store = null)
     {
         $this->_api->setApiKey($this->getApiKey($store));
-        $this->_api->setUserAgent('Mailchimp4Magento2' . (string)$this->getModuleVersion());
+        $this->_api->setUserAgent('Mailchimp4Magento' . (string)$this->getModuleVersion());
         return $this->_api;
     }
 
@@ -250,7 +250,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
             $currencyCode = $this->_storeManager->getStore()->getDefaultCurrencyCode();
             //create store in mailchimp
             try {
-                $this->getApi()->ecommerce->stores->add($storeId,$listId,$storeId,$currencyCode);
+                $this->getApi()->ecommerce->stores->add($storeId,$listId,$storeId,$currencyCode,'Magento');
                 return $storeId;
 
             } catch (Exception $e) {
