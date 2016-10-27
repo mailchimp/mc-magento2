@@ -19,10 +19,10 @@ use Magento\Framework\Model\ResourceModel\Db\Context;
 
 class MailChimpErrors extends AbstractDb
 {
-    public function __construct(Context $context, $connectionName)
-    {
-        parent::__construct($context, $connectionName);
-    }
+//    public function __construct(Context $context, $connectionName)
+//    {
+//        parent::__construct($context, $connectionName);
+//    }
     protected function _construct()
     {
         $this->_init('mailchimp_errors', 'id');
