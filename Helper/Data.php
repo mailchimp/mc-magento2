@@ -368,6 +368,9 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
                 case 'group_id':
                     $merge_vars = array_merge($merge_vars, $this->_getCustomerGroup($customer, $key, $merge_vars));
                     break;
+                case 'store_id':
+                    $merge_vars[$key] = $customer->getStoreId();
+                    break;
             }
             return $merge_vars;
         }
@@ -382,6 +385,9 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
             switch ($customAtt) {
                 case 'group_id':
                     $merge_vars = $this->_getCustomerGroup($subscriber, $key, $merge_vars);
+                    break;
+                case 'store_id':
+                    $merge_vars[$key] = $subscriber->getStoreId();
                     break;
             }
             return $merge_vars;
