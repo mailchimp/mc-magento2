@@ -36,6 +36,20 @@ class Details implements \Magento\Framework\Option\ArrayInterface
             $api = $this->_helper->getApi();
             try {
                 $this->_options = $api->root->info();
+                $mailchimpStoreId = $this->_helper->getConfigValue(\Ebizmarts\Mailchimp\Helper\Data::XML_PATH_STORE);
+                if ($mailchimpStoreId) {
+                    $this->_options['store_exists'] = true;
+                    $totalCustomers = $api->ecommerce->customers->getAll($mailchimpStoreId, 'total_items');
+                    $this->_options['total_customers'] = $totalCustomers['total_items'];
+                    $totalProducts = $api->ecommerce->products->getAll($mailchimpStoreId, 'total_items');
+                    $this->_options['total_products'] = $totalProducts['total_items'];
+                    $totalOrders = $api->ecommerce->orders->getAll($mailchimpStoreId, 'total_items');
+                    $this->_options['total_orders'] = $totalOrders['total_items'];
+                    $totalCarts = $api->ecommerce->carts->getAll($mailchimpStoreId, 'total_items');
+                    $this->_options['total_carts'] = $totalCarts['total_items'];
+                } else {
+                    $this->_options['store_exists'] = false;
+                }
             } catch (\Exception $e) {
                 $this->_helper->log($e->getMessage());
             }
@@ -58,12 +72,12 @@ class Details implements \Magento\Framework\Option\ArrayInterface
                     ['value' => '    Total Subscribers', 'label' => $this->_options['total_subscribers']]
                 ];
                 if (isset($this->_options['store_exists']) && $this->_options['store_exists']) {
-                    $ret = array_merge([
+                    $ret = array_merge($ret, [
                         ['value' => '  Total Customers', 'label' => $this->_options['total_customers']],
                         ['value' => '  Total Products', 'label' => $this->_options['total_products']],
                         ['value' => '  Total Orders', 'label' => $this->_options['total_orders']],
                         ['value' => '  Total Carts', 'label' => $this->_options['total_carts']]
-                    ], $ret);
+                    ]);
                 }
             }
         } elseif (!$this->_options) {
