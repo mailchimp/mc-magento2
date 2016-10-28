@@ -35,8 +35,8 @@ class InstallSchema implements InstallSchemaInterface
         $installer = $setup;
 
         $installer->startSetup();
-
-        $table = $installer->getConnection()
+        $connection = $installer->getConnection();
+        $table = $connection
             ->newTable($installer->getTable('mailchimp_sync_batches'))
             ->addColumn(
                 'id',
@@ -116,6 +116,17 @@ class InstallSchema implements InstallSchemaInterface
             );
 
         $installer->getConnection()->createTable($table);
+
+        $connection->addColumn(
+            $installer->getTable('newsletter_subscriber'),
+            'mailchimp_id',
+            [
+                'type' => \Magento\Framework\DB\Ddl\Table::TYPE_TEXT,
+                'default' => '',
+                'comment' => 'Mailchimp reference'
+            ]
+        );
+
         $path = $this->_helper->getBaseDir() . DIRECTORY_SEPARATOR . 'var' . DIRECTORY_SEPARATOR . 'Mailchimp';
         try {
             mkdir($path);

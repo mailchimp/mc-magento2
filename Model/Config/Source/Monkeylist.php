@@ -27,7 +27,11 @@ class Monkeylist implements \Magento\Framework\Option\ArrayInterface
     {
         $this->_helper = $helper;
         if ($this->_helper->getApiKey()) {
-            $this->_options = $this->_helper->getApi()->lists->getLists(null, 'lists', null, 100);
+            try {
+                $this->_options = $this->_helper->getApi()->lists->getLists(null, 'lists', null, 100);
+            } catch (\Exception $e) {
+                $this->_helper->log($e->getMessage());
+            }
         }
     }
     public function toOptionArray()
