@@ -37,7 +37,7 @@ class Details implements \Magento\Framework\Option\ArrayInterface
             try {
                 $this->_options = $api->root->info();
                 $mailchimpStoreId = $this->_helper->getConfigValue(\Ebizmarts\Mailchimp\Helper\Data::XML_PATH_STORE);
-                if ($mailchimpStoreId) {
+                if ($mailchimpStoreId && $this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_PATH_ECOMMERCE_ACTIVE)) {
                     $this->_options['store_exists'] = true;
                     $totalCustomers = $api->ecommerce->customers->getAll($mailchimpStoreId, 'total_items');
                     $this->_options['total_customers'] = $totalCustomers['total_items'];
