@@ -1,0 +1,29 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Backend:etc/menu.xsd">
+    <menu>
+        <add id="Ebizmarts_MailChimp::root_menu"
+             title="MailChimp"
+             module="Ebizmarts_MailChimp"
+             sortOrder="110"
+             dependsOnModule="Ebizmarts_MailChimp"
+             resource="Magento_Backend::content"
+        />
+        <add id="Ebizmarts_MailChimp::config_menu"
+             title="Configuration"
+             module="Ebizmarts_MailChimp"
+             sortOrder="10"
+             resource="Magento_Backend::content"
+             parent="Ebizmarts_MailChimp::root_menu"
+             action="adminhtml/system_config/edit/section/mailchimp"
+        />
+        <add id="Ebizmarts_MailChimp::error_menu"
+             title="Errors"
+             module="Ebizmarts_MailChimp"
+             sortOrder="20"
+             resource="Magento_Backend::content"
+             parent="Ebizmarts_MailChimp::root_menu"
+             action="mailchimp/errors"
+        />
+    </menu>
+</config>
+
