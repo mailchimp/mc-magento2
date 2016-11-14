@@ -31,6 +31,10 @@ class Ecommerce
      */
     private $_apiResult;
     /**
+     * @var \Ebizmarts\MailChimp\Model\Api\Customer
+     */
+    private $_apiCustomer;
+    /**
      * @var \Ebizmarts\MailChimp\Model\MailChimpSyncBatches
      */
     private $_mailChimpSyncBatches;
@@ -41,6 +45,7 @@ class Ecommerce
      * @param \Ebizmarts\MailChimp\Helper\Data $helper
      * @param \Ebizmarts\MailChimp\Model\Api\Product $apiProduct
      * @param \Ebizmarts\MailChimp\Model\Api\Result $apiResult
+     * @param \Ebizmarts\MailChimp\Model\Api\Customer $apiCustomer
      * @param \Ebizmarts\MailChimp\Model\MailChimpSyncBatches $mailChimpSyncBatches
      */
     public function __construct(
@@ -48,6 +53,7 @@ class Ecommerce
         \Ebizmarts\MailChimp\Helper\Data $helper,
         \Ebizmarts\MailChimp\Model\Api\Product $apiProduct,
         \Ebizmarts\MailChimp\Model\Api\Result $apiResult,
+        \Ebizmarts\MailChimp\Model\Api\Customer $apiCustomer,
         \Ebizmarts\MailChimp\Model\MailChimpSyncBatches $mailChimpSyncBatches
     )
     {
@@ -56,6 +62,7 @@ class Ecommerce
         $this->_apiProduct      = $apiProduct;
         $this->_mailChimpSyncBatches    = $mailChimpSyncBatches;
         $this->_apiResult       = $apiResult;
+        $this->_apiCustomer     = $apiCustomer;
     }
 
     public function execute()
@@ -73,14 +80,18 @@ class Ecommerce
     protected function _processStore($storeId)
     {
         $batchArray = array();
+        $results = array();
         if ($this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_PATH_ECOMMERCE_ACTIVE)) {
-            $batchArray['operations'] =  $this->_apiProduct->_sendProducts($storeId);
+            $results =  $this->_apiProduct->_sendProducts($storeId);
+            $customers = $this->_apiCustomer->sendCustomers($storeId);
+            $this->_helper->log(var_export($customers,true));
+            $results = array_merge($results,$customers);
         }
-
-        if (!empty($batchArray['operations'])) {
+        $this->_helper->log(var_export($results,true));
+        if (!empty($results)) {
             try {
+                $batchArray['operations'] = $results;
                 $batchJson = json_encode($batchArray);
-                $this->_helper->log($batchJson);
 
                 if (!$batchJson || $batchJson == '') {
                     $this->_helper->log('An empty operation was detected');
