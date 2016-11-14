@@ -36,6 +36,10 @@ class Result
      * @var \Magento\Catalog\Model\ProductRepository
      */
     private $_productRepository;
+    /**
+     * @var \Magento\Customer\Api\CustomerRepositoryInterface
+     */
+    private $_customerRepository;
 
 
     /**
@@ -51,7 +55,8 @@ class Result
         \Ebizmarts\MailChimp\Model\ResourceModel\MailChimpSyncBatches\Collection $batchCollection,
         \Ebizmarts\MailChimp\Model\MailChimpErrors $chimpErrors,
         \Magento\Framework\Archive $archive,
-        \Magento\Catalog\Model\ProductRepository $productRepository
+        \Magento\Catalog\Model\ProductRepository $productRepository,
+        \Magento\Customer\Api\CustomerRepositoryInterface $customerRepository
     )
     {
         $this->_batchCollection     = $batchCollection;
@@ -59,6 +64,7 @@ class Result
         $this->_archive             = $archive;
         $this->_chimpErrors         = $chimpErrors;
         $this->_productRepository   = $productRepository;
+        $this->_customerRepository  = $customerRepository;
     }
     public function processResponses($storeId, $isMailChimpStoreId = false)
     {
@@ -164,24 +170,21 @@ class Result
                             if ($p->getId() == $id) {
                                 $p->setData("mailchimp_sync_error", $error);
                                 //$p->setMailchimpUpdateObserverRan(true);
-                                $p->save();
+                                $this->_productRepository->save($p);
                             } else {
                                 $this->_helper->log("Error: product " . $id . " not found");
                             }
                             break;
-//                        case \Ebizmarts\MailChimp\Helper\Data::IS_CUSTOMER:
-//                            /**
-//                             * @var \Magento\Customer\Model\ResourceModel\CustomerRepository
-//                             */                            $c = null;
-//                            $c = $this->_customerRepository->getById($id);
-//                            if ($c->getId() == $id) {
-//                                $c->setData("mailchimp_sync_error", $error);
-//                                $c->setMailchimpUpdateObserverRan(true);
-//                                $c->save();
-//                            } else {
-//                                $this->_helper->log("Error: customer " . $id . " not found");
-//                            }
-//                            break;
+                        case \Ebizmarts\MailChimp\Helper\Data::IS_CUSTOMER:
+                            $c = $this->_customerRepository->getById($id);
+                            if ($c->getId() == $id) {
+                                $c->setCustomAttribute("mailchimp_sync_error", $error);
+                                //$c->setMailchimpUpdateObserverRan(true);
+                                $this->_customerRepository->save($c);
+                            } else {
+                                $this->_helper->log("Error: customer " . $id . " not found");
+                            }
+                            break;
 //                        case \Ebizmarts\MailChimp\Helper\Data::IS_ORDER:
 //                            $o = $this->_orderRepository->get($id);
 //                            if ($o->getId() == $id) {
