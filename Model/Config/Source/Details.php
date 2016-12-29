@@ -68,8 +68,8 @@ class Details implements \Magento\Framework\Option\ArrayInterface
             if (isset($this->_options['account_name'])) {
                 $ret = [
                     ['value' => 'Username', 'label' => $this->_options['account_name']],
-                    ['value' => 'Data uploaded to MailChimp', 'label' => ''],
-                    ['value' => '    Total Subscribers', 'label' => $this->_options['total_subscribers']]
+                    ['value' => 'Total Subscribers', 'label' => $this->_options['total_subscribers']],
+                    ['value' => 'Ecommerce Data uploaded to MailChimp', 'label' => '']
                 ];
                 if (isset($this->_options['store_exists']) && $this->_options['store_exists']) {
                     $ret = array_merge($ret, [
