@@ -125,8 +125,6 @@ class Product
                 $product->setData("mailchimp_sync_error", "");
                 $product->setData('mailchimp_sync_modified', 0);
                 $product->setHasDataChanges(true);
-//                $product->getResource()->save($product);
-//                $product->setMailchimpUpdateObserverRan(true);
                 $product->getResource()->save($product);
                 $product->getResource()->saveAttribute($product,'mailchimp_sync_error');
                 $product->getResource()->saveAttribute($product,'mailchimp_sync_modified');
@@ -136,8 +134,6 @@ class Product
                 $product->setData("mailchimp_sync_error", "This product type is not supported on MailChimp.");
                 $product->setData('mailchimp_sync_modified', 0);
                 $product->setHasDataChanges(true);
-//                $product->getResource()->save($product);
-//                $product->setMailchimpUpdateObserverRan(true);
                 $product->getResource()->save($product);
                 $product->getResource()->saveAttribute($product,'mailchimp_sync_error');
                 $product->getResource()->saveAttribute($product,'mailchimp_sync_modified');
@@ -190,9 +186,9 @@ class Product
         $data['body'] = $body;
         return $data;
     }
-    protected function _buildOldProductRequest($product)
+    protected function _buildOldProductRequest($product, $mailchimpStoreId)
     {
-
+        return "";
     }
     protected function _buildProductData(\Magento\Catalog\Model\Product $product,  $isVarient = true, $variants = null)
     {
@@ -241,5 +237,39 @@ class Product
         }
 
         return $data;
+    }
+
+    public function sendModifiedProduct(\Magento\Sales\Model\Order $order,$mailchimpStoreId)
+    {
+        $data = array();
+        $batchId = \Ebizmarts\MailChimp\Helper\Data::IS_PRODUCT . '_' . $this->_date->gmtTimestamp();
+        $items = $order->getAllVisibleItems();
+        foreach ($items as $item)
+        {
+            $product = $this->_productRepository->getById($item->getProductId());
+            if ($product->getId()!=$item->getProductId()||$product->getTypeId()=='bundle'||$product->getTypeId()=='grouped') {
+                continue;
+            }
+
+            if ($product->getMailchimpSyncModified() && $product->getMailchimpSyncDelta() > $this->_helper->getMCMinSyncDateFlag()) {
+                $data[] = $this->_buildOldProductRequest($product, $mailchimpStoreId);
+                $this->_updateProduct($product);
+            } elseif (!$product->getMailchimpSyncDelta() || $product->getMailchimpSyncDelta() < $this->_helper->getMCMinSyncDateFlag()) {
+                $data[] = $this->_buildNewProductRequest($product, $mailchimpStoreId);
+                $this->_updateProduct($product);
+            }
+        }
+        return $data;
+    }
+    protected function _updateProduct($product)
+    {
+        $product->setData("mailchimp_sync_delta", $this->_date->gmtDate());
+        $product->setData("mailchimp_sync_error", "");
+        $product->setData('mailchimp_sync_modified', 0);
+        $product->setHasDataChanges(true);
+        $product->getResource()->save($product);
+        $product->getResource()->saveAttribute($product,'mailchimp_sync_error');
+        $product->getResource()->saveAttribute($product,'mailchimp_sync_modified');
+        $product->getResource()->saveAttribute($product,'mailchimp_sync_modified');
     }
 }

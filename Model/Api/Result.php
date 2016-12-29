@@ -40,6 +40,12 @@ class Result
      * @var \Magento\Customer\Api\CustomerRepositoryInterface
      */
     private $_customerRepository;
+    /**
+     * @var \Magento\Sales\Model\OrderRepository
+     */
+    private $_orderRepository;
+
+    private $_chimpSyncEcommerce;
 
 
     /**
@@ -56,7 +62,9 @@ class Result
         \Ebizmarts\MailChimp\Model\MailChimpErrors $chimpErrors,
         \Magento\Framework\Archive $archive,
         \Magento\Catalog\Model\ProductRepository $productRepository,
-        \Magento\Customer\Api\CustomerRepositoryInterface $customerRepository
+        \Magento\Customer\Api\CustomerRepositoryInterface $customerRepository,
+        \Magento\Sales\Model\OrderRepository $orderRepository,
+        \Ebizmarts\MailChimp\Model\MailChimpSyncEcommerce $chimpSyncEcommerce
     )
     {
         $this->_batchCollection     = $batchCollection;
@@ -65,6 +73,8 @@ class Result
         $this->_chimpErrors         = $chimpErrors;
         $this->_productRepository   = $productRepository;
         $this->_customerRepository  = $customerRepository;
+        $this->_orderRepository     = $orderRepository;
+        $this->_chimpSyncEcommerce  = $chimpSyncEcommerce;
     }
     public function processResponses($storeId, $isMailChimpStoreId = false)
     {
@@ -185,15 +195,16 @@ class Result
                                 $this->_helper->log("Error: customer " . $id . " not found");
                             }
                             break;
-//                        case \Ebizmarts\MailChimp\Helper\Data::IS_ORDER:
-//                            $o = $this->_orderRepository->get($id);
-//                            if ($o->getId() == $id) {
-//                                $o->setData("mailchimp_sync_error", $error);
-//                                $o->save();
-//                            } else {
-//                                $this->_helper->log("Error: order " . $id . " not found");
-//                            }
-//                            break;
+                        case \Ebizmarts\MailChimp\Helper\Data::IS_ORDER:
+                            $o = $this->_orderRepository->get($id);
+                            if ($o->getId() == $id) {
+                                $c = $this->_chimpSyncEcommerce->getByStoreIdType($o->getStoreId(),$id,$type);
+                                $c->setData("mailchimp_sync_error", $error);
+                                $c->getResource()->save($c);
+                            } else {
+                                $this->_helper->log("Error: order " . $id . " not found");
+                            }
+                            break;
 //                        case \Ebizmarts\MailChimp\Helper\Data::IS_QUOTE:
 //                            $q = Mage::getModel('sales/quote')->load($id);
 //                            if ($q->getId() == $id) {

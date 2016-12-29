@@ -1,0 +1,14 @@
+@font-face {
+    font-family: 'mailchimp';
+    src:  url('../fonts/mailchimp.eot?75w84o');
+    src:  url('../fonts/mailchimp.eot?75w84o#iefix') format('embedded-opentype'),
+    url('../fonts/mailchimp.ttf?75w84o') format('truetype'),
+    url('../fonts/mailchimp.woff?75w84o') format('woff'),
+    url('../fonts/mailchimp.svg?75w84o#mailchimp') format('svg');
+    font-weight: normal;
+    font-style: normal;
+}
+.admin__menu .item-mailchimp-menu.parent.level-0 > a:before {
+    font-family: 'mailchimp';
+    content: "\e990"
+}

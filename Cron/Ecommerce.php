@@ -35,6 +35,10 @@ class Ecommerce
      */
     private $_apiCustomer;
     /**
+     * @var \Ebizmarts\MailChimp\Model\Api\Order
+     */
+    private $_apiOrder;
+    /**
      * @var \Ebizmarts\MailChimp\Model\MailChimpSyncBatches
      */
     private $_mailChimpSyncBatches;
@@ -54,6 +58,7 @@ class Ecommerce
         \Ebizmarts\MailChimp\Model\Api\Product $apiProduct,
         \Ebizmarts\MailChimp\Model\Api\Result $apiResult,
         \Ebizmarts\MailChimp\Model\Api\Customer $apiCustomer,
+        \Ebizmarts\MailChimp\Model\Api\Order $apiOrder,
         \Ebizmarts\MailChimp\Model\MailChimpSyncBatches $mailChimpSyncBatches
     )
     {
@@ -63,6 +68,7 @@ class Ecommerce
         $this->_mailChimpSyncBatches    = $mailChimpSyncBatches;
         $this->_apiResult       = $apiResult;
         $this->_apiCustomer     = $apiCustomer;
+        $this->_apiOrder        = $apiOrder;
     }
 
     public function execute()
@@ -84,8 +90,9 @@ class Ecommerce
         if ($this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_PATH_ECOMMERCE_ACTIVE)) {
             $results =  $this->_apiProduct->_sendProducts($storeId);
             $customers = $this->_apiCustomer->sendCustomers($storeId);
-            $this->_helper->log(var_export($customers,true));
             $results = array_merge($results,$customers);
+            $orders = $this->_apiOrder->sendOrders($storeId);
+            $results = array_merge($results,$orders);
         }
         $this->_helper->log(var_export($results,true));
         if (!empty($results)) {

@@ -42,6 +42,10 @@ class Customer
      * @var \Magento\Directory\Api\CountryInformationAcquirerInterface
      */
     protected $_countryInformation;
+    /**
+     * @var \Magento\Customer\Api\Data\CustomerInterfaceFactory
+     */
+    protected $_customerFactory;
     protected $_address;
 
     /**
@@ -61,6 +65,7 @@ class Customer
     public function __construct(
         \Ebizmarts\MailChimp\Helper\Data $helper,
         \Magento\Customer\Api\CustomerRepositoryInterface $customerRepository,
+        \Magento\Customer\Api\Data\CustomerInterfaceFactory $customerFactory,
         \Magento\Customer\Model\ResourceModel\Customer\Collection $collection,
         \Magento\Sales\Model\ResourceModel\Order\Collection $orderCollection,
         \Magento\Directory\Api\CountryInformationAcquirerInterface $countryInformation,
@@ -76,6 +81,7 @@ class Customer
         $this->_batchId             = \Ebizmarts\MailChimp\Helper\Data::IS_CUSTOMER. '_' . $this->_date->gmtTimestamp();
         $this->_countryInformation  = $countryInformation;
         $this->_address             = $address;
+        $this->_customerFactory     = $customerFactory;
     }
     public function sendCustomers($storeId)
     {
@@ -132,13 +138,12 @@ class Customer
     protected function _buildCustomerData(\Magento\Customer\Api\Data\CustomerInterface $customer)
     {
         $point = 0;
-        $this->_helper->log(__METHOD__);
         $data = array();
         $data['id']             = $customer->getId();
         $data['email_address']  = $customer->getEmail();
         $data['first_name']     = $customer->getFirstName();
         $data['last_name']      = $customer->getLastName();
-        $data['opt_in_status']  = false; //$customer->getOptin();
+        $data['opt_in_status']  = $this->getOptin();
         // customer order data
         $orderCollection = $this->_orderCollection;
         $orderCollection->addFieldToFilter('state', 'complete')
@@ -163,13 +168,6 @@ class Customer
                 $country = $this->_countryInformation->getCountryInfo($address->getCountryId());
 //                $this->_helper->log('country name'.$point++);
                 $countryName = $country->getFullNameLocale();
-//                $this->_helper->log($countryName);
-//                $this->_helper->log('street '.$point++);
-//                $this->_helper->log($street[0]);
-//                $this->_helper->log('country '.$point++);
-//                $this->_helper->log($country->getTwoLetterAbbreviation());
-//                $this->_helper->log('city '.$point++);
-//                $this->_helper->log($address->getCity());
 //                $this->_helper->log('region '.$point++);
 //                //$regionModel = $address->getRegionModel($address->getRegionId());
 //                $this->_helper->log($address->getRegion());
@@ -199,8 +197,6 @@ class Customer
 //        if (is_array($mergeFields)) {
 //            $data = array_merge($mergeFields, $data);
 //        }
-//        $this->_helper->log('nos vamos');
-//        $this->_helper->log(var_export($data,true));
         return $data;
     }
 
@@ -210,5 +206,31 @@ class Customer
     public function getMergeVars(\Magento\Customer\Model\Customer $customer)
     {
         return array();
+    }
+
+    /**
+     * @param $guestId
+     * @param $order
+     * @return \Magento\Customer\Api\Data\CustomerInterface
+     */
+    public function createGuestCustomer($guestId, $order) {
+        $guestCustomer = $this->_customerFactory->create();
+        $guestCustomer->setId($guestId);
+        foreach ($order->getData() as $key => $value) {
+            $keyArray = explode('_', $key);
+            if ($value && isset($keyArray[0]) && $keyArray[0] == 'customer') {
+                $guestCustomer->{'set' . ucfirst($keyArray[1])}($value);
+            }
+        }
+        return $guestCustomer;
+    }
+
+    public function getOptin() {
+        if ($this->_helper->getConfigValue(\Ebizmarts\Mailchimp\Helper\Data::XML_ECOMMERCE_OPTIN, 0)) {
+            $optin = true;
+        } else {
+            $optin = false;
+        }
+        return $optin;
     }
 }

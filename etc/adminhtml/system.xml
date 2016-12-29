@@ -95,6 +95,10 @@
                     <label>Enabled</label>
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
                 </field>
+                <field id="customer_optin" translate="label" type="select" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Subscribe all customers to the newsletter</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
             </group>
             <group id="abandonedcart" translate="label" type="text" sortOrder="130" showInDefault="1" showInWebsite="1" showInStore="1">
                 <label>Abandoned Cart Configuration</label>

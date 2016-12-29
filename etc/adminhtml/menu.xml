@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Backend:etc/menu.xsd">
     <menu>
-        <add id="Ebizmarts_MailChimp::root_menu"
+        <add id="Ebizmarts_MailChimp::mailchimp_menu"
              title="MailChimp"
              module="Ebizmarts_MailChimp"
              sortOrder="110"
@@ -13,7 +13,7 @@
              module="Ebizmarts_MailChimp"
              sortOrder="10"
              resource="Magento_Backend::content"
-             parent="Ebizmarts_MailChimp::root_menu"
+             parent="Ebizmarts_MailChimp::mailchimp_menu"
              action="adminhtml/system_config/edit/section/mailchimp"
         />
         <add id="Ebizmarts_MailChimp::error_menu"
@@ -21,7 +21,7 @@
              module="Ebizmarts_MailChimp"
              sortOrder="20"
              resource="Magento_Backend::content"
-             parent="Ebizmarts_MailChimp::root_menu"
+             parent="Ebizmarts_MailChimp::mailchimp_menu"
              action="mailchimp/errors"
         />
     </menu>

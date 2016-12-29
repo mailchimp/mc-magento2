@@ -28,6 +28,9 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     const XML_PATH_STORE             = 'mailchimp/ecommerce/store';
     const XML_PATH_ECOMMERCE_ACTIVE  = 'mailchimp/ecommerce/active';
     const XML_PATH_SYNC_DATE         = 'mailchimp/general/mcminsyncdateflag';
+    const XML_ECOMMERCE_OPTIN        = 'mailchimp/ecommerce/customer_optin';
+
+    const ORDER_STATE_OK             = 'complete';
 
     const MERGE_VARS                 = array(0 => array('magento' => 'fname', 'mailchimp' => 'FNAME'), 1 => array('magento' => 'lname', 'mailchimp' => 'LNAME'), 2 => array('magento' => 'gender', 'mailchimp' => 'GENDER'), 3 => array('magento' => 'dob', 'mailchimp' => 'DOB'), 4 => array('magento' => 'billing_address', 'mailchimp' => 'BILLING'), 5 => array('magento' => 'shipping_address', 'mailchimp' => 'SHIPPING'), 6 => array('magento' => 'billing_telephone', 'mailchimp' => 'BTELEPHONE'), 7 => array('magento' => 'shipping_telephone', 'mailchimp' => 'STELEPHONE'), 8 => array('magento' => 'billing_company', 'mailchimp' => 'BCOMPANY'), 9 => array('magento' => 'shipping_company', 'mailchimp' => 'SCOMPANY'), 10 => array('magento' => 'group_id', 'mailchimp' => 'CGROUP'), 11 => array('magento' => 'store_id', 'mailchimp' => 'STOREID'));
     const GUEST_GROUP                = 'NOT LOGGED IN';
@@ -423,6 +426,14 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
             ];
         }
         return $merge_vars;
+    }
+    public function getDateMicrotime()
+    {
+        $microtime = explode(' ', microtime());
+        $msec = $microtime[0];
+        $msecArray = explode('.', $msec);
+        $date = date('Y-m-d-H-i-s') . '-' . $msecArray[1];
+        return $date;
     }
 
 }

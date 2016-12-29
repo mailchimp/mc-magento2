@@ -23,6 +23,65 @@ class UpgradeSchema implements UpgradeSchemaInterface
     public function upgrade(SchemaSetupInterface $setup, ModuleContextInterface $context)
     {
         $setup->startSetup();
+        $connection = $setup->getConnection();
+        if ($context->getVersion()
+            && version_compare($context->getVersion(), '0.0.3') < 0
+        ) {
+
+            $table = $connection
+                ->newTable($setup->getTable('mailchimp_sync_ecommerce'))
+                ->addColumn(
+                    'id',
+                    \Magento\Framework\DB\Ddl\Table::TYPE_INTEGER,
+                    null,
+                    ['identity' => true, 'unsigned' => true, 'nullable' => false, 'primary' => true],
+                    'Id'
+                )
+                ->addColumn(
+                    'store_id',
+                    \Magento\Framework\DB\Ddl\Table::TYPE_TEXT,
+                    50,
+                    ['unsigned' => true, 'nullable' => false],
+                    'Store Id'
+                )
+                ->addColumn(
+                    'type',
+                    \Magento\Framework\DB\Ddl\Table::TYPE_TEXT,
+                    24,
+                    [],
+                    'Type of register'
+                )
+                ->addColumn(
+                    'related_id',
+                    \Magento\Framework\DB\Ddl\Table::TYPE_INTEGER,
+                    null,
+                    [],
+                    'Id of the related entity'
+                )
+                ->addColumn(
+                    'mailchimp_sync_modified',
+                    \Magento\Framework\DB\Ddl\Table::TYPE_BOOLEAN,
+                    null,
+                    [],
+                    'If the entity was modified'
+                )
+                ->addColumn(
+                    'mailchimp_sync_delta',
+                    \Magento\Framework\DB\Ddl\Table::TYPE_DATETIME,
+                    null,
+                    [],
+                    'Sync Delta'
+                )->addColumn(
+                    'mailchimp_sync_error',
+                    \Magento\Framework\DB\Ddl\Table::TYPE_TEXT,
+                    128,
+                    [],
+                    'Error on synchronization'
+                )
+            ;
+
+            $setup->getConnection()->createTable($table);
+        }
 
         $setup->endSetup();
     }
