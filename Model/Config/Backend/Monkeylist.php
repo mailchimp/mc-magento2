@@ -63,30 +63,31 @@ class Monkeylist extends \Magento\Framework\App\Config\Value
 
     public function beforeSave()
     {
+        $generalData = $this->getData();
         $data = $this->getData('groups');
-        $this->_helper->log($data['ecommerce']);
-        $active = $data['ecommerce']['fields']['active']['value'];
+        if (isset($data['ecommerce']['fields']['active']['value'])) {
+            $active = $data['ecommerce']['fields']['active']['value'];
+        } elseif ($data['ecommerce']['fields']['active']['inherit']) {
+            $active = $data['ecommerce']['fields']['active']['inherit'];
+        }
         if ($active&&$this->isValueChanged()) {
-            if ($this->_helper->getConfigValue(\Ebizmarts\Mailchimp\Helper\Data::XML_PATH_STORE)) {
+            if ($this->_helper->getConfigValue(\Ebizmarts\Mailchimp\Helper\Data::XML_PATH_STORE,$generalData['scope_id'])) {
                 $this->_helper->deleteStore();
             }
-            $store = $this->_helper->createStore($this->getValue());
+            $store = $this->_helper->createStore($this->getValue(), $generalData['scope_id']);
             if ($store) {
                 $this->resourceConfig->saveConfig(
                     \Ebizmarts\Mailchimp\Helper\Data::XML_PATH_STORE, $store,
-                    ScopeConfigInterface::SCOPE_TYPE_DEFAULT,
-                    0
+                    $generalData['scope'],
+                    $generalData['scope_id']
                 );
                 $this->resourceConfig->saveConfig(
                     \Ebizmarts\MailChimp\Helper\Data::XML_PATH_SYNC_DATE,
                     $this->_date->gmtDate(),
-                    ScopeConfigInterface::SCOPE_TYPE_DEFAULT,
-                    0
+                    $generalData['scope'],
+                    $generalData['scope_id']
                 );
             }
-
-
-        } else {
         }
         return parent::beforeSave();
     }

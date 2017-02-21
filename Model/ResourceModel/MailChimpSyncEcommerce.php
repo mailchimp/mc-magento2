@@ -35,6 +35,6 @@ class MailChimpSyncEcommerce extends AbstractDb
         if ($data) {
             $chimp->setData($data);
         }
-        return $this;
+        return $chimp;
     }
 }

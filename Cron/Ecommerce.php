@@ -94,7 +94,6 @@ class Ecommerce
             $orders = $this->_apiOrder->sendOrders($storeId);
             $results = array_merge($results,$orders);
         }
-        $this->_helper->log(var_export($results,true));
         if (!empty($results)) {
             try {
                 $batchArray['operations'] = $results;
@@ -105,7 +104,8 @@ class Ecommerce
                 } else {
                     $api = $this->_helper->getApi();
                     $batchResponse =$api->batchOperation->add($batchArray);
-//                    $this->_helper->log(var_export($batchResponse,true));
+                    $this->_helper->log(var_export($results,true),null,$batchResponse['id']);
+                    $this->_helper->log(var_export($batchResponse,true));
                     $this->_mailChimpSyncBatches->setStoreId($storeId);
                     $this->_mailChimpSyncBatches->setBatchId($batchResponse['id']);
                     $this->_mailChimpSyncBatches->setStatus($batchResponse['status']);

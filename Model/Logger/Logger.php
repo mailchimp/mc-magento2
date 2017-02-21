@@ -14,8 +14,14 @@ namespace Ebizmarts\MailChimp\Model\Logger;
 class Logger extends \Monolog\Logger
 {
 
-    public function mailchimpLog($message)
+    public function mailchimpLog($message,$file)
     {
+        if ($file) {
+            $fileName = BP. DIRECTORY_SEPARATOR . 'var' . DIRECTORY_SEPARATOR . $file .'_Request.log';
+            $this->info('name of log file: ['.$fileName.']');
+            $this->pushHandler(new \Monolog\Handler\StreamHandler($fileName));
+        }
+
         try {
             if ($message===null) {
                 $message = "NULL";
@@ -35,5 +41,8 @@ class Logger extends \Monolog\Logger
         }
         $message .= "\r\n";
         $this->info($message);
+        if ($file) {
+            $this->popHandler();
+        }
     }
 }

@@ -29,6 +29,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     const XML_PATH_ECOMMERCE_ACTIVE  = 'mailchimp/ecommerce/active';
     const XML_PATH_SYNC_DATE         = 'mailchimp/general/mcminsyncdateflag';
     const XML_ECOMMERCE_OPTIN        = 'mailchimp/ecommerce/customer_optin';
+    const XML_ECOMMERCE_FIRSTDATE    = 'mailchimp/ecommerce/firstdate';
 
     const ORDER_STATE_OK             = 'complete';
 
@@ -219,10 +220,10 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
      * @param $message
      * @param null $store
      */
-    public function log($message, $store = null)
+    public function log($message, $store = null, $file = null)
     {
         if ($this->getConfigValue(self::XML_PATH_LOG, $store)) {
-            $this->_mlogger->mailchimpLog($message);
+            $this->_mlogger->mailchimpLog($message, $file);
         }
     }
 
@@ -249,18 +250,24 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
 
         }
     }
-    public function createStore($listId=null)
+    public function getMCStoreName($storeId)
+    {
+        return $this->_storeManager->getStore($storeId)->getFrontendName();
+    }
+    public function createStore($listId=null, $storeId)
     {
         if ($listId) {
             //generate store id
             $date = date('Y-m-d-His');
-            $baseUrl = $this->_storeManager->getStore()->getBaseUrl();
-            $storeId = parse_url($baseUrl, PHP_URL_HOST) . '_' . $date;
-            $currencyCode = $this->_storeManager->getStore()->getDefaultCurrencyCode();
+            $baseUrl = $this->_storeManager->getStore($storeId)->getName();
+            $mailchimpStoreId = md5(parse_url($baseUrl, PHP_URL_HOST) . '_' . $date);
+            $currencyCode = $this->_storeManager->getStore($storeId)->getDefaultCurrencyCode();
+            $name = $this->getMCStoreName($storeId);
+
             //create store in mailchimp
             try {
-                $this->getApi()->ecommerce->stores->add($storeId,$listId,$storeId,$currencyCode,'Magento');
-                return $storeId;
+                $this->getApi()->ecommerce->stores->add($mailchimpStoreId,$listId,$name,$currencyCode,'Magento');
+                return $mailchimpStoreId;
 
             } catch (Exception $e) {
                 return null;

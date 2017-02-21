@@ -35,11 +35,11 @@
                         <field id="*/*/active">1</field>
                     </depends>
                 </field>
-                <field id="oauth" translate="button_label" type="button" sortOrder="25" showInDefault="1" showInWebsite="0" showInStore="1">
+                <!--field id="oauth" translate="button_label" type="button" sortOrder="25" showInDefault="1" showInWebsite="0" showInStore="1">
                     <label></label>
                     <button_label>Get API credentials</button_label>
                     <frontend_model>Ebizmarts\MailChimp\Block\Adminhtml\System\Config\OauthWizard</frontend_model>
-                </field>
+                </field-->
                 <field id="account_details" translate="label" type="textarea" sortOrder="30" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Account Details</label>
                     <frontend_model>Ebizmarts\MailChimp\Block\Adminhtml\System\Config\Account</frontend_model>
@@ -98,6 +98,20 @@
                 <field id="customer_optin" translate="label" type="select" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Subscribe all customers to the newsletter</label>
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
+                <field id="firstdate" translate="label" type="date" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>First Date</label>
+                    <frontend_model>Ebizmarts\MailChimp\Block\Adminhtml\System\Config\Date</frontend_model>
+                    <depends>
+                        <field id="*/*/active">1</field>
+                    </depends>
+                </field>
+                <field id="reset_errors" translate="button_label" type="button" sortOrder="130" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <button_label>Reset Errors</button_label>
+                    <frontend_model>Ebizmarts\MailChimp\Block\Adminhtml\System\Config\ResetErrors</frontend_model>
+                    <depends>
+                        <field id="*/*/active">1</field>
+                    </depends>
                 </field>
             </group>
             <group id="abandonedcart" translate="label" type="text" sortOrder="130" showInDefault="1" showInWebsite="1" showInStore="1">

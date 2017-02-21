@@ -22,15 +22,22 @@ class Details implements \Magento\Framework\Option\ArrayInterface
      * @var \Ebizmarts\MailChimp\Helper\Data|null
      */
     private $_helper  = null;
+    /**
+     * @var \Magento\Framework\Message\ManagerInterface
+     */
+    private $_message;
+    private $_error = '';
 
     /**
+     * Details constructor.
      * @param \Ebizmarts\MailChimp\Helper\Data $helper
-     * @param \Ebizmarts\MailChimp\Model\Api $api
+     * @param \Magento\Framework\Message\ManagerInterface $message
      */
     public function __construct(
-        \Ebizmarts\MailChimp\Helper\Data $helper
+        \Ebizmarts\MailChimp\Helper\Data $helper,
+        \Magento\Framework\Message\ManagerInterface $message
     ) {
-    
+        $this->_message = $message;
         $this->_helper  = $helper;
         if ($this->_helper->getApiKey()) {
             $api = $this->_helper->getApi();
@@ -50,8 +57,9 @@ class Details implements \Magento\Framework\Option\ArrayInterface
                 } else {
                     $this->_options['store_exists'] = false;
                 }
-            } catch (\Exception $e) {
-                $this->_helper->log($e->getMessage());
+            } catch (\Mailchimp_Error $e) {
+                $this->_error = $e->getMessage();
+                $this->_options['store_exists'] = false;
             }
         } else {
             $this->_options = '--- Enter your API Key ---';
