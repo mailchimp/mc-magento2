@@ -11,9 +11,8 @@
 
 namespace Ebizmarts\MailChimp\Helper;
 
-use Magento\Customer\Api\Data\CustomerInterface;
+use Magento\Framework\Exception\ValidatorException;
 use Magento\Store\Model\Store;
-use Magento\Framework\App\Config\ScopeConfigInterface;
 use Symfony\Component\Config\Definition\Exception\Exception;
 
 class Data extends \Magento\Framework\App\Helper\AbstractHelper
@@ -30,6 +29,9 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     const XML_PATH_SYNC_DATE         = 'mailchimp/general/mcminsyncdateflag';
     const XML_ECOMMERCE_OPTIN        = 'mailchimp/ecommerce/customer_optin';
     const XML_ECOMMERCE_FIRSTDATE    = 'mailchimp/ecommerce/firstdate';
+    const XML_ABANDONEDCART_ACTIVE   = 'mailchimp/abandonedcart/active';
+    const XML_ABANDONEDCART_FIRSTDATE   = 'mailchimp/abandonedcart/firstdate';
+
 
     const ORDER_STATE_OK             = 'complete';
 
@@ -78,6 +80,18 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
      * @var \Magento\Customer\Model\ResourceModel\Customer\CustomerRepository
      */
     private $_customer;
+    /**
+     * @var \Ebizmarts\MailChimp\Model\MailChimpErrors
+     */
+    private $_mailChimpErrors;
+    /**
+     * @var \Ebizmarts\MailChimp\Model\MailChimpSyncEcommerceFactory
+     */
+    private $_mailChimpSyncEcommerce;
+    /**
+     * @var \Magento\Catalog\Model\ResourceModel\Product\Collection
+     */
+    private $_productCollection;
 
     /**
      * Data constructor.
@@ -89,6 +103,9 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
      * @param \Magento\Framework\Module\ModuleList\Loader $loader
      * @param \Mailchimp $api
      * @param \Magento\Customer\Model\ResourceModel\CustomerRepository $customer
+     * @param \Ebizmarts\MailChimp\Model\MailChimpErrors $mailChimpErrors
+     * @param \Ebizmarts\MailChimp\Model\MailChimpSyncEcommerceFactory $mailChimpSyncEcommerce
+     * @param \Magento\Catalog\Model\ResourceModel\Product\Collection $productCollection
      */
     public function __construct(
         \Magento\Framework\App\Helper\Context $context,
@@ -98,7 +115,10 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         \Magento\Framework\App\State $state,
         \Magento\Framework\Module\ModuleList\Loader $loader,
         \Mailchimp $api,
-        \Magento\Customer\Model\ResourceModel\CustomerRepository $customer
+        \Magento\Customer\Model\ResourceModel\CustomerRepository $customer,
+        \Ebizmarts\MailChimp\Model\MailChimpErrors $mailChimpErrors,
+        \Ebizmarts\MailChimp\Model\MailChimpSyncEcommerceFactory $mailChimpSyncEcommerce,
+        \Magento\Catalog\Model\ResourceModel\Product\Collection $productCollection
     ) {
     
         $this->_storeManager  = $storeManager;
@@ -110,6 +130,9 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         $this->_loader        = $loader;
         $this->_api           = $api;
         $this->_customer      = $customer;
+        $this->_mailChimpErrors         = $mailChimpErrors;
+        $this->_mailChimpSyncEcommerce  = $mailChimpSyncEcommerce;
+        $this->_productCollection       = $productCollection;
         parent::__construct($context);
     }
 
@@ -442,5 +465,58 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         $date = date('Y-m-d-H-i-s') . '-' . $msecArray[1];
         return $date;
     }
+    public function resetErrors()
+    {
+        try {
+            // clean the errors table
+            $connection = $this->_mailChimpErrors->getResource()->getConnection();
+            $tableName = $this->_mailChimpErrors->getResource()->getMainTable();
+            $connection->truncateTable($tableName);
+            // clean the syncecommerce table with errors
+            $connection = $this->_mailChimpSyncEcommerce->getResource()->getConnection();
+            $tableName = $this->_mailChimpSyncEcommerce->getResource()->getMainTable();
+            $connection->delete($tableName,['mailchimp_sync_error is not null']);
+            // clean the errors in eav for products
+//            $productCollection = $this->_productCollection;
+//            $productCollection->addAttributeToFilter(
+//                array(
+//                    array('attribute' => 'mailchimp_sync_error', 'neq' => '')
+//                ), '', 'left'
+//            );
+//            foreach ($productCollection as $product) {
+//                $product->setData("mailchimp_sync_delta", null);
+//                $product->setData("mailchimp_sync_error", '');
+//                $resource = $product->getResource();
+//                $resource->saveAttribute($product, 'mailchimp_sync_delta');
+//                $resource->saveAttribute($product, 'mailchimp_sync_error');
+//            }
+            // clean the error in eav for customers
+        } catch(\Zend_Db_Exception $e) {
+            throw new ValidatorException(__($e->getMessage()));
+        }
+    }
+    public function resetEcommerce()
+    {
+        $this->resetErrors();
+    }
+    public function saveEcommerceData($storeId, $entityId , $date, $error, $modified, $type, $deleted = 0, $token = null)
+    {
+        $chimpSyncEcommerce = $this->getChimpSyncEcommerce($storeId,$entityId,$type);
+        $chimpSyncEcommerce->setMailchimpStoreId($storeId);
+        $chimpSyncEcommerce->setType($type);
+        $chimpSyncEcommerce->setRelatedId($entityId);
+        $chimpSyncEcommerce->setMailchimpSyncModified($modified);
+        $chimpSyncEcommerce->setMailchimpSyncDelta($date);
+        $chimpSyncEcommerce->setMailchimpSyncError($error);
+        $chimpSyncEcommerce->setMailchimpSyncDeleted($deleted);
+        $chimpSyncEcommerce->setMailchimpToken($token);
+        $chimpSyncEcommerce->getResource()->save($chimpSyncEcommerce);
+    }
+    public function getChimpSyncEcommerce($storeId,$id,$type)
+    {
+        $chimp = $this->_mailChimpSyncEcommerce->create();
+        return $chimp->getByStoreIdType($storeId,$id,$type);
+    }
+
 
 }

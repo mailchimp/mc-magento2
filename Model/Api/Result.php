@@ -188,8 +188,7 @@ class Result
                         case \Ebizmarts\MailChimp\Helper\Data::IS_CUSTOMER:
                             $c = $this->_customerRepository->getById($id);
                             if ($c->getId() == $id) {
-                                $c->setCustomAttribute("mailchimp_sync_error", $error);
-                                //$c->setMailchimpUpdateObserverRan(true);
+//                                $c->setCustomAttribute("mailchimp_sync_error", $error);
                                 $this->_customerRepository->save($c);
                             } else {
                                 $this->_helper->log("Error: customer " . $id . " not found");

@@ -39,6 +39,10 @@ class Ecommerce
      */
     private $_apiOrder;
     /**
+     * @var \Ebizmarts\MailChimp\Model\Api\Cart
+     */
+    private $_apiCart;
+    /**
      * @var \Ebizmarts\MailChimp\Model\MailChimpSyncBatches
      */
     private $_mailChimpSyncBatches;
@@ -50,6 +54,8 @@ class Ecommerce
      * @param \Ebizmarts\MailChimp\Model\Api\Product $apiProduct
      * @param \Ebizmarts\MailChimp\Model\Api\Result $apiResult
      * @param \Ebizmarts\MailChimp\Model\Api\Customer $apiCustomer
+     * @param \Ebizmarts\MailChimp\Model\Api\Order $apiOrder
+     * @param \Ebizmarts\MailChimp\Model\Api\Cart $apiCart
      * @param \Ebizmarts\MailChimp\Model\MailChimpSyncBatches $mailChimpSyncBatches
      */
     public function __construct(
@@ -59,6 +65,7 @@ class Ecommerce
         \Ebizmarts\MailChimp\Model\Api\Result $apiResult,
         \Ebizmarts\MailChimp\Model\Api\Customer $apiCustomer,
         \Ebizmarts\MailChimp\Model\Api\Order $apiOrder,
+        \Ebizmarts\MailChimp\Model\Api\Cart $apiCart,
         \Ebizmarts\MailChimp\Model\MailChimpSyncBatches $mailChimpSyncBatches
     )
     {
@@ -69,10 +76,12 @@ class Ecommerce
         $this->_apiResult       = $apiResult;
         $this->_apiCustomer     = $apiCustomer;
         $this->_apiOrder        = $apiOrder;
+        $this->_apiCart         = $apiCart;
     }
 
     public function execute()
     {
+        $this->_helper->log(__METHOD__);
         foreach($this->_storeManager->getStores() as $storeId => $val)
         {
             $this->_storeManager->setCurrentStore($storeId);
@@ -85,14 +94,17 @@ class Ecommerce
 
     protected function _processStore($storeId)
     {
+        $this->_helper->log(__METHOD__);
         $batchArray = array();
         $results = array();
-        if ($this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_PATH_ECOMMERCE_ACTIVE)) {
+        if ($this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_PATH_ECOMMERCE_ACTIVE,$storeId)) {
             $results =  $this->_apiProduct->_sendProducts($storeId);
             $customers = $this->_apiCustomer->sendCustomers($storeId);
             $results = array_merge($results,$customers);
             $orders = $this->_apiOrder->sendOrders($storeId);
             $results = array_merge($results,$orders);
+            $carts = $this->_apiCart->createBatchJson($storeId);
+            $results= array_merge($results,$carts);
         }
         if (!empty($results)) {
             try {
@@ -104,7 +116,7 @@ class Ecommerce
                 } else {
                     $api = $this->_helper->getApi();
                     $batchResponse =$api->batchOperation->add($batchArray);
-                    $this->_helper->log(var_export($results,true),null,$batchResponse['id']);
+                    $this->_helper->log($results,null,$batchResponse['id']);
                     $this->_helper->log(var_export($batchResponse,true));
                     $this->_mailChimpSyncBatches->setStoreId($storeId);
                     $this->_mailChimpSyncBatches->setBatchId($batchResponse['id']);

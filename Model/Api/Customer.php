@@ -18,20 +18,17 @@ use Symfony\Component\Config\Definition\Exception\Exception;
 
 class Customer
 {
+    const MAX           = 100;
     /**
      * @var \Ebizmarts\MailChimp\Helper\Data
      */
     protected $_helper;
     /**
-     * @var \Magento\Customer\Api\CustomerRepositoryInterface
-     */
-    protected $_customerRepository;
-    /**
-     * @var \Magento\Customer\Model\ResourceModel\Customer\Collection
+     * @var \Magento\Customer\Model\ResourceModel\Customer\CollectionFactory
      */
     protected $_collection;
     /**
-     * @var \Magento\Sales\Model\ResourceModel\Order\Collection
+     * @var \Magento\Sales\Model\ResourceModel\Order\CollectionFactory
      */
     protected $_orderCollection;
     /**
@@ -43,7 +40,7 @@ class Customer
      */
     protected $_countryInformation;
     /**
-     * @var \Magento\Customer\Api\Data\CustomerInterfaceFactory
+     * @var \Magento\Customer\Model\CustomerFactory
      */
     protected $_customerFactory;
     protected $_address;
@@ -56,25 +53,24 @@ class Customer
     /**
      * Customer constructor.
      * @param \Ebizmarts\MailChimp\Helper\Data $helper
-     * @param \Magento\Customer\Api\CustomerRepositoryInterface $customerRepository
-     * @param \Magento\Customer\Model\ResourceModel\Customer\Collection $collection
-     * @param \Magento\Sales\Model\ResourceModel\Order\Collection $orderCollection
+     * @param \Magento\Customer\Model\CustomerFactory $customerFactory
+     * @param \Magento\Customer\Model\ResourceModel\Customer\CollectionFactory $collection
+     * @param \Magento\Sales\Model\ResourceModel\Order\CollectionFactory $orderCollection
      * @param \Magento\Directory\Api\CountryInformationAcquirerInterface $countryInformation
+     * @param \Magento\Customer\Model\Address $address
      * @param \Magento\Framework\Stdlib\DateTime\DateTime $date
      */
     public function __construct(
         \Ebizmarts\MailChimp\Helper\Data $helper,
-        \Magento\Customer\Api\CustomerRepositoryInterface $customerRepository,
-        \Magento\Customer\Api\Data\CustomerInterfaceFactory $customerFactory,
-        \Magento\Customer\Model\ResourceModel\Customer\Collection $collection,
-        \Magento\Sales\Model\ResourceModel\Order\Collection $orderCollection,
+        \Magento\Customer\Model\CustomerFactory $customerFactory,
+        \Magento\Customer\Model\ResourceModel\Customer\CollectionFactory $collection,
+        \Magento\Sales\Model\ResourceModel\Order\CollectionFactory $orderCollection,
         \Magento\Directory\Api\CountryInformationAcquirerInterface $countryInformation,
         \Magento\Customer\Model\Address $address,
         \Magento\Framework\Stdlib\DateTime\DateTime $date
     )
     {
         $this->_helper              = $helper;
-        $this->_customerRepository  = $customerRepository;
         $this->_collection          = $collection;
         $this->_orderCollection     = $orderCollection;
         $this->_date                = $date;
@@ -85,28 +81,35 @@ class Customer
     }
     public function sendCustomers($storeId)
     {
-        $mailchimpStoreId = $this->_helper->getConfigValue(\Ebizmarts\Mailchimp\Helper\Data::XML_PATH_STORE);
-        $collection = $this->_collection;
-        $collection->addAttributeToFilter(
-                array(
-                    array('attribute' => 'mailchimp_sync_delta', 'null' => true),
-                    array('attribute' => 'mailchimp_sync_delta', 'eq' => ''),
-                    array('attribute' => 'mailchimp_sync_delta', 'lt' => $this->_helper->getMCMinSyncDateFlag()),
-                    array('attribute' => 'mailchimp_sync_modified', 'eq'=> 1)
-                ), '', 'left'
-            )
-            ->addAttributeToFilter('store_id',array('eq'=>$storeId));
+        $mailchimpStoreId = $this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_PATH_STORE,$storeId);
+        $collection = $this->_collection->create();
+        $collection->addFieldToFilter('store_id',array('eq'=>$storeId));
+        $collection->getSelect()->joinLeft(
+            ['m4m' => 'mailchimp_sync_ecommerce'],
+            "m4m.related_id = e.entity_id and m4m.type = '".\Ebizmarts\MailChimp\Helper\Data::IS_CUSTOMER.
+            "' and m4m.mailchimp_store_id = '".$mailchimpStoreId."'",
+            ['m4m.*']
+        );
+        $collection->getSelect()->where("m4m.mailchimp_sync_delta IS null ".
+            "OR (m4m.mailchimp_sync_delta > '".$this->_helper->getMCMinSyncDateFlag().
+            "' and m4m.mailchimp_sync_modified = 1)");
+        $collection->getSelect()->limit(self::MAX);
+        $this->_helper->log((string)$collection->getSelect());
         $counter = 0;
         $customerArray = array();
 
         foreach($collection as $item)
         {
-            $customer       = $this->_customerRepository->getById($item->getId());
+            $this->_helper->log('process each customer');
+            $customer = $this->_customerFactory->create();
+            $customer->getResource()->load($customer,$item->getId());
+
+
+//            $item->getId());
             $data           = $this->_buildCustomerData($customer);
             $customerJson   = '';
 
             try {
-                $this->_helper->log('before json');
                 $customerJson = json_encode($data);
             } catch(Exception $e) {
                 $this->_helper->log('Customer: '.$customer->getId().' json encode failed');
@@ -118,12 +121,7 @@ class Customer
                 $customerArray[$counter]['body'] = $customerJson;
 
                 //update customers delta
-                $customer->setCustomAttribute("mailchimp_sync_delta",$this->_date->gmtDate());
-                //$customer->setData("mailchimp_sync_delta",$this->_date->gmtDate());
-                $customer->setCustomAttribute("mailchimp_sync_error", "");
-                $customer->setCustomAttribute("mailchimp_sync_modified", 0);
-                $this->_customerRepository->save($customer);
-//                $customer->save($customer);
+                $this->_updateCustomer($mailchimpStoreId, $customer->getId(), $this->_date->gmtDate(), '', 0);
 
             }
             $counter++;
@@ -135,68 +133,84 @@ class Customer
      * @param \Magento\Customer\Model\Customer $customer
      * @return array
      */
-    protected function _buildCustomerData(\Magento\Customer\Api\Data\CustomerInterface $customer)
+    protected function _buildCustomerData(\Magento\Customer\Model\Customer $customer)
     {
+        $this->_helper->log(__METHOD__);
         $point = 0;
         $data = array();
-        $data['id']             = $customer->getId();
-        $data['email_address']  = $customer->getEmail();
-        $data['first_name']     = $customer->getFirstName();
-        $data['last_name']      = $customer->getLastName();
-        $data['opt_in_status']  = $this->getOptin();
+        $data["id"] = $customer->getId();
+        $data["email_address"] = $customer->getEmail() ? $customer->getEmail() : '';
+        $data["first_name"] = $customer->getFirstname() ? $customer->getFirstname() : '';
+        $data["last_name"] = $customer->getLastname() ? $customer->getLastname() : '';
+        $data["opt_in_status"] = $this->getOptin();
         // customer order data
-        $orderCollection = $this->_orderCollection;
-        $orderCollection->addFieldToFilter('state', 'complete')
+        $orderCollection = $this->_orderCollection->create();
+        $orderCollection->addFieldToFilter('state', array(
+            array('neq',\Magento\Sales\Model\Order::STATE_CANCELED),
+            array('neq',\Magento\Sales\Model\Order::STATE_CLOSED)))
             ->addAttributeToFilter('customer_id', array('eq' => $customer->getId()));
+        $this->_helper->log((string)$orderCollection->getSelect());
         $totalOrders = 0;
         $totalAmountSpent = 0;
         /**
-         * @var $order \Magento\Sales\Model\Order
+         * @var $customerOrder \Magento\Sales\Model\Order
          */
-        foreach($orderCollection as $order) {
+        foreach($orderCollection as $customerOrder) {
             $totalOrders++;
-            $totalAmountSpent += $order->getGrandTotal();
+            $totalAmountSpent += $customerOrder->getGrandTotal() - $customerOrder->getTotalRefunded()
+                - $customerOrder->getTotalCanceled();
         }
         $data['orders_count']   = $totalOrders;
         $data['total_spent']    = $totalAmountSpent;
-        foreach($customer->getAddresses() as $address) {
-            /**
-             * @var $address \Magento\Customer\Model\Address
-             */
-            if (!array_key_exists('address',$data)) {
+        $address = $customer->getDefaultBillingAddress();
+        $this->_helper->log('after get billing address');
+        if($address) {
+            $customerAddress = array();
+            if ($street = $address->getStreet()) {
                 $street = $address->getStreet();
+                if ($street[0]) {
+                    $customerAddress["address1"] = $street[0];
+                }
+                if (count($street) > 1) {
+                    $customerAddress["address2"] = $street[1];
+                }
+            }
+            $this->_helper->log('after street');
+            if ($address->getCity()) {
+                $customerAddress["city"] = $address->getCity();
+            }
+            $this->_helper->log('after city');
+            if ($address->getRegion()) {
+                $customerAddress["province"] = $address->getRegion();
+            }
+            $this->_helper->log('after region');
+            if ($address->getRegionCode()) {
+                $customerAddress["province_code"] = $address->getRegionCode();
+            }
+            $this->_helper->log('after region code');
+            if ($address->getPostcode()) {
+                $customerAddress["postal_code"] = $address->getPostcode();
+            }
+            $this->_helper->log('after post code');
+            if ($address->getCountry()) {
                 $country = $this->_countryInformation->getCountryInfo($address->getCountryId());
-//                $this->_helper->log('country name'.$point++);
                 $countryName = $country->getFullNameLocale();
-//                $this->_helper->log('region '.$point++);
-//                //$regionModel = $address->getRegionModel($address->getRegionId());
-//                $this->_helper->log($address->getRegion());
-//                $this->_helper->log('region code '.$point++);
-//                $this->_helper->log($address->getRegionCode());
-//                $this->_helper->log('postcode '.$point++);
-//                $this->_helper->log($address->getPostcode());
-                $data['address'] = array(
-                    "address1" => $street[0] ? $street[0] : "",
-                    "address2" => count($street)>1 ? $street[1] : "",
-                    "city" => $address->getCity() ? $address->getCity() : "",
-//                    "province" => $address->getRegion() ? $address->getRegion() : "",
-//                    "province_code" => $address->getRegionCode() ? $address->getRegionCode() : "",
-                    "postal_code" => $address->getPostcode(),
-                    "country" => $countryName,
-                    "country_code" => $country->getTwoLetterAbbreviation()
-                );
-//                $this->_helper->log('before getcompany');
+                $customerAddress["country"] = $countryName;
+                $customerAddress["country_code"] = $country->getTwoLetterAbbreviation();
+            }
+            $this->_helper->log('after country');
+            if (count($customerAddress)) {
+                $data["address"] = $customerAddress;
+            }
+            //company
 //                if ($address->getCompany()) {
 //                    $data["company"] = $address->getCompany();
 //                }
-                break;
-            }
-        }
-//        $this->_helper->log('antes del mergeVar');
-//        $mergeFields = $this->getMergeVars($customer);
-//        if (is_array($mergeFields)) {
-//            $data = array_merge($mergeFields, $data);
+//                break;
+//            }
 //        }
+        }
+        $this->_helper->log('before return');
         return $data;
     }
 
@@ -225,12 +239,18 @@ class Customer
         return $guestCustomer;
     }
 
-    public function getOptin() {
-        if ($this->_helper->getConfigValue(\Ebizmarts\Mailchimp\Helper\Data::XML_ECOMMERCE_OPTIN, 0)) {
+    public function getOptin($storeId = 0) {
+        if ($this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_ECOMMERCE_OPTIN, $storeId)) {
             $optin = true;
         } else {
             $optin = false;
         }
         return $optin;
     }
+    protected function _updateCustomer($storeId, $entityId, $sync_delta, $sync_error, $sync_modified)
+    {
+        $this->_helper->saveEcommerceData($storeId, $entityId, $sync_delta, $sync_error, $sync_modified,
+            \Ebizmarts\MailChimp\Helper\Data::IS_CUSTOMER);
+    }
+
 }

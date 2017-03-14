@@ -14,6 +14,8 @@
 namespace Ebizmarts\MailChimp\Controller\Adminhtml\Ecommerce;
 
 use Magento\Framework\Controller\Result\JsonFactory;
+use Magento\Framework\Exception\ValidatorException;
+use Symfony\Component\Config\Definition\Exception\Exception;
 
 class ResetLocalErrors extends \Magento\Backend\App\Action
 {
@@ -33,10 +35,18 @@ class ResetLocalErrors extends \Magento\Backend\App\Action
 
     public function execute()
     {
+        $valid = 1;
+        $message = '';
         $resultJson = $this->resultJsonFactory->create();
+        try {
+            $this->helper->resetErrors();
+        } catch(ValidatorException $e) {
+            $valid = 0;
+            $message = $e->getMessage();
+        }
         return $resultJson->setData([
-            'valid' => (int)1,
-            'message' => 'OK',
+            'valid' => (int)$valid,
+            'message' => $message,
         ]);
     }
     protected function _isAllowed()

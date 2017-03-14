@@ -71,13 +71,13 @@ class Monkeylist extends \Magento\Framework\App\Config\Value
             $active = $data['ecommerce']['fields']['active']['inherit'];
         }
         if ($active&&$this->isValueChanged()) {
-            if ($this->_helper->getConfigValue(\Ebizmarts\Mailchimp\Helper\Data::XML_PATH_STORE,$generalData['scope_id'])) {
+            if ($this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_PATH_STORE,$generalData['scope_id'])) {
                 $this->_helper->deleteStore();
             }
             $store = $this->_helper->createStore($this->getValue(), $generalData['scope_id']);
             if ($store) {
                 $this->resourceConfig->saveConfig(
-                    \Ebizmarts\Mailchimp\Helper\Data::XML_PATH_STORE, $store,
+                    \Ebizmarts\MailChimp\Helper\Data::XML_PATH_STORE, $store,
                     $generalData['scope'],
                     $generalData['scope_id']
                 );

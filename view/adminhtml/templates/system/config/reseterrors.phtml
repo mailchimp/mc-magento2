@@ -4,7 +4,15 @@
         jQuery.ajax({
             url: '<?php echo $this->getAjaxCheckUrl() ?>',
             data: {form_key: window.FORM_KEY},
-            type: 'POST'
+            type: 'POST',
+            success: function(data){
+                if(data.valid==0) {
+                    alert('Error: '+data.message);
+                }
+                else if(data.valid==1) {
+                    alert('Errors cleaned');
+                }
+            }
         }).done(function(a) {
             console.log(a);
         });

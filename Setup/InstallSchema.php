@@ -36,7 +36,7 @@ class InstallSchema implements InstallSchemaInterface
 
         $installer->startSetup();
         $connection = $installer->getConnection();
-        $table = $connection
+        $table = $installer->getConnection()
             ->newTable($installer->getTable('mailchimp_sync_batches'))
             ->addColumn(
                 'id',
@@ -117,6 +117,74 @@ class InstallSchema implements InstallSchemaInterface
 
         $installer->getConnection()->createTable($table);
 
+
+        $table = $installer->getConnection()
+            ->newTable($installer->getTable('mailchimp_sync_ecommerce'))
+            ->addColumn(
+                'id',
+                \Magento\Framework\DB\Ddl\Table::TYPE_INTEGER,
+                null,
+                ['identity' => true, 'unsigned' => true, 'nullable' => false, 'primary' => true],
+                'Id'
+            )
+            ->addColumn(
+                'mailchimp_store_id',
+                \Magento\Framework\DB\Ddl\Table::TYPE_TEXT,
+                50,
+                ['unsigned' => true, 'nullable' => false],
+                'Store Id'
+            )
+            ->addColumn(
+                'type',
+                \Magento\Framework\DB\Ddl\Table::TYPE_TEXT,
+                24,
+                [],
+                'Type of register'
+            )
+            ->addColumn(
+                'related_id',
+                \Magento\Framework\DB\Ddl\Table::TYPE_INTEGER,
+                null,
+                [],
+                'Id of the related entity'
+            )
+            ->addColumn(
+                'mailchimp_sync_modified',
+                \Magento\Framework\DB\Ddl\Table::TYPE_BOOLEAN,
+                null,
+                [],
+                'If the entity was modified'
+            )
+            ->addColumn(
+                'mailchimp_sync_delta',
+                \Magento\Framework\DB\Ddl\Table::TYPE_DATETIME,
+                null,
+                [],
+                'Sync Delta'
+            )->addColumn(
+                'mailchimp_sync_error',
+                \Magento\Framework\DB\Ddl\Table::TYPE_TEXT,
+                128,
+                [],
+                'Error on synchronization'
+            )->addColumn(
+                'mailchimp_sync_deleted',
+                \Magento\Framework\DB\Ddl\Table::TYPE_BOOLEAN,
+                null,
+                [],
+                'If the object was deleted in mailchimp'
+            )->addColumn(
+                'mailchimp_token',
+                \Magento\Framework\DB\Ddl\Table::TYPE_TEXT,
+                32,
+                [],
+                'Quote token'
+            )
+
+        ;
+
+        $installer->getConnection()->createTable($table);
+
         $connection->addColumn(
             $installer->getTable('newsletter_subscriber'),
             'mailchimp_id',
@@ -129,7 +197,9 @@ class InstallSchema implements InstallSchemaInterface
 
         $path = $this->_helper->getBaseDir() . DIRECTORY_SEPARATOR . 'var' . DIRECTORY_SEPARATOR . 'Mailchimp';
         try {
-            mkdir($path);
+            if (!is_dir($path)) {
+                mkdir($path);
+            }
         } catch(Exception $e) {
             $this->_helper->log($e->getMessage());
         }

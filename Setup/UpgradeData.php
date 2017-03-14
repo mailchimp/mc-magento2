@@ -20,60 +20,12 @@ use Magento\Framework\Setup\UpgradeDataInterface;
 
 class UpgradeData implements UpgradeDataInterface
 {
-    /**
-     * @var EavSetupFactory
-     */
-    private $eavSetupFactory;
 
-    public function __construct(EavSetupFactory $eavSetupFactory)
-    {
-        $this->eavSetupFactory = $eavSetupFactory;
-    }
+//    public function __construct(EavSetupFactory $eavSetupFactory)
+//    {
+//        $this->eavSetupFactory = $eavSetupFactory;
+//    }
     public function upgrade(ModuleDataSetupInterface $setup, ModuleContextInterface $context)
     {
-        $setup->startSetup();
-        if ($context->getVersion()
-            && version_compare($context->getVersion(), '0.0.2') < 0
-        ) {
-            $eavSetup = $this->eavSetupFactory->create(['setup' => $setup]);
-            $eavSetup->addAttribute(
-                \Magento\Customer\Model\Customer::ENTITY,
-                'mailchimp_sync_modified',
-                [
-                    'type' => 'int',
-                    'label' => 'Mailchimp Sync Modified',
-                    'input' => null,
-                    'required' => false,
-                    'sort_order' => 150,
-                    'visible' => false,
-                    'system' => false,                ]
-            );
-            $eavSetup->addAttribute(
-                \Magento\Customer\Model\Customer::ENTITY,
-                'mailchimp_sync_delta',
-                [
-                    'type' => 'datetime',
-                    'label' => 'Mailchimp Sync Delta',
-                    'input' => null,
-                    'required' => false,
-                    'sort_order' => 151,
-                    'visible' => false,
-                    'system' => false,                ]
-            );
-            $eavSetup->addAttribute(
-                \Magento\Customer\Model\Customer::ENTITY,
-                'mailchimp_sync_error',
-                [
-                    'type' => 'varchar',
-                    'label' => 'Mailchimp Sync Error',
-                    'input' => null,
-                    'required' => false,
-                    'sort_order' => 152,
-                    'visible' => false,
-                    'system' => false,                ]
-            );
-
-        }
-        $setup->endSetup();
     }
 }

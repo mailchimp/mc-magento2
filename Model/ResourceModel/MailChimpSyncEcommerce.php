@@ -29,7 +29,7 @@ class MailChimpSyncEcommerce extends AbstractDb
         $select = $connection->select()->from(
             $this->getTable('mailchimp_sync_ecommerce')
         )->where(
-            'store_id = :store_id AND type = :type AND related_id = :related_id'
+            'mailchimp_store_id = :store_id AND type = :type AND related_id = :related_id'
         );
         $data = $connection->fetchRow($select, $bind);
         if ($data) {
