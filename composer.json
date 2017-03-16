@@ -1,12 +1,12 @@
 {
-  "name": "ebizmarts/mc-magento2",
+  "name": "mailchimp/mc-magento2",
   "autoload": {
     "psr-4": {"Ebizmarts\\MailChimp\\":""},
     "files": ["registration.php"]
   },
   "description": "Connect MailChimp with Magento",
   "type": "magento2-module",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "authors": [
     {
       "name": "Ebizmarts Corp",
