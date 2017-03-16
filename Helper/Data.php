@@ -31,6 +31,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     const XML_ECOMMERCE_FIRSTDATE    = 'mailchimp/ecommerce/firstdate';
     const XML_ABANDONEDCART_ACTIVE   = 'mailchimp/abandonedcart/active';
     const XML_ABANDONEDCART_FIRSTDATE   = 'mailchimp/abandonedcart/firstdate';
+    const XML_ABANDONEDCART_PAGE     = 'mailchimp/abandonedcart/page';
 
 
     const ORDER_STATE_OK             = 'complete';

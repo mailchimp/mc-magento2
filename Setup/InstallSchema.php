@@ -195,6 +195,26 @@ class InstallSchema implements InstallSchemaInterface
             ]
         );
 
+        $connection->addColumn(
+            $installer->getTable('quote'),
+            'mailchimp_abandonedcart_flag',
+            [
+                'type' => \Magento\Framework\DB\Ddl\Table::TYPE_BOOLEAN,
+                'default' => 0,
+                'comment' => 'Retrieved from Mailchimp'
+            ]
+        );
+
+        $connection->addColumn(
+            $installer->getTable('sales_order'),
+            'mailchimp_abandonedcart_flag',
+            [
+                'type' => \Magento\Framework\DB\Ddl\Table::TYPE_BOOLEAN,
+                'default' => 0,
+                'comment' => 'Retrieved from Mailchimp'
+            ]
+        );
+
         $path = $this->_helper->getBaseDir() . DIRECTORY_SEPARATOR . 'var' . DIRECTORY_SEPARATOR . 'Mailchimp';
         try {
             if (!is_dir($path)) {

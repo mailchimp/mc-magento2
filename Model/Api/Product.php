@@ -247,8 +247,12 @@ class Product
             $stock =$this->_stockItemRepository->get($product->getId());
             $data["inventory_quantity"] = (int)$stock->getQty();
             $data["backorders"] = (string)$stock->getBackorders();
-
-            $data["visibility"] = $product->getVisibility();
+            if ($product->getVisibility() != \Magento\Catalog\Model\Product\Visibility::VISIBILITY_NOT_VISIBLE) {
+                $data["visibility"] = 'true';
+            }
+            else {
+                $data["visibility"] = false;
+            }
 
         } else {
             //this is for a root product

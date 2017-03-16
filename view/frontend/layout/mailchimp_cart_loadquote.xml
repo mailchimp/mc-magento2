@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+/**
+ * ebizmarts_mailchimp_loadquote_index.xml
+ *
+ * @copyright Copyright © 2017 Ebizmarts Corp.. All rights reserved.
+ * @author    info@ebizmarts.com
+ */
+-->
+<page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" layout="1column" xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
+    <body>
+        <referenceContainer name="content">
+            <block class="Ebizmarts\MailChimp\Block\Loadquote" name="mailchimp.loadquote" />
+        </referenceContainer>
+    </body>
+</page>
