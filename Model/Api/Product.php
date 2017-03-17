@@ -251,7 +251,7 @@ class Product
                 $data["visibility"] = 'true';
             }
             else {
-                $data["visibility"] = false;
+                $data["visibility"] = 'false';
             }
 
         } else {
