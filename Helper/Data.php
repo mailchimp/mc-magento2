@@ -476,21 +476,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
             // clean the syncecommerce table with errors
             $connection = $this->_mailChimpSyncEcommerce->getResource()->getConnection();
             $tableName = $this->_mailChimpSyncEcommerce->getResource()->getMainTable();
-            $connection->delete($tableName,['mailchimp_sync_error is not null']);
-            // clean the errors in eav for products
-//            $productCollection = $this->_productCollection;
-//            $productCollection->addAttributeToFilter(
-//                array(
-//                    array('attribute' => 'mailchimp_sync_error', 'neq' => '')
-//                ), '', 'left'
-//            );
-//            foreach ($productCollection as $product) {
-//                $product->setData("mailchimp_sync_delta", null);
-//                $product->setData("mailchimp_sync_error", '');
-//                $resource = $product->getResource();
-//                $resource->saveAttribute($product, 'mailchimp_sync_delta');
-//                $resource->saveAttribute($product, 'mailchimp_sync_error');
-//            }
+            $connection->truncateTable($tableName);
             // clean the error in eav for customers
         } catch(\Zend_Db_Exception $e) {
             throw new ValidatorException(__($e->getMessage()));
