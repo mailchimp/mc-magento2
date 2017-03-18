@@ -90,9 +90,9 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
      */
     private $_mailChimpSyncEcommerce;
     /**
-     * @var \Magento\Catalog\Model\ResourceModel\Product\Collection
+     * @var \Ebizmarts\MailChimp\Model\MailChimpSyncEcommerce
      */
-    private $_productCollection;
+    private $_mailChimpSyncE;
 
     /**
      * Data constructor.
@@ -106,7 +106,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
      * @param \Magento\Customer\Model\ResourceModel\CustomerRepository $customer
      * @param \Ebizmarts\MailChimp\Model\MailChimpErrors $mailChimpErrors
      * @param \Ebizmarts\MailChimp\Model\MailChimpSyncEcommerceFactory $mailChimpSyncEcommerce
-     * @param \Magento\Catalog\Model\ResourceModel\Product\Collection $productCollection
+     * @param \Ebizmarts\MailChimp\Model\MailChimpSyncEcommerce $mailChimpSyncE
      */
     public function __construct(
         \Magento\Framework\App\Helper\Context $context,
@@ -119,7 +119,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         \Magento\Customer\Model\ResourceModel\CustomerRepository $customer,
         \Ebizmarts\MailChimp\Model\MailChimpErrors $mailChimpErrors,
         \Ebizmarts\MailChimp\Model\MailChimpSyncEcommerceFactory $mailChimpSyncEcommerce,
-        \Magento\Catalog\Model\ResourceModel\Product\Collection $productCollection
+        \Ebizmarts\MailChimp\Model\MailChimpSyncEcommerce $mailChimpSyncE
     ) {
     
         $this->_storeManager  = $storeManager;
@@ -133,7 +133,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         $this->_customer      = $customer;
         $this->_mailChimpErrors         = $mailChimpErrors;
         $this->_mailChimpSyncEcommerce  = $mailChimpSyncEcommerce;
-        $this->_productCollection       = $productCollection;
+        $this->_mailChimpSyncE          = $mailChimpSyncE;
         parent::__construct($context);
     }
 
@@ -474,10 +474,9 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
             $tableName = $this->_mailChimpErrors->getResource()->getMainTable();
             $connection->truncateTable($tableName);
             // clean the syncecommerce table with errors
-            $connection = $this->_mailChimpSyncEcommerce->getResource()->getConnection();
-            $tableName = $this->_mailChimpSyncEcommerce->getResource()->getMainTable();
+            $connection = $this->_mailChimpSyncE->getResource()->getConnection();
+            $tableName = $this->_mailChimpSyncE->getResource()->getMainTable();
             $connection->truncateTable($tableName);
-            // clean the error in eav for customers
         } catch(\Zend_Db_Exception $e) {
             throw new ValidatorException(__($e->getMessage()));
         }
