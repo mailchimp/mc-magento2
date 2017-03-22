@@ -181,46 +181,57 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
      * @return mixed
      * @throws \Magento\Framework\Exception\LocalizedException
      */
-    public function getConfigValue($path, $storeId = null)
+    public function getConfigValue($path, $storeId = null, $scope = null)
     {
         $areaCode = $this->_state->getAreaCode();
-        if ($storeId !== null) {
-            $configValue = $this->scopeConfig->getValue(
-                $path,
-                \Magento\Store\Model\ScopeInterface::SCOPE_STORE,
-                $storeId
-            );
-        } elseif ($areaCode == 'frontend') {
-            $frontStoreId = $this->_storeManager->getStore()->getId();
-            $configValue = $this->scopeConfig->getValue(
-                $path,
-                \Magento\Store\Model\ScopeInterface::SCOPE_STORE,
-                $frontStoreId
-            );
-        } else {
-            $storeId = $this->_request->getParam(\Magento\Store\Model\ScopeInterface::SCOPE_STORE);
-            $websiteId = $this->_request->getParam(\Magento\Store\Model\ScopeInterface::SCOPE_WEBSITE);
-            if (!empty($storeId)) {
-                $configValue = $this->scopeConfig->getValue(
-                    $path,
-                    \Magento\Store\Model\ScopeInterface::SCOPE_STORE,
-                    $storeId
-                );
-            } elseif (!empty($websiteId)) {
-                $configValue = $this->scopeConfig->getValue(
-                    $path,
-                    \Magento\Store\Model\ScopeInterface::SCOPE_WEBSITE,
-                    $websiteId
-                );
-            } else {
-                $configValue = $this->scopeConfig->getValue(
-                    $path,
-                    \Magento\Store\Model\ScopeInterface::SCOPE_WEBSITE,
-                    0
-                );
-            }
+        switch ($scope) {
+            case 'website':
+                $value = $this->_scopeConfig->getValue($path ,\Magento\Store\Model\ScopeInterface::SCOPE_WEBSITE, $storeId);
+                break;
+            default:
+                $value = $this->_scopeConfig->getValue($path ,\Magento\Store\Model\ScopeInterface::SCOPE_STORE, $storeId);
+                break;
         }
-        return $configValue;
+        return $value;
+
+
+//        if ($storeId !== null) {
+//            $configValue = $this->scopeConfig->getValue(
+//                $path,
+//                \Magento\Store\Model\ScopeInterface::SCOPE_STORE,
+//                $storeId
+//            );
+//        } elseif ($areaCode == 'frontend') {
+//            $frontStoreId = $this->_storeManager->getStore()->getId();
+//            $configValue = $this->scopeConfig->getValue(
+//                $path,
+//                \Magento\Store\Model\ScopeInterface::SCOPE_STORE,
+//                $frontStoreId
+//            );
+//        } else {
+//            $storeId = $this->_request->getParam(\Magento\Store\Model\ScopeInterface::SCOPE_STORE);
+//            $websiteId = $this->_request->getParam(\Magento\Store\Model\ScopeInterface::SCOPE_WEBSITE);
+//            if (!empty($storeId)) {
+//                $configValue = $this->scopeConfig->getValue(
+//                    $path,
+//                    \Magento\Store\Model\ScopeInterface::SCOPE_STORE,
+//                    $storeId
+//                );
+//            } elseif (!empty($websiteId)) {
+//                $configValue = $this->scopeConfig->getValue(
+//                    $path,
+//                    \Magento\Store\Model\ScopeInterface::SCOPE_WEBSITE,
+//                    $websiteId
+//                );
+//            } else {
+//                $configValue = $this->scopeConfig->getValue(
+//                    $path,
+//                    \Magento\Store\Model\ScopeInterface::SCOPE_WEBSITE,
+//                    0
+//                );
+//            }
+//        }
+//        return $configValue;
     }
 
     /**
@@ -466,17 +477,19 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         $date = date('Y-m-d-H-i-s') . '-' . $msecArray[1];
         return $date;
     }
-    public function resetErrors()
+    public function resetErrors($mailchimpStore)
     {
         try {
             // clean the errors table
             $connection = $this->_mailChimpErrors->getResource()->getConnection();
             $tableName = $this->_mailChimpErrors->getResource()->getMainTable();
-            $connection->truncateTable($tableName);
+            $connection->delete($tableName, "mailchimp_store_id = '".$mailchimpStore."'");
+//            $connection->truncateTable($tableName);
             // clean the syncecommerce table with errors
             $connection = $this->_mailChimpSyncE->getResource()->getConnection();
             $tableName = $this->_mailChimpSyncE->getResource()->getMainTable();
-            $connection->truncateTable($tableName);
+            $connection->delete($tableName, "mailchimp_store_id = '".$mailchimpStore."' and mailchimp_sync_error is not null");
+//            $connection->truncateTable($tableName);
         } catch(\Zend_Db_Exception $e) {
             throw new ValidatorException(__($e->getMessage()));
         }
@@ -503,6 +516,8 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         $chimp = $this->_mailChimpSyncEcommerce->create();
         return $chimp->getByStoreIdType($storeId,$id,$type);
     }
-
+    public function getScope()
+    {
+    }
 
 }
