@@ -53,6 +53,13 @@ class InstallSchema implements InstallSchemaInterface
                 'Store Id'
             )
             ->addColumn(
+                'mailchimp_store_id',
+                \Magento\Framework\DB\Ddl\Table::TYPE_TEXT,
+                50,
+                ['unsigned' => true, 'nullable' => false],
+                'Store Id'
+            )
+            ->addColumn(
                 'batch_id',
                 \Magento\Framework\DB\Ddl\Table::TYPE_TEXT,
                 24,
@@ -78,6 +85,13 @@ class InstallSchema implements InstallSchemaInterface
                 null,
                 ['identity' => true, 'unsigned' => true, 'nullable' => false, 'primary' => true],
                 'Batch Id'
+            )
+            ->addColumn(
+                'mailchimp_store_id',
+                \Magento\Framework\DB\Ddl\Table::TYPE_TEXT,
+                50,
+                ['unsigned' => true, 'nullable' => false],
+                'Store Id'
             )
             ->addColumn(
                 'type',
