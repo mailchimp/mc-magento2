@@ -1,21 +1,26 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <listing xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Ui:etc/ui_configuration.xsd">
-    <!--Declare data source, columns list, button...-->
     <argument name="data" xsi:type="array">
         <item name="js_config" xsi:type="array">
-            <item name="provider" xsi:type="string">mailchimp_errors_grid.mailchimp_errors_grid_data_source</item>
-            <item name="deps" xsi:type="string">mailchimp_errors_grid.mailchimp_errors_grid_data_source</item>
+            <item name="provider" xsi:type="string">mailchimp_stores_grid.mailchimp_stores_grid_data_source</item>
+            <item name="deps" xsi:type="string">mailchimp_stores_grid.mailchimp_stores_grid_data_source</item>
             <!--Declare the data source name which will be defined below-->
         </item>
-        <item name="spinner" xsi:type="string">mailchimp_errors_columns</item>
+        <item name="spinner" xsi:type="string">mailchimp_stores_columns</item>
         <item name="buttons" xsi:type="array">
+            <item name="add" xsi:type="array">
+                <item name="name" xsi:type="string">add</item>
+                <item name="label" xsi:type="string" translate="true">Create New Mailchimp Store</item>
+                <item name="class" xsi:type="string">primary</item>
+                <item name="url" xsi:type="string">mailchimp/stores/edit</item>
+            </item>
         </item>
     </argument>
-    <dataSource name="mailchimp_errors_grid_data_source">
+    <dataSource name="mailchimp_stores_grid_data_source">
         <!--The data source-->
         <argument name="dataProvider" xsi:type="configurableObject">
             <argument name="class" xsi:type="string">Magento\Framework\View\Element\UiComponent\DataProvider\DataProvider</argument>
-            <argument name="name" xsi:type="string">mailchimp_errors_grid_data_source</argument>
+            <argument name="name" xsi:type="string">mailchimp_stores_grid_data_source</argument>
             <argument name="primaryFieldName" xsi:type="string">id</argument>
             <argument name="requestFieldName" xsi:type="string">id</argument>
             <argument name="data" xsi:type="array">
@@ -23,13 +28,13 @@
                     <item name="component" xsi:type="string">Magento_Ui/js/grid/provider</item>
                     <item name="update_url" xsi:type="url" path="mui/index/render"/>
                     <!--<item name="storageConfig" xsi:type="array">-->
-                        <!--<item name="indexField" xsi:type="string">id</item>-->
+                    <!--<item name="indexField" xsi:type="string">id</item>-->
                     <!--</item>-->
                 </item>
             </argument>
         </argument>
     </dataSource>
-
+    <!-- ... other block of code -->
     <container name="listing_top">
         <argument name="data" xsi:type="array">
             <item name="config" xsi:type="array">
@@ -38,7 +43,6 @@
             </item>
         </argument>
     </container>
-
     <listingToolbar name="listing_top">
         <argument name="data" xsi:type="array">
             <item name="config" xsi:type="array">
@@ -64,55 +68,47 @@
         </filters>
         <paging name="listing_paging"/>
     </listingToolbar>
-
-
-    <columns name="mailchimp_errors_columns">
+    <!-- ... other block of code -->
+    <columns name="mailchimp_stores_columns">
         <!--The list of columns-->
-        <column name="id">
+        <column name="apikey">
             <argument name="data" xsi:type="array">
                 <item name="config" xsi:type="array">
                     <item name="filter" xsi:type="string">text</item>
                     <item name="sorting" xsi:type="string">asc</item>
-                    <item name="label" xsi:type="string" translate="true">ID</item>
+                    <item name="label" xsi:type="string" translate="true">API Key</item>
+                    <item name="sortOrder" xsi:type="number">20</item>
                 </item>
             </argument>
         </column>
-        <column name="regtype">
+        <column name="name">
             <argument name="data" xsi:type="array">
                 <item name="config" xsi:type="array">
                     <item name="filter" xsi:type="string">text</item>
                     <item name="sorting" xsi:type="string">asc</item>
-                    <item name="label" xsi:type="string" translate="true">Type</item>
+                    <item name="label" xsi:type="string" translate="true">Store name</item>
+                    <item name="sortOrder" xsi:type="number">30</item>
                 </item>
             </argument>
         </column>
-        <column name="title">
+        <column name="email_address">
             <argument name="data" xsi:type="array">
                 <item name="config" xsi:type="array">
                     <item name="filter" xsi:type="string">text</item>
                     <item name="sorting" xsi:type="string">asc</item>
-                    <item name="label" xsi:type="string" translate="true">Title</item>
+                    <item name="label" xsi:type="string" translate="true">Email</item>
+                    <item name="sortOrder" xsi:type="number">40</item>
                 </item>
             </argument>
         </column>
-        <column name="status">
+        <actionsColumn name="actions" class="\Ebizmarts\MailChimp\Ui\Component\Stores\Grid\Column\Actions">
             <argument name="data" xsi:type="array">
                 <item name="config" xsi:type="array">
-                    <item name="filter" xsi:type="string">text</item>
-                    <item name="sorting" xsi:type="string">asc</item>
-                    <item name="label" xsi:type="string" translate="true">Status</item>
+                    <item name="indexField" xsi:type="string">id</item>
                 </item>
             </argument>
-        </column>
-        <column name="errors">
-            <argument name="data" xsi:type="array">
-                <item name="config" xsi:type="array">
-                    <item name="filter" xsi:type="string">text</item>
-                    <item name="sorting" xsi:type="string">asc</item>
-                    <item name="label" xsi:type="string" translate="true">Error</item>
-                </item>
-            </argument>
-        </column>
+        </actionsColumn>
     </columns>
+
 </listing>
 
