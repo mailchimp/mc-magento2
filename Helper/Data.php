@@ -19,10 +19,12 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
 {
     const XML_PATH_ACTIVE            = 'mailchimp/general/active';
     const XML_PATH_APIKEY            = 'mailchimp/general/apikey';
+    const XML_PATH_APIKEY_LIST       = 'mailchimp/general/apikeylist';
     const XML_PATH_MAXLISTAMOUNT     = 'mailchimp/general/maxlistamount';
     const XML_PATH_LIST              = 'mailchimp/general/list';
     const XML_PATH_LOG               = 'mailchimp/general/log';
     const XML_PATH_MAPPING           = 'mailchimp/general/mapping';
+    const XML_MAILCHIMP_STORE        = 'mailchimp/general/monkeystore';
     const XML_PATH_CONFIRMATION_FLAG = 'newsletter/subscription/confirm';
     const XML_PATH_STORE             = 'mailchimp/ecommerce/store';
     const XML_PATH_ECOMMERCE_ACTIVE  = 'mailchimp/ecommerce/active';
@@ -43,6 +45,9 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     const IS_ORDER      = "ORD";
     const IS_QUOTE      = "QUO";
     const IS_SUBSCRIBER = "SUB";
+
+    const PLATFORM      = 'Magento2';
+    const MAXSTORES     = 100;
 
     /**
      * @var \Magento\Store\Model\StoreManagerInterface
@@ -73,6 +78,10 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
      */
     private $_loader;
     /**
+     * @var \Magento\Config\Model\ResourceModel\Config
+     */
+    private $_config;
+    /**
      * @var \Mailchimp
      */
     private $_api;
@@ -93,6 +102,18 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
      * @var \Ebizmarts\MailChimp\Model\MailChimpSyncEcommerce
      */
     private $_mailChimpSyncE;
+    /**
+     * @var \Ebizmarts\MailChimp\Model\MailChimpSyncBatches
+     */
+    private $_syncBatches;
+    /**
+     * @var \Ebizmarts\MailChimp\Model\MailChimpStoresFactory
+     */
+    private $_mailChimpStoresFactory;
+    /**
+     * @var \Ebizmarts\MailChimp\Model\MailChimpStores
+     */
+    private $_mailChimpStores;
 
     /**
      * Data constructor.
@@ -102,11 +123,15 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
      * @param \Magento\Customer\Model\GroupRegistry $groupRegistry
      * @param \Magento\Framework\App\State $state
      * @param \Magento\Framework\Module\ModuleList\Loader $loader
+     * @param \Magento\Config\Model\ResourceModel\Config $config
      * @param \Mailchimp $api
      * @param \Magento\Customer\Model\ResourceModel\CustomerRepository $customer
      * @param \Ebizmarts\MailChimp\Model\MailChimpErrors $mailChimpErrors
      * @param \Ebizmarts\MailChimp\Model\MailChimpSyncEcommerceFactory $mailChimpSyncEcommerce
      * @param \Ebizmarts\MailChimp\Model\MailChimpSyncEcommerce $mailChimpSyncE
+     * @param \Ebizmarts\MailChimp\Model\MailChimpSyncBatches $syncBatches
+     * @param \Ebizmarts\MailChimp\Model\MailChimpStoresFactory $mailChimpStoresFactory
+     * @param \Ebizmarts\MailChimp\Model\MailChimpStores $mailChimpStores
      */
     public function __construct(
         \Magento\Framework\App\Helper\Context $context,
@@ -115,11 +140,15 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         \Magento\Customer\Model\GroupRegistry $groupRegistry,
         \Magento\Framework\App\State $state,
         \Magento\Framework\Module\ModuleList\Loader $loader,
+        \Magento\Config\Model\ResourceModel\Config $config,
         \Mailchimp $api,
         \Magento\Customer\Model\ResourceModel\CustomerRepository $customer,
         \Ebizmarts\MailChimp\Model\MailChimpErrors $mailChimpErrors,
         \Ebizmarts\MailChimp\Model\MailChimpSyncEcommerceFactory $mailChimpSyncEcommerce,
-        \Ebizmarts\MailChimp\Model\MailChimpSyncEcommerce $mailChimpSyncE
+        \Ebizmarts\MailChimp\Model\MailChimpSyncEcommerce $mailChimpSyncE,
+        \Ebizmarts\MailChimp\Model\MailChimpSyncBatches $syncBatches,
+        \Ebizmarts\MailChimp\Model\MailChimpStoresFactory $mailChimpStoresFactory,
+        \Ebizmarts\MailChimp\Model\MailChimpStores $mailChimpStores
     ) {
     
         $this->_storeManager  = $storeManager;
@@ -129,11 +158,15 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         $this->_request       = $context->getRequest();
         $this->_state         = $state;
         $this->_loader        = $loader;
+        $this->_config        = $config;
         $this->_api           = $api;
         $this->_customer      = $customer;
         $this->_mailChimpErrors         = $mailChimpErrors;
         $this->_mailChimpSyncEcommerce  = $mailChimpSyncEcommerce;
         $this->_mailChimpSyncE          = $mailChimpSyncE;
+        $this->_syncBatches             = $syncBatches;
+        $this->_mailChimpStores         = $mailChimpStores;
+        $this->_mailChimpStoresFactory  = $mailChimpStoresFactory;
         parent::__construct($context);
     }
 
@@ -171,6 +204,17 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     public function getApi($store = null)
     {
         $this->_api->setApiKey($this->getApiKey($store));
+        $this->_api->setUserAgent('Mailchimp4Magento' . (string)$this->getModuleVersion());
+        return $this->_api;
+    }
+
+    /**
+     * @param $apiKey
+     * @return \Mailchimp
+     */
+    public function getApiByApiKey($apiKey)
+    {
+        $this->_api->setApiKey($apiKey);
         $this->_api->setUserAgent('Mailchimp4Magento' . (string)$this->getModuleVersion());
         return $this->_api;
     }
@@ -275,15 +319,25 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         }
         return $v;
     }
-    public function deleteStore()
+    public function deleteStore($mailchimpStore)
     {
         try {
-            $storeId = $this->getConfigValue(self::XML_PATH_STORE);
-            $this->getApi()->ecommerce->stores->delete($storeId);
+//            $storeId = $this->getConfigValue(self::XML_MAILCHIMP_STORE);
+            $this->getApi()->ecommerce->stores->delete($mailchimpStore);
+            $this->markAllBatchesAs($mailchimpStore, 'canceled');
+            $connection = $this->_syncBatches->getResource()->getConnection();
+            $tableName = $this->_syncBatches->getResource()->getMainTable();
+            $connection->update($tableName, ['status' => 'canceled'], "mailchimp_store_id = '".$mailchimpStore."'");
         } catch (Exception $e)
         {
 
         }
+    }
+    public function markAllBatchesAs($mailchimpStore, $status)
+    {
+        $connection = $this->_syncBatches->getResource()->getConnection();
+        $tableName = $this->_syncBatches->getResource()->getMainTable();
+        $connection->update($tableName, ['status' => $status], "mailchimp_store_id = '".$mailchimpStore."'");
     }
     public function getMCStoreName($storeId)
     {
@@ -519,5 +573,45 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     public function getScope()
     {
     }
-
+    public function loadStores()
+    {
+        $connection = $this->_mailChimpStores->getResource()->getConnection();
+        $tableName = $this->_mailChimpStores->getResource()->getMainTable();
+        $connection->truncateTable($tableName);
+        $apiKeys = $this->getConfigValue(self::XML_PATH_APIKEY_LIST);
+        $keys = explode("\n", $apiKeys);
+        foreach($keys as $apiKey) {
+            $this->_api->setApiKey(trim($apiKey));
+            $this->_api->setUserAgent('Mailchimp4Magento' . (string)$this->getModuleVersion());
+            $apiStores = $this->_api->ecommerce->stores->get(null,null,null,self::MAXSTORES);
+            foreach($apiStores['stores'] as $store) {
+                if($store['platform']!=self::PLATFORM) {
+                    continue;
+                }
+                $this->log($store);
+                $mstore = $this->_mailChimpStoresFactory->create();
+                $mstore->setApikey(trim($apiKey));
+                $mstore->setStoreid($store['id']);
+                $mstore->setListId($store['list_id']);
+                $mstore->setName($store['name']);
+                $mstore->setPlatform($store['platform']);
+                $mstore->setIsSync($store['is_syncing']);
+                $mstore->setEmailAddress($store['email_address']);
+                $mstore->setCurrencyCode($store['currency_code']);
+//                $mstore->setMoneyFormat($store['money_format']);
+                $mstore->setPrimaryLocale($store['primary_locale']);
+                $mstore->setTimezone($store['timezone']);
+                $mstore->setPhone($store['phone']);
+                $mstore->setAddressAddress1($store['address']['address1']);
+                $mstore->setAddressAddress2($store['address']['address2']);
+                $mstore->setAddressCity($store['address']['city']);
+                $mstore->setAddressProvince($store['address']['province']);
+                $mstore->setAddressProvinceCode($store['address']['province_code']);
+                $mstore->setAddressPostalCode($store['address']['postal_code']);
+                $mstore->setAddressCountry($store['address']['country']);
+                $mstore->setAddressCountryCode($store['address']['country_code']);
+                $mstore->getResource()->save($mstore);
+            }
+        }
+    }
 }
