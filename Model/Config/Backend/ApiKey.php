@@ -15,7 +15,7 @@ namespace Ebizmarts\MailChimp\Model\Config\Backend;
 
 use Magento\Framework\App\Config\ScopeConfigInterface;
 
-class Monkeylist extends \Magento\Framework\App\Config\Value
+class ApiKey extends \Magento\Framework\App\Config\Value
 {
     /**
      * @var \Ebizmarts\MailChimp\Helper\Data
@@ -29,9 +29,13 @@ class Monkeylist extends \Magento\Framework\App\Config\Value
      * @var \Magento\Framework\Stdlib\DateTime\DateTime
      */
     private $_date;
+    /**
+     * @var \Magento\Store\Model\StoreManager
+     */
+    private $_storeManager;
 
     /**
-     * Monkeylist constructor.
+     * ApiKey constructor.
      * @param \Magento\Framework\Model\Context $context
      * @param \Magento\Framework\Registry $registry
      * @param ScopeConfigInterface $config
@@ -41,6 +45,7 @@ class Monkeylist extends \Magento\Framework\App\Config\Value
      * @param \Magento\Framework\Data\Collection\AbstractDb|null $resourceCollection
      * @param \Magento\Framework\Stdlib\DateTime\DateTime $date
      * @param \Ebizmarts\MailChimp\Helper\Data $helper
+     * @param \Magento\Store\Model\StoreManager $storeManager
      * @param array $data
      */
     public function __construct(
@@ -53,11 +58,13 @@ class Monkeylist extends \Magento\Framework\App\Config\Value
         \Magento\Framework\Data\Collection\AbstractDb $resourceCollection = null,
         \Magento\Framework\Stdlib\DateTime\DateTime $date,
         \Ebizmarts\MailChimp\Helper\Data $helper,
+        \Magento\Store\Model\StoreManager $storeManager,
         array $data = []
     ) {
-        $this->_helper = $helper;
-        $this->resourceConfig = $resourceConfig;
-        $this->_date = $date;
+        $this->_helper          = $helper;
+        $this->resourceConfig   = $resourceConfig;
+        $this->_date            = $date;
+        $this->_storeManager    = $storeManager;
         parent::__construct($context, $registry, $config, $cacheTypeList, $resource, $resourceCollection, $data);
     }
 
@@ -65,28 +72,22 @@ class Monkeylist extends \Magento\Framework\App\Config\Value
     {
         $generalData = $this->getData();
         $data = $this->getData('groups');
+        $found = 0;
         if (isset($data['ecommerce']['fields']['active']['value'])) {
             $active = $data['ecommerce']['fields']['active']['value'];
         } elseif ($data['ecommerce']['fields']['active']['inherit']) {
             $active = $data['ecommerce']['fields']['active']['inherit'];
         }
         if ($active&&$this->isValueChanged()) {
-            if ($this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_PATH_STORE,$generalData['scope_id'])) {
-                $this->_helper->deleteStore();
+            $mailchimpStore = $this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_MAILCHIMP_STORE, $generalData['scope_id']);
+            $this->resourceConfig->deleteConfig(\Ebizmarts\MailChimp\Helper\Data::XML_MAILCHIMP_STORE, $generalData['scope'], $generalData['scope_id']);
+            foreach ($this->_storeManager->getStores() as $storeId => $val) {
+                if ($this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_MAILCHIMP_STORE, $storeId) == $mailchimpStore) {
+                    $found++;
+                }
             }
-            $store = $this->_helper->createStore($this->getValue(), $generalData['scope_id']);
-            if ($store) {
-                $this->resourceConfig->saveConfig(
-                    \Ebizmarts\MailChimp\Helper\Data::XML_PATH_STORE, $store,
-                    $generalData['scope'],
-                    $generalData['scope_id']
-                );
-                $this->resourceConfig->saveConfig(
-                    \Ebizmarts\MailChimp\Helper\Data::XML_PATH_SYNC_DATE,
-                    $this->_date->gmtDate(),
-                    $generalData['scope'],
-                    $generalData['scope_id']
-                );
+            if ($found==1) {
+                $this->_helper->markAllBatchesAs($mailchimpStore, 'canceled');
             }
         }
         return parent::beforeSave();
