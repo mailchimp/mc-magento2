@@ -86,13 +86,17 @@ class Ecommerce
         {
             $this->_storeManager->setCurrentStore($storeId);
             if($this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_PATH_ACTIVE)) {
-                $this->_apiResult->processResponses($storeId,true);
-                $this->_processStore($storeId);
+                $mailchimpStoreId  = $this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_MAILCHIMP_STORE,$storeId);
+                if ($mailchimpStoreId != -1)
+                {
+                    $this->_apiResult->processResponses($storeId,true, $mailchimpStoreId);
+                    $this->_processStore($storeId, $mailchimpStoreId);
+                }
             }
         }
     }
 
-    protected function _processStore($storeId)
+    protected function _processStore($storeId, $mailchimpStoreId)
     {
         $this->_helper->log(__METHOD__);
         $batchArray = array();
@@ -121,6 +125,7 @@ class Ecommerce
                     $this->_mailChimpSyncBatches->setStoreId($storeId);
                     $this->_mailChimpSyncBatches->setBatchId($batchResponse['id']);
                     $this->_mailChimpSyncBatches->setStatus($batchResponse['status']);
+                    $this->_mailChimpSyncBatches->setMailchimpStoreId($mailchimpStoreId);
                     $this->_mailChimpSyncBatches->getResource()->save($this->_mailChimpSyncBatches);
                 }
             } catch(Exception $e) {
