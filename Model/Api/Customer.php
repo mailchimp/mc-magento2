@@ -81,7 +81,7 @@ class Customer
     }
     public function sendCustomers($storeId)
     {
-        $mailchimpStoreId = $this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_PATH_STORE,$storeId);
+        $mailchimpStoreId = $this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_MAILCHIMP_STORE,$storeId);
         $collection = $this->_collection->create();
         $collection->addFieldToFilter('store_id',array('eq'=>$storeId));
         $collection->getSelect()->joinLeft(

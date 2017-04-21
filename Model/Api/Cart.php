@@ -115,7 +115,7 @@ class Cart
             $magentoStoreId
         );
         $this->_counter = 0;
-        $mailchimpStoreId = $this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_PATH_STORE,$magentoStoreId);
+        $mailchimpStoreId = $this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_MAILCHIMP_STORE,$magentoStoreId);
 
         $date = $this->_helper->getDateMicrotime();
         $this->_batchId = 'storeid-' . $magentoStoreId . '_' . \Ebizmarts\MailChimp\Helper\Data::IS_QUOTE.'_'.$date;

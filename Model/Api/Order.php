@@ -146,7 +146,7 @@ class Order
     {
         $this->_helper->log(__METHOD__);
         $batchArray = array();
-        $mailchimpStoreId = $this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_PATH_STORE,$magentoStoreId);
+        $mailchimpStoreId = $this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_MAILCHIMP_STORE,$magentoStoreId);
         $modifiedOrders = $this->_getCollection();
         // select orders for the current Magento store id
         $modifiedOrders->addFieldToFilter('store_id', array('eq' => $magentoStoreId));
@@ -207,7 +207,7 @@ class Order
     {
         $this->_helper->log(__METHOD__);
         $batchArray = array();
-        $mailchimpStoreId = $this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_PATH_STORE,$magentoStoreId);
+        $mailchimpStoreId = $this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_MAILCHIMP_STORE,$magentoStoreId);
         $newOrders = $this->_getCollection();
         // select carts for the current Magento store id
         $newOrders->addFieldToFilter('store_id', array('eq' => $magentoStoreId));
