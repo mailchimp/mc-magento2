@@ -29,17 +29,23 @@
                     <label>Enabled</label>
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
                 </field>
-                <field id="apikey" translate="label" type="text" sortOrder="20" showInDefault="1" showInWebsite="1" showInStore="1">
-                    <label>API Key</label>
+                <field id="apikeylist" translate="label" type="textarea" sortOrder="20" showInDefault="1">
+                    <label>API Key list</label>
+                    <backend_model>Ebizmarts\MailChimp\Model\Config\Backend\ApiKey</backend_model>
+                    <comment>Enterlist of API keys one per line</comment>
                     <depends>
                         <field id="*/*/active">1</field>
                     </depends>
                 </field>
-                <!--field id="oauth" translate="button_label" type="button" sortOrder="25" showInDefault="1" showInWebsite="0" showInStore="1">
-                    <label></label>
-                    <button_label>Get API credentials</button_label>
-                    <frontend_model>Ebizmarts\MailChimp\Block\Adminhtml\System\Config\OauthWizard</frontend_model>
-                </field-->
+                <field id="apikey" translate="label" type="select" sortOrder="20" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>API Key</label>
+                    <source_model>Ebizmarts\MailChimp\Model\Config\Source\ApiKey</source_model>
+                    <backend_model>Ebizmarts\MailChimp\Model\Config\Backend\ApiKey</backend_model>
+                    <comment>Caution, if you change the API Key the old mailchimp store will be deleted</comment>
+                    <depends>
+                        <field id="*/*/active">1</field>
+                    </depends>
+                </field>
                 <field id="account_details" translate="label" type="textarea" sortOrder="30" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Account Details</label>
                     <frontend_model>Ebizmarts\MailChimp\Block\Adminhtml\System\Config\Account</frontend_model>
@@ -48,16 +54,10 @@
                         <field id="*/*/active">1</field>
                     </depends>
                 </field>
-                <!--&lt;!&ndash;<field id="maxlistsamount" translate="label" type="text" sortOrder="50" showInDefault="1" showInWebsite="1" showInStore="1">-->
-                    <!--<label>Max amount of lists to show</label>-->
-                    <!--<depends>-->
-                        <!--<field id="*/*/active">1</field>-->
-                    <!--</depends>-->
-                <!--</field>&ndash;&gt;-->
-                <field id="list" translate="label" type="select" sortOrder="60" showInDefault="1" showInWebsite="1" showInStore="1">
-                    <label>General Subscription</label>
-                    <source_model>Ebizmarts\MailChimp\Model\Config\Source\Monkeylist</source_model>
-                    <backend_model>Ebizmarts\MailChimp\Model\Config\Backend\Monkeylist</backend_model>
+                <field id="monkeystore" translate="label" type="select" sortOrder="60" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Mailchimp Store</label>
+                    <source_model>Ebizmarts\MailChimp\Model\Config\Source\MonkeyStore</source_model>
+                    <backend_model>Ebizmarts\MailChimp\Model\Config\Backend\MonkeyStore</backend_model>
                     <depends>
                         <field id="*/*/active">1</field>
                     </depends>
@@ -69,25 +69,6 @@
                         <field id="*/*/active">1</field>
                     </depends>
                 </field>
-                <!--<field id="mapping" translate="label comment tooltip" sortOrder="80" showInDefault="1" showInWebsite="1" showInStore="0">-->
-                    <!--<label>Customer Fields Mapping</label>-->
-                    <!--<frontend_model>Ebizmarts\MailChimp\Block\Adminhtml\System\Config\Form\Field\Customermap</frontend_model>-->
-                    <!--<backend_model>Magento\Config\Model\Config\Backend\Serialized\ArraySerialized</backend_model>-->
-                    <!--<comment>-->
-                        <!--<![CDATA[Add the magento to mailchimp mapping]]>-->
-                    <!--</comment>-->
-                    <!--<tooltip>Map the magento customer field to mailchimp merge_fields</tooltip>-->
-                    <!--<depends>-->
-                        <!--<field id="*/*/active">1</field>-->
-                    <!--</depends>-->
-                <!--</field>-->
-                <!--<field id="chekcoutsubscribe" translate="label" type="select" sortOrder="90" showInDefault="1" showInWebsite="1" showInStore="1">
-                    <label>Subscribe On Checkout</label>
-                    <source_model>Ebizmarts\MailChimp\Model\Config\Source\Checkoutsubscribe</source_model>
-                    <depends>
-                        <field id="*/*/active">1</field>
-                    </depends>
-                </field>-->
             </group>
             <group id="ecommerce" translate="label" type="text" sortOrder="110" showInDefault="1" showInWebsite="1" showInStore="1">
                 <label>Ecommerce Configuration</label>
@@ -109,6 +90,21 @@
                 <field id="reset_errors" translate="button_label" type="button" sortOrder="130" showInDefault="1" showInWebsite="1" showInStore="1">
                     <button_label>Reset Errors</button_label>
                     <frontend_model>Ebizmarts\MailChimp\Block\Adminhtml\System\Config\ResetErrors</frontend_model>
+                    <depends>
+                        <field id="*/*/active">1</field>
+                    </depends>
+                </field>
+                <!--<field id="reset_store" translate="button_label" type="button" sortOrder="130" showInDefault="1" showInWebsite="1" showInStore="1">-->
+                    <!--<button_label>Reset Store</button_label>-->
+                    <!--<frontend_model>Ebizmarts\MailChimp\Block\Adminhtml\System\Config\ResetStore</frontend_model>-->
+                    <!--<depends>-->
+                        <!--<field id="*/*/active">1</field>-->
+                    <!--</depends>-->
+                <!--</field>-->
+                <field id="delete_store" translate="button_label" type="button" sortOrder="130" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <button_label>Delete Store</button_label>
+                    <comment>Proceed with caution, this delete the mailchimp store for all the connected magento stores</comment>
+                    <frontend_model>Ebizmarts\MailChimp\Block\Adminhtml\System\Config\DeleteStore</frontend_model>
                     <depends>
                         <field id="*/*/active">1</field>
                     </depends>
