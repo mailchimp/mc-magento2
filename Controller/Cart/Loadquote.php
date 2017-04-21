@@ -91,7 +91,7 @@ class Loadquote extends Action
             $quote->getResource()->load($quote,$params['id']);
             $magentoStoreId = $quote->getStoreId();
             $mailchimpStoreId = $this->_helper->getConfigValue(
-                \Ebizmarts\MailChimp\Helper\Data::XML_PATH_STORE,
+                \Ebizmarts\MailChimp\Helper\Data::XML_MAILCHIMP_STORE,
                 $magentoStoreId
             );
             $syncCommerce = $this->_helper->getChimpSyncEcommerce(
