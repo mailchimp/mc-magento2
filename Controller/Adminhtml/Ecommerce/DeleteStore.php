@@ -17,7 +17,7 @@ use Magento\Framework\Controller\Result\JsonFactory;
 use Magento\Framework\Exception\ValidatorException;
 use Symfony\Component\Config\Definition\Exception\Exception;
 
-class ResetLocalErrors extends \Magento\Backend\App\Action
+class DeleteStore extends \Magento\Backend\App\Action
 {
     /**
      * @var JsonFactory
@@ -31,25 +31,32 @@ class ResetLocalErrors extends \Magento\Backend\App\Action
      * @var \Magento\Store\Model\StoreManagerInterface
      */
     protected $storeManager;
+    /**
+     * @var \Magento\Config\Model\ResourceModel\Config
+     */
+    protected $_config;
 
     /**
-     * ResetLocalErrors constructor.
+     * DeleteStore constructor.
      * @param \Magento\Backend\App\Action\Context $context
      * @param JsonFactory $resultJsonFactory
      * @param \Magento\Store\Model\StoreManagerInterface $storeManagerInterface
      * @param \Ebizmarts\MailChimp\Helper\Data $helper
+     * @param \Magento\Config\Model\ResourceModel\Config $config
      */
     public function __construct(
         \Magento\Backend\App\Action\Context $context,
         JsonFactory $resultJsonFactory,
         \Magento\Store\Model\StoreManagerInterface $storeManagerInterface,
-        \Ebizmarts\MailChimp\Helper\Data $helper
+        \Ebizmarts\MailChimp\Helper\Data $helper,
+        \Magento\Config\Model\ResourceModel\Config $config
     )
     {
         parent::__construct($context);
         $this->resultJsonFactory    = $resultJsonFactory;
         $this->helper               = $helper;
         $this->storeManager         = $storeManagerInterface;
+        $this->_config              = $config;
     }
 
     public function execute()
@@ -58,28 +65,31 @@ class ResetLocalErrors extends \Magento\Backend\App\Action
         $message = '';
         $params = $this->getRequest()->getParams();
         if (isset($params['website'])) {
-            $mailchimpStore = $this->helper->getConfigValue(
-                \Ebizmarts\MailChimp\Helper\Data::XML_MAILCHIMP_STORE,
-                $params['website'],
-                'website'
-            );
+            $scope = 'website';
+            $storeId = $params['website'];
         } elseif (isset($params['store'])) {
-            $mailchimpStore = $this->helper->getConfigValue(
-                \Ebizmarts\MailChimp\Helper\Data::XML_MAILCHIMP_STORE,
-                $params['store'],
-                'store'
-            );
+            $scope = 'store';
+            $storeId = $params['store'];
         } else {
-            $mailchimpStore = $this->helper->getConfigValue(
-                \Ebizmarts\MailChimp\Helper\Data::XML_MAILCHIMP_STORE,
-                $this->storeManager->getStore()
-            );
+            //$storeId = $this->storeManager->getDefaultStoreView()->getWebsiteId();
+            $storeId = 0;
+            $scope = 'default';
         }
-//        $this->helper->log($mailchimpStore);
 
+        $mailchimpStore = $this->helper->getConfigValue(
+            \Ebizmarts\MailChimp\Helper\Data::XML_MAILCHIMP_STORE,
+            $storeId,
+            $scope
+        );
         $resultJson = $this->resultJsonFactory->create();
         try {
-            $this->helper->resetErrors($mailchimpStore);
+            $this->helper->deleteStore($mailchimpStore);
+            $this->helper->log('before deleteConfig');
+            $this->helper->log(\Ebizmarts\MailChimp\Helper\Data::XML_MAILCHIMP_STORE);
+            $this->helper->log($scope);
+            $this->helper->log($storeId);
+            $this->_config->deleteConfig(\Ebizmarts\MailChimp\Helper\Data::XML_MAILCHIMP_STORE, $scope, $storeId);
+            $this->helper->log('after deleteConfig');
         } catch(ValidatorException $e) {
             $valid = 0;
             $message = $e->getMessage();
