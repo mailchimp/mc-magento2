@@ -199,6 +199,8 @@ class InstallSchema implements InstallSchemaInterface
 
         $installer->getConnection()->createTable($table);
 
+
+
         $connection->addColumn(
             $installer->getTable('newsletter_subscriber'),
             'mailchimp_id',
