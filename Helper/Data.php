@@ -581,6 +581,9 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         $apiKeys = $this->getConfigValue(self::XML_PATH_APIKEY_LIST);
         $keys = explode("\n", $apiKeys);
         foreach($keys as $apiKey) {
+            if(!$apiKey || $apiKey =='') {
+                continue;
+            }
             $this->_api->setApiKey(trim($apiKey));
             $this->_api->setUserAgent('Mailchimp4Magento' . (string)$this->getModuleVersion());
             $apiStores = $this->_api->ecommerce->stores->get(null,null,null,self::MAXSTORES);
