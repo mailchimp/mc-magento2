@@ -53,4 +53,7 @@
     <type name="Magento\Newsletter\Model\Subscriber">
         <plugin name="mailchimp-subscriber" type="Ebizmarts\MailChimp\Model\Plugin\Subscriber" sortOrder="10"/>
     </type>
+    <type name="Magento\Customer\Model\AccountManagement">
+        <plugin name="abandoned-checkout-save-quote" type="Ebizmarts\MailChimp\Model\Plugin\AccountManagement" sortOrder="10"/>
+    </type>
 </config>
