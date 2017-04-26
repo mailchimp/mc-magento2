@@ -177,6 +177,51 @@ class UpgradeSchema implements UpgradeSchemaInterface
 
             $installer->getConnection()->createTable($table);
         }
+        if (version_compare($context->getVersion(), '1.0.7') < 0) {
+            $installer->getConnection()->addColumn(
+                $installer->getTable('quote'),
+                'mailchimp_campaign_id',
+                [
+                    'type' => \Magento\Framework\DB\Ddl\Table::TYPE_TEXT,
+                    'length' => 16,
+                    'default' => '',
+                    'comment' => 'Campaign'
+                ]
+            );
+
+            $installer->getConnection()->addColumn(
+                $installer->getTable('sales_order'),
+                'mailchimp_campaign_id',
+                [
+                    'type' => \Magento\Framework\DB\Ddl\Table::TYPE_TEXT,
+                    'length' => 16,
+                    'default' => '',
+                    'comment' => 'Campaign'
+                ]
+            );
+            $installer->getConnection()->addColumn(
+                $installer->getTable('quote'),
+                'mailchimp_landing_page',
+                [
+                    'type' => \Magento\Framework\DB\Ddl\Table::TYPE_TEXT,
+                    'length' => 512,
+                    'default' => '',
+                    'comment' => 'Landing Page'
+                ]
+            );
+
+            $installer->getConnection()->addColumn(
+                $installer->getTable('sales_order'),
+                'mailchimp_landing_page',
+                [
+                    'type' => \Magento\Framework\DB\Ddl\Table::TYPE_TEXT,
+                    'length' => 512,
+                    'default' => '',
+                    'comment' => 'Landing Page'
+                ]
+            );
+
+        }
         $installer->endSetup();
 
 

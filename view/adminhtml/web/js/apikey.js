@@ -15,7 +15,7 @@ define([
 
         $.widget('mage.monkeyapikey', {
             "options": {
-              "apikeyUrl": "hola que tal"
+              "apikeyUrl": ""
             },
 
             _init: function () {
