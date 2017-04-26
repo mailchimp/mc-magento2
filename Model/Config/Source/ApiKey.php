@@ -29,7 +29,6 @@ class ApiKey implements \Magento\Framework\Option\ArrayInterface
         } else {
             $this->options = [];
         }
-        $helper->log(count($this->options));
     }
     public function toOptionArray()
     {
