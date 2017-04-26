@@ -84,12 +84,7 @@ class DeleteStore extends \Magento\Backend\App\Action
         $resultJson = $this->resultJsonFactory->create();
         try {
             $this->helper->deleteStore($mailchimpStore);
-            $this->helper->log('before deleteConfig');
-            $this->helper->log(\Ebizmarts\MailChimp\Helper\Data::XML_MAILCHIMP_STORE);
-            $this->helper->log($scope);
-            $this->helper->log($storeId);
             $this->_config->deleteConfig(\Ebizmarts\MailChimp\Helper\Data::XML_MAILCHIMP_STORE, $scope, $storeId);
-            $this->helper->log('after deleteConfig');
         } catch(ValidatorException $e) {
             $valid = 0;
             $message = $e->getMessage();

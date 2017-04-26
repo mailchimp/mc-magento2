@@ -19,7 +19,6 @@ class Delete extends \Ebizmarts\MailChimp\Controller\Adminhtml\Stores
     {
         $resultRedirect = $this->resultRedirectFactory->create();
         $storeId = (int) $this->getRequest()->getParam('id');
-        $this->_helper->log("store [$storeId]");
         if ($storeId)
         {
             $storeModel = $this->_mailchimpStoresFactory->create();

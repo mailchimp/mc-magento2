@@ -27,7 +27,6 @@ class MonkeyStore implements \Magento\Framework\Option\ArrayInterface
         \Magento\Store\Model\StoreManagerInterface $storeManager
     )
     {
-        $helper->log($helper->getApiKey($storeManager->getStore()->getId()));
         if ($helper->getApiKey($storeManager->getStore()->getId())) {
            try {
                 $this->options = $helper->getApi()->ecommerce->stores->get(null,null,null,\Ebizmarts\MailChimp\Helper\Data::MAXSTORES);

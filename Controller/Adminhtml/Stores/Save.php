@@ -28,7 +28,6 @@ class Save extends \Ebizmarts\MailChimp\Controller\Adminhtml\Stores
                 $storeModel->getResource()->load($storeModel,$storeId);
             }
             try {
-                $this->_helper->log($formData);
                 $formData['storeid'] = $this->_updateMailchimp($formData);
                 $formData['platform'] = \Ebizmarts\MailChimp\Helper\Data::PLATFORM;
                 $storeModel->setData($formData);
@@ -89,7 +88,6 @@ class Save extends \Ebizmarts\MailChimp\Controller\Adminhtml\Stores
         } else {
             $date = $this->_helper->getDateMicrotime();
             $mailchimpStoreId = md5($name. '_' . $date);
-            $this->_helper->log("add new store with id $mailchimpStoreId");
             $ret =$api->ecommerce->stores->add(
                 $mailchimpStoreId,
                 $formData['list_id'],
@@ -104,7 +102,6 @@ class Save extends \Ebizmarts\MailChimp\Controller\Adminhtml\Stores
                 $phone,
                 $address
             );
-            $this->_helper->log($ret);
             $formData['storeid'] = $mailchimpStoreId;
         }
         return $formData['storeid'];
