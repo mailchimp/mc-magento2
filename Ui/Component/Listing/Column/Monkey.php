@@ -74,6 +74,9 @@ class Monkey extends Column
 
                 $order = $this->_orderRepository->get($item["entity_id"]);
                 $status = $order->getData("mailchimp_abandonedcart_flag");
+                if ($order->getMailchimpCampaignId() || $order->getMailchimpLandingPage() ) {
+                    $status = 1;
+                }
                 $fieldName = $this->getData('name');
 
                 switch ($status) {
