@@ -94,13 +94,11 @@ class Customer
             "OR (m4m.mailchimp_sync_delta > '".$this->_helper->getMCMinSyncDateFlag().
             "' and m4m.mailchimp_sync_modified = 1)");
         $collection->getSelect()->limit(self::MAX);
-        $this->_helper->log((string)$collection->getSelect());
         $counter = 0;
         $customerArray = array();
 
         foreach($collection as $item)
         {
-            $this->_helper->log('process each customer');
             $customer = $this->_customerFactory->create();
             $customer->getResource()->load($customer,$item->getId());
 
@@ -135,7 +133,6 @@ class Customer
      */
     protected function _buildCustomerData(\Magento\Customer\Model\Customer $customer)
     {
-        $this->_helper->log(__METHOD__);
         $point = 0;
         $data = array();
         $data["id"] = $customer->getId();
@@ -149,7 +146,6 @@ class Customer
             array('neq',\Magento\Sales\Model\Order::STATE_CANCELED),
             array('neq',\Magento\Sales\Model\Order::STATE_CLOSED)))
             ->addAttributeToFilter('customer_id', array('eq' => $customer->getId()));
-        $this->_helper->log((string)$orderCollection->getSelect());
         $totalOrders = 0;
         $totalAmountSpent = 0;
         /**
@@ -163,7 +159,6 @@ class Customer
         $data['orders_count']   = $totalOrders;
         $data['total_spent']    = $totalAmountSpent;
         $address = $customer->getDefaultBillingAddress();
-        $this->_helper->log('after get billing address');
         if($address) {
             $customerAddress = array();
             if ($street = $address->getStreet()) {
@@ -175,30 +170,24 @@ class Customer
                     $customerAddress["address2"] = $street[1];
                 }
             }
-            $this->_helper->log('after street');
             if ($address->getCity()) {
                 $customerAddress["city"] = $address->getCity();
             }
-            $this->_helper->log('after city');
             if ($address->getRegion()) {
                 $customerAddress["province"] = $address->getRegion();
             }
-            $this->_helper->log('after region');
             if ($address->getRegionCode()) {
                 $customerAddress["province_code"] = $address->getRegionCode();
             }
-            $this->_helper->log('after region code');
             if ($address->getPostcode()) {
                 $customerAddress["postal_code"] = $address->getPostcode();
             }
-            $this->_helper->log('after post code');
             if ($address->getCountry()) {
                 $country = $this->_countryInformation->getCountryInfo($address->getCountryId());
                 $countryName = $country->getFullNameLocale();
                 $customerAddress["country"] = $countryName;
                 $customerAddress["country_code"] = $country->getTwoLetterAbbreviation();
             }
-            $this->_helper->log('after country');
             if (count($customerAddress)) {
                 $data["address"] = $customerAddress;
             }
@@ -210,7 +199,6 @@ class Customer
 //            }
 //        }
         }
-        $this->_helper->log('before return');
         return $data;
     }
 

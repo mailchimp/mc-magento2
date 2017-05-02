@@ -64,7 +64,7 @@ class Result
         $item = null;
         foreach ($collection as $item) {
             try {
-                $storeId = ($isMailChimpStoreId) ? 0 : $storeId;
+//                $storeId = ($isMailChimpStoreId) ? 0 : $storeId;
                 $files = $this->getBatchResponse($item->getBatchId(), $storeId);
                 if (count($files)) {
                     $this->processEachResponseFile($files, $item->getBatchId(), $mailchimpStoreId, $storeId);
@@ -130,13 +130,13 @@ class Result
                     $line = explode('_', $item->operation_id);
                     $type = $line[0];
                     $id = $line[2];
+                    $this->_helper->log("type [$type] id [$id] store[$storeId]");
 
                     $mailchimpErrors = $this->_chimpErrors->create();
 
                     //parse error
                     $response = json_decode($item->response);
                     $this->_helper->log($response);
-                    $this->_helper->log("type [$type] id [$id]");
                     $errorDetails = "";
                     if (!empty($response->errors)) {
                         foreach ($response->errors as $error) {
@@ -154,7 +154,8 @@ class Result
                     /**
                      * @var \Ebizmarts\MailChimp\Model\MailChimpSyncEcommerce  $chimpSync
                      */
-                    $chimpSync = $this->_helper->getChimpSyncEcommerce($storeId,$id,$type);
+                    $chimpSync = $this->_helper->getChimpSyncEcommerce($mailchimpStoreId,$id,$type);
+                    $this->_helper->log($chimpSync);
                     $chimpSync->setData("mailchimp_sync_error", $error);
                     $chimpSync->getResource()->save($chimpSync);
                     $mailchimpErrors->setType($response->type);

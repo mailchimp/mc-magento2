@@ -81,7 +81,6 @@ class Ecommerce
 
     public function execute()
     {
-        $this->_helper->log(__METHOD__);
         foreach($this->_storeManager->getStores() as $storeId => $val)
         {
             $this->_storeManager->setCurrentStore($storeId);
@@ -98,7 +97,6 @@ class Ecommerce
 
     protected function _processStore($storeId, $mailchimpStoreId)
     {
-        $this->_helper->log(__METHOD__);
         $batchArray = array();
         $results = array();
         if ($this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_PATH_ECOMMERCE_ACTIVE,$storeId)) {

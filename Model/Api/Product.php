@@ -103,7 +103,6 @@ class Product
         $collection->getSelect()->where("m4m.mailchimp_sync_delta IS null OR (m4m.mailchimp_sync_delta > '".$this->_helper->getMCMinSyncDateFlag().
             "' and m4m.mailchimp_sync_modified = 1)");
         $collection->getSelect()->limit(self::MAX);
-        $this->_helper->log((string)$collection->getSelect());
         foreach($collection as $item)
         {
             /**
@@ -289,31 +288,26 @@ class Product
      */
     public function sendModifiedProduct(\Magento\Sales\Model\Order $order,$mailchimpStoreId)
     {
-        $this->_helper->log(__METHOD__);
         $data = array();
         $batchId = \Ebizmarts\MailChimp\Helper\Data::IS_PRODUCT . '_' . $this->_date->gmtTimestamp();
         $items = $order->getAllVisibleItems();
         foreach ($items as $item)
         {
-            $this->_helper->log($item->getProductId());
             //@todo get from the store not the default
             $product = $this->_productRepository->getById($item->getProductId());
             $productSyncData = $this->_chimpSyncEcommerce->getByStoreIdType($mailchimpStoreId,$product->getId(),
                 \Ebizmarts\MailChimp\Helper\Data::IS_PRODUCT);
 
             if ($product->getId()!=$item->getProductId()||$product->getTypeId()=='bundle'||$product->getTypeId()=='grouped') {
-                $this->_helper->log('continue is bundle/grouped');
                 continue;
             }
 
             if ($productSyncData->getMailchimpSyncModified() &&
                 $productSyncData->getMailchimpSyncDelta() > $this->_helper->getMCMinSyncDateFlag()) {
-                $this->_helper->log('is an old product');
                 $data[] = $this->_buildOldProductRequest($product,$batchId);
                 $this->_updateProduct($mailchimpStoreId, $product->getId(), $this->_date->gmtDate(),'',0);
             } elseif (!$productSyncData->getMailchimpSyncDelta() ||
                 $productSyncData->getMailchimpSyncDelta() < $this->_helper->getMCMinSyncDateFlag()) {
-                $this->_helper->log('is a new product');
                 $data[] = $this->_buildNewProductRequest($product, $mailchimpStoreId);
                 $this->_updateProduct($mailchimpStoreId, $product->getId(), $this->_date->gmtDate(),'',0);
             }
@@ -323,7 +317,6 @@ class Product
 
     public function sendQuoteModifiedProduct(\Magento\Quote\Model\Quote $quote,$mailchimpStoreId)
     {
-        $this->_helper->log(__METHOD__);
         $data = array();
         $batchId = \Ebizmarts\MailChimp\Helper\Data::IS_PRODUCT . '_' . $this->_date->gmtTimestamp();
         $items = $quote->getAllVisibleItems();
@@ -332,25 +325,21 @@ class Product
          */
         foreach ($items as $item)
         {
-            $this->_helper->log($item->getProductId());
             //@todo get from the store not the default
             $product = $this->_productRepository->getById($item->getProductId());
             $productSyncData = $this->_chimpSyncEcommerce->getByStoreIdType($mailchimpStoreId,$product->getId(),
                 \Ebizmarts\MailChimp\Helper\Data::IS_PRODUCT);
 
             if ($product->getId()!=$item->getProductId()||$product->getTypeId()=='bundle'||$product->getTypeId()=='grouped') {
-                $this->_helper->log('continue is bundle/grouped');
                 continue;
             }
 
             if ($productSyncData->getMailchimpSyncModified() &&
                 $productSyncData->getMailchimpSyncDelta() > $this->_helper->getMCMinSyncDateFlag()) {
-                $this->_helper->log('is an old product');
                 $data[] = $this->_buildOldProductRequest($product,$batchId);
                 $this->_updateProduct($mailchimpStoreId, $product->getId(), $this->_date->gmtDate(),'',0);
             } elseif (!$productSyncData->getMailchimpSyncDelta() ||
                 $productSyncData->getMailchimpSyncDelta() < $this->_helper->getMCMinSyncDateFlag()) {
-                $this->_helper->log('is a new product');
                 $data[] = $this->_buildNewProductRequest($product, $mailchimpStoreId);
                 $this->_updateProduct($mailchimpStoreId, $product->getId(), $this->_date->gmtDate(),'',0);
             }

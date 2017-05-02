@@ -554,6 +554,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     }
     public function saveEcommerceData($storeId, $entityId , $date, $error, $modified, $type, $deleted = 0, $token = null)
     {
+
         $chimpSyncEcommerce = $this->getChimpSyncEcommerce($storeId,$entityId,$type);
         $chimpSyncEcommerce->setMailchimpStoreId($storeId);
         $chimpSyncEcommerce->setType($type);
@@ -591,7 +592,6 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
                 if($store['platform']!=self::PLATFORM) {
                     continue;
                 }
-                $this->log($store);
                 $mstore = $this->_mailChimpStoresFactory->create();
                 $mstore->setApikey(trim($apiKey));
                 $mstore->setStoreid($store['id']);
