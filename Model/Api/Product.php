@@ -39,9 +39,9 @@ class Product
      */
     protected $_imageHelper;
     /**
-     * @var \Magento\CatalogInventory\Model\Stock\StockItemRepository
+     * @var \Magento\CatalogInventory\Api\StockRegistryInterface
      */
-    protected $_stockItemRepository;
+    protected $_stockRegistry;
     /**
      * @var \Magento\Catalog\Model\CategoryRepository
      */
@@ -62,7 +62,7 @@ class Product
      * @param \Magento\Framework\Stdlib\DateTime\DateTime $date
      * @param \Ebizmarts\MailChimp\Helper\Data $helper
      * @param \Magento\Catalog\Helper\Image $imageHelper
-     * @param \Magento\CatalogInventory\Model\Stock\StockItemRepository $stockItemRepository
+     * @param \Magento\CatalogInventory\Api\StockRegistryInterface $stockRegistry
      * @param \Magento\Catalog\Model\CategoryRepository $categoryRepository
      * @param \Ebizmarts\MailChimp\Model\MailChimpSyncEcommerce $chimpSyncEcommerce
      */
@@ -72,7 +72,7 @@ class Product
         \Magento\Framework\Stdlib\DateTime\DateTime $date,
         \Ebizmarts\MailChimp\Helper\Data $helper,
         \Magento\Catalog\Helper\Image $imageHelper,
-        \Magento\CatalogInventory\Model\Stock\StockItemRepository $stockItemRepository,
+        \Magento\CatalogInventory\Api\StockRegistryInterface $stockRegistry,
         \Magento\Catalog\Model\CategoryRepository $categoryRepository,
         \Ebizmarts\MailChimp\Model\MailChimpSyncEcommerce $chimpSyncEcommerce
     )
@@ -82,18 +82,18 @@ class Product
         $this->_date                = $date;
         $this->_productCollection   = $productCollection;
         $this->_imageHelper         = $imageHelper;
-        $this->_stockItemRepository = $stockItemRepository;
+        $this->_stockRegistry       = $stockRegistry;
         $this->_categoryRepository  = $categoryRepository;
         $this->_chimpSyncEcommerce  = $chimpSyncEcommerce;
         $this->_batchId             = \Ebizmarts\MailChimp\Helper\Data::IS_PRODUCT. '_' . $this->_date->gmtTimestamp();
     }
-    public function _sendProducts($storeId)
+    public function _sendProducts($magentoStoreId)
     {
         $batchArray = array();
         $counter = 0;
-        $mailchimpStoreId = $this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_MAILCHIMP_STORE,$storeId);
+        $mailchimpStoreId = $this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_MAILCHIMP_STORE,$magentoStoreId);
         $collection = $this->_getCollection();
-        $collection->setStoreId($storeId);
+        $collection->setStoreId($magentoStoreId);
         $collection->getSelect()->joinLeft(
             ['m4m' => 'mailchimp_sync_ecommerce'],
             "m4m.related_id = e.entity_id and m4m.type = '".\Ebizmarts\MailChimp\Helper\Data::IS_PRODUCT.
@@ -116,7 +116,7 @@ class Product
                 $this->_updateProduct($mailchimpStoreId,$product->getId(),$this->_date->gmtDate(),"",0);
                 continue;
             } else {
-                $data = $this->_buildNewProductRequest($product, $mailchimpStoreId);
+                $data = $this->_buildNewProductRequest($product, $mailchimpStoreId,$magentoStoreId);
             }
             if (!empty($data)) {
                 $batchArray[$counter] = $data;
@@ -139,7 +139,11 @@ class Product
     {
         return $this->_productCollection->create();
     }
-    protected function _buildNewProductRequest(\Magento\Catalog\Model\Product $product, $mailchimpStoreId)
+    protected function _buildNewProductRequest(
+        \Magento\Catalog\Model\Product $product,
+        $mailchimpStoreId,
+        $magentoStoreId
+    )
     {
         $variantProducts = array();
         switch($product->getTypeId()) {
@@ -164,7 +168,7 @@ class Product
             default:
                 return array();
         }
-        $bodyData = $this->_buildProductData($product, false, $variantProducts);
+        $bodyData = $this->_buildProductData($product, $magentoStoreId, false, $variantProducts);
         try {
             $body = json_encode($bodyData,JSON_HEX_APOS|JSON_HEX_QUOT);
 
@@ -182,13 +186,18 @@ class Product
         $data['body'] = $body;
         return $data;
     }
-    protected function _buildOldProductRequest(\Magento\Catalog\Model\Product $product, $batchId, $mailchimpStoreId)
+    protected function _buildOldProductRequest(
+        \Magento\Catalog\Model\Product $product,
+        $batchId,
+        $mailchimpStoreId,
+        $magentoStoreId
+    )
     {
         $operations = array();
         if ($product->getTypeId() == \Magento\Catalog\Model\Product\Type::TYPE_SIMPLE ||
             $product->getTypeId() == \Magento\Catalog\Model\Product\Type::TYPE_VIRTUAL ||
             $product->getTypeId() == "downloadable") {
-            $data = $this->_buildProductData($product);
+            $data = $this->_buildProductData($product,$magentoStoreId);
 
             $parentIds = $product->getTypeInstance()->getParentIdsByChild($product->getId());
             //$parentIds = Mage::getResourceSingleton('catalog/product_type_configurable')->getParentIdsByChild($product->getId());
@@ -227,7 +236,12 @@ class Product
         }
 
         return $operations;    }
-    protected function _buildProductData(\Magento\Catalog\Model\Product $product,  $isVarient = true, $variants = null)
+    protected function _buildProductData(
+        \Magento\Catalog\Model\Product $product,
+        $magentoStoreId,
+        $isVarient = true,
+        $variants = null
+    )
     {
         $data = array();
 
@@ -235,7 +249,9 @@ class Product
         $data["id"] = $product->getId();
         $data["title"] = $product->getName();
         $data["url"] = $product->getProductUrl();
-        $data["image_url"] =$this->_imageHelper->init($product,self::PRODUCTIMAGE)->setImageFile($product->getImage())->getUrl();
+        if ($product->getImage()) {
+            $data["image_url"] = $this->_imageHelper->init($product,self::PRODUCTIMAGE)->setImageFile($product->getImage())->getUrl();
+        }
         $data["published_at_foreign"] = "";
         if ($isVarient) {
             //this is for a varient product
@@ -243,7 +259,7 @@ class Product
             $data["price"] = $product->getPrice();
 
             //stock
-            $stock =$this->_stockItemRepository->get($product->getId());
+            $stock = $this->_stockRegistry->getStockItem($product->getId(),$magentoStoreId);
             $data["inventory_quantity"] = (int)$stock->getQty();
             $data["backorders"] = (string)$stock->getBackorders();
             if ($product->getVisibility() != \Magento\Catalog\Model\Product\Visibility::VISIBILITY_NOT_VISIBLE) {
@@ -273,7 +289,7 @@ class Product
             //variants
             $data["variants"] = array();
             foreach ($variants as $variant) {
-                $data["variants"][] = $this->_buildProductData($variant);
+                $data["variants"][] = $this->_buildProductData($variant,$magentoStoreId);
             }
         }
 
@@ -286,7 +302,7 @@ class Product
      * @return array
      * @throws \Magento\Framework\Exception\NoSuchEntityException
      */
-    public function sendModifiedProduct(\Magento\Sales\Model\Order $order,$mailchimpStoreId)
+    public function sendModifiedProduct(\Magento\Sales\Model\Order $order,$mailchimpStoreId,$magentoStoreId)
     {
         $data = array();
         $batchId = \Ebizmarts\MailChimp\Helper\Data::IS_PRODUCT . '_' . $this->_date->gmtTimestamp();
@@ -304,18 +320,18 @@ class Product
 
             if ($productSyncData->getMailchimpSyncModified() &&
                 $productSyncData->getMailchimpSyncDelta() > $this->_helper->getMCMinSyncDateFlag()) {
-                $data[] = $this->_buildOldProductRequest($product,$batchId);
+                $data[] = $this->_buildOldProductRequest($product,$batchId,$mailchimpStoreId,$magentoStoreId);
                 $this->_updateProduct($mailchimpStoreId, $product->getId(), $this->_date->gmtDate(),'',0);
             } elseif (!$productSyncData->getMailchimpSyncDelta() ||
                 $productSyncData->getMailchimpSyncDelta() < $this->_helper->getMCMinSyncDateFlag()) {
-                $data[] = $this->_buildNewProductRequest($product, $mailchimpStoreId);
+                $data[] = $this->_buildNewProductRequest($product, $mailchimpStoreId,$magentoStoreId);
                 $this->_updateProduct($mailchimpStoreId, $product->getId(), $this->_date->gmtDate(),'',0);
             }
         }
         return $data;
     }
 
-    public function sendQuoteModifiedProduct(\Magento\Quote\Model\Quote $quote,$mailchimpStoreId)
+    public function sendQuoteModifiedProduct(\Magento\Quote\Model\Quote $quote,$mailchimpStoreId,$magentoStoreId)
     {
         $data = array();
         $batchId = \Ebizmarts\MailChimp\Helper\Data::IS_PRODUCT . '_' . $this->_date->gmtTimestamp();
@@ -336,11 +352,11 @@ class Product
 
             if ($productSyncData->getMailchimpSyncModified() &&
                 $productSyncData->getMailchimpSyncDelta() > $this->_helper->getMCMinSyncDateFlag()) {
-                $data[] = $this->_buildOldProductRequest($product,$batchId);
+                $data[] = $this->_buildOldProductRequest($product,$batchId,$mailchimpStoreId,$magentoStoreId);
                 $this->_updateProduct($mailchimpStoreId, $product->getId(), $this->_date->gmtDate(),'',0);
             } elseif (!$productSyncData->getMailchimpSyncDelta() ||
                 $productSyncData->getMailchimpSyncDelta() < $this->_helper->getMCMinSyncDateFlag()) {
-                $data[] = $this->_buildNewProductRequest($product, $mailchimpStoreId);
+                $data[] = $this->_buildNewProductRequest($product, $mailchimpStoreId,$magentoStoreId);
                 $this->_updateProduct($mailchimpStoreId, $product->getId(), $this->_date->gmtDate(),'',0);
             }
         }
