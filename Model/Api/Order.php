@@ -168,7 +168,7 @@ class Order
                 $orderId = $item->getEntityId();
                 $order = $this->_order->get($orderId);
                 //create missing products first
-                $productData = $this->_apiProduct->sendModifiedProduct($order, $mailchimpStoreId);
+                $productData = $this->_apiProduct->sendModifiedProduct($order, $mailchimpStoreId,$magentoStoreId);
                 if (count($productData)) {
                     foreach ($productData as $p) {
                         $batchArray[$this->_counter] = $p;
@@ -229,7 +229,7 @@ class Order
                 $orderId = $item->getEntityId();
                 $order = $this->_order->get($orderId);
                 //create missing products first
-                $productData = $this->_apiProduct->sendModifiedProduct($order, $mailchimpStoreId);
+                $productData = $this->_apiProduct->sendModifiedProduct($order, $mailchimpStoreId,$magentoStoreId);
                 if (count($productData)) {
                     foreach ($productData as $p) {
                         $batchArray[$this->_counter] = $p;

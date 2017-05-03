@@ -130,13 +130,11 @@ class Result
                     $line = explode('_', $item->operation_id);
                     $type = $line[0];
                     $id = $line[2];
-                    $this->_helper->log("type [$type] id [$id] store[$storeId]");
 
                     $mailchimpErrors = $this->_chimpErrors->create();
 
                     //parse error
                     $response = json_decode($item->response);
-                    $this->_helper->log($response);
                     $errorDetails = "";
                     if (!empty($response->errors)) {
                         foreach ($response->errors as $error) {
@@ -155,7 +153,6 @@ class Result
                      * @var \Ebizmarts\MailChimp\Model\MailChimpSyncEcommerce  $chimpSync
                      */
                     $chimpSync = $this->_helper->getChimpSyncEcommerce($mailchimpStoreId,$id,$type);
-                    $this->_helper->log($chimpSync);
                     $chimpSync->setData("mailchimp_sync_error", $error);
                     $chimpSync->getResource()->save($chimpSync);
                     $mailchimpErrors->setType($response->type);
@@ -166,6 +163,8 @@ class Result
                     $mailchimpErrors->setOriginalId($id);
                     $mailchimpErrors->setBatchId($batchId);
                     $mailchimpErrors->setMailchimpStoreId($mailchimpStoreId);
+                    $mailchimpErrors->setOriginalId($id);
+                    $mailchimpErrors->setBatchId($batchId);
                     $mailchimpErrors->getResource()->save($mailchimpErrors);
                 }
             }
