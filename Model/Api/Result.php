@@ -80,12 +80,12 @@ class Result
             }
         }
     }
-    protected function getBatchResponse($batchId, $storeId = 0)
+    public function getBatchResponse($batchId, $storeId = null)
     {
         $files = array();
         try {
             $baseDir = $this->_helper->getBaseDir();
-            $api = $this->_helper->getApi();
+            $api = $this->_helper->getApi($storeId);
             // check the status of the job
             $response = $api->batchOperation->status($batchId);
             if (isset($response['status']) && $response['status'] == 'finished') {
@@ -165,6 +165,7 @@ class Result
                     $mailchimpErrors->setMailchimpStoreId($mailchimpStoreId);
                     $mailchimpErrors->setOriginalId($id);
                     $mailchimpErrors->setBatchId($batchId);
+                    $mailchimpStoreId->setStoreId($storeId);
                     $mailchimpErrors->getResource()->save($mailchimpErrors);
                 }
             }

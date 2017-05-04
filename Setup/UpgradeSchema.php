@@ -245,10 +245,18 @@ class UpgradeSchema implements UpgradeSchemaInterface
             );
 
         }
+        if (version_compare($context->getVersion(), '1.0.10') < 0) {
+            $installer->getConnection()->addColumn(
+              $installer->getTable('mailchimp_errors'),
+                'store_id',
+                [
+                    'type' => \Magento\Framework\DB\Ddl\Table::TYPE_INTEGER,
+                    'length' => 11,
+                    'default' => null,
+                    'comment' => 'Magento Store Id'
+                ]
+            );
+        }
         $installer->endSetup();
-
-
-
-
     }
 }
