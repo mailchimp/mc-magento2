@@ -18,6 +18,8 @@ use Magento\Framework\Controller\ResultFactory;
 
 class Get extends Action
 {
+    const MAX_LISTS = 200;
+
     /**
      * @var \Ebizmarts\MailChimp\Helper\Data
      */
@@ -49,7 +51,7 @@ class Get extends Action
         $param = $this->getRequest()->getParams();
         $apiKey = $param['apikey'];
         $api = $this->_helper->getApiByApiKey($apiKey);
-        $lists = $api->lists->getLists();
+        $lists = $api->lists->getLists(null,null,null,self::MAX_LISTS);
         $result = [];
         foreach($lists['lists'] as $list) {
             $result[] = ['id'=> $list['id'], 'name'=> $list['name']];
