@@ -40,7 +40,7 @@ class Edit extends \Ebizmarts\MailChimp\Controller\Adminhtml\Stores
         /** @var \Magento\Backend\Model\View\Result\Page $resultPage */
         $resultPage = $this->_resultPageFactory->create();
         $resultPage->setActiveMenu('Ebizmarts_MailChimp::main_menu');
-        $resultPage->getConfig()->getTitle()->prepend(__('Mailchimp Store'));
+        $resultPage->getConfig()->getTitle()->prepend(__('MailChimp Store'));
 
         return $resultPage;
     }
