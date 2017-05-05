@@ -600,13 +600,14 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
                 $mstore->setPlatform($store['platform']);
                 $mstore->setIsSync($store['is_syncing']);
                 $mstore->setEmailAddress($store['email_address']);
+                $mstore->setDomain($store['domain']);
                 $mstore->setCurrencyCode($store['currency_code']);
 //                $mstore->setMoneyFormat($store['money_format']);
                 $mstore->setPrimaryLocale($store['primary_locale']);
                 $mstore->setTimezone($store['timezone']);
                 $mstore->setPhone($store['phone']);
-                $mstore->setAddressAddress1($store['address']['address1']);
-                $mstore->setAddressAddress2($store['address']['address2']);
+                $mstore->setAddressAddressOne($store['address']['address1']);
+                $mstore->setAddressAddressTwo($store['address']['address2']);
                 $mstore->setAddressCity($store['address']['city']);
                 $mstore->setAddressProvince($store['address']['province']);
                 $mstore->setAddressProvinceCode($store['address']['province_code']);

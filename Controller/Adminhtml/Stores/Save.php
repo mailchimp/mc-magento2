@@ -53,8 +53,8 @@ class Save extends \Ebizmarts\MailChimp\Controller\Adminhtml\Stores
         $api = $this->_helper->getApiByApiKey($formData['apikey']);
         // set the address
         $address = [];
-        $address['address1']    = $formData['address_address1'];
-        $address['address2']    = $formData['address_address2'];
+        $address['address1']    = $formData['address_address_one'];
+        $address['address2']    = $formData['address_address_two'];
         $address['city']        = $formData['address_city'];
         $address['province']    = '';
         $address['province_code'] = '';
@@ -68,7 +68,7 @@ class Save extends \Ebizmarts\MailChimp\Controller\Adminhtml\Stores
         $timeZone       = $formData['timezone'];
         $phone          = $formData['phone'];
         $name           = $formData['name'];
-        $domain         = 'domain';
+        $domain         = $formData['domain'];
         $storeId = isset($formData['storeid']) ? $formData['storeid'] : null;
 
         if ($storeId) {

@@ -64,19 +64,19 @@ class Address extends Generic implements TabInterface
             );
         }
         $fieldset->addField(
-            'address_address1',
+            'address_address_one',
             'text',
             [
-                'name'        => 'address_address1',
+                'name'        => 'address_address_one',
                 'label'    => __('Street'),
                 'required'     => true
             ]
         );
         $fieldset->addField(
-            'address_address2',
+            'address_address_two',
             'text',
             [
-                'name'        => 'address_address2',
+                'name'        => 'address_address_two',
                 'label'    => __('Street'),
                 'required'     => false
             ]
