@@ -41,7 +41,6 @@
                     <label>API Key</label>
                     <source_model>Ebizmarts\MailChimp\Model\Config\Source\ApiKey</source_model>
                     <backend_model>Ebizmarts\MailChimp\Model\Config\Backend\ApiKey</backend_model>
-                    <comment>Caution, if you change the API Key the old mailchimp store will be deleted</comment>
                     <depends>
                         <field id="*/*/active">1</field>
                     </depends>
