@@ -52,11 +52,21 @@ define([
                         showLoader: true
                     }
                 ).done(function(data) {
+                    var unique = data.length;
                     $.each(data, function (i, item) {
-                        $('#mailchimp_general_monkeystore').append($('<option>', {
-                            value: item.id,
-                            text : item.name
-                        }));
+                        if(unique == 1) {
+                            $('#mailchimp_general_monkeystore').append($('<option>', {
+                                value: item.id,
+                                text: item.name,
+                                selected: "selected"
+                            }));
+                        }
+                        else {
+                            $('#mailchimp_general_monkeystore').append($('<option>', {
+                                value: item.id,
+                                text: item.name
+                            }));
+                        }
                     });
                 });
                 this._loadDetails();
