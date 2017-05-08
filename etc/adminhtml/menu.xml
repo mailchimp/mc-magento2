@@ -17,7 +17,7 @@
              action="adminhtml/system_config/edit/section/mailchimp"
         />
         <add id="Ebizmarts_MailChimp::store_menu"
-             title="Mailchimp Stores"
+             title="MailChimp Stores"
              module="Ebizmarts_MailChimp"
              sortOrder="20"
              resource="Magento_Backend::content"
