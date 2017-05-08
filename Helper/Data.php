@@ -25,6 +25,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     const XML_PATH_LOG               = 'mailchimp/general/log';
     const XML_PATH_MAPPING           = 'mailchimp/general/mapping';
     const XML_MAILCHIMP_STORE        = 'mailchimp/general/monkeystore';
+    const XML_MAILCHIMP_JS_URL       = 'mailchimp/general/mailchimpjsurl';
     const XML_PATH_CONFIRMATION_FLAG = 'newsletter/subscription/confirm';
     const XML_PATH_STORE             = 'mailchimp/ecommerce/store';
     const XML_PATH_ECOMMERCE_ACTIVE  = 'mailchimp/ecommerce/active';
@@ -227,7 +228,6 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
      */
     public function getConfigValue($path, $storeId = null, $scope = null)
     {
-        $areaCode = $this->_state->getAreaCode();
         switch ($scope) {
             case 'website':
                 $value = $this->_scopeConfig->getValue($path ,\Magento\Store\Model\ScopeInterface::SCOPE_WEBSITE, $storeId);
@@ -237,45 +237,6 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
                 break;
         }
         return $value;
-
-
-//        if ($storeId !== null) {
-//            $configValue = $this->scopeConfig->getValue(
-//                $path,
-//                \Magento\Store\Model\ScopeInterface::SCOPE_STORE,
-//                $storeId
-//            );
-//        } elseif ($areaCode == 'frontend') {
-//            $frontStoreId = $this->_storeManager->getStore()->getId();
-//            $configValue = $this->scopeConfig->getValue(
-//                $path,
-//                \Magento\Store\Model\ScopeInterface::SCOPE_STORE,
-//                $frontStoreId
-//            );
-//        } else {
-//            $storeId = $this->_request->getParam(\Magento\Store\Model\ScopeInterface::SCOPE_STORE);
-//            $websiteId = $this->_request->getParam(\Magento\Store\Model\ScopeInterface::SCOPE_WEBSITE);
-//            if (!empty($storeId)) {
-//                $configValue = $this->scopeConfig->getValue(
-//                    $path,
-//                    \Magento\Store\Model\ScopeInterface::SCOPE_STORE,
-//                    $storeId
-//                );
-//            } elseif (!empty($websiteId)) {
-//                $configValue = $this->scopeConfig->getValue(
-//                    $path,
-//                    \Magento\Store\Model\ScopeInterface::SCOPE_WEBSITE,
-//                    $websiteId
-//                );
-//            } else {
-//                $configValue = $this->scopeConfig->getValue(
-//                    $path,
-//                    \Magento\Store\Model\ScopeInterface::SCOPE_WEBSITE,
-//                    0
-//                );
-//            }
-//        }
-//        return $configValue;
     }
 
     /**
@@ -355,7 +316,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
 
             //create store in mailchimp
             try {
-                $this->getApi()->ecommerce->stores->add($mailchimpStoreId,$listId,$name,$currencyCode,'Magento');
+                $this->getApi()->ecommerce->stores->add($mailchimpStoreId,$listId,$name,$currencyCode,self::PLATFORM);
                 return $mailchimpStoreId;
 
             } catch (Exception $e) {
@@ -617,5 +578,26 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
                 $mstore->getResource()->save($mstore);
             }
         }
+    }
+    public function getJsUrl($storeId)
+    {
+        $url = '';
+        if ($this->getConfigValue(self::XML_PATH_ACTIVE,$storeId)) {
+            $url = $this->getConfigValue(self::XML_MAILCHIMP_JS_URL, $storeId);
+            if (!$url) {
+                $mailChimpStoreId = $this->getConfigValue(self::XML_MAILCHIMP_STORE, $storeId);
+                $api = $this->getApi($storeId);
+                $storeData = $api->ecommerce->stores->get($mailChimpStoreId);
+                if (isset($storeData['connected_site']['site_script']['url'])) {
+                    $url = $storeData['connected_site']['site_script']['url'];
+                    $this->_config->saveConfig(
+                        self::XML_MAILCHIMP_JS_URL,
+                        $url,
+                        \Magento\Store\Model\ScopeInterface::SCOPE_STORES,
+                        $storeId);
+                }
+            }
+        }
+        return $url;
     }
 }
