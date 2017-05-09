@@ -70,6 +70,8 @@ class Save extends \Ebizmarts\MailChimp\Controller\Adminhtml\Stores
         $name           = $formData['name'];
         $domain         = $formData['domain'];
         $storeId = isset($formData['storeid']) ? $formData['storeid'] : null;
+        $is_sync        = $formData['is_sync'] ? true : false;
+        $this->_helper->log($is_sync);
 
         if ($storeId) {
             $api->ecommerce->stores->edit(
@@ -83,7 +85,8 @@ class Save extends \Ebizmarts\MailChimp\Controller\Adminhtml\Stores
                 $primaryLocale,
                 $timeZone,
                 $phone,
-                $address
+                $address,
+                $is_sync
             );
         } else {
             $date = $this->_helper->getDateMicrotime();
@@ -100,7 +103,8 @@ class Save extends \Ebizmarts\MailChimp\Controller\Adminhtml\Stores
                 $primaryLocale,
                 $timeZone,
                 $phone,
-                $address
+                $address,
+                $is_sync
             );
             $formData['storeid'] = $mailchimpStoreId;
         }
