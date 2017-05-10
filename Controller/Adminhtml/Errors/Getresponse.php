@@ -17,6 +17,7 @@ use Magento\Framework\Controller\ResultFactory;
 
 class Getresponse extends \Magento\Backend\App\Action
 {
+    const MAX_RETRIES = 5;
     /**
      * @var ResultFactory
      */
@@ -62,31 +63,33 @@ class Getresponse extends \Magento\Backend\App\Action
         $errors = $this->_errorsFactory->create();
         $errors->getResource()->load($errors, $errorId);
         $batchId = $errors->getBatchId();
-        $files = $this->_result->getBatchResponse($batchId,$errors->getStoreId());
         $fileContent = [];
-        foreach ($files as $file)
-        {
-            $items = json_decode(file_get_contents($file));
-            foreach ($items as $item)
-            {
-                $content = array(
-                    'status_code'=>$item->status_code,
-                    'operation_id'=>$item->operation_id,
-                    'response'=>json_decode($item->response)
-                );
-                $fileContent[] = $content;
+        $counter = 0;
+        do {
+            $counter++;
+            $files = $this->_result->getBatchResponse($batchId, $errors->getStoreId());
+            foreach ($files as $file) {
+                $items = json_decode(file_get_contents($file));
+                foreach ($items as $item) {
+                    $content = array(
+                        'status_code' => $item->status_code,
+                        'operation_id' => $item->operation_id,
+                        'response' => json_decode($item->response)
+                    );
+                    $fileContent[] = $content;
+                }
+                unlink($file);
             }
-            unlink($file);
-        }
+            $baseDir = $this->_helper->getBaseDir();
+            if (is_dir($baseDir . DIRECTORY_SEPARATOR . 'var' . DIRECTORY_SEPARATOR . \Ebizmarts\MailChimp\Model\Api\Result::MAILCHIMP_TEMP_DIR . DIRECTORY_SEPARATOR . $batchId)) {
+                rmdir($baseDir . DIRECTORY_SEPARATOR . 'var' . DIRECTORY_SEPARATOR . \Ebizmarts\MailChimp\Model\Api\Result::MAILCHIMP_TEMP_DIR . DIRECTORY_SEPARATOR . $batchId);
+            }
+        } while(!count($fileContent)&&$counter<self::MAX_RETRIES);
         $resultJson =$this->_resultFactory->create(ResultFactory::TYPE_JSON);
         $resultJson->setHeader('Content-disposition', 'attachment; filename='.$batchId.'.json');
         $resultJson->setHeader('Content-type', 'application/json');
         $data = json_encode($fileContent, JSON_PRETTY_PRINT);
         $resultJson->setJsonData($data);
-        $baseDir = $this->_helper->getBaseDir();
-        if (is_dir($baseDir . DIRECTORY_SEPARATOR . 'var' . DIRECTORY_SEPARATOR . \Ebizmarts\MailChimp\Model\Api\Result::MAILCHIMP_TEMP_DIR . DIRECTORY_SEPARATOR . $batchId)) {
-            rmdir($baseDir . DIRECTORY_SEPARATOR . 'var' . DIRECTORY_SEPARATOR . \Ebizmarts\MailChimp\Model\Api\Result::MAILCHIMP_TEMP_DIR . DIRECTORY_SEPARATOR . $batchId);
-        }
         return $resultJson;
     }
     protected function _isAllowed()
