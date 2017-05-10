@@ -45,18 +45,18 @@
                         <field id="*/*/active">1</field>
                     </depends>
                 </field>
-                <field id="account_details" translate="label" type="textarea" sortOrder="30" showInDefault="1" showInWebsite="1" showInStore="1">
-                    <label>Account Details</label>
-                    <frontend_model>Ebizmarts\MailChimp\Block\Adminhtml\System\Config\Account</frontend_model>
-                    <source_model>Ebizmarts\MailChimp\Model\Config\Source\Details</source_model>
+                <field id="monkeystore" translate="label" type="select" sortOrder="30" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Mailchimp Store</label>
+                    <source_model>Ebizmarts\MailChimp\Model\Config\Source\MonkeyStore</source_model>
+                    <backend_model>Ebizmarts\MailChimp\Model\Config\Backend\MonkeyStore</backend_model>
                     <depends>
                         <field id="*/*/active">1</field>
                     </depends>
                 </field>
-                <field id="monkeystore" translate="label" type="select" sortOrder="40" showInDefault="1" showInWebsite="1" showInStore="1">
-                    <label>Mailchimp Store</label>
-                    <source_model>Ebizmarts\MailChimp\Model\Config\Source\MonkeyStore</source_model>
-                    <backend_model>Ebizmarts\MailChimp\Model\Config\Backend\MonkeyStore</backend_model>
+                <field id="account_details" translate="label" type="textarea" sortOrder="40" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Account Details</label>
+                    <frontend_model>Ebizmarts\MailChimp\Block\Adminhtml\System\Config\Account</frontend_model>
+                    <source_model>Ebizmarts\MailChimp\Model\Config\Source\Details</source_model>
                     <depends>
                         <field id="*/*/active">1</field>
                     </depends>
