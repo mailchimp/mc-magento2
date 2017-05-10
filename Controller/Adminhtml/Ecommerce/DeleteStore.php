@@ -96,6 +96,6 @@ class DeleteStore extends \Magento\Backend\App\Action
     }
     protected function _isAllowed()
     {
-        return $this->_authorization->isAllowed('Magento_EncryptionKey::crypt_key');
+        return $this->_authorization->isAllowed('Ebizmarts_MailChimp::config_mailchimp');
     }
 }

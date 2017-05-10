@@ -67,6 +67,6 @@ class Stores extends Action
     }
     protected function _isAllowed()
     {
-        return $this->_authorization->isAllowed('Ebizmarts_MailChimp::manage_stores');
+        return $this->_authorization->isAllowed('Ebizmarts_MailChimp::stores_grid');
     }
 }

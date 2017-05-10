@@ -77,6 +77,8 @@ class Getaccountdetails extends Action
         $resultJson->setData($options);
         return $resultJson;
     }
-
-
+    protected function _isAllowed()
+    {
+        return $this->_authorization->isAllowed('Ebizmarts_MailChimp::config_mailchimp');
+    }
 }

@@ -23,4 +23,9 @@ class Index extends Stores
         $page->getConfig()->getTitle()->prepend(__('MailChimp Stores'));
         return $page;
     }
+    protected function _isAllowed()
+    {
+        return $this->_authorization->isAllowed('Ebizmarts_MailChimp::stores_edit');
+    }
+
 }

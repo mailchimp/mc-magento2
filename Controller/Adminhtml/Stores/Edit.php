@@ -44,4 +44,9 @@ class Edit extends \Ebizmarts\MailChimp\Controller\Adminhtml\Stores
 
         return $resultPage;
     }
+    protected function _isAllowed()
+    {
+        return $this->_authorization->isAllowed('Ebizmarts_MailChimp::stores_edit');
+    }
+
 }

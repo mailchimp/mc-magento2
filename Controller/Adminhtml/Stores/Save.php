@@ -110,4 +110,9 @@ class Save extends \Ebizmarts\MailChimp\Controller\Adminhtml\Stores
         }
         return $formData['storeid'];
     }
+    protected function _isAllowed()
+    {
+        return $this->_authorization->isAllowed('Ebizmarts_MailChimp::stores_edit');
+    }
+
 }

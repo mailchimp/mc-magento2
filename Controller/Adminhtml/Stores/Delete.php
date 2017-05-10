@@ -34,4 +34,9 @@ class Delete extends \Ebizmarts\MailChimp\Controller\Adminhtml\Stores
             }
         }
     }
+    protected function _isAllowed()
+    {
+        return $this->_authorization->isAllowed('Ebizmarts_MailChimp::stores_edit');
+    }
+
 }
