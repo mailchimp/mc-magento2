@@ -145,16 +145,16 @@ class Info extends Generic implements TabInterface
             ]
         );
 
-        $fieldset->addField(
-            'is_sync',
-            'select',
-            [
-                'name'        => 'is_sync',
-                'label'    => __('Synced'),
-                'required'     => true,
-                'options'   => $this->_yesno->toArray(),
-            ]
-        );
+//        $fieldset->addField(
+//            'is_sync',
+//            'select',
+//            [
+//                'name'        => 'is_sync',
+//                'label'    => __('Synced'),
+//                'required'     => true,
+//                'options'   => $this->_yesno->toArray(),
+//            ]
+//        );
 
         $fieldset->addField(
             'domain',
