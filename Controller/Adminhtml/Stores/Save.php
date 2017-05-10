@@ -70,8 +70,8 @@ class Save extends \Ebizmarts\MailChimp\Controller\Adminhtml\Stores
         $name           = $formData['name'];
         $domain         = $formData['domain'];
         $storeId = isset($formData['storeid']) ? $formData['storeid'] : null;
-        $is_sync        = $formData['is_sync'] ? true : false;
-        $this->_helper->log($is_sync);
+//        $is_sync        = $formData['is_sync'] ? true : false;
+        $is_sync = null;
 
         if ($storeId) {
             $api->ecommerce->stores->edit(

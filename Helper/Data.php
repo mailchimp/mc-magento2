@@ -537,6 +537,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     }
     public function loadStores()
     {
+        $mcUserName = [];
         $connection = $this->_mailChimpStores->getResource()->getConnection();
         $tableName = $this->_mailChimpStores->getResource()->getMainTable();
         $connection->truncateTable($tableName);
@@ -575,6 +576,13 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
                 $mstore->setAddressPostalCode($store['address']['postal_code']);
                 $mstore->setAddressCountry($store['address']['country']);
                 $mstore->setAddressCountryCode($store['address']['country_code']);
+                if (!isset($mcUserName[$apiKey])) {
+                    $mcInfo = $this->_api->root->info();
+                    $mcUserName[$apiKey] = $mcInfo['account_name'];
+                }
+                $listInfo = $this->_api->lists->getLists($store['list_id']);
+                $mstore->setListName($listInfo['name']);
+                $mstore->setMcAccountName($mcUserName[$apiKey]);
                 $mstore->getResource()->save($mstore);
             }
         }
