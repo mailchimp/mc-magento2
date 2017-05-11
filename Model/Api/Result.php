@@ -125,8 +125,9 @@ class Result
     protected function processEachResponseFile($files, $batchId, $mailchimpStoreId , $storeId)
     {
         foreach ($files as $file) {
-            try {
-                $items = json_decode(file_get_contents($file));
+            $this->_helper->log("Proccesing file $file");
+            $items = json_decode(file_get_contents($file));
+            if ($items!==false) {
                 foreach ($items as $item) {
                     if ($item->status_code != 200) {
                         $line = explode('_', $item->operation_id);
@@ -171,8 +172,22 @@ class Result
                         $mailchimpErrors->getResource()->save($mailchimpErrors);
                     }
                 }
-            } catch(\Exception $e) {
-                $this->_helper->log($e->getMessage());
+            }
+            else {
+                switch(json_last_error()) {
+                    case JSON_ERROR_DEPTH:
+                        $this->_helper->log(' - Maximum stack depth exceeded');
+                        break;
+                    case JSON_ERROR_CTRL_CHAR:
+                        $this->_helper->log(' - Unexpected control character found');
+                        break;
+                    case JSON_ERROR_SYNTAX:
+                        $this->_helper->log(' - Syntax error, malformed JSON');
+                        break;
+                    case JSON_ERROR_NONE:
+                        $this->_helper->log(' - No errors');
+                        break;
+                }
             }
             unlink($file);
         }
