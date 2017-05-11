@@ -73,7 +73,8 @@ class Result
                 }
                 $baseDir = $this->_helper->getBaseDir();
                 if (is_dir($baseDir . DIRECTORY_SEPARATOR . 'var' . DIRECTORY_SEPARATOR . self::MAILCHIMP_TEMP_DIR . DIRECTORY_SEPARATOR . $item->getBatchId())) {
-                    rmdir($baseDir . DIRECTORY_SEPARATOR . 'var' . DIRECTORY_SEPARATOR . self::MAILCHIMP_TEMP_DIR . DIRECTORY_SEPARATOR . $item->getBatchId());
+                    array_map('unlink', glob($baseDir . DIRECTORY_SEPARATOR . 'var' . DIRECTORY_SEPARATOR . self::MAILCHIMP_TEMP_DIR . DIRECTORY_SEPARATOR . $item->getBatchId().DIRECTORY_SEPARATOR."*.*"));
+//                    rmdir($baseDir . DIRECTORY_SEPARATOR . 'var' . DIRECTORY_SEPARATOR . self::MAILCHIMP_TEMP_DIR . DIRECTORY_SEPARATOR . $item->getBatchId());
                 }
             } catch (\Exception $e) {
                 $this->_helper->log("Error with a response: " . $e->getMessage());
@@ -124,50 +125,54 @@ class Result
     protected function processEachResponseFile($files, $batchId, $mailchimpStoreId , $storeId)
     {
         foreach ($files as $file) {
-            $items = json_decode(file_get_contents($file));
-            foreach ($items as $item) {
-                if ($item->status_code != 200) {
-                    $line = explode('_', $item->operation_id);
-                    $type = $line[0];
-                    $id = $line[2];
+            try {
+                $items = json_decode(file_get_contents($file));
+                foreach ($items as $item) {
+                    if ($item->status_code != 200) {
+                        $line = explode('_', $item->operation_id);
+                        $type = $line[0];
+                        $id = $line[2];
 
-                    $mailchimpErrors = $this->_chimpErrors->create();
+                        $mailchimpErrors = $this->_chimpErrors->create();
 
-                    //parse error
-                    $response = json_decode($item->response);
-                    $errorDetails = "";
-                    if (!empty($response->errors)) {
-                        foreach ($response->errors as $error) {
-                            if (isset($error->field) && isset($error->message)) {
-                                $errorDetails .= $errorDetails != "" ? " / " : "";
-                                $errorDetails .= $error->field . " : " . $error->message;
+                        //parse error
+                        $response = json_decode($item->response);
+                        $errorDetails = "";
+                        if (!empty($response->errors)) {
+                            foreach ($response->errors as $error) {
+                                if (isset($error->field) && isset($error->message)) {
+                                    $errorDetails .= $errorDetails != "" ? " / " : "";
+                                    $errorDetails .= $error->field . " : " . $error->message;
+                                }
                             }
                         }
-                    }
-                    if ($errorDetails == "") {
-                        $errorDetails = $response->detail;
-                    }
+                        if ($errorDetails == "") {
+                            $errorDetails = $response->detail;
+                        }
 
-                    $error = $response->title . " : " . $response->detail;
-                    /**
-                     * @var \Ebizmarts\MailChimp\Model\MailChimpSyncEcommerce  $chimpSync
-                     */
-                    $chimpSync = $this->_helper->getChimpSyncEcommerce($mailchimpStoreId,$id,$type);
-                    $chimpSync->setData("mailchimp_sync_error", $error);
-                    $chimpSync->getResource()->save($chimpSync);
-                    $mailchimpErrors->setType($response->type);
-                    $mailchimpErrors->setTitle($response->title);
-                    $mailchimpErrors->setStatus($item->status_code);
-                    $mailchimpErrors->setErrors($errorDetails);
-                    $mailchimpErrors->setRegtype($type);
-                    $mailchimpErrors->setOriginalId($id);
-                    $mailchimpErrors->setBatchId($batchId);
-                    $mailchimpErrors->setMailchimpStoreId($mailchimpStoreId);
-                    $mailchimpErrors->setOriginalId($id);
-                    $mailchimpErrors->setBatchId($batchId);
-                    $mailchimpStoreId->setStoreId($storeId);
-                    $mailchimpErrors->getResource()->save($mailchimpErrors);
+                        $error = $response->title . " : " . $response->detail;
+                        /**
+                         * @var \Ebizmarts\MailChimp\Model\MailChimpSyncEcommerce $chimpSync
+                         */
+                        $chimpSync = $this->_helper->getChimpSyncEcommerce($mailchimpStoreId, $id, $type);
+                        $chimpSync->setData("mailchimp_sync_error", $error);
+                        $chimpSync->getResource()->save($chimpSync);
+                        $mailchimpErrors->setType($response->type);
+                        $mailchimpErrors->setTitle($response->title);
+                        $mailchimpErrors->setStatus($item->status_code);
+                        $mailchimpErrors->setErrors($errorDetails);
+                        $mailchimpErrors->setRegtype($type);
+                        $mailchimpErrors->setOriginalId($id);
+                        $mailchimpErrors->setBatchId($batchId);
+                        $mailchimpErrors->setMailchimpStoreId($mailchimpStoreId);
+                        $mailchimpErrors->setOriginalId($id);
+                        $mailchimpErrors->setBatchId($batchId);
+                        $mailchimpStoreId->setStoreId($storeId);
+                        $mailchimpErrors->getResource()->save($mailchimpErrors);
+                    }
                 }
+            } catch(\Exception $e) {
+                $this->_helper->log($e->getMessage());
             }
             unlink($file);
         }
