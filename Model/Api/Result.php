@@ -125,7 +125,6 @@ class Result
     protected function processEachResponseFile($files, $batchId, $mailchimpStoreId , $storeId)
     {
         foreach ($files as $file) {
-            $this->_helper->log("Proccesing file $file");
             $items = json_decode(file_get_contents($file));
             if ($items!==false) {
                 foreach ($items as $item) {
