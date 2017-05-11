@@ -49,8 +49,6 @@ class Getaccountdetails extends Action
         $param = $this->getRequest()->getParams();
         $apiKey = $param['apikey'];
         $store  = $param['store'];
-        $this->_helper->log($apiKey);
-        $this->_helper->log($store);
 
         $api = $this->_helper->getApiByApiKey($apiKey);
         $apiInfo = $api->root->info();
@@ -68,7 +66,10 @@ class Getaccountdetails extends Action
                 $options['total_orders'] = ['label'=> __('Total orders:'), 'value' =>$totalOrders['total_items']];
                 $totalCarts = $api->ecommerce->carts->getAll($store, 'total_items');
                 $options['total_carts'] = ['label'=> __('Total Carts:'), 'value' =>$totalCarts['total_items']];
-
+                $options['notsaved'] = ['label' => __('This MailChimp account is not connected to Magento.'), 'value'=>''];
+            }
+            else {
+                $options['nostore'] = ['label' => __('This MailChimp account is not connected to Magento.'), 'value'=>''];
             }
         }
 

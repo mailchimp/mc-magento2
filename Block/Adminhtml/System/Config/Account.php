@@ -20,7 +20,12 @@ class Account extends \Magento\Config\Block\System\Config\Form\Field
         $html .= '<ul class="checkboxes" id="mailchimp_general_account_details_ul">';
         if ($values) {
             foreach ($values as $dat) {
-                $html .= "<li>{$dat['value']}: {$dat['label']}</li>";
+                if ($dat['value']!=='') {
+                    $html .= "<li>{$dat['label']}: {$dat['value']}</li>";
+                }
+                else {
+                    $html .= "<li>{$dat['label']}</li>";
+                }
             }
         }
 

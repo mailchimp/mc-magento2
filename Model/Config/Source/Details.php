@@ -19,7 +19,7 @@ class Details implements \Magento\Framework\Option\ArrayInterface
      */
     private $_options = null;
     /**
-     * @var \Ebizmarts\MailChimp\Helper\Data|null
+     * @var \Ebizmarts\MailChimp\Helper\Data
      */
     private $_helper  = null;
     /**
@@ -44,7 +44,9 @@ class Details implements \Magento\Framework\Option\ArrayInterface
             try {
                 $this->_options = $api->root->info();
                 $mailchimpStoreId = $this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_MAILCHIMP_STORE);
-                if ($mailchimpStoreId && $this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_PATH_ECOMMERCE_ACTIVE)) {
+                if ($mailchimpStoreId && $mailchimpStoreId!=-1 && $this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_PATH_ECOMMERCE_ACTIVE)) {
+                    $storeInfo = $api->ecommerce->stores->get($mailchimpStoreId);
+                    $this->_options['is_syncing'] = $storeInfo['is_syncing'];
                     $this->_options['store_exists'] = true;
                     $totalCustomers = $api->ecommerce->customers->getAll($mailchimpStoreId, 'total_items');
                     $this->_options['total_customers'] = $totalCustomers['total_items'];
@@ -75,25 +77,39 @@ class Details implements \Magento\Framework\Option\ArrayInterface
         if (is_array($this->_options)) {
             if (isset($this->_options['account_name'])) {
                 $ret = [
-                    ['value' => 'Username', 'label' => $this->_options['account_name']],
-                    ['value' => 'Total Subscribers', 'label' => $this->_options['total_subscribers']],
-                    ['value' => 'Ecommerce Data uploaded to MailChimp', 'label' => '']
+                    ['label' => __('Username'), 'value' => $this->_options['account_name']],
+                    ['label' => 'Total Subscribers', 'value' => $this->_options['total_subscribers']],
+                    ['label' => 'Ecommerce Data uploaded to MailChimp', 'value' => '']
                 ];
                 if (isset($this->_options['store_exists']) && $this->_options['store_exists']) {
                     $ret = array_merge($ret, [
-                        ['value' => '  Total Customers', 'label' => $this->_options['total_customers']],
-                        ['value' => '  Total Products', 'label' => $this->_options['total_products']],
-                        ['value' => '  Total Orders', 'label' => $this->_options['total_orders']],
-                        ['value' => '  Total Carts', 'label' => $this->_options['total_carts']]
+                        ['label' => '  Total Customers', 'value' => $this->_options['total_customers']],
+                        ['label' => '  Total Products', 'value' => $this->_options['total_products']],
+                        ['label' => '  Total Orders', 'value' => $this->_options['total_orders']],
+                        ['label' => '  Total Carts', 'value' => $this->_options['total_carts']]
                     ]);
+                    if($this->_options['is_syncing']) {
+                        $ret = array_merge($ret, [
+                           ['label'=> __('This account is currently syncing'), 'value'=>'']
+                        ]);
+                    } else {
+                        $ret = array_merge($ret, [
+                            ['label'=> __('Synced since'), 'value'=>'']
+                        ]);
+                    }
+                }
+                else {
+                    $ret = array_merge($ret ,[
+                         ['label'=>'This MailChimp account is not connected to Magento.','value'=>'']
+                        ]);
                 }
             }
         } elseif (!$this->_options) {
             $ret = [
-                ['value' => 'Error', 'label' => __('--- Invalid API Key ---')]
+                ['label' => 'Error', 'value' => __('--- Invalid API Key ---')]
             ];
         } else {
-            $ret = [['value' => 'Important', 'label' => __($this->_options)]];
+            $ret = [['label' => 'Important', 'value' => __($this->_options)]];
         }
         return $ret;
     }

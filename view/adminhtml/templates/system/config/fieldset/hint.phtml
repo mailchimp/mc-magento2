@@ -10,7 +10,10 @@
  */
 ?>
 <div id="configmonkey_apikey" class="admin__page-section-item" style="display:none;"
-     data-mage-init='{"configmonkeyapikey":{"storeUrl": "<?php echo $this->getUrl('mailchimp/stores/get');?>","detailsUrl": "<?php echo $this->getUrl('mailchimp/ecommerce/getaccountdetails');?>"}}'>
+     data-mage-init='{"configmonkeyapikey":{
+     "storeUrl": "<?php echo $this->getUrl('mailchimp/stores/get');?>",
+     "detailsUrl": "<?php echo $this->getUrl('mailchimp/ecommerce/getaccountdetails');?>",
+     "storeGridUrl": "<?php echo $this->getUrl('mailchimp/stores/index');?>"}}'>
 </div>
 <div style="background:#EAF0EE;border:1px solid #CCCCCC;margin-bottom:10px;padding:11px 0 0 10px;">
     <h4>

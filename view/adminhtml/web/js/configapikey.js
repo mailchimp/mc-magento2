@@ -16,7 +16,8 @@ define([
         $.widget('mage.configmonkeyapikey', {
             "options": {
               "storeUrl": "",
-              "detailsUrl": ""
+              "detailsUrl": "",
+              "storeGridUrl": ""
             },
 
             _init: function () {
@@ -32,6 +33,10 @@ define([
                 $('#mailchimp_general_monkeystore').change(function() {
                     self._loadDetails();
                 });
+                $('#row_mailchimp_general_monkeystore').find('.note').append(' <a href="'+self.options.storeGridUrl+'">here</a>');
+                if($('#mailchimp_general_monkeystore option').length>1) {
+                    $('#row_mailchimp_general_monkeystore .note').hide();
+                }
             },
 
             _loadStores: function (apiKey) {
@@ -69,6 +74,11 @@ define([
                         }
                     });
                 });
+                if($('#mailchimp_general_monkeystore option').length>1) {
+                    $('#row_mailchimp_general_monkeystore .note').hide();
+                } else {
+                    $('#row_mailchimp_general_monkeystore .note').show();
+                }
                 this._loadDetails();
             },
             _loadApiKeys: function(oldApiKey) {

@@ -49,6 +49,7 @@
                     <label>Mailchimp Store</label>
                     <source_model>Ebizmarts\MailChimp\Model\Config\Source\MonkeyStore</source_model>
                     <backend_model>Ebizmarts\MailChimp\Model\Config\Backend\MonkeyStore</backend_model>
+                    <comment>You must create a MailChimp Store for this API key to connect to this account</comment>
                     <depends>
                         <field id="*/*/active">1</field>
                     </depends>
