@@ -23,9 +23,11 @@
                         </resource>
                     </resource>
                 </resource>
-                <resource id="Ebizmarts_MailChimp::error_grid" title="MailChimp Error Grid" sortOrder="100"/>
-                <resource id="Ebizmarts_MailChimp::stores_grid" title="MailChimp Stores Grid" sortOrder="110">
-                    <resource id="Ebizmarts_MailChimp::stores_edit" title="MailChimp Stores Edit" sortOrder="120"/>
+                <resource id="Ebizmarts_MailChimp::menu">
+                    <resource id="Ebizmarts_MailChimp::error_grid" title="MailChimp Error Grid" sortOrder="100"/>
+                    <resource id="Ebizmarts_MailChimp::stores_grid" title="MailChimp Stores Grid" sortOrder="110">
+                        <resource id="Ebizmarts_MailChimp::stores_edit" title="MailChimp Stores Edit" sortOrder="120"/>
+                    </resource>
                 </resource>
             </resource>
         </resources>

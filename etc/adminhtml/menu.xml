@@ -6,13 +6,13 @@
              module="Ebizmarts_MailChimp"
              sortOrder="110"
              dependsOnModule="Ebizmarts_MailChimp"
-             resource="Magento_Backend::content"
+             resource="Magento_Backend::menu"
         />
         <add id="Ebizmarts_MailChimp::config_menu"
              title="Configuration"
              module="Ebizmarts_MailChimp"
              sortOrder="10"
-             resource="Magento_Backend::content"
+             resource="Ebizmarts_MailChimp::config_mailchimp"
              parent="Ebizmarts_MailChimp::mailchimp_menu"
              action="adminhtml/system_config/edit/section/mailchimp"
         />
@@ -20,7 +20,7 @@
              title="MailChimp Stores"
              module="Ebizmarts_MailChimp"
              sortOrder="20"
-             resource="Magento_Backend::content"
+             resource="Ebizmarts_MailChimp::stores_grid"
              parent="Ebizmarts_MailChimp::mailchimp_menu"
              action="mailchimp/stores"
         />
@@ -28,7 +28,7 @@
              title="Errors"
              module="Ebizmarts_MailChimp"
              sortOrder="30"
-             resource="Magento_Backend::content"
+             resource="Ebizmarts_MailChimp::error_grid"
              parent="Ebizmarts_MailChimp::mailchimp_menu"
              action="mailchimp/errors"
         />
