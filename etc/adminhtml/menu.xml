@@ -6,7 +6,7 @@
              module="Ebizmarts_MailChimp"
              sortOrder="110"
              dependsOnModule="Ebizmarts_MailChimp"
-             resource="Ebizmarts_MailChimp::menu"
+             resource="Ebizmarts_MailChimp::main_menu"
         />
         <add id="Ebizmarts_MailChimp::config_menu"
              title="Configuration"
