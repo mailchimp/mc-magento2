@@ -49,28 +49,30 @@ class Getaccountdetails extends Action
         $param = $this->getRequest()->getParams();
         $apiKey = $param['apikey'];
         $store  = $param['store'];
-
-        $api = $this->_helper->getApiByApiKey($apiKey);
-        $apiInfo = $api->root->info();
-        $options = [];
-        if(isset($apiInfo['account_name'])) {
-            $options['username'] = ['label' => __('User name:'), 'value' => $apiInfo['account_name']];
-            $options['total_subscribers'] = ['label'=> __('Total Subscribers:'), 'value' => $apiInfo['total_subscribers']];
-            if($store != -1) {
-                $options['subtitle'] = ['label'=> __('Ecommerce Data uploaded to MailChimp:'), 'value' =>''];
-                $totalCustomers = $api->ecommerce->customers->getAll($store, 'total_items');
-                $options['total_customers'] = ['label' => __('Total customers:'), 'value' => $totalCustomers['total_items']];
-                $totalProducts = $api->ecommerce->products->getAll($store, 'total_items');
-                $options['total_products'] = ['label'=> __('Total products:'), 'value' =>$totalProducts['total_items']];
-                $totalOrders = $api->ecommerce->orders->getAll($store, 'total_items');
-                $options['total_orders'] = ['label'=> __('Total orders:'), 'value' =>$totalOrders['total_items']];
-                $totalCarts = $api->ecommerce->carts->getAll($store, 'total_items');
-                $options['total_carts'] = ['label'=> __('Total Carts:'), 'value' =>$totalCarts['total_items']];
-                $options['notsaved'] = ['label' => __('This MailChimp account is not connected to Magento.'), 'value'=>''];
+        try {
+            $api = $this->_helper->getApiByApiKey($apiKey);
+            $apiInfo = $api->root->info();
+            $options = [];
+            if (isset($apiInfo['account_name'])) {
+                $options['username'] = ['label' => __('User name:'), 'value' => $apiInfo['account_name']];
+                $options['total_subscribers'] = ['label' => __('Total Subscribers:'), 'value' => $apiInfo['total_subscribers']];
+                if ($store != -1) {
+                    $options['subtitle'] = ['label' => __('Ecommerce Data uploaded to MailChimp:'), 'value' => ''];
+                    $totalCustomers = $api->ecommerce->customers->getAll($store, 'total_items');
+                    $options['total_customers'] = ['label' => __('Total customers:'), 'value' => $totalCustomers['total_items']];
+                    $totalProducts = $api->ecommerce->products->getAll($store, 'total_items');
+                    $options['total_products'] = ['label' => __('Total products:'), 'value' => $totalProducts['total_items']];
+                    $totalOrders = $api->ecommerce->orders->getAll($store, 'total_items');
+                    $options['total_orders'] = ['label' => __('Total orders:'), 'value' => $totalOrders['total_items']];
+                    $totalCarts = $api->ecommerce->carts->getAll($store, 'total_items');
+                    $options['total_carts'] = ['label' => __('Total Carts:'), 'value' => $totalCarts['total_items']];
+                    $options['notsaved'] = ['label' => __('This MailChimp account is not connected to Magento.'), 'value' => ''];
+                } else {
+                    $options['nostore'] = ['label' => __('This MailChimp account is not connected to Magento.'), 'value' => ''];
+                }
             }
-            else {
-                $options['nostore'] = ['label' => __('This MailChimp account is not connected to Magento.'), 'value'=>''];
-            }
+        } catch(\Mailchimp_Error $e) {
+            $options['error'] = ['label' => 'Error', 'value' => __('--- Invalid API Key ---')];
         }
 
 

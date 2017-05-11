@@ -40,6 +40,7 @@ define([
             },
 
             _loadStores: function (apiKey) {
+                var self = this;
                 var storeUrl = this.options.storeUrl;
                 // remove all items in list combo
                 $('#mailchimp_general_monkeystore').empty();
@@ -73,13 +74,13 @@ define([
                             }));
                         }
                     });
+                    if($('#mailchimp_general_monkeystore option').length>1) {
+                        $('#row_mailchimp_general_monkeystore').find('.note').hide();
+                    } else {
+                        $('#row_mailchimp_general_monkeystore').find('.note').show();
+                    }
+                    self._loadDetails();
                 });
-                if($('#mailchimp_general_monkeystore option').length>1) {
-                    $('#row_mailchimp_general_monkeystore .note').hide();
-                } else {
-                    $('#row_mailchimp_general_monkeystore .note').show();
-                }
-                this._loadDetails();
             },
             _loadApiKeys: function(oldApiKey) {
                 $('#mailchimp_general_apikey').empty();

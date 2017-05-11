@@ -50,13 +50,17 @@ class Get extends Action
     {
         $param = $this->getRequest()->getParams();
         $apiKey = $param['apikey'];
-        $api = $this->_helper->getApiByApiKey($apiKey);
-        $stores = $api->ecommerce->stores->get(null,null,null,self::MAX_STORES);
-        $result = [];
-        foreach($stores['stores'] as $store) {
-            if($store['platform']==\Ebizmarts\MailChimp\Helper\Data::PLATFORM) {
-                $result[] = ['id' => $store['id'], 'name' => $store['name']];
+        try {
+            $api = $this->_helper->getApiByApiKey($apiKey);
+            $stores = $api->ecommerce->stores->get(null, null, null, self::MAX_STORES);
+            $result = [];
+            foreach ($stores['stores'] as $store) {
+                if ($store['platform'] == \Ebizmarts\MailChimp\Helper\Data::PLATFORM) {
+                    $result[] = ['id' => $store['id'], 'name' => $store['name']];
+                }
             }
+        } catch(\Mailchimp_Error $e) {
+            $result = [];
         }
         $resultJson = $this->_resultFactory->create(ResultFactory::TYPE_JSON);
         $resultJson->setData($result);
