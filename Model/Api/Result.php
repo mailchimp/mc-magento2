@@ -168,7 +168,7 @@ class Result
                         $mailchimpErrors->setMailchimpStoreId($mailchimpStoreId);
                         $mailchimpErrors->setOriginalId($id);
                         $mailchimpErrors->setBatchId($batchId);
-                        $mailchimpStoreId->setStoreId($storeId);
+                        $mailchimpErrors->setStoreId($storeId);
                         $mailchimpErrors->getResource()->save($mailchimpErrors);
                     }
                 }
