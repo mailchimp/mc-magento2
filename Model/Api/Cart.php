@@ -117,7 +117,7 @@ class Cart
         $mailchimpStoreId = $this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_MAILCHIMP_STORE,$magentoStoreId);
 
         $date = $this->_helper->getDateMicrotime();
-        $this->_batchId = 'storeid-' . $magentoStoreId . '_' . \Ebizmarts\MailChimp\Helper\Data::IS_QUOTE.'_'.$date;
+        $this->_batchId =  \Ebizmarts\MailChimp\Helper\Data::IS_QUOTE.'_'.$date;
         // get all the carts converted in orders (must be deleted on mailchimp)
         $allCarts = array_merge($allCarts, $this->_getConvertedQuotes($mailchimpStoreId, $magentoStoreId));
         // get all the carts modified but not converted in orders
