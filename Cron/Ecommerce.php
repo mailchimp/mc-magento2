@@ -46,6 +46,10 @@ class Ecommerce
      * @var \Ebizmarts\MailChimp\Model\MailChimpSyncBatches
      */
     private $_mailChimpSyncBatches;
+    /**
+     * @var \Ebizmarts\MailChimp\Model\Api\Subscriber
+     */
+    private $_apiSubscribers;
 
     /**
      * Ecommerce constructor.
@@ -56,6 +60,7 @@ class Ecommerce
      * @param \Ebizmarts\MailChimp\Model\Api\Customer $apiCustomer
      * @param \Ebizmarts\MailChimp\Model\Api\Order $apiOrder
      * @param \Ebizmarts\MailChimp\Model\Api\Cart $apiCart
+     * @param \Ebizmarts\MailChimp\Model\Api\Subscriber $apiSubscriber
      * @param \Ebizmarts\MailChimp\Model\MailChimpSyncBatches $mailChimpSyncBatches
      */
     public function __construct(
@@ -66,6 +71,7 @@ class Ecommerce
         \Ebizmarts\MailChimp\Model\Api\Customer $apiCustomer,
         \Ebizmarts\MailChimp\Model\Api\Order $apiOrder,
         \Ebizmarts\MailChimp\Model\Api\Cart $apiCart,
+        \Ebizmarts\MailChimp\Model\Api\Subscriber $apiSubscriber,
         \Ebizmarts\MailChimp\Model\MailChimpSyncBatches $mailChimpSyncBatches
     )
     {
@@ -77,6 +83,7 @@ class Ecommerce
         $this->_apiCustomer     = $apiCustomer;
         $this->_apiOrder        = $apiOrder;
         $this->_apiCart         = $apiCart;
+        $this->_apiSubscribers  = $apiSubscriber;
     }
 
     public function execute()
@@ -100,7 +107,9 @@ class Ecommerce
         $batchArray = array();
         $results = array();
         if ($this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_PATH_ECOMMERCE_ACTIVE,$storeId)) {
-            $results =  $this->_apiProduct->_sendProducts($storeId);
+            $results = $this->_apiSubscribers->sendSubscribers($storeId);
+            $products =  $this->_apiProduct->_sendProducts($storeId);
+            $results = array_merge($results, $products);
             $customers = $this->_apiCustomer->sendCustomers($storeId);
             $results = array_merge($results,$customers);
             $orders = $this->_apiOrder->sendOrders($storeId);

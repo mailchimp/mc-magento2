@@ -325,9 +325,9 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         }
         return null;
     }
-    public function getMCMinSyncDateFlag()
+    public function getMCMinSyncDateFlag($storeId = null)
     {
-        return $this->getConfigValue(self::XML_PATH_SYNC_DATE);
+        return $this->getConfigValue(self::XML_PATH_SYNC_DATE,$storeId);
     }
     public function getBaseDir()
     {
@@ -435,7 +435,16 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
             return $merge_vars;
         }
     }
-
+    public function getGeneralList($storeId)
+    {
+        $mailchimpStoreId = $this->getConfigValue(self::XML_MAILCHIMP_STORE,$storeId);
+        $api = $this->getApi($storeId);
+        $store =$api->ecommerce->stores->get($mailchimpStoreId);
+        if (isset($store['list_id'])) {
+            return $store['list_id'];
+        }
+        return null;
+    }
     protected function _getSubscriberMergeVarsValues($map, $subscriber, $merge_vars)
     {
         $customAtt = $map['magento'];
