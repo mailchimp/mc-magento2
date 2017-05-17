@@ -315,6 +315,18 @@ class UpgradeSchema implements UpgradeSchemaInterface
                 ]
             );
         }
+        if (version_compare($context->getVersion(), '1.0.14') < 0) {
+            $installer->getConnection()->addColumn(
+                $installer->getTable('mailchimp_sync_ecommerce'),
+                'batch_id',
+                [
+                    'type' => \Magento\Framework\DB\Ddl\Table::TYPE_TEXT,
+                    'length' => 64,
+                    'default' => null,
+                    'comment' => 'Mailchimp batch Id'
+                ]
+            );
+        }
         $installer->endSetup();
     }
 }

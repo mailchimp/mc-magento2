@@ -243,8 +243,8 @@ class Order
                     $batchArray[$this->_counter]['operation_id'] = $this->_batchId . '_' . $orderId;
                     $batchArray[$this->_counter]['body'] = $orderJson;
                 } else {
-                    $error = $this->_helper->__('Something went wrong when retreiving product information.');
-                    $this->_updateOrder($mailchimpStoreId, $orderId, $this->_date->gmtDate(), $error, 0);
+                    $error = __('Something went wrong when retreiving product information.');
+//                    $this->_updateOrder($mailchimpStoreId, $orderId, $this->_date->gmtDate(), $error, 0);
                 }
 
                 //update order delta
@@ -320,6 +320,7 @@ class Order
          * @var $item \Magento\Sales\Model\Order\Item
          */
         foreach ($items as $item) {
+            $variant = null;
             $productSyncData = $this->_helper->getChimpSyncEcommerce($mailchimpStoreId, $item->getProductId(),
                 \Ebizmarts\MailChimp\Helper\Data::IS_PRODUCT);
             if ($item->getProductType() == \Magento\ConfigurableProduct\Model\Product\Type\Configurable::TYPE_CODE) {
@@ -332,7 +333,7 @@ class Order
             } else {
                 $variant = $item->getProductId();
             }
-            if ($productSyncData->getMailchimpSyncDelta() && $productSyncData->getMailchimpSyncError() == 0) {
+            if ($productSyncData->getMailchimpSyncDelta() && $productSyncData->getMailchimpSyncError() == '' && $variant) {
                 $itemCount++;
                 $data["lines"][] = array(
                     "id" => (string)$itemCount,
@@ -350,7 +351,6 @@ class Order
         }
 
         //customer data
-
         $api = $this->_helper->getApi();
         $customers = array();
         try {
@@ -510,7 +510,6 @@ class Order
 //            }
         }
         //customer orders data
-
         $orderCollection = $this->_orderCollectionFactory->create();
         $orderCollection->addFieldToFilter('state', array(
             array('neq',\Magento\Sales\Model\Order::STATE_CANCELED),

@@ -51,7 +51,7 @@ class Product
      */
     protected $_batchId;
     /**
-     * @var \Ebizmarts\MailChimp\Model\MailChimpSyncEcommerce
+     * @var \Ebizmarts\MailChimp\Model\MailChimpSyncEcommerceFactory
      */
     protected $_chimpSyncEcommerce;
 
@@ -64,7 +64,7 @@ class Product
      * @param \Magento\Catalog\Helper\Image $imageHelper
      * @param \Magento\CatalogInventory\Api\StockRegistryInterface $stockRegistry
      * @param \Magento\Catalog\Model\CategoryRepository $categoryRepository
-     * @param \Ebizmarts\MailChimp\Model\MailChimpSyncEcommerce $chimpSyncEcommerce
+     * @param \Ebizmarts\MailChimp\Model\MailChimpSyncEcommerceFactory $chimpSyncEcommerce
      */
     public function __construct(
         \Magento\Catalog\Model\ResourceModel\Product\CollectionFactory $productCollection,
@@ -74,7 +74,7 @@ class Product
         \Magento\Catalog\Helper\Image $imageHelper,
         \Magento\CatalogInventory\Api\StockRegistryInterface $stockRegistry,
         \Magento\Catalog\Model\CategoryRepository $categoryRepository,
-        \Ebizmarts\MailChimp\Model\MailChimpSyncEcommerce $chimpSyncEcommerce
+        \Ebizmarts\MailChimp\Model\MailChimpSyncEcommerceFactory $chimpSyncEcommerce
     )
     {
         $this->_productRepository   = $productRepository;
@@ -311,13 +311,11 @@ class Product
         {
             //@todo get from the store not the default
             $product = $this->_productRepository->getById($item->getProductId());
-            $productSyncData = $this->_chimpSyncEcommerce->getByStoreIdType($mailchimpStoreId,$product->getId(),
+            $productSyncData = $this->_chimpSyncEcommerce->create()->getByStoreIdType($mailchimpStoreId,$product->getId(),
                 \Ebizmarts\MailChimp\Helper\Data::IS_PRODUCT);
-
             if ($product->getId()!=$item->getProductId()||$product->getTypeId()=='bundle'||$product->getTypeId()=='grouped') {
                 continue;
             }
-
             if ($productSyncData->getMailchimpSyncModified() &&
                 $productSyncData->getMailchimpSyncDelta() > $this->_helper->getMCMinSyncDateFlag()) {
                 $data[] = $this->_buildOldProductRequest($product,$batchId,$mailchimpStoreId,$magentoStoreId);
@@ -343,7 +341,7 @@ class Product
         {
             //@todo get from the store not the default
             $product = $this->_productRepository->getById($item->getProductId());
-            $productSyncData = $this->_chimpSyncEcommerce->getByStoreIdType($mailchimpStoreId,$product->getId(),
+            $productSyncData = $this->_chimpSyncEcommerce->create()->getByStoreIdType($mailchimpStoreId,$product->getId(),
                 \Ebizmarts\MailChimp\Helper\Data::IS_PRODUCT);
 
             if ($product->getId()!=$item->getProductId()||$product->getTypeId()=='bundle'||$product->getTypeId()=='grouped') {
