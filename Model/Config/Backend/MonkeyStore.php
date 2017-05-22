@@ -71,6 +71,7 @@ class  MonkeyStore extends \Magento\Framework\App\Config\Value
     {
         $generalData = $this->getData();
         $data = $this->getData('groups');
+        $this->_helper->log($data);
         $found = 0;
         if (isset($data['ecommerce']['fields']['active']['value'])) {
             $active = $data['ecommerce']['fields']['active']['value'];
@@ -78,12 +79,31 @@ class  MonkeyStore extends \Magento\Framework\App\Config\Value
             $active = $data['ecommerce']['fields']['active']['inherit'];
         }
         if ($active&&$this->isValueChanged()) {
-            $mailchimpStore = $this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_MAILCHIMP_STORE, $generalData['scope_id']);
+//            $mailchimpStore = $this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_MAILCHIMP_STORE, $generalData['scope_id']);
+            $mailchimpStore     = $this->getOldValue();
+            $apiKey = $this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_PATH_APIKEY, $generalData['scope_id']);
+            $newMailchimpStore  = $this->getValue();
+            $newApiKey = $data['general']['fields']['apikey']['value'];
+            $this->_helper->log($apiKey);
+            $this->_helper->log($newApiKey);
+
+            $newListId = $this->_helper->getListForMailChimpStore($newMailchimpStore, $newApiKey);
+            $oldListId = $this->_helper->getListForMailChimpStore($mailchimpStore, $apiKey);
+
+            $data['general']['fields']['list_id']['value'] = $newListId;
+            $this->setData('groups',$data);
+
 //            $this->resourceConfig->deleteConfig(\Ebizmarts\MailChimp\Helper\Data::XML_MAILCHIMP_STORE, $generalData['scope'], $generalData['scope_id']);
             foreach ($this->_storeManager->getStores() as $storeId => $val) {
                 if ($this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_MAILCHIMP_STORE, $storeId) == $mailchimpStore) {
                     $found++;
                 }
+//                $listId = $this->_helper->getGeneralList($storeId);
+//                if (isset($lists[$listId])) {
+//                    $lists[$listId] = $lists[$listId] +1;
+//                } else {
+//                    $lists[$listId] = 1;
+//                }
             }
             if ($found==1) {
                 $this->_helper->markAllBatchesAs($mailchimpStore, 'canceled');

@@ -73,6 +73,7 @@ class Subscriber
         $subscriber,
         $customerId
     ) {
+        $this->_helper->log(__METHOD__);
         $subscriber->loadByCustomerId($customerId);
         $subscriber->setImportMode(true);
         $storeId = $subscriber->getStoreId();
@@ -109,6 +110,7 @@ class Subscriber
         $subscriber,
         $email
     ) {
+        $this->_helper->log(__METHOD__);
         $storeId = $this->_storeManager->getStore()->getId();
 
         if ($this->_helper->isMailChimpEnabled($storeId)) {

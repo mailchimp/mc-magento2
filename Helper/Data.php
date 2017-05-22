@@ -445,6 +445,18 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         }
         return null;
     }
+
+    public function getListForMailChimpStore($mailchimpStoreId,$apiKey)
+    {
+        $api = $this->getApiByApiKey($apiKey);
+        $store =$api->ecommerce->stores->get($mailchimpStoreId);
+        if (isset($store['list_id'])) {
+            return $store['list_id'];
+        }
+        return null;
+    }
+
+
     protected function _getSubscriberMergeVarsValues($map, $subscriber, $merge_vars)
     {
         $customAtt = $map['magento'];

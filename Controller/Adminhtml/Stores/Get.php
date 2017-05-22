@@ -56,7 +56,8 @@ class Get extends Action
             $result = [];
             foreach ($stores['stores'] as $store) {
                 if ($store['platform'] == \Ebizmarts\MailChimp\Helper\Data::PLATFORM) {
-                    $result[] = ['id' => $store['id'], 'name' => $store['name']];
+                    $list = $api->lists->getLists($store['list_id']);
+                    $result[] = ['id' => $store['id'], 'name' => $store['name'], 'list_name' => $list['name'], 'list_id' => $store['list_id']];
                 }
             }
         } catch(\Mailchimp_Error $e) {
