@@ -37,7 +37,7 @@ define([
                 if($('#mailchimp_general_monkeystore option').length>1) {
                     $('#row_mailchimp_general_monkeystore .note').hide();
                 }
-                $('#mailchimp_general_list').prop('disabled', true);
+                //$('#mailchimp_general_monkeylist').prop('disabled', true);
             },
 
             _loadStores: function (apiKey) {
@@ -50,7 +50,7 @@ define([
                     value: -1,
                     text : 'Select one Mailchimp Store'
                 }));
-                $('#mailchimp_general_list').append($('<option>', {
+                $('#mailchimp_general_monkeylist').append($('<option>', {
                     value: -1,
                     text : 'Select one Mailchimp Store'
                 }));
@@ -126,7 +126,7 @@ define([
                 var selectedApiKey = $('#mailchimp_general_apikey').find(':selected').val();
                 var selectedStore = $('#mailchimp_general_monkeystore').find(':selected').val();
                 $('#mailchimp_general_account_details_ul').empty();
-                $('#mailchimp_general_list').empty();
+                $('#mailchimp_general_monkeylist').empty();
                 $.ajax({
                         url: detailsUrl,
                         data: {'form_key':  window.FORM_KEY, 'apikey': selectedApiKey, "store": selectedStore},
@@ -140,7 +140,7 @@ define([
                             $('#mailchimp_general_account_details_ul').append('<li>' + item.label + ' ' + item.value + '</li>');
                         }
                     });
-                    $('#mailchimp_general_list').append($('<option>', {
+                    $('#mailchimp_general_monkeylist').append($('<option>', {
                         value: data.list_id,
                         text: data.list_name,
                         selected: "selected"

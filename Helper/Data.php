@@ -21,7 +21,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     const XML_PATH_APIKEY            = 'mailchimp/general/apikey';
     const XML_PATH_APIKEY_LIST       = 'mailchimp/general/apikeylist';
     const XML_PATH_MAXLISTAMOUNT     = 'mailchimp/general/maxlistamount';
-    const XML_PATH_LIST              = 'mailchimp/general/list';
+    const XML_PATH_LIST              = 'mailchimp/general/monkeylist';
     const XML_PATH_LOG               = 'mailchimp/general/log';
     const XML_PATH_MAPPING           = 'mailchimp/general/mapping';
     const XML_MAILCHIMP_STORE        = 'mailchimp/general/monkeystore';
