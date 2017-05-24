@@ -7,13 +7,13 @@
  * @author Ebizmarts Team <info@ebizmarts.com>
  * @copyright Ebizmarts (http://ebizmarts.com)
  * @license     http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
- * @date: 3/29/17 4:29 PM
- * @file: MonkeyStore.php
+ * @date: 5/22/17 3:08 PM
+ * @file: MonkeyList.php
  */
 
 namespace Ebizmarts\MailChimp\Model\Config\Backend;
 
-class  MonkeyStore extends \Magento\Framework\App\Config\Value
+class MonkeyList extends \Magento\Framework\App\Config\Value
 {
     /**
      * @var \Ebizmarts\MailChimp\Helper\Data
@@ -31,9 +31,6 @@ class  MonkeyStore extends \Magento\Framework\App\Config\Value
      * @var \Magento\Store\Model\StoreManager
      */
     private $_storeManager;
-
-    private $oldListId = null;
-
 
     /**
      * ApiKey constructor.
@@ -69,42 +66,13 @@ class  MonkeyStore extends \Magento\Framework\App\Config\Value
         parent::__construct($context, $registry, $config, $cacheTypeList, $resource, $resourceCollection, $data);
     }
 
-
-    public function beforeSave()
+    public function afterSave()
     {
         $generalData = $this->getData();
         $data = $this->getData('groups');
-        $found = 0;
-        if (isset($data['ecommerce']['fields']['active']['value'])) {
-            $active = $data['ecommerce']['fields']['active']['value'];
-        } elseif ($data['ecommerce']['fields']['active']['inherit']) {
-            $active = $data['ecommerce']['fields']['active']['inherit'];
-        }
-        if ($active&&$this->isValueChanged()) {
-            $mailchimpStore     = $this->getOldValue();
-            $newListId = $data['general']['fields']['monkeylist']['value'];
-            $this->oldListId = $this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_PATH_LIST, $generalData['scope_id']);
-
-            $createWebhook = true;
-            foreach ($this->_storeManager->getStores() as $storeId => $val) {
-                $mstoreId = $this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_MAILCHIMP_STORE, $storeId);
-                if ( $mstoreId == $mailchimpStore) {
-                    $found++;
-                }
-//                $api = $this->_helper->getApi($storeId);
-//                $store = $api->ecommerce->stores->get($mstoreId);
-                $listId = $this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_PATH_LIST, $storeId);
-                if ( $listId == $newListId) {
-                    $createWebhook = false;
-                }
-            }
-            if ($found==1) {
-                $this->_helper->markAllBatchesAs($mailchimpStore, 'canceled');
-            }
-            if ($createWebhook) {
-                $this->_helper->createWebHook($data['general']['fields']['apikey']['value'], $newListId);
-            }
-        }
-        return parent::beforeSave();
+        $oldListId = $this->getOldValue();
+        $this->_registry->register('oldListId',$oldListId);
+        $this->_registry->register('apiKey',$data['general']['fields']['apikey']['value']);
+        return parent::afterSave();
     }
 }

@@ -3,4 +3,7 @@
     <event name="sales_order_save_after">
         <observer name="sales_order_save_after" instance="\Ebizmarts\MailChimp\Observer\Sales\Order\SaveAfter"/>
     </event>
+    <event name="admin_system_config_changed_section_mailchimp">
+        <observer name="mailchimp_admin_system_config_changed_section_mailchimp" instance="Ebizmarts\MailChimp\Observer\ConfigObserver"/>
+    </event>
 </config>

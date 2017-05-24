@@ -57,7 +57,7 @@
                 <field id="monkeylist" translate="label" type="select" sortOrder="30" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Mailchimp List</label>
                     <source_model>Ebizmarts\MailChimp\Model\Config\Source\MonkeyList</source_model>
-                    <!--<backend_model>Ebizmarts\MailChimp\Model\Config\Backend\List</backend_model>-->
+                    <backend_model>Ebizmarts\MailChimp\Model\Config\Backend\MonkeyList</backend_model>
                     <depends>
                         <field id="*/*/active">1</field>
                     </depends>

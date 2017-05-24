@@ -629,4 +629,48 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         }
         return $url;
     }
+    public function createWebHook($apikey,$listId)
+    {
+        $this->log('must create the webhook in list '.$listId.' whith apikey '.$apikey);
+        $events = array(
+            'subscribe' => true,
+            'unsubscribe' => true,
+            'profile' => true,
+            'cleaned' => true,
+            'upemail' => true,
+            'campaign' => false
+        );
+        $sources = array(
+            'user' => true,
+            'admin' => true,
+            'api' => true
+        );
+        $api = $this->getApiByApiKey($apikey);
+        $hookUrl = $this->_getUrl(\Ebizmarts\MailChimp\Controller\WebHook\Index::WEBHOOK__PATH,array(
+            '_nosid' => true,
+            '_secure' => true));
+        $this->log($hookUrl);
+        try {
+            $ret = $api->lists->webhooks->add($listId, $hookUrl, $events, $sources);
+        } catch(\Mailchimp_Error $e) {
+            $this->log($e->getMessage());
+        }
+
+    }
+    public function deleteWebHook($apikey,$listId)
+    {
+        $this->log('must delete the webhook in list '.$listId.' whith apikey '.$apikey);
+        $api = $this->getApiByApiKey($apikey);
+        $webhooks = $api->lists->webhooks->getAll($listId);
+        $hookUrl = $this->_getUrl(\Ebizmarts\MailChimp\Controller\WebHook\Index::WEBHOOK__PATH,array(
+            '_nosid' => true,
+            '_secure' => true));
+        if (isset($webhooks['webhooks'])) {
+            foreach ($webhooks['webhooks'] as $wh) {
+                if ($wh['url'] == $hookUrl) {
+                    $api->lists->webhooks->delete($listId, $wh['id']);
+                }
+            }
+        }
+    }
 }
