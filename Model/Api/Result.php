@@ -133,10 +133,13 @@ class Result
                         $type = $line[0];
                         $id = $line[2];
 
-                        $mailchimpErrors = $this->_chimpErrors->create();
 
                         //parse error
                         $response = json_decode($item->response);
+                        if (preg_match('/already exists/',$response->detail)) {
+                            continue;
+                        }
+                        $mailchimpErrors = $this->_chimpErrors->create();
                         $errorDetails = "";
                         if (!empty($response->errors)) {
                             foreach ($response->errors as $error) {
