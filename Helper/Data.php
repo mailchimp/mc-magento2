@@ -115,6 +115,10 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
      * @var \Ebizmarts\MailChimp\Model\MailChimpStores
      */
     private $_mailChimpStores;
+    /**
+     * @var \Magento\Framework\Encryption\Encryptor
+     */
+    private $_encryptor;
 
     /**
      * Data constructor.
@@ -133,6 +137,8 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
      * @param \Ebizmarts\MailChimp\Model\MailChimpSyncBatches $syncBatches
      * @param \Ebizmarts\MailChimp\Model\MailChimpStoresFactory $mailChimpStoresFactory
      * @param \Ebizmarts\MailChimp\Model\MailChimpStores $mailChimpStores
+     * @param \Magento\Framework\Encryption\Encryptor $encryptor
+     *
      */
     public function __construct(
         \Magento\Framework\App\Helper\Context $context,
@@ -149,7 +155,8 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         \Ebizmarts\MailChimp\Model\MailChimpSyncEcommerce $mailChimpSyncE,
         \Ebizmarts\MailChimp\Model\MailChimpSyncBatches $syncBatches,
         \Ebizmarts\MailChimp\Model\MailChimpStoresFactory $mailChimpStoresFactory,
-        \Ebizmarts\MailChimp\Model\MailChimpStores $mailChimpStores
+        \Ebizmarts\MailChimp\Model\MailChimpStores $mailChimpStores,
+        \Magento\Framework\Encryption\Encryptor $encryptor
     ) {
     
         $this->_storeManager  = $storeManager;
@@ -168,6 +175,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         $this->_syncBatches             = $syncBatches;
         $this->_mailChimpStores         = $mailChimpStores;
         $this->_mailChimpStoresFactory  = $mailChimpStoresFactory;
+        $this->_encryptor               = $encryptor;
         parent::__construct($context);
     }
 
@@ -629,9 +637,18 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         }
         return $url;
     }
+
+    public function getWebhooksKey()
+    {
+        $keys =explode("\n",$this->_encryptor->exportKeys());
+        $crypt = md5((string)$keys[0]);
+        $key = substr($crypt, 0, (strlen($crypt) / 2));
+
+        return $key;
+    }
+
     public function createWebHook($apikey,$listId)
     {
-        $this->log('must create the webhook in list '.$listId.' whith apikey '.$apikey);
         $events = array(
             'subscribe' => true,
             'unsubscribe' => true,
@@ -647,9 +664,9 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         );
         $api = $this->getApiByApiKey($apikey);
         $hookUrl = $this->_getUrl(\Ebizmarts\MailChimp\Controller\WebHook\Index::WEBHOOK__PATH,array(
+            'wkey' => $this->getWebhooksKey(),
             '_nosid' => true,
             '_secure' => true));
-        $this->log($hookUrl);
         try {
             $ret = $api->lists->webhooks->add($listId, $hookUrl, $events, $sources);
         } catch(\Mailchimp_Error $e) {
@@ -659,7 +676,9 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     }
     public function deleteWebHook($apikey,$listId)
     {
-        $this->log('must delete the webhook in list '.$listId.' whith apikey '.$apikey);
+        if (empty($listId)) {
+            return;
+        }
         $api = $this->getApiByApiKey($apikey);
         $webhooks = $api->lists->webhooks->getAll($listId);
         $hookUrl = $this->_getUrl(\Ebizmarts\MailChimp\Controller\WebHook\Index::WEBHOOK__PATH,array(
