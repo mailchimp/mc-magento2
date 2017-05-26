@@ -327,6 +327,48 @@ class UpgradeSchema implements UpgradeSchemaInterface
                 ]
             );
         }
+        if (version_compare($context->getVersion(), '1.0.15') < 0) {
+            $table = $installer->getConnection()
+                ->newTable($installer->getTable('mailchimp_webhook_request'))
+                ->addColumn(
+                    'id',
+                    \Magento\Framework\DB\Ddl\Table::TYPE_INTEGER,
+                    null,
+                    ['identity' => true, 'unsigned' => true, 'nullable' => false, 'primary' => true],
+                    'Id'
+                )
+                ->addColumn(
+                    'type',
+                    \Magento\Framework\DB\Ddl\Table::TYPE_TEXT,
+                    50,
+                    ['unsigned' => true, 'nullable' => false],
+                    'request type'
+                )
+                ->addColumn(
+                    'fired_at',
+                    \Magento\Framework\DB\Ddl\Table::TYPE_DATETIME,
+                    null,
+                    [],
+                    'date of the request'
+                )
+                ->addColumn(
+                    'data_request',
+                    \Magento\Framework\DB\Ddl\Table::TYPE_TEXT,
+                    4096,
+                    ['unsigned' => true, 'nullable' => false],
+                    'data of the request'
+                )
+                ->addColumn(
+                    'processed',
+                    \Magento\Framework\DB\Ddl\Table::TYPE_BOOLEAN,
+                    null,
+                    [],
+                    'Already processed'
+                )
+            ;
+            $installer->getConnection()->createTable($table);
+
+        }
         $installer->endSetup();
     }
 }
