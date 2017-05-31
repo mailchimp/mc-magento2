@@ -64,6 +64,9 @@ class Webhook
         $collection = $this->_webhookCollection->create();
         $collection->addFieldToFilter('processed',['eq'=>0]);
         $this->_helper->log((string)$collection->getSelect());
+        /**
+         * @var $item \Ebizmarts\MailChimp\Model\MailChimpWebhookRequest
+         */
         foreach($collection as $item) {
             $data = unserialize($item->getDataRequest());
             switch($item->getType()) {
@@ -82,6 +85,8 @@ class Webhook
                 case self::TYPE_PROFILE:
                     $this->_profile($data);
             }
+            $item->setProcessed(1);
+            $item->getResource()->save($item);
         }
     }
     protected function _subscribe($data)
@@ -124,14 +129,12 @@ class Webhook
                         {
                             $sub->getResource()->delete($sub);
                         } elseif ($sub->getSubscriberStatus()!=\Magento\Newsletter\Model\Subscriber::STATUS_UNSUBSCRIBED) {
-                            $sub->setImportMode(true);
-                            $sub->unsubscribe();
+                            $this->_subscribeMember($sub,\Magento\Newsletter\Model\Subscriber::STATUS_UNSUBSCRIBED);
                         }
                         break;
                     case self::ACTION_UNSUBSCRIBE :
                         if ($sub->getSubscriberStatus()!=\Magento\Newsletter\Model\Subscriber::STATUS_UNSUBSCRIBED) {
-                            $sub->setImportMode(true);
-                            $sub->unsubscribe();
+                            $this->_subscribeMember($sub,\Magento\Newsletter\Model\Subscriber::STATUS_UNSUBSCRIBED);
                         }
                         break;
                 }
@@ -148,8 +151,6 @@ class Webhook
          */
         foreach($subscribers as $sub)
         {
-//            $subscriber = $this->_subscriberFactory->create();
-//            $subscriber->getResource()->load($subscriber,$s->getSubscriberId());
             $sub->getResource()->delete($sub);
         }
     }
