@@ -22,6 +22,8 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     const XML_PATH_APIKEY_LIST       = 'mailchimp/general/apikeylist';
     const XML_PATH_MAXLISTAMOUNT     = 'mailchimp/general/maxlistamount';
     const XML_PATH_LIST              = 'mailchimp/general/monkeylist';
+    const XML_PATH_WEBHOOK_ACTIVE    = 'mailchimp/general/webhook_active';
+    const XML_PATH_WEBHOOK_DELETE    = 'mailchimp/general/webhook_delete';
     const XML_PATH_LOG               = 'mailchimp/general/log';
     const XML_PATH_MAPPING           = 'mailchimp/general/mapping';
     const XML_MAILCHIMP_STORE        = 'mailchimp/general/monkeystore';
@@ -119,6 +121,14 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
      * @var \Magento\Framework\Encryption\Encryptor
      */
     private $_encryptor;
+    /**
+     * @var \Magento\Newsletter\Model\ResourceModel\Subscriber\CollectionFactory
+     */
+    private $_subscriberCollection;
+    /**
+     * @var \Magento\Customer\Model\ResourceModel\Customer\CollectionFactory
+     */
+    private $_customerCollection;
 
     /**
      * Data constructor.
@@ -138,7 +148,8 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
      * @param \Ebizmarts\MailChimp\Model\MailChimpStoresFactory $mailChimpStoresFactory
      * @param \Ebizmarts\MailChimp\Model\MailChimpStores $mailChimpStores
      * @param \Magento\Framework\Encryption\Encryptor $encryptor
-     *
+     * @param \Magento\Newsletter\Model\ResourceModel\Subscriber\CollectionFactory $subscriberCollection
+     * @param \Magento\Customer\Model\ResourceModel\Customer\CollectionFactory $customerCollection
      */
     public function __construct(
         \Magento\Framework\App\Helper\Context $context,
@@ -156,7 +167,9 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         \Ebizmarts\MailChimp\Model\MailChimpSyncBatches $syncBatches,
         \Ebizmarts\MailChimp\Model\MailChimpStoresFactory $mailChimpStoresFactory,
         \Ebizmarts\MailChimp\Model\MailChimpStores $mailChimpStores,
-        \Magento\Framework\Encryption\Encryptor $encryptor
+        \Magento\Framework\Encryption\Encryptor $encryptor,
+        \Magento\Newsletter\Model\ResourceModel\Subscriber\CollectionFactory $subscriberCollection,
+        \Magento\Customer\Model\ResourceModel\Customer\CollectionFactory $customerCollection
     ) {
     
         $this->_storeManager  = $storeManager;
@@ -176,6 +189,8 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         $this->_mailChimpStores         = $mailChimpStores;
         $this->_mailChimpStoresFactory  = $mailChimpStoresFactory;
         $this->_encryptor               = $encryptor;
+        $this->_subscriberCollection    = $subscriberCollection;
+        $this->_customerCollection      = $customerCollection;
         parent::__construct($context);
     }
 
@@ -691,5 +706,59 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
                 }
             }
         }
+    }
+
+    /**
+     * @param $listId
+     * @param $mail
+     * @return \Magento\Newsletter\Model\ResourceModel\Subscriber\Collection
+     */
+    public function loadListSubscribers($listId, $mail)
+    {
+        $collection = null;
+        $storeIds = $this->getMagentoStoreIdsByListId($listId);
+        if (count($storeIds) > 0)
+        {
+            $collection = $this->_subscriberCollection->create();
+            $collection
+                ->addFieldToFilter('store_id',['in'=>$storeIds])
+                ->addFieldToFilter('subscriber_email',['eq'=>$mail]);
+        }
+        return $collection;
+    }
+    public function getMagentoStoreIdsByListId($listId)
+    {
+        $storeIds = [];
+        foreach($this->_storeManager->getStores() as $storeId => $val)
+        {
+            if ($this->isMailChimpEnabled($storeId))
+            {
+                $storeListId = $this->getConfigValue(self::XML_PATH_LIST,$storeId);
+                if ($storeListId == $listId)
+                {
+                    $storeIds[] = $storeId;
+                }
+            }
+        }
+        return $storeIds;
+    }
+
+    /**
+     * @param $listId
+     * @param $email
+     * @return \Magento\Customer\Model\ResourceModel\Customer\Collection
+     */
+    public function loadListCustomers($listId, $email)
+    {
+        $customer = null;
+        $storeIds = $this->getMagentoStoreIdsByListId($listId);
+        if (count($storeIds) > 0) {
+            $customer = $this->_customerCollection->create();
+            $customer
+                ->addFieldToSelect('entity_id')
+                ->addFieldToFilter('store_id', ['in' => $storeIds])
+                ->addFieldToFilter('email', ['eq' => $email]);
+        }
+        return $customer;
     }
 }

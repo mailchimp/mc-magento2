@@ -54,7 +54,7 @@ class Ecommerce
      * @var \Ebizmarts\MailChimp\Model\Api\Subscriber
      */
     private $_apiSubscribers;
-
+    private $_webhook;
     /**
      * Ecommerce constructor.
      * @param \Magento\Store\Model\StoreManager $storeManager
@@ -67,6 +67,8 @@ class Ecommerce
      * @param \Ebizmarts\MailChimp\Model\Api\Subscriber $apiSubscriber
      * @param \Ebizmarts\MailChimp\Model\MailChimpSyncBatches $mailChimpSyncBatches
      * @param \Ebizmarts\MailChimp\Model\MailChimpSyncEcommerce $chimpSyncEcommerce
+     * @param \Ebizmarts\MailChimp\Model\ResourceModel\MailChimpWebhookRequest\CollectionFactory $webhookCollection
+     * @param \Magento\Customer\Model\CustomerFactory $customer
      */
     public function __construct(
         \Magento\Store\Model\StoreManager $storeManager,
@@ -78,7 +80,8 @@ class Ecommerce
         \Ebizmarts\MailChimp\Model\Api\Cart $apiCart,
         \Ebizmarts\MailChimp\Model\Api\Subscriber $apiSubscriber,
         \Ebizmarts\MailChimp\Model\MailChimpSyncBatches $mailChimpSyncBatches,
-        \Ebizmarts\MailChimp\Model\MailChimpSyncEcommerce $chimpSyncEcommerce
+        \Ebizmarts\MailChimp\Model\MailChimpSyncEcommerce $chimpSyncEcommerce,
+        \Ebizmarts\MailChimp\Cron\Webhook $webhook
     )
     {
         $this->_storeManager    = $storeManager;
@@ -91,6 +94,7 @@ class Ecommerce
         $this->_apiCart         = $apiCart;
         $this->_apiSubscribers  = $apiSubscriber;
         $this->_chimpSyncEcommerce  = $chimpSyncEcommerce;
+        $this->_webhook             = $webhook;
     }
 
     public function execute()
@@ -116,6 +120,8 @@ class Ecommerce
                 }
             }
         }
+        $this->_webhook->processWebhooks();
+
     }
 
     protected function _processStore($storeId, $mailchimpStoreId)

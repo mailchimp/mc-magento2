@@ -201,15 +201,15 @@ class InstallSchema implements InstallSchemaInterface
 
 
 
-        $connection->addColumn(
-            $installer->getTable('newsletter_subscriber'),
-            'mailchimp_id',
-            [
-                'type' => \Magento\Framework\DB\Ddl\Table::TYPE_TEXT,
-                'default' => '',
-                'comment' => 'Mailchimp reference'
-            ]
-        );
+//        $connection->addColumn(
+//            $installer->getTable('newsletter_subscriber'),
+//            'mailchimp_id',
+//            [
+//                'type' => \Magento\Framework\DB\Ddl\Table::TYPE_TEXT,
+//                'default' => '',
+//                'comment' => 'Mailchimp reference'
+//            ]
+//        );
 
         $connection->addColumn(
             $installer->getTable('quote'),
