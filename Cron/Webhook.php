@@ -59,6 +59,10 @@ class Webhook
         $this->_webhookCollection   = $webhookCollection;
         $this->_customer            = $customer;
     }
+    public function execute()
+    {
+        $this->processWebhooks();
+    }
     public function processWebhooks()
     {
         $collection = $this->_webhookCollection->create();
