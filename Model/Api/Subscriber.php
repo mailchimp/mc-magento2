@@ -59,10 +59,10 @@ class Subscriber
         $this->_subscriberFactory       = $subscriberFactory;
     }
 
-    public function sendSubscribers($storeId)
+    public function sendSubscribers($storeId, $listId)
     {
         //get subscribers
-        $listId = $this->_helper->getGeneralList($storeId);
+//        $listId = $this->_helper->getGeneralList($storeId);
         $collection = $this->_subscriberCollection->create();
         $collection->addFieldToFilter('subscriber_status', array('eq' => 1))
             ->addFieldToFilter('store_id', array('eq' => $storeId));
@@ -110,6 +110,7 @@ class Subscriber
 
     protected function _buildSubscriberData(\Magento\Newsletter\Model\Subscriber $subscriber)
     {
+        $this->_helper->log(__METHOD__);
         $storeId = $subscriber->getStoreId();
         $data = array();
         $data["email_address"] = $subscriber->getSubscriberEmail();

@@ -18,6 +18,8 @@ class Product
     const DOWNLOADABLE  = 'downloadable';
     const PRODUCTIMAGE  = 'product_small_image';
     const MAX           = 100;
+
+    protected $_parentImage = null;
     /**
      * @var \Ebizmarts\MailChimp\Helper\Data
      */
@@ -197,7 +199,7 @@ class Product
         if ($product->getTypeId() == \Magento\Catalog\Model\Product\Type::TYPE_SIMPLE ||
             $product->getTypeId() == \Magento\Catalog\Model\Product\Type::TYPE_VIRTUAL ||
             $product->getTypeId() == "downloadable") {
-            $data = $this->_buildProductData($product,$magentoStoreId);
+            $data = $this-> _buildProductData($product,$magentoStoreId);
 
             $parentIds = $product->getTypeInstance()->getParentIdsByChild($product->getId());
             //$parentIds = Mage::getResourceSingleton('catalog/product_type_configurable')->getParentIdsByChild($product->getId());
@@ -251,6 +253,8 @@ class Product
         $data["url"] = $product->getProductUrl();
         if ($product->getImage()) {
             $data["image_url"] = $this->_imageHelper->init($product,self::PRODUCTIMAGE)->setImageFile($product->getImage())->getUrl();
+        } elseif ($this->_parentImage) {
+            $data['image_url'] = $this->_parentImage;
         }
         $data["published_at_foreign"] = "";
         if ($isVarient) {
@@ -285,12 +289,15 @@ class Product
             //missing data
             $data["vendor"] = "";
             $data["handle"] = "";
-
+            if(isset($data['image_url'])) {
+                $this->_parentImage = $data['image_url'];
+            }
             //variants
             $data["variants"] = array();
             foreach ($variants as $variant) {
                 $data["variants"][] = $this->_buildProductData($variant,$magentoStoreId);
             }
+            $this->_parentImage = null;
         }
 
         return $data;

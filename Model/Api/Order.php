@@ -134,7 +134,6 @@ class Order
         $batchArray = array_merge($batchArray, $this->_getModifiedOrders($magentoStoreId));
         // get new orders
         $batchArray = array_merge($batchArray, $this->_getNewOrders($magentoStoreId));
-
         return $batchArray;
     }
     protected function _getCollection()
@@ -220,6 +219,7 @@ class Order
         $newOrders->getSelect()->where("m4m.mailchimp_sync_delta IS NULL");
         // limit the collection
         $newOrders->getSelect()->limit(self::BATCH_LIMIT);
+
         /**
          * @var $order \Magento\Sales\Model\Order
          */

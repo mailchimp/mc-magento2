@@ -17,7 +17,7 @@ class Result
 {
     const MAILCHIMP_TEMP_DIR = 'Mailchimp';
     /**
-     * @var \Ebizmarts\MailChimp\Model\ResourceModel\MailChimpSyncBatches\Collection
+     * @var \Ebizmarts\MailChimp\Model\ResourceModel\MailChimpSyncBatches\CollectionFactory
      */
     private $_batchCollection;
     /**
@@ -42,7 +42,7 @@ class Result
      */
     public function __construct(
         \Ebizmarts\MailChimp\Helper\Data $helper,
-        \Ebizmarts\MailChimp\Model\ResourceModel\MailChimpSyncBatches\Collection $batchCollection,
+        \Ebizmarts\MailChimp\Model\ResourceModel\MailChimpSyncBatches\CollectionFactory $batchCollection,
         \Ebizmarts\MailChimp\Model\MailChimpErrorsFactory $chimpErrors,
         \Magento\Framework\Archive $archive
     )
@@ -54,7 +54,7 @@ class Result
     }
     public function processResponses($storeId, $isMailChimpStoreId = false, $mailchimpStoreId)
     {
-        $collection = $this->_batchCollection;
+        $collection = $this->_batchCollection->create();
         $collection
             ->addFieldToFilter('store_id', array('eq' => $storeId))
             ->addFieldToFilter('status', array('eq' => 'pending'));
@@ -64,7 +64,6 @@ class Result
         $item = null;
         foreach ($collection as $item) {
             try {
-//                $storeId = ($isMailChimpStoreId) ? 0 : $storeId;
                 $files = $this->getBatchResponse($item->getBatchId(), $storeId);
                 if (count($files)) {
                     $this->processEachResponseFile($files, $item->getBatchId(), $mailchimpStoreId, $storeId);
@@ -89,6 +88,7 @@ class Result
             $api = $this->_helper->getApi($storeId);
             // check the status of the job
             $response = $api->batchOperation->status($batchId);
+
             if (isset($response['status']) && $response['status'] == 'finished') {
                 // get the tar.gz file with the results
                 $fileUrl = urldecode($response['response_body_url']);

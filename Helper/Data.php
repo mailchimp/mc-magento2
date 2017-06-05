@@ -37,6 +37,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     const XML_ABANDONEDCART_ACTIVE   = 'mailchimp/abandonedcart/active';
     const XML_ABANDONEDCART_FIRSTDATE   = 'mailchimp/abandonedcart/firstdate';
     const XML_ABANDONEDCART_PAGE     = 'mailchimp/abandonedcart/page';
+    const XML_PATH_IS_SYNC           = 'mailchimp/general/issync';
 
 
     const ORDER_STATE_OK             = 'complete';
@@ -227,7 +228,8 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
      */
     public function getApi($store = null)
     {
-        $this->_api->setApiKey($this->getApiKey($store));
+        $apiKey = $this->getApiKey($store);
+        $this->_api->setApiKey($apiKey);
         $this->_api->setUserAgent('Mailchimp4Magento' . (string)$this->getModuleVersion());
         return $this->_api;
     }
@@ -262,6 +264,24 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         return $value;
     }
 
+    public function saveConfigValue($path, $value, $storeId = null, $scope = null)
+    {
+        switch ($scope) {
+            case 'website':
+                $this->_config->saveConfig($path,$value,\Magento\Store\Model\ScopeInterface::SCOPE_WEBSITE,$storeId);
+                break;
+            default:
+                $this->_config->saveConfig($path,$value,\Magento\Store\Model\ScopeInterface::SCOPE_STORE,$storeId);
+                break;
+        }
+
+    }
+    public function getMCMinSyncing($storeId)
+    {
+        $ret = $this->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_PATH_IS_SYNC,$storeId);
+        return !$ret;
+
+    }
     /**
      * @param null $store
      * @return mixed
@@ -460,13 +480,15 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     }
     public function getGeneralList($storeId)
     {
-        $mailchimpStoreId = $this->getConfigValue(self::XML_MAILCHIMP_STORE,$storeId);
-        $api = $this->getApi($storeId);
-        $store =$api->ecommerce->stores->get($mailchimpStoreId);
-        if (isset($store['list_id'])) {
-            return $store['list_id'];
-        }
-        return null;
+        return $this->getConfigValue(self::XML_PATH_LIST,$storeId);
+//        $this->log($mailchimpStoreId);
+//        $api = $this->getApi($storeId);
+//        $store =$api->ecommerce->stores->get($mailchimpStoreId);
+//        $this->log($store);
+//        if (isset($store['list_id'])) {
+//            return $store['list_id'];
+//        }
+//        return null;
     }
 
     public function getListForMailChimpStore($mailchimpStoreId,$apiKey)

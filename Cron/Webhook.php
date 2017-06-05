@@ -67,7 +67,6 @@ class Webhook
     {
         $collection = $this->_webhookCollection->create();
         $collection->addFieldToFilter('processed',['eq'=>0]);
-        $this->_helper->log((string)$collection->getSelect());
         /**
          * @var $item \Ebizmarts\MailChimp\Model\MailChimpWebhookRequest
          */
