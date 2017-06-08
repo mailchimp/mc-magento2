@@ -23,6 +23,7 @@ class Webhook
     const TYPE_CLEANED          = 'cleaned';
     const TYPE_UPDATE_EMAIL     = 'upemail';
     const TYPE_PROFILE          = 'profile';
+    const BATCH_LIMIT           = 50;
     /**
      * @var \Ebizmarts\MailChimp\Helper\Data
      */
@@ -65,8 +66,12 @@ class Webhook
     }
     public function processWebhooks()
     {
+        /**
+         * @var $collection \Ebizmarts\MailChimp\Model\ResourceModel\MailChimpWebhookRequest\Collection
+         */
         $collection = $this->_webhookCollection->create();
         $collection->addFieldToFilter('processed',['eq'=>0]);
+        $collection->getSelect()->limit(self::BATCH_LIMIT);
         /**
          * @var $item \Ebizmarts\MailChimp\Model\MailChimpWebhookRequest
          */
