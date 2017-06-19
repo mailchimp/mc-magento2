@@ -313,7 +313,9 @@ class Product
                         break;
                     }
                 }
-                $this->_childtUrl =$data['url'] = $parent->getProductUrl().$tailUrl;
+                if ($parent) {
+                    $this->_childtUrl = $data['url'] = $parent->getProductUrl() . $tailUrl;
+                }
             }
             else {
                 $this->_helper->log('is visible');
@@ -342,7 +344,9 @@ class Product
             //variants
             $data["variants"] = array();
             foreach ($variants as $variant) {
-                $data["variants"][] = $this->_buildProductData($variant,$magentoStoreId);
+                if ($variant) {
+                    $data["variants"][] = $this->_buildProductData($variant, $magentoStoreId);
+                }
             }
             if ($this->_childtUrl) {
                 $data["url"] = $this->_childtUrl;
