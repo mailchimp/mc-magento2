@@ -481,14 +481,6 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     public function getGeneralList($storeId)
     {
         return $this->getConfigValue(self::XML_PATH_LIST,$storeId);
-//        $this->log($mailchimpStoreId);
-//        $api = $this->getApi($storeId);
-//        $store =$api->ecommerce->stores->get($mailchimpStoreId);
-//        $this->log($store);
-//        if (isset($store['list_id'])) {
-//            return $store['list_id'];
-//        }
-//        return null;
     }
 
     public function getListForMailChimpStore($mailchimpStoreId,$apiKey)
@@ -705,7 +697,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
             '_nosid' => true,
             '_secure' => true));
         try {
-            $ret = $api->lists->webhooks->add($listId, $hookUrl, $events, $sources);
+            $ret = $api->lists->webhooks->add($listId, urlencode($hookUrl), $events, $sources);
         } catch(\Mailchimp_Error $e) {
             $this->log($e->getMessage());
         }
