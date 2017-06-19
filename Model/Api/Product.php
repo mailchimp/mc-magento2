@@ -20,6 +20,7 @@ class Product
     const MAX           = 100;
 
     protected $_parentImage = null;
+    protected $_childtUrl   = null;
     /**
      * @var \Ebizmarts\MailChimp\Helper\Data
      */
@@ -56,27 +57,45 @@ class Product
      * @var \Ebizmarts\MailChimp\Model\MailChimpSyncEcommerceFactory
      */
     protected $_chimpSyncEcommerce;
+    /**
+     * @var \Magento\ConfigurableProduct\Model\Product\Type\Configurable
+     */
+    protected $_configurable;
+    /**
+     * @var \Magento\Catalog\Model\Product\Option
+     */
+    protected $_option;
+    /**
+     * @var \Magento\Catalog\Model\ProductFactory
+     */
+    protected $_productFactory;
 
     /**
      * Product constructor.
      * @param \Magento\Catalog\Model\ResourceModel\Product\CollectionFactory $productCollection
      * @param \Magento\Catalog\Model\ProductRepository $productRepository
+     * @param \Magento\Catalog\Model\ProductFactory $productFactory
      * @param \Magento\Framework\Stdlib\DateTime\DateTime $date
      * @param \Ebizmarts\MailChimp\Helper\Data $helper
      * @param \Magento\Catalog\Helper\Image $imageHelper
      * @param \Magento\CatalogInventory\Api\StockRegistryInterface $stockRegistry
      * @param \Magento\Catalog\Model\CategoryRepository $categoryRepository
      * @param \Ebizmarts\MailChimp\Model\MailChimpSyncEcommerceFactory $chimpSyncEcommerce
+     * @param \Magento\ConfigurableProduct\Model\Product\Type\Configurable $configurable
+     * @param \Magento\Catalog\Model\Product\Option $option
      */
     public function __construct(
         \Magento\Catalog\Model\ResourceModel\Product\CollectionFactory $productCollection,
         \Magento\Catalog\Model\ProductRepository $productRepository,
+        \Magento\Catalog\Model\ProductFactory $productFactory,
         \Magento\Framework\Stdlib\DateTime\DateTime $date,
         \Ebizmarts\MailChimp\Helper\Data $helper,
         \Magento\Catalog\Helper\Image $imageHelper,
         \Magento\CatalogInventory\Api\StockRegistryInterface $stockRegistry,
         \Magento\Catalog\Model\CategoryRepository $categoryRepository,
-        \Ebizmarts\MailChimp\Model\MailChimpSyncEcommerceFactory $chimpSyncEcommerce
+        \Ebizmarts\MailChimp\Model\MailChimpSyncEcommerceFactory $chimpSyncEcommerce,
+        \Magento\ConfigurableProduct\Model\Product\Type\Configurable $configurable,
+        \Magento\Catalog\Model\Product\Option $option
     )
     {
         $this->_productRepository   = $productRepository;
@@ -87,6 +106,9 @@ class Product
         $this->_stockRegistry       = $stockRegistry;
         $this->_categoryRepository  = $categoryRepository;
         $this->_chimpSyncEcommerce  = $chimpSyncEcommerce;
+        $this->_configurable        = $configurable;
+        $this->_option              = $option;
+        $this->_productFactory      = $productFactory;
         $this->_batchId             = \Ebizmarts\MailChimp\Helper\Data::IS_PRODUCT. '_' . $this->_date->gmtTimestamp();
     }
     public function _sendProducts($magentoStoreId)
@@ -157,7 +179,8 @@ class Product
                 $variantProducts[] = $product;
                 if (count($childProducts[0])) {
                     foreach ($childProducts[0] as $childId) {
-                        $variantProducts[] = $this->_productRepository->getById($childId);
+                        $variantProducts[] = $this->_productFactory->create()->getById($childId);
+//                        $variantProducts[] = $this->_productRepository->getById($childId);
                     }
                 }
                 break;
@@ -202,7 +225,6 @@ class Product
             $data = $this-> _buildProductData($product,$magentoStoreId);
 
             $parentIds = $product->getTypeInstance()->getParentIdsByChild($product->getId());
-            //$parentIds = Mage::getResourceSingleton('catalog/product_type_configurable')->getParentIdsByChild($product->getId());
 
             if (empty($parentIds)) {
                 $parentIds = array($product->getId());
@@ -266,11 +288,36 @@ class Product
             $stock = $this->_stockRegistry->getStockItem($product->getId(),$magentoStoreId);
             $data["inventory_quantity"] = (int)$stock->getQty();
             $data["backorders"] = (string)$stock->getBackorders();
-            if ($product->getVisibility() != \Magento\Catalog\Model\Product\Visibility::VISIBILITY_NOT_VISIBLE) {
-                $data["visibility"] = 'true';
+            if ($product->getVisibility() == \Magento\Catalog\Model\Product\Visibility::VISIBILITY_NOT_VISIBLE) {
+                $tailUrl = '';
+                $data["visibility"] = 'false';
+                $parentIds =$this->_configurable->getParentIdsByChild($product->getId());
+                /**
+                 * @var $parent \Magento\Catalog\Model\Product
+                 */
+                $parent = null;
+                foreach($parentIds as $id) {
+                    $parent = $this->_productRepository->getById($id);
+                    if ($parent->getTypeId() == \Magento\ConfigurableProduct\Model\Product\Type\Configurable::TYPE_CODE) {
+                        $options = $parent->getTypeInstance()->getConfigurableAttributesAsArray($parent);
+                        foreach($options as $option) {
+                            if(strlen($tailUrl)) {
+                                $tailUrl .= '&';
+                            } else {
+                                $tailUrl .= '?';
+                            }
+                            $tailUrl.= $option['attribute_code']."=".$product->getData($option['attribute_code']);
+                        }
+                    }
+                    if($tailUrl!='') {
+                        break;
+                    }
+                }
+                $this->_childtUrl =$data['url'] = $parent->getProductUrl().$tailUrl;
             }
             else {
-                $data["visibility"] = 'false';
+                $this->_helper->log('is visible');
+                $data["visibility"] = 'true';
             }
 
         } else {
@@ -296,6 +343,10 @@ class Product
             $data["variants"] = array();
             foreach ($variants as $variant) {
                 $data["variants"][] = $this->_buildProductData($variant,$magentoStoreId);
+            }
+            if ($this->_childtUrl) {
+                $data["url"] = $this->_childtUrl;
+                $this->_childtUrl = null;
             }
             $this->_parentImage = null;
         }
