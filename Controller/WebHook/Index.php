@@ -85,7 +85,7 @@ class Index extends Action{
         }
         else {
             $this->_helper->log('An empty request comes from ip: '.$this->_remoteAddress->getRemoteAddress());
-            $result = $this->_ressultFactory->create(ResultFactory::TYPE_RAW)->setHttpResponseCode(403);
+            $result = $this->_ressultFactory->create(ResultFactory::TYPE_RAW)->setHttpResponseCode(200);
             return $result;
         }
     }
