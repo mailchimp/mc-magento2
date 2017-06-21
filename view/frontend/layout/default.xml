@@ -13,12 +13,11 @@
 <page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
       xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
     <head>
-        <block class="Ebizmarts\MailChimp\Block\Mailchimpjs" template="Ebizmarts_MailChimp::mailchimpjs.phtml"/>
+        <script src="Ebizmarts_MailChimp::js/mailchimpjs.js"></script>
     </head>
     <body>
         <referenceContainer name="content">
             <block class="Ebizmarts\MailChimp\Block\Catcher" template="Ebizmarts_MailChimp::catcher.phtml" ifconfig="mailchimp/general/active"/>
-            <block class="Ebizmarts\MailChimp\Block\Mailchimpjs" template="Ebizmarts_MailChimp::mailchimpjs.phtml" ifconfig="mailchimp/general/active"/>
         </referenceContainer>
     </body>
 </page>

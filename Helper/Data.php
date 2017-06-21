@@ -261,7 +261,12 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
                 $value = $this->_scopeConfig->getValue($path ,\Magento\Store\Model\ScopeInterface::SCOPE_STORE, $storeId);
                 break;
         }
+
         return $value;
+    }
+    public function deleteConfig($path, $storeId = null, $scope = null)
+    {
+        $this->_config->deleteConfig($path, $scope, $storeId);
     }
 
     public function saveConfigValue($path, $value, $storeId = null, $scope = null)
@@ -649,19 +654,16 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     {
         $url = '';
         if ($this->getConfigValue(self::XML_PATH_ACTIVE,$storeId)) {
-            $url = $this->getConfigValue(self::XML_MAILCHIMP_JS_URL, $storeId);
-            if (!$url) {
-                $mailChimpStoreId = $this->getConfigValue(self::XML_MAILCHIMP_STORE, $storeId);
-                $api = $this->getApi($storeId);
-                $storeData = $api->ecommerce->stores->get($mailChimpStoreId);
-                if (isset($storeData['connected_site']['site_script']['url'])) {
-                    $url = $storeData['connected_site']['site_script']['url'];
-                    $this->_config->saveConfig(
-                        self::XML_MAILCHIMP_JS_URL,
-                        $url,
-                        \Magento\Store\Model\ScopeInterface::SCOPE_STORES,
-                        $storeId);
-                }
+            $mailChimpStoreId = $this->getConfigValue(self::XML_MAILCHIMP_STORE, $storeId);
+            $api = $this->getApi($storeId);
+            $storeData = $api->ecommerce->stores->get($mailChimpStoreId);
+            if (isset($storeData['connected_site']['site_script']['url'])) {
+                $url = $storeData['connected_site']['site_script']['url'];
+                $this->_config->saveConfig(
+                    self::XML_MAILCHIMP_JS_URL,
+                    $url,
+                    \Magento\Store\Model\ScopeInterface::SCOPE_STORES,
+                    $storeId);
             }
         }
         return $url;

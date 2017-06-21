@@ -83,7 +83,7 @@ class  MonkeyStore extends \Magento\Framework\App\Config\Value
         if ($active&&$this->isValueChanged()) {
             $mailchimpStore     = $this->getOldValue();
             $newListId = $data['general']['fields']['monkeylist']['value'];
-            $this->oldListId = $this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_PATH_LIST, $generalData['scope_id']);
+            $this->oldListId = $this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_PATH_LIST, $this->getScopeId());
 
             $createWebhook = true;
             foreach ($this->_storeManager->getStores() as $storeId => $val) {
@@ -91,12 +91,11 @@ class  MonkeyStore extends \Magento\Framework\App\Config\Value
                 if ( $mstoreId == $mailchimpStore) {
                     $found++;
                 }
-//                $api = $this->_helper->getApi($storeId);
-//                $store = $api->ecommerce->stores->get($mstoreId);
                 $listId = $this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_PATH_LIST, $storeId);
                 if ( $listId == $newListId) {
                     $createWebhook = false;
                 }
+                $this->_helper->deleteConfig(\Ebizmarts\MailChimp\Helper\Data::XML_MAILCHIMP_JS_URL, $storeId , \Magento\Store\Model\ScopeInterface::SCOPE_STORES);
             }
             if ($found==1) {
                 $this->_helper->markAllBatchesAs($mailchimpStore, 'canceled');
@@ -104,6 +103,8 @@ class  MonkeyStore extends \Magento\Framework\App\Config\Value
             if ($createWebhook) {
                 $this->_helper->createWebHook($data['general']['fields']['apikey']['value'], $newListId);
             }
+//            $this->_helper->deleteConfig(\Ebizmarts\MailChimp\Helper\Data::XML_MAILCHIMP_JS_URL, $this->getScopeId() ,$this->getScope());
+
         }
         return parent::beforeSave();
     }

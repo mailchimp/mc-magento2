@@ -23,7 +23,7 @@ class Index extends Action{
     /**
      * @var ResultFactory
      */
-    private $_ressultFactory;
+    private $_resultFactory;
     /**
      * @var \Ebizmarts\MailChimp\Helper\Data
      */
@@ -51,7 +51,7 @@ class Index extends Action{
     )
     {
         parent::__construct($context);
-        $this->_ressultFactory              = $resultFactory;
+        $this->_resultFactory              = $resultFactory;
         $this->_helper                      = $helper;
         $this->_chimpWebhookRequestFactory  = $chimpWebhookRequestFactory;
         $this->_remoteAddress               = $remoteAddress;
@@ -62,13 +62,13 @@ class Index extends Action{
         $requestKey = $this->getRequest()->getParam('wkey');
         if (!$requestKey) {
             $this->_helper->log('No wkey parameter from ip: '.$this->_remoteAddress->getRemoteAddress());
-            $result = $this->_ressultFactory->create(ResultFactory::TYPE_RAW)->setHttpResponseCode(403);
+            $result = $this->_resultFactory->create(ResultFactory::TYPE_RAW)->setHttpResponseCode(403);
             return $result;
         }
         $key = $this->_helper->getWebhooksKey();
         if ($key!=$requestKey) {
             $this->_helper->log('wkey parameter is invalid from ip: '.$this->_remoteAddress->getRemoteAddress());
-            $result = $this->_ressultFactory->create(ResultFactory::TYPE_RAW)->setHttpResponseCode(403);
+            $result = $this->_resultFactory->create(ResultFactory::TYPE_RAW)->setHttpResponseCode(403);
             return $result;
         }
         if ($this->getRequest()->getPost('type')) {
@@ -85,7 +85,7 @@ class Index extends Action{
         }
         else {
             $this->_helper->log('An empty request comes from ip: '.$this->_remoteAddress->getRemoteAddress());
-            $result = $this->_ressultFactory->create(ResultFactory::TYPE_RAW)->setHttpResponseCode(200);
+            $result = $this->_resultFactory->create(ResultFactory::TYPE_RAW)->setHttpResponseCode(200);
             return $result;
         }
     }
