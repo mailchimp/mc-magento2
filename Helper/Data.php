@@ -733,6 +733,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     {
         $collection = null;
         $storeIds = $this->getMagentoStoreIdsByListId($listId);
+        $storeIds[] = 0;
         if (count($storeIds) > 0)
         {
             $collection = $this->_subscriberCollection->create();
