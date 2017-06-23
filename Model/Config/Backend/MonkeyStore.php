@@ -72,7 +72,6 @@ class  MonkeyStore extends \Magento\Framework\App\Config\Value
 
     public function beforeSave()
     {
-        $generalData = $this->getData();
         $data = $this->getData('groups');
         $found = 0;
         if (isset($data['ecommerce']['fields']['active']['value'])) {
@@ -99,12 +98,11 @@ class  MonkeyStore extends \Magento\Framework\App\Config\Value
             }
             if ($found==1) {
                 $this->_helper->markAllBatchesAs($mailchimpStore, 'canceled');
+                $this->_helper->resetErrors($mailchimpStore);
             }
             if ($createWebhook) {
                 $this->_helper->createWebHook($data['general']['fields']['apikey']['value'], $newListId);
             }
-//            $this->_helper->deleteConfig(\Ebizmarts\MailChimp\Helper\Data::XML_MAILCHIMP_JS_URL, $this->getScopeId() ,$this->getScope());
-
         }
         return parent::beforeSave();
     }
