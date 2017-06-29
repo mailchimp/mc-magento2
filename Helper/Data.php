@@ -258,7 +258,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
                 $value = $this->_scopeConfig->getValue($path ,\Magento\Store\Model\ScopeInterface::SCOPE_WEBSITE, $storeId);
                 break;
             default:
-                $value = $this->_scopeConfig->getValue($path ,\Magento\Store\Model\ScopeInterface::SCOPE_STORE, $storeId);
+                $value = $this->_scopeConfig->getValue($path ,\Magento\Store\Model\ScopeInterface::SCOPE_STORES, $storeId);
                 break;
         }
 
@@ -276,7 +276,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
                 $this->_config->saveConfig($path,$value,\Magento\Store\Model\ScopeInterface::SCOPE_WEBSITE,$storeId);
                 break;
             default:
-                $this->_config->saveConfig($path,$value,\Magento\Store\Model\ScopeInterface::SCOPE_STORE,$storeId);
+                $this->_config->saveConfig($path,$value,\Magento\Store\Model\ScopeInterface::SCOPE_STORES,$storeId);
                 break;
         }
 
@@ -334,9 +334,6 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
 //            $storeId = $this->getConfigValue(self::XML_MAILCHIMP_STORE);
             $this->getApi()->ecommerce->stores->delete($mailchimpStore);
             $this->markAllBatchesAs($mailchimpStore, 'canceled');
-            $connection = $this->_syncBatches->getResource()->getConnection();
-            $tableName = $this->_syncBatches->getResource()->getMainTable();
-            $connection->update($tableName, ['status' => 'canceled'], "mailchimp_store_id = '".$mailchimpStore."'");
         } catch (Exception $e)
         {
 
@@ -347,6 +344,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         $connection = $this->_syncBatches->getResource()->getConnection();
         $tableName = $this->_syncBatches->getResource()->getMainTable();
         $connection->update($tableName, ['status' => $status], "mailchimp_store_id = '".$mailchimpStore."'");
+        $connection->commit();
     }
     public function getMCStoreName($storeId)
     {
@@ -562,11 +560,11 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
             $connection = $this->_mailChimpErrors->getResource()->getConnection();
             $tableName = $this->_mailChimpErrors->getResource()->getMainTable();
             $connection->delete($tableName, "mailchimp_store_id = '".$mailchimpStore."'");
-//            $connection->truncateTable($tableName);
             // clean the syncecommerce table with errors
             $connection = $this->_mailChimpSyncE->getResource()->getConnection();
             $tableName = $this->_mailChimpSyncE->getResource()->getMainTable();
             $connection->delete($tableName, "mailchimp_store_id = '".$mailchimpStore."' and mailchimp_sync_error is not null");
+//            $connection->commit();
 //            $connection->truncateTable($tableName);
         } catch(\Zend_Db_Exception $e) {
             throw new ValidatorException(__($e->getMessage()));
@@ -643,10 +641,16 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
                     $mcInfo = $this->_api->root->info();
                     $mcUserName[$apiKey] = $mcInfo['account_name'];
                 }
-                $listInfo = $this->_api->lists->getLists($store['list_id']);
-                $mstore->setListName($listInfo['name']);
-                $mstore->setMcAccountName($mcUserName[$apiKey]);
-                $mstore->getResource()->save($mstore);
+                try {
+                    $listInfo = $this->_api->lists->getLists($store['list_id']);
+                    if (isset($listInfo['name'])) {
+                        $mstore->setListName($listInfo['name']);
+                        $mstore->setMcAccountName($mcUserName[$apiKey]);
+                        $mstore->getResource()->save($mstore);
+                    }
+                } catch(\Mailchimp_Error $e) {
+
+                }
             }
         }
     }
