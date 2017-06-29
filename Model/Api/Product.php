@@ -65,10 +65,6 @@ class Product
      * @var \Magento\Catalog\Model\Product\Option
      */
     protected $_option;
-    /**
-     * @var \Magento\Catalog\Model\ProductFactory
-     */
-    protected $_productFactory;
 
     /**
      * Product constructor.
@@ -87,7 +83,6 @@ class Product
     public function __construct(
         \Magento\Catalog\Model\ResourceModel\Product\CollectionFactory $productCollection,
         \Magento\Catalog\Model\ProductRepository $productRepository,
-        \Magento\Catalog\Model\ProductFactory $productFactory,
         \Magento\Framework\Stdlib\DateTime\DateTime $date,
         \Ebizmarts\MailChimp\Helper\Data $helper,
         \Magento\Catalog\Helper\Image $imageHelper,
@@ -108,7 +103,6 @@ class Product
         $this->_chimpSyncEcommerce  = $chimpSyncEcommerce;
         $this->_configurable        = $configurable;
         $this->_option              = $option;
-        $this->_productFactory      = $productFactory;
         $this->_batchId             = \Ebizmarts\MailChimp\Helper\Data::IS_PRODUCT. '_' . $this->_date->gmtTimestamp();
     }
     public function _sendProducts($magentoStoreId)
@@ -179,8 +173,7 @@ class Product
                 $variantProducts[] = $product;
                 if (count($childProducts[0])) {
                     foreach ($childProducts[0] as $childId) {
-                        $variantProducts[] = $this->_productFactory->create()->getById($childId);
-//                        $variantProducts[] = $this->_productRepository->getById($childId);
+                        $variantProducts[] = $this->_productRepository->getById($childId);
                     }
                 }
                 break;
