@@ -10,7 +10,7 @@
 define([
         'jquery'
 ],
-    function($){
+    function($) {
         "use strict";
 
         $.widget('mage.monkeyapikey', {
