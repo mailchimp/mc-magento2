@@ -336,7 +336,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
             $this->markAllBatchesAs($mailchimpStore, 'canceled');
         } catch (Exception $e)
         {
-
+            $this->log($e->getMessage());
         }
     }
     public function markAllBatchesAs($mailchimpStore, $status)
@@ -344,7 +344,6 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         $connection = $this->_syncBatches->getResource()->getConnection();
         $tableName = $this->_syncBatches->getResource()->getMainTable();
         $connection->update($tableName, ['status' => $status], "mailchimp_store_id = '".$mailchimpStore."'");
-        $connection->commit();
     }
     public function getMCStoreName($storeId)
     {
@@ -392,6 +391,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         try {
             $customer = $this->_customer->get($email);
         } catch (\Exception $e) {
+            $this->log($e->getMessage());
             //Customer doesn't exist. Continue with the subscriber.
         }
         foreach ($mergeVars as $map) {
@@ -649,7 +649,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
                         $mstore->getResource()->save($mstore);
                     }
                 } catch(\Mailchimp_Error $e) {
-
+                    $this->log($e->getMessage());
                 }
             }
         }

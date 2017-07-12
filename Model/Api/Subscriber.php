@@ -90,7 +90,7 @@ class Subscriber
             //enconde to JSON
             try {
                 $subscriberJson = json_encode($data);
-            } catch (Exception $e) {
+            } catch (\Exception $e) {
                 //json encode failed
                 $errorMessage = "Subscriber ".$subscriber->getSubscriberId()." json encode failed";
                 $this->_helper->log($errorMessage, $storeId);
@@ -344,7 +344,7 @@ class Subscriber
                 $this->_helper->log($e->getMessage(), $storeId);
                 $this->_message->addErrorMessage($e->getMessage());
             }
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
             $this->_helper->log($e->getMessage(), $storeId);
         }
     }

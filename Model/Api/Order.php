@@ -381,6 +381,7 @@ class Order
                             $custEmailAddr = $customer['email_address'];
                         }
                     } catch (\Mailchimp_Error $e) {
+                        $this->_helper->log('no customer found');
                     }
 
                     $data["customer"] = array(

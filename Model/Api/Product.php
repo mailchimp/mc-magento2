@@ -192,7 +192,7 @@ class Product
 
 //            $this->_helper->log($body);
 
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
             //json encode failed
             $this->_helper->log("Product " . $product->getId() . " json encode failed");
             return array();
@@ -241,7 +241,7 @@ class Product
                 $productdata['operation_id'] = $batchId . '_' . $parentId;
                 try {
                     $body = json_encode($variendata);
-                } catch (Exception $e) {
+                } catch (\Exception $e) {
                     //json encode failed
                     $this->_helper->log("Product " . $product->getId() . " json encode failed");
                     continue;
