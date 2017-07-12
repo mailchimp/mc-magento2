@@ -27,5 +27,4 @@ class Index extends Stores
     {
         return $this->_authorization->isAllowed('Ebizmarts_MailChimp::stores_grid');
     }
-
 }

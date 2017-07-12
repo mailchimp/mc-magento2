@@ -26,8 +26,9 @@ class MailChimpSyncEcommerceFactory
      */
     public function __construct(
         \Magento\Framework\ObjectManagerInterface $objectManager,
-        $instanceName = '\\Ebizmarts\MailChimp\\Model\\MailChimpSyncEcommerce')
-    {
+        $instanceName = '\\Ebizmarts\MailChimp\\Model\\MailChimpSyncEcommerce'
+    ) {
+    
         $this->_objectManager   = $objectManager;
         $this->_instanceName    = $instanceName;
     }
@@ -36,7 +37,7 @@ class MailChimpSyncEcommerceFactory
      * @param array $data
      * @return \Ebizmarts\MailChimp\Model\MailChimpSyncEcommerce
      */
-    public function create(array $data = array())
+    public function create(array $data = [])
     {
         return $this->_objectManager->create($this->_instanceName, $data);
     }

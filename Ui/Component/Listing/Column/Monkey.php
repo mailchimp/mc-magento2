@@ -58,8 +58,8 @@ class Monkey extends Column
         SearchCriteriaBuilder $criteria,
         array $components = [],
         array $data = []
-    )
-    {
+    ) {
+    
         $this->_orderRepository = $orderRepository;
         $this->_searchCriteria  = $criteria;
         $this->_assetRepository = $assetRepository;
@@ -71,10 +71,9 @@ class Monkey extends Column
     {
         if (isset($dataSource['data']['items'])) {
             foreach ($dataSource['data']['items'] as & $item) {
-
                 $order = $this->_orderRepository->get($item["entity_id"]);
                 $status = $order->getData("mailchimp_abandonedcart_flag");
-                if ($order->getMailchimpCampaignId() || $order->getMailchimpLandingPage() ) {
+                if ($order->getMailchimpCampaignId() || $order->getMailchimpLandingPage()) {
                     $status = 1;
                 }
                 $fieldName = $this->getData('name');
@@ -88,14 +87,13 @@ class Monkey extends Column
                         $item[$fieldName . '_class'] = '';
                         break;
                     case "1":
-                        $params = array('_secure' => $this->_requestInterfase->isSecure());
+                        $params = ['_secure' => $this->_requestInterfase->isSecure()];
                         $url = $this->_assetRepository->getUrlWithParams('Ebizmarts_MailChimp::images/logo-freddie-monocolor-200.png', $params);
                         $item[$fieldName . '_src'] = $url;
                         $item[$fieldName . '_alt'] = 'hep hep thanks MailChimp';
                         $item[$fieldName . '_link'] = '';
 //                        $item[$fieldName . '_orig_src'] = $url;
                         break;
-
                 }
             }
         }

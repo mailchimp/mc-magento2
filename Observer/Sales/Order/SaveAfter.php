@@ -34,8 +34,8 @@ class SaveAfter implements \Magento\Framework\Event\ObserverInterface
     public function __construct(
         \Ebizmarts\MailChimp\Model\MailChimpSyncEcommerce $ecommerce,
         \Ebizmarts\MailChimp\Helper\Data $helper
-    )
-    {
+    ) {
+    
         $this->_ecommerce   = $ecommerce;
         $this->_helper      = $helper;
     }
@@ -43,12 +43,11 @@ class SaveAfter implements \Magento\Framework\Event\ObserverInterface
     public function execute(\Magento\Framework\Event\Observer $observer)
     {
         $order = $observer->getEvent()->getOrder();
-        $mailchimpStoreId = $mailchimpStoreId = $this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_MAILCHIMP_STORE,$order->getStoreId());
-        $ecom = $this->_ecommerce->getByStoreIdType($mailchimpStoreId,$order->getId(),'ORD');
+        $mailchimpStoreId = $mailchimpStoreId = $this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_MAILCHIMP_STORE, $order->getStoreId());
+        $ecom = $this->_ecommerce->getByStoreIdType($mailchimpStoreId, $order->getId(), 'ORD');
         if ($ecom) {
             $ecom->setMailchimpSyncModified(1);
             $ecom->getResource()->save($ecom);
         }
-
     }
 }

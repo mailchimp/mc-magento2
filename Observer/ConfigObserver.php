@@ -41,8 +41,8 @@ class ConfigObserver implements ObserverInterface
         \Magento\Store\Model\StoreManager $storeManager,
         \Magento\Framework\Registry $registry,
         \Ebizmarts\MailChimp\Helper\Data $helper
-    )
-    {
+    ) {
+    
         $this->_helper          = $helper;
         $this->_storeManager    = $storeManager;
         $this->_registry        = $registry;
@@ -59,7 +59,7 @@ class ConfigObserver implements ObserverInterface
                 $mustDelete = false;
             }
         }
-        if( $mustDelete ) {
+        if ($mustDelete) {
             $this->_helper->deleteWebHook($apiKey, $oldListId);
         }
         $this->_registry->unregister('oldListId');

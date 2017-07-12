@@ -33,22 +33,19 @@ class Get extends Action
     /**
      * Get constructor.
      * @param Context $context
-     * @param ResultFactory $resultFactory
      * @param \Magento\Store\Model\StoreManagerInterface $storeManager
      * @param \Ebizmarts\MailChimp\Helper\Data $helper
      */
     public function __construct(
         Context $context,
-        ResultFactory $resultFactory,
         \Magento\Store\Model\StoreManagerInterface $storeManager,
         \Ebizmarts\MailChimp\Helper\Data $helper
-    )
-    {
-        $this->_resultFactory   = $resultFactory;
+    ) {
+    
+        $this->_resultFactory   = $context->getResultFactory();
         $this->_helper          = $helper;
         $this->_storeManager    = $storeManager;
         parent::__construct($context);
-
     }
     public function execute()
     {

@@ -13,7 +13,7 @@
 
 namespace Ebizmarts\MailChimp\Model\Config\Backend;
 
-class  MonkeyStore extends \Magento\Framework\App\Config\Value
+class MonkeyStore extends \Magento\Framework\App\Config\Value
 {
     /**
      * @var \Ebizmarts\MailChimp\Helper\Data
@@ -79,7 +79,7 @@ class  MonkeyStore extends \Magento\Framework\App\Config\Value
         } elseif ($data['ecommerce']['fields']['active']['inherit']) {
             $active = $data['ecommerce']['fields']['active']['inherit'];
         }
-        if ($active&&$this->isValueChanged()) {
+        if ($active && $this->isValueChanged()) {
             $mailchimpStore     = $this->getOldValue();
             $newListId = $data['general']['fields']['monkeylist']['value'];
             $this->oldListId = $this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_PATH_LIST, $this->getScopeId());
@@ -87,14 +87,14 @@ class  MonkeyStore extends \Magento\Framework\App\Config\Value
             $createWebhook = true;
             foreach ($this->_storeManager->getStores() as $storeId => $val) {
                 $mstoreId = $this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_MAILCHIMP_STORE, $storeId);
-                if ( $mstoreId == $mailchimpStore) {
+                if ($mstoreId == $mailchimpStore) {
                     $found++;
                 }
                 $listId = $this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_PATH_LIST, $storeId);
-                if ( $listId == $newListId) {
+                if ($listId == $newListId) {
                     $createWebhook = false;
                 }
-                $this->_helper->deleteConfig(\Ebizmarts\MailChimp\Helper\Data::XML_MAILCHIMP_JS_URL, $storeId , \Magento\Store\Model\ScopeInterface::SCOPE_STORES);
+                $this->_helper->deleteConfig(\Ebizmarts\MailChimp\Helper\Data::XML_MAILCHIMP_JS_URL, $storeId, \Magento\Store\Model\ScopeInterface::SCOPE_STORES);
             }
             if ($found==1) {
                 $this->_helper->markAllBatchesAs($mailchimpStore, 'canceled');

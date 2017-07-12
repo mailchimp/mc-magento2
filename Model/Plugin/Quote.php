@@ -31,8 +31,8 @@ class Quote
     public function __construct(
         \Magento\Framework\Stdlib\CookieManagerInterface $cookieManager,
         \Ebizmarts\MailChimp\Helper\Data $helper
-    )
-    {
+    ) {
+    
         $this->_cookieManager = $cookieManager;
         $this->_helper  = $helper;
     }
@@ -41,11 +41,11 @@ class Quote
     {
         $mailchimp_campaign_id = $this->_cookieManager->getCookie('mailchimp_campaign_id');
         if ($mailchimp_campaign_id) {
-            $quote->setData('mailchimp_campaign_id',$mailchimp_campaign_id);
+            $quote->setData('mailchimp_campaign_id', $mailchimp_campaign_id);
         }
         $mailchimp_landing_page = $this->_cookieManager->getCookie('mailchimp_landing_page');
         if ($mailchimp_landing_page) {
-            $quote->setData('mailchimp_landing_page',$mailchimp_landing_page);
+            $quote->setData('mailchimp_landing_page', $mailchimp_landing_page);
         }
     }
 }

@@ -25,14 +25,14 @@ class MonkeyList implements \Magento\Framework\Option\ArrayInterface
     public function __construct(
         \Ebizmarts\MailChimp\Helper\Data $helper,
         \Magento\Store\Model\StoreManagerInterface $storeManager
-    )
-    {
+    ) {
+    
         if ($helper->getApiKey($storeManager->getStore()->getId())) {
-           try {
-                $this->options = $helper->getApi()->lists->getLists($helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_PATH_LIST,$storeManager->getStore()->getId()));
-           } catch(\Exception $e) {
-               $helper->log($e->getMessage());
-           }
+            try {
+                $this->options = $helper->getApi()->lists->getLists($helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_PATH_LIST, $storeManager->getStore()->getId()));
+            } catch (\Exception $e) {
+                $helper->log($e->getMessage());
+            }
         }
     }
     public function toOptionArray()
@@ -46,13 +46,11 @@ class MonkeyList implements \Magento\Framework\Option\ArrayInterface
             $rc[] = ['value' => 0, 'label' => __('---No Data---')];
         }
         return $rc;
-
     }
     public function toArray()
     {
         $rc = [];
         $rc[$this->options['id']] = $this->options['name'];
         return $rc;
-
     }
 }

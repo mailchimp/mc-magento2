@@ -24,25 +24,23 @@ class Save extends \Ebizmarts\MailChimp\Controller\Adminhtml\Stores
             $storeModel = $this->_mailchimpStoresFactory->create();
             $formData = $this->getRequest()->getParam('stores');
             $storeId = isset($formData['id']) ? $formData['id'] : null;
-            if($storeId) {
-                $storeModel->getResource()->load($storeModel,$storeId);
+            if ($storeId) {
+                $storeModel->getResource()->load($storeModel, $storeId);
             }
             try {
                 $formData['storeid'] = $this->_updateMailchimp($formData);
                 $formData['platform'] = \Ebizmarts\MailChimp\Helper\Data::PLATFORM;
                 $storeModel->setData($formData);
                 $storeModel->getResource()->save($storeModel);
-                if($returnToEdit) {
-                    if(!$storeId) {
+                if ($returnToEdit) {
+                    if (!$storeId) {
                         $storeId = $storeModel->getId();
                     }
                     return $resultRedirect->setPath('mailchimp/stores/edit', ['id'=>$storeId]);
-                }
-                else {
+                } else {
                     return $resultRedirect->setPath('mailchimp/stores');
                 }
-            } catch(\Mailchimp_Error $e)
-            {
+            } catch (\Mailchimp_Error $e) {
                 $this->messageManager->addErrorMessage(__('Store could not be saved.'.$e->getMessage()));
                 return $resultRedirect->setPath('mailchimp/stores/edit', ['id'=>$storeId]);
             }
@@ -114,5 +112,4 @@ class Save extends \Ebizmarts\MailChimp\Controller\Adminhtml\Stores
     {
         return $this->_authorization->isAllowed('Ebizmarts_MailChimp::stores_edit');
     }
-
 }

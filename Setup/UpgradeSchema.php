@@ -11,6 +11,7 @@
  * @file: UpgradeSchema.php
  */
 namespace Ebizmarts\MailChimp\Setup;
+
 use Magento\Framework\Setup\UpgradeSchemaInterface;
 use Magento\Framework\Setup\SchemaSetupInterface;
 use Magento\Framework\Setup\ModuleContextInterface;
@@ -220,7 +221,6 @@ class UpgradeSchema implements UpgradeSchemaInterface
                     'comment' => 'Landing Page'
                 ]
             );
-
         }
         if (version_compare($context->getVersion(), '1.0.8') < 0) {
             $installer->getConnection()->addColumn(
@@ -243,11 +243,10 @@ class UpgradeSchema implements UpgradeSchemaInterface
                     'comment' => 'Mailchimp Batch ID'
                 ]
             );
-
         }
         if (version_compare($context->getVersion(), '1.0.10') < 0) {
             $installer->getConnection()->addColumn(
-              $installer->getTable('mailchimp_errors'),
+                $installer->getTable('mailchimp_errors'),
                 'store_id',
                 [
                     'type' => \Magento\Framework\DB\Ddl\Table::TYPE_INTEGER,
@@ -364,10 +363,8 @@ class UpgradeSchema implements UpgradeSchemaInterface
                     null,
                     [],
                     'Already processed'
-                )
-            ;
+                );
             $installer->getConnection()->createTable($table);
-
         }
         $installer->endSetup();
     }

@@ -45,8 +45,8 @@ class Result
         \Ebizmarts\MailChimp\Model\ResourceModel\MailChimpSyncBatches\CollectionFactory $batchCollection,
         \Ebizmarts\MailChimp\Model\MailChimpErrorsFactory $chimpErrors,
         \Magento\Framework\Archive $archive
-    )
-    {
+    ) {
+    
         $this->_batchCollection     = $batchCollection;
         $this->_helper              = $helper;
         $this->_archive             = $archive;
@@ -56,8 +56,8 @@ class Result
     {
         $collection = $this->_batchCollection->create();
         $collection
-            ->addFieldToFilter('store_id', array('eq' => $storeId))
-            ->addFieldToFilter('status', array('eq' => 'pending'));
+            ->addFieldToFilter('store_id', ['eq' => $storeId])
+            ->addFieldToFilter('status', ['eq' => 'pending']);
         /**
          * @var $item \Ebizmarts\MailChimp\Model\MailChimpSyncBatches
          */
@@ -82,7 +82,7 @@ class Result
     }
     public function getBatchResponse($batchId, $storeId = null)
     {
-        $files = array();
+        $files = [];
         try {
             $baseDir = $this->_helper->getBaseDir();
             $api = $this->_helper->getApi($storeId);
@@ -122,7 +122,7 @@ class Result
         }
         return $files;
     }
-    protected function processEachResponseFile($files, $batchId, $mailchimpStoreId , $storeId)
+    protected function processEachResponseFile($files, $batchId, $mailchimpStoreId, $storeId)
     {
         foreach ($files as $file) {
             $items = json_decode(file_get_contents($file));
@@ -136,7 +136,7 @@ class Result
 
                         //parse error
                         $response = json_decode($item->response);
-                        if (preg_match('/already exists/',$response->detail)) {
+                        if (preg_match('/already exists/', $response->detail)) {
                             continue;
                         }
                         $mailchimpErrors = $this->_chimpErrors->create();
@@ -174,9 +174,8 @@ class Result
                         $mailchimpErrors->getResource()->save($mailchimpErrors);
                     }
                 }
-            }
-            else {
-                switch(json_last_error()) {
+            } else {
+                switch (json_last_error()) {
                     case JSON_ERROR_DEPTH:
                         $this->_helper->log(' - Maximum stack depth exceeded');
                         break;

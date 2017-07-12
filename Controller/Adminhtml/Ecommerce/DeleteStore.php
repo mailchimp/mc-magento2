@@ -50,8 +50,8 @@ class DeleteStore extends \Magento\Backend\App\Action
         \Magento\Store\Model\StoreManagerInterface $storeManagerInterface,
         \Ebizmarts\MailChimp\Helper\Data $helper,
         \Magento\Config\Model\ResourceModel\Config $config
-    )
-    {
+    ) {
+    
         parent::__construct($context);
         $this->resultJsonFactory    = $resultJsonFactory;
         $this->helper               = $helper;
@@ -85,7 +85,7 @@ class DeleteStore extends \Magento\Backend\App\Action
         try {
             $this->helper->deleteStore($mailchimpStore);
             $this->_config->deleteConfig(\Ebizmarts\MailChimp\Helper\Data::XML_MAILCHIMP_STORE, $scope, $storeId);
-        } catch(ValidatorException $e) {
+        } catch (ValidatorException $e) {
             $valid = 0;
             $message = $e->getMessage();
         }

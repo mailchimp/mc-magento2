@@ -21,5 +21,4 @@ class MailChimpWebhookRequest extends AbstractDb
     {
         $this->_init('mailchimp_webhook_request', 'id');
     }
-
 }

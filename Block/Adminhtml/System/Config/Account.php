@@ -22,8 +22,7 @@ class Account extends \Magento\Config\Block\System\Config\Form\Field
             foreach ($values as $dat) {
                 if ($dat['value']!=='') {
                     $html .= "<li>{$dat['label']}: {$dat['value']}</li>";
-                }
-                else {
+                } else {
                     $html .= "<li>{$dat['label']}</li>";
                 }
             }

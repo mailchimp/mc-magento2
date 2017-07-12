@@ -22,5 +22,4 @@ class MailChimpStores extends AbstractDb
     {
         $this->_init('mailchimp_stores', 'id');
     }
-
 }

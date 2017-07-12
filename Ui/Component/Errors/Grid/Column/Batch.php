@@ -46,7 +46,6 @@ class Batch extends Column
     public function prepareDataSource(array $dataSource)
     {
         if (isset($dataSource['data']['items'])) {
-
             foreach ($dataSource['data']['items'] as &$item) {
                 $item[$this->getData('name')]['batch_id'] = [
                     'href' => $this->urlBuilder->getUrl(
@@ -61,6 +60,4 @@ class Batch extends Column
 
         return $dataSource;
     }
-
-
 }

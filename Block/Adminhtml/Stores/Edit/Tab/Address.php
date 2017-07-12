@@ -39,8 +39,8 @@ class Address extends Generic implements TabInterface
         \Magento\Framework\Data\FormFactory $formFactory,
         \Magento\Directory\Model\Config\Source\Country $country,
         array $data = []
-    )
-    {
+    ) {
+    
         $this->_country = $country;
         parent::__construct($context, $registry, $formFactory, $data);
     }
@@ -101,7 +101,7 @@ class Address extends Generic implements TabInterface
         );
         $country = $this->_country->toOptionArray();
         $countryArray = [''=> __('Select one')];
-        foreach($country as $c) {
+        foreach ($country as $c) {
             $countryArray[$c['value']] = $c['label'];
         }
         $fieldset->addField(
@@ -121,7 +121,6 @@ class Address extends Generic implements TabInterface
         $this->setForm($form);
 
         return parent::_prepareForm();
-
     }
     public function getTabLabel()
     {
@@ -139,5 +138,4 @@ class Address extends Generic implements TabInterface
     {
         return false;
     }
-
 }

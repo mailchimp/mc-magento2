@@ -79,8 +79,8 @@ class Ecommerce
         \Ebizmarts\MailChimp\Model\Api\Subscriber $apiSubscriber,
         \Ebizmarts\MailChimp\Model\MailChimpSyncBatches $mailChimpSyncBatches,
         \Ebizmarts\MailChimp\Model\MailChimpSyncEcommerce $chimpSyncEcommerce
-    )
-    {
+    ) {
+    
         $this->_storeManager    = $storeManager;
         $this->_helper          = $helper;
         $this->_apiProduct      = $apiProduct;
@@ -99,15 +99,13 @@ class Ecommerce
         $tableName = $this->_chimpSyncEcommerce->getResource()->getMainTable();
         $connection->delete($tableName, 'batch_id is null');
 
-        foreach($this->_storeManager->getStores() as $storeId => $val)
-        {
+        foreach ($this->_storeManager->getStores() as $storeId => $val) {
             $this->_storeManager->setCurrentStore($storeId);
             $listId = $this->_helper->getGeneralList($storeId);
-            if($this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_PATH_ACTIVE,$storeId)) {
-                $mailchimpStoreId  = $this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_MAILCHIMP_STORE,$storeId);
-                if ($mailchimpStoreId != -1)
-                {
-                    $this->_apiResult->processResponses($storeId,true, $mailchimpStoreId);
+            if ($this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_PATH_ACTIVE, $storeId)) {
+                $mailchimpStoreId  = $this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_MAILCHIMP_STORE, $storeId);
+                if ($mailchimpStoreId != -1) {
+                    $this->_apiResult->processResponses($storeId, true, $mailchimpStoreId);
                     $batchId =$this->_processStore($storeId, $mailchimpStoreId, $listId);
                     if ($batchId) {
                         $connection->update($tableName, ['batch_id' => $batchId], "batch_id is null and mailchimp_store_id = '$mailchimpStoreId'");
@@ -123,20 +121,20 @@ class Ecommerce
         $batchId = null;
         $batchArray = [];
         $results = [];
-        if ($this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_PATH_ECOMMERCE_ACTIVE,$storeId)) {
-            $results = $this->_apiSubscribers->sendSubscribers($storeId,$listId);
+        if ($this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_PATH_ECOMMERCE_ACTIVE, $storeId)) {
+            $results = $this->_apiSubscribers->sendSubscribers($storeId, $listId);
             $countSubscribers = count($results);
             $products =  $this->_apiProduct->_sendProducts($storeId);
             $countProducts = count($products);
             $results = array_merge($results, $products);
             $customers = $this->_apiCustomer->sendCustomers($storeId);
             $countCustomers = count($customers);
-            $results = array_merge($results,$customers);
+            $results = array_merge($results, $customers);
             $orders = $this->_apiOrder->sendOrders($storeId);
             $countOrders = count($orders);
-            $results = array_merge($results,$orders);
+            $results = array_merge($results, $orders);
             $carts = $this->_apiCart->createBatchJson($storeId);
-            $results= array_merge($results,$carts);
+            $results= array_merge($results, $carts);
 
             if (!empty($results)) {
                 try {
@@ -160,23 +158,21 @@ class Ecommerce
                             $batchId = $batchResponse['id'];
                         }
                     }
-                } catch(\Mailchimp_Error $e) {
+                } catch (\Mailchimp_Error $e) {
                     $this->_helper->log('error de mailchimp '.$e->getMessage());
-                } catch(\Exception $e) {
+                } catch (\Exception $e) {
                     $this->_helper->log("Json encode fails");
-                    $this->_helper->log(var_export($batchArray,true));
+                    $this->_helper->log(var_export($batchArray, true));
                 }
             }
             $countTotal = $countCustomers + $countProducts + $countOrders + $countSubscribers;
-            if($countTotal == 0 && $this->_helper->getMCMinSyncing($storeId))
-            {
+            if ($countTotal == 0 && $this->_helper->getMCMinSyncing($storeId)) {
                 $api = $this->_helper->getApi($storeId);
-                $api->ecommerce->stores->edit($mailchimpStoreId,null, null, null, null, null, null, null, null, null, null, false);
-                $this->_helper->saveConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_PATH_IS_SYNC,true,$storeId);
+                $api->ecommerce->stores->edit($mailchimpStoreId, null, null, null, null, null, null, null, null, null, null, false);
+                $this->_helper->saveConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_PATH_IS_SYNC, true, $storeId);
             }
         }
 
         return $batchId;
     }
-
 }

@@ -7,16 +7,17 @@
  * @copyright   Ebizmarts (http://ebizmarts.com)
  * @license     http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
-define([
+define(
+    [
         'jquery',
         'mage/cookies'
     ],
-    function($) {
+    function ($) {
         "use strict";
 
         $.widget('mage.campaigncatcher', {
-            _init: function() {
-                $(document).ready(function() {
+            _init: function () {
+                $(document).ready(function () {
                     var urlparams = location.search.substr(1).split('&');
                     var params = new Array();
                     var mc_cid = null;
@@ -29,24 +30,23 @@ define([
                             params[key] = val;
                         }
 
-                        if(key=='utm_source') {
+                        if (key=='utm_source') {
                             var reg = /^mailchimp$/;
-                            if(reg.exec(val)) {
+                            if (reg.exec(val)) {
                                 isMailchimp = true;
                             }
-                        }
-                        else {
+                        } else {
                             if (key=='mc_cid') {
                                 mc_cid = val;
                             }
                         }
                     }
-                    if (mc_cid&&!isMailchimp) {
+                    if (mc_cid && !isMailchimp) {
                         $.mage.cookies.set('mailchimp_campaign_id' , mc_cid);
                         $.mage.cookies.set('mailchimp_landing_page', location);
                     }
 
-                    if(isMailchimp) {
+                    if (isMailchimp) {
                         $.mage.cookies.clear('mailchimp_campaign_id');
                         $.mage.cookies.set('mailchimp_landing_page', location);
                     }
@@ -54,4 +54,5 @@ define([
             }
         });
         return $.mage.campaigncatcher;
-});
+    }
+);

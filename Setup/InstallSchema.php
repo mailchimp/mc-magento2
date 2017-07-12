@@ -72,8 +72,7 @@ class InstallSchema implements InstallSchemaInterface
                 10,
                 [],
                 'Status'
-            )
-        ;
+            );
 
         $installer->getConnection()->createTable($table);
 
@@ -193,9 +192,7 @@ class InstallSchema implements InstallSchemaInterface
                 32,
                 [],
                 'Quote token'
-            )
-
-        ;
+            );
 
         $installer->getConnection()->createTable($table);
 
@@ -236,7 +233,7 @@ class InstallSchema implements InstallSchemaInterface
             if (!is_dir($path)) {
                 mkdir($path);
             }
-        } catch(Exception $e) {
+        } catch (Exception $e) {
             $this->_helper->log($e->getMessage());
         }
         $installer->endSetup();

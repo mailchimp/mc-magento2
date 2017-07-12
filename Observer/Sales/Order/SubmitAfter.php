@@ -45,8 +45,8 @@ class SubmitAfter implements \Magento\Framework\Event\ObserverInterface
         \Magento\Framework\Stdlib\Cookie\CookieMetadataFactory $metadataFactory,
         \Magento\Framework\Session\SessionManagerInterface $sessionManager,
         \Ebizmarts\MailChimp\Helper\Data $helper
-    )
-    {
+    ) {
+    
         $this->_cookieManager   = $cookieManager;
         $this->_helper          = $helper;
         $this->_cookieMetadataFactory   = $metadataFactory;

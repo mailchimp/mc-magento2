@@ -52,18 +52,16 @@ class Stores extends Action
         PageFactory $resultPageFactory,
         MailChimpStoresFactory $storesFactory,
         \Ebizmarts\MailChimp\Helper\Data $helper
-    )
-    {
+    ) {
+    
         parent::__construct($context);
         $this->_coreRegistry            = $registry;
         $this->_resultPageFactory       = $resultPageFactory;
         $this->_mailchimpStoresFactory  = $storesFactory;
         $this->_helper                  = $helper;
-
     }
     public function execute()
     {
-
     }
     protected function _isAllowed()
     {

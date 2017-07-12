@@ -29,7 +29,7 @@ class Cmspage
     }
     public function toOptionArray()
     {
-        $pages = $this->_page->getCollection()->addOrder('title','asc');
+        $pages = $this->_page->getCollection()->addOrder('title', 'asc');
         return ['checkout/cart' => 'Shopping Cart (default page)'] + $pages->toOptionIdArray();
     }
 }

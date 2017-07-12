@@ -31,17 +31,15 @@ class Getaccountdetails extends Action
     /**
      * GetAccountDetails constructor.
      * @param Context $context
-     * @param ResultFactory $resultFactory
      * @param \Ebizmarts\MailChimp\Helper\Data $helper
      */
     public function __construct(
         Context $context,
-        ResultFactory $resultFactory,
         \Ebizmarts\MailChimp\Helper\Data $helper
-    )
-    {
+    ) {
+    
         parent::__construct($context);
-        $this->_resultFactory       = $resultFactory;
+        $this->_resultFactory       = $context->getResultFactory();
         $this->_helper                  = $helper;
     }
     public function execute()
@@ -75,7 +73,7 @@ class Getaccountdetails extends Action
                     $options['nostore'] = ['label' => __('This MailChimp account is not connected to Magento.'), 'value' => ''];
                 }
             }
-        } catch(\Mailchimp_Error $e) {
+        } catch (\Mailchimp_Error $e) {
             $options['error'] = ['label' => 'Error', 'value' => __('--- Invalid API Key ---')];
         }
 

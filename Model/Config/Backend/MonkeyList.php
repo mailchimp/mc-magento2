@@ -71,8 +71,8 @@ class MonkeyList extends \Magento\Framework\App\Config\Value
         $generalData = $this->getData();
         $data = $this->getData('groups');
         $oldListId = $this->getOldValue();
-        $this->_registry->register('oldListId',$oldListId);
-        $this->_registry->register('apiKey',$data['general']['fields']['apikey']['value']);
+        $this->_registry->register('oldListId', $oldListId);
+        $this->_registry->register('apiKey', $data['general']['fields']['apikey']['value']);
         return parent::afterSave();
     }
 }

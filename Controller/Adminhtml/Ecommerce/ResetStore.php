@@ -44,8 +44,8 @@ class ResetStore extends \Magento\Backend\App\Action
         JsonFactory $resultJsonFactory,
         \Magento\Store\Model\StoreManagerInterface $storeManagerInterface,
         \Ebizmarts\MailChimp\Helper\Data $helper
-    )
-    {
+    ) {
+    
         parent::__construct($context);
         $this->resultJsonFactory    = $resultJsonFactory;
         $this->helper               = $helper;
@@ -80,7 +80,7 @@ class ResetStore extends \Magento\Backend\App\Action
         try {
             $resultJson = $this->resultJsonFactory->create();
 //            $this->helper->resetErrors($mailchimpStore);
-        } catch(ValidatorException $e) {
+        } catch (ValidatorException $e) {
             $valid = 0;
             $message = $e->getMessage();
         }

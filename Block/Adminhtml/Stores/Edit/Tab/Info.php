@@ -64,8 +64,8 @@ class Info extends Generic implements TabInterface
         \Magento\Config\Model\Config\Source\Locale $locale,
         \Ebizmarts\MailChimp\Model\Config\Source\ApiKey $apiKey,
         array $data = []
-    )
-    {
+    ) {
+    
         $this->_timezone    = $timezone;
         $this->_yesno       = $yesno;
         $this->_currency    = $currency;
@@ -105,8 +105,7 @@ class Info extends Generic implements TabInterface
         } else {
             $apikey = $this->_apikey->toOptionArray();
             $apikeyArray = [];
-            foreach($apikey as $a)
-            {
+            foreach ($apikey as $a) {
                 $apikeyArray[$a['value']] = $a['label'];
             }
             $url = $this->_urlBuilder->getUrl('mailchimp/stores/getList');
@@ -131,8 +130,6 @@ class Info extends Generic implements TabInterface
                     'options'   => $listArray,
                 ]
             );
-
-
         }
 
         $fieldset->addField(
@@ -177,8 +174,7 @@ class Info extends Generic implements TabInterface
         );
         $currency = $this->_currency->toOptionArray();
         $currencyArray = [''=> __('Select one')];
-        foreach($currency as $c)
-        {
+        foreach ($currency as $c) {
             $currencyArray[$c['value']] = $c['label'];
         }
         $fieldset->addField(
@@ -193,7 +189,7 @@ class Info extends Generic implements TabInterface
         );
         $locale = $this->_locale->toOptionArray();
         $localeArray = [''=> __('Select one')];
-        foreach($locale as $l) {
+        foreach ($locale as $l) {
             $localeArray[$l['value']] = $l['label'];
         }
 
@@ -209,7 +205,7 @@ class Info extends Generic implements TabInterface
         );
         $timezone = $this->_timezone->toOptionArray();
         $timezoneArray = [''=> __('Select one')];
-        foreach($timezone as $t) {
+        foreach ($timezone as $t) {
             $timezoneArray[$t['value']] = $t['label'];
         }
         $fieldset->addField(

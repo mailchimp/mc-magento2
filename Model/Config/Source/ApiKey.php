@@ -21,8 +21,8 @@ class ApiKey implements \Magento\Framework\Option\ArrayInterface
      */
     public function __construct(
         \Ebizmarts\MailChimp\Helper\Data $helper
-    )
-    {
+    ) {
+    
         $apiKeys = $helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_PATH_APIKEY_LIST);
         if ($apiKeys) {
             $this->options = explode("\n", $apiKeys);
@@ -32,7 +32,7 @@ class ApiKey implements \Magento\Framework\Option\ArrayInterface
     }
     public function toOptionArray()
     {
-        if (is_array($this->options)&&count($this->options)) {
+        if (is_array($this->options) && count($this->options)) {
             $rc = [];
             $rc[] = ['value' => -1, 'label' => 'Select one ApiKey'];
             foreach ($this->options as $apiKey) {
@@ -42,6 +42,5 @@ class ApiKey implements \Magento\Framework\Option\ArrayInterface
             $rc[] = ['value' => 0, 'label' => __('---Enter first an APIKey list---')];
         }
         return $rc;
-
     }
 }

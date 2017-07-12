@@ -88,7 +88,7 @@ class Details implements \Magento\Framework\Option\ArrayInterface
                         ['label' => '  Total Orders', 'value' => $this->_options['total_orders']],
                         ['label' => '  Total Carts', 'value' => $this->_options['total_carts']]
                     ]);
-                    if($this->_options['is_syncing']) {
+                    if ($this->_options['is_syncing']) {
                         $ret = array_merge($ret, [
                            ['label'=> __('This account is currently syncing'), 'value'=>'']
                         ]);
@@ -97,9 +97,8 @@ class Details implements \Magento\Framework\Option\ArrayInterface
                             ['label'=> __('Synced since'), 'value'=>'']
                         ]);
                     }
-                }
-                else {
-                    $ret = array_merge($ret ,[
+                } else {
+                    $ret = array_merge($ret, [
                          ['label'=>'This MailChimp account is not connected to Magento.','value'=>'']
                         ]);
                 }

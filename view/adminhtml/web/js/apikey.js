@@ -7,10 +7,11 @@
  * @copyright   Ebizmarts (http://ebizmarts.com)
  * @license     http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
-define([
+define(
+    [
         'jquery'
-],
-    function($) {
+    ],
+    function ($) {
         "use strict";
 
         $.widget('mage.monkeyapikey', {
@@ -20,7 +21,7 @@ define([
 
             _init: function () {
                 var apiUrl = this.options.apikeyUrl;
-                $('#stores_apikey').change(function() {
+                $('#stores_apikey').change(function () {
                     // remove all items in list combo
                     $('#stores_list_id').empty();
                     // get the selected apikey
@@ -33,8 +34,7 @@ define([
                             type: 'POST',
                             dataType: 'json',
                             showLoader: true
-                        }
-                    ).done(function(data) {
+                        }).done(function (data) {
                         $.each(data, function (i, item) {
                             $('#stores_list_id').append($('<option>', {
                                 value: item.id,
@@ -46,4 +46,5 @@ define([
             }
         });
         return $.mage.monkeyapikey;
-    });
+    }
+);

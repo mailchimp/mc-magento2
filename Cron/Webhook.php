@@ -53,8 +53,8 @@ class Webhook
         \Magento\Newsletter\Model\SubscriberFactory $subscriberFactory,
         \Ebizmarts\MailChimp\Model\ResourceModel\MailChimpWebhookRequest\CollectionFactory $webhookCollection,
         \Magento\Customer\Model\CustomerFactory $customer
-    )
-    {
+    ) {
+    
         $this->_helper              = $helper;
         $this->_subscriberFactory   = $subscriberFactory;
         $this->_webhookCollection   = $webhookCollection;
@@ -70,14 +70,14 @@ class Webhook
          * @var $collection \Ebizmarts\MailChimp\Model\ResourceModel\MailChimpWebhookRequest\Collection
          */
         $collection = $this->_webhookCollection->create();
-        $collection->addFieldToFilter('processed',['eq'=>0]);
+        $collection->addFieldToFilter('processed', ['eq'=>0]);
         $collection->getSelect()->limit(self::BATCH_LIMIT);
         /**
          * @var $item \Ebizmarts\MailChimp\Model\MailChimpWebhookRequest
          */
-        foreach($collection as $item) {
+        foreach ($collection as $item) {
             $data = unserialize($item->getDataRequest());
-            switch($item->getType()) {
+            switch ($item->getType()) {
                 case self::TYPE_SUBSCRIBE:
                     $this->_subscribe($data);
                     break;
@@ -101,14 +101,13 @@ class Webhook
     {
         $listId = $data['list_id'];
         $email  = $data['email'];
-        $subscribers = $this->_helper->loadListSubscribers($listId,$email);
+        $subscribers = $this->_helper->loadListSubscribers($listId, $email);
         /**
          * @var $sub \Magento\Newsletter\Model\Subscriber
          */
         if ($subscribers->count()) {
-            foreach($subscribers as $sub) {
-                if ($sub->getSubscriberStatus() != \Magento\Newsletter\Model\Subscriber::STATUS_SUBSCRIBED)
-                {
+            foreach ($subscribers as $sub) {
+                if ($sub->getSubscriberStatus() != \Magento\Newsletter\Model\Subscriber::STATUS_SUBSCRIBED) {
                     $sub->setSubscriberStatus(\Magento\Newsletter\Model\Subscriber::STATUS_SUBSCRIBED);
                     $sub->getResource()->save($sub);
                 }
@@ -123,42 +122,39 @@ class Webhook
     {
         $listId = $data['list_id'];
         $email  = $data['email'];
-        $subscribers = $this->_helper->loadListSubscribers($listId,$email);
+        $subscribers = $this->_helper->loadListSubscribers($listId, $email);
         /**
          * @var $sub \Magento\Newsletter\Model\Subscriber
          */
-        foreach($subscribers as $sub)
-        {
+        foreach ($subscribers as $sub) {
             try {
                 $action = isset($data['action']) ? $data['action'] : self::ACTION_DELETE;
                 switch ($action) {
-                    case self::ACTION_DELETE :
-                        if ($this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_PATH_WEBHOOK_DELETE))
-                        {
+                    case self::ACTION_DELETE:
+                        if ($this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_PATH_WEBHOOK_DELETE)) {
                             $sub->getResource()->delete($sub);
                         } elseif ($sub->getSubscriberStatus()!=\Magento\Newsletter\Model\Subscriber::STATUS_UNSUBSCRIBED) {
-                            $this->_subscribeMember($sub,\Magento\Newsletter\Model\Subscriber::STATUS_UNSUBSCRIBED);
+                            $this->_subscribeMember($sub, \Magento\Newsletter\Model\Subscriber::STATUS_UNSUBSCRIBED);
                         }
                         break;
-                    case self::ACTION_UNSUBSCRIBE :
+                    case self::ACTION_UNSUBSCRIBE:
                         if ($sub->getSubscriberStatus()!=\Magento\Newsletter\Model\Subscriber::STATUS_UNSUBSCRIBED) {
-                            $this->_subscribeMember($sub,\Magento\Newsletter\Model\Subscriber::STATUS_UNSUBSCRIBED);
+                            $this->_subscribeMember($sub, \Magento\Newsletter\Model\Subscriber::STATUS_UNSUBSCRIBED);
                         }
                         break;
                 }
-            } catch(\Exception $e) {
+            } catch (\Exception $e) {
                 $this->_helper->log($e->getMessage());
             }
         }
     }
     protected function _clean($data)
     {
-        $subscribers = $this->_helper->loadListSubscribers($data['list_id'],$data['email']);
+        $subscribers = $this->_helper->loadListSubscribers($data['list_id'], $data['email']);
         /**
          * @var $sub \Magento\Newsletter\Model\Subscriber
          */
-        foreach($subscribers as $sub)
-        {
+        foreach ($subscribers as $sub) {
             $sub->getResource()->delete($sub);
         }
     }
@@ -167,8 +163,8 @@ class Webhook
         $oldEmail = $data['old_email'];
         $newEmail = $data['new_email'];
         $listId   = $data['list_id'];
-        $oldSubscribers = $this->_helper->loadListSubscribers($listId,$oldEmail);
-        $newSubscribers = $this->_helper->loadListSubscribers($listId,$newEmail);
+        $oldSubscribers = $this->_helper->loadListSubscribers($listId, $oldEmail);
+        $newSubscribers = $this->_helper->loadListSubscribers($listId, $newEmail);
         /**
          * @var $sub \Magento\Newsletter\Model\Subscriber
          */
@@ -181,7 +177,7 @@ class Webhook
             } else {
                 $sub = $this->_subscriberFactory->create();
                 $sub->setSubscriberEmail($newEmail);
-                $this->_subscribeMember($sub,\Magento\Newsletter\Model\Subscriber::STATUS_SUBSCRIBED);
+                $this->_subscribeMember($sub, \Magento\Newsletter\Model\Subscriber::STATUS_SUBSCRIBED);
             }
         }
     }
@@ -207,26 +203,21 @@ class Webhook
                 $customer->getResource()->save($customer);
             }
         } else {
-            $subscribers = $this->_helper->loadListSubscribers($listId,$email);
-            if ($subscribers->count() == 0)
-            {
+            $subscribers = $this->_helper->loadListSubscribers($listId, $email);
+            if ($subscribers->count() == 0) {
                 $subscriber = $this->_subscriberFactory->create();
                 $subscriber->setSubscriberEmail($email);
 
                 $stores = $this->_helper->getMagentoStoreIdsByListId($listId);
-                if (count($stores))
-                {
+                if (count($stores)) {
                     $subscriber->setStreId($stores[0]);
                     $api = $this->_helper->getApi($stores[0]);
-                    $member =$api->lists->members->get($listId,md5(strtolower($email)));
-                    if($member)
-                    {
-                        if ($member['status']==\Mailchimp::SUBSCRIBED)
-                        {
-                            $this->_subscribeMember($subscriber,\Magento\Newsletter\Model\Subscriber::STATUS_SUBSCRIBED);
-                        } elseif ($member['status']==\Mailchimp::UNSUBSCRIBED)
-                        {
-                            $this->_subscribeMember($subscriber,\Magento\Newsletter\Model\Subscriber::STATUS_UNSUBSCRIBED);
+                    $member =$api->lists->members->get($listId, md5(strtolower($email)));
+                    if ($member) {
+                        if ($member['status']==\Mailchimp::SUBSCRIBED) {
+                            $this->_subscribeMember($subscriber, \Magento\Newsletter\Model\Subscriber::STATUS_SUBSCRIBED);
+                        } elseif ($member['status']==\Mailchimp::UNSUBSCRIBED) {
+                            $this->_subscribeMember($subscriber, \Magento\Newsletter\Model\Subscriber::STATUS_UNSUBSCRIBED);
                         }
                     }
                 }
@@ -239,7 +230,7 @@ class Webhook
      * @param string $status
      * @throws \Exception
      */
-    protected function _subscribeMember(\Magento\Newsletter\Model\Subscriber $subscriber,int $status)
+    protected function _subscribeMember(\Magento\Newsletter\Model\Subscriber $subscriber, int $status)
     {
         $subscriber->setImportMode(true);
         $subscriber->setStatus($status);
@@ -248,5 +239,4 @@ class Webhook
         $subscriber->setIsStatusChanged(true);
         $subscriber->getResource()->save($subscriber);
     }
-
 }

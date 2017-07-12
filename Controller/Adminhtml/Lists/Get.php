@@ -32,28 +32,25 @@ class Get extends Action
     /**
      * Get constructor.
      * @param Context $context
-     * @param ResultFactory $resultFactory
      * @param \Ebizmarts\MailChimp\Helper\Data $helper
      */
     public function __construct(
         Context $context,
-        ResultFactory $resultFactory,
         \Ebizmarts\MailChimp\Helper\Data $helper
-    )
-    {
+    ) {
+    
         parent::__construct($context);
-        $this->_resultFactory       = $resultFactory;
+        $this->_resultFactory       = $context->getResultFactory();
         $this->_helper                  = $helper;
-
     }
     public function execute()
     {
         $param = $this->getRequest()->getParams();
         $apiKey = $param['apikey'];
         $api = $this->_helper->getApiByApiKey($apiKey);
-        $lists = $api->lists->getLists(null,null,null,self::MAX_LISTS);
+        $lists = $api->lists->getLists(null, null, null, self::MAX_LISTS);
         $result = [];
-        foreach($lists['lists'] as $list) {
+        foreach ($lists['lists'] as $list) {
             $result[] = ['id'=> $list['id'], 'name'=> $list['name']];
         }
         $resultJson = $this->_resultFactory->create(ResultFactory::TYPE_JSON);
@@ -64,5 +61,4 @@ class Get extends Action
     {
         return $this->_authorization->isAllowed('Ebizmarts_MailChimp::stores_edit');
     }
-
 }

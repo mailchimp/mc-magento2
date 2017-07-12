@@ -32,19 +32,16 @@ class Get extends Action
     /**
      * Get constructor.
      * @param Context $context
-     * @param ResultFactory $resultFactory
      * @param \Ebizmarts\MailChimp\Helper\Data $helper
      */
     public function __construct(
         Context $context,
-        ResultFactory $resultFactory,
         \Ebizmarts\MailChimp\Helper\Data $helper
-    )
-    {
+    ) {
+    
         parent::__construct($context);
-        $this->_resultFactory       = $resultFactory;
+        $this->_resultFactory       = $context->getResultFactory();
         $this->_helper                  = $helper;
-
     }
     public function execute()
     {
@@ -60,7 +57,7 @@ class Get extends Action
                     $result[] = ['id' => $store['id'], 'name' => $store['name'], 'list_name' => $list['name'], 'list_id' => $store['list_id']];
                 }
             }
-        } catch(\Mailchimp_Error $e) {
+        } catch (\Mailchimp_Error $e) {
             $result = [];
         }
         $resultJson = $this->_resultFactory->create(ResultFactory::TYPE_JSON);
@@ -71,5 +68,4 @@ class Get extends Action
     {
         return $this->_authorization->isAllowed('Ebizmarts_MailChimp::config_mailchimp');
     }
-
 }

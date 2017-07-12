@@ -38,8 +38,8 @@ class AccountManagement
         \Ebizmarts\MailChimp\Helper\Data $helper,
         \Magento\Checkout\Model\Session $checkoutSession,
         \Magento\Quote\Model\QuoteFactory $quote
-    )
-    {
+    ) {
+    
         $this->_helper  = $helper;
         $this->_quote   = $quote;
         $this->_session = $checkoutSession;
@@ -55,16 +55,15 @@ class AccountManagement
         \Magento\Customer\Model\AccountManagement $accountManagement,
         \Closure $proceed,
         $customerEmail,
-        $websiteId=null)
-    {
+        $websiteId = null
+    ) {
+    
         $ret = $proceed($customerEmail,$websiteId);
-        if ($this->_session)
-        {
+        if ($this->_session) {
             $quoteId = $this->_session->getQuoteId();
-            if ($quoteId)
-            {
+            if ($quoteId) {
                 $quote = $this->_quote->create();
-                $quote->getResource()->load($quote,$quoteId);
+                $quote->getResource()->load($quote, $quoteId);
                 $quote->setCustomerEmail($customerEmail);
                 $quote->setUpdatedAt(date('Y-m-d H:i:s'));
                 $quote->getResource()->save($quote);

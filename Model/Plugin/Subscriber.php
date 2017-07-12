@@ -58,13 +58,13 @@ class Subscriber
         $subscriber->loadByCustomerId($customerId);
 //        if ($subscriber->getMailchimpId() != null) {
             $api = $this->_api;
-            try {
-                $md5HashEmail = md5(strtolower($subscriber->getSubscriberEmail()));
-                $api->lists->members->update($this->_helper->getDefaultList(), $md5HashEmail, null, 'unsubscribed');
+        try {
+            $md5HashEmail = md5(strtolower($subscriber->getSubscriberEmail()));
+            $api->lists->members->update($this->_helper->getDefaultList(), $md5HashEmail, null, 'unsubscribed');
 //                $subscriber->setMailchimpId('')->save();
-            } catch (\Exception $e) {
-                $this->_helper->log($e->getMessage());
-            }
+        } catch (\Exception $e) {
+            $this->_helper->log($e->getMessage());
+        }
 //        }
         return [$customerId];
     }
@@ -131,7 +131,6 @@ class Subscriber
             } catch (\Exception $e) {
                 $this->_helper->log($e->getMessage());
             }
-
         }
         return [$email];
     }
@@ -143,13 +142,13 @@ class Subscriber
 //        if ($subscriber->getMailchimpId()) {
 //            $this->_helper->log('has id');
             $api = $this->_helper->getApi();
-            try {
-                $md5HashEmail = md5(strtolower($subscriber->getSubscriberEmail()));
-                $api->lists->members->update($this->_helper->getDefaultList(), $md5HashEmail, null, 'unsubscribed');
+        try {
+            $md5HashEmail = md5(strtolower($subscriber->getSubscriberEmail()));
+            $api->lists->members->update($this->_helper->getDefaultList(), $md5HashEmail, null, 'unsubscribed');
 //                $subscriber->setMailchimpId('');
-            } catch (\Exception $e) {
-                $this->_helper->log($e->getMessage());
-            }
+        } catch (\Exception $e) {
+            $this->_helper->log($e->getMessage());
+        }
 //        }
         return null;
     }

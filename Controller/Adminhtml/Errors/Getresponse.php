@@ -38,20 +38,18 @@ class Getresponse extends \Magento\Backend\App\Action
     /**
      * Getresponse constructor.
      * @param \Magento\Backend\App\Action\Context $context
-     * @param ResultFactory $resultFactory
      * @param \Ebizmarts\MailChimp\Model\MailChimpErrorsFactory $errorsFactory
      * @param \Ebizmarts\MailChimp\Helper\Data $helper
      * @param \Ebizmarts\MailChimp\Model\Api\Result $result
      */
     public function __construct(
         \Magento\Backend\App\Action\Context $context,
-        \Magento\Framework\Controller\ResultFactory $resultFactory,
         \Ebizmarts\MailChimp\Model\MailChimpErrorsFactory $errorsFactory,
         \Ebizmarts\MailChimp\Helper\Data $helper,
         \Ebizmarts\MailChimp\Model\Api\Result $result
     ) {
         parent::__construct($context);
-        $this->_resultFactory       = $resultFactory;
+        $this->_resultFactory       = $context->getResultFactory();
         $this->_errorsFactory       = $errorsFactory;
         $this->_result              = $result;
         $this->_helper              = $helper;
@@ -71,11 +69,11 @@ class Getresponse extends \Magento\Backend\App\Action
             foreach ($files as $file) {
                 $items = json_decode(file_get_contents($file));
                 foreach ($items as $item) {
-                    $content = array(
+                    $content = [
                         'status_code' => $item->status_code,
                         'operation_id' => $item->operation_id,
                         'response' => json_decode($item->response)
-                    );
+                    ];
                     $fileContent[] = $content;
                 }
                 unlink($file);
@@ -84,7 +82,7 @@ class Getresponse extends \Magento\Backend\App\Action
             if (is_dir($baseDir . DIRECTORY_SEPARATOR . 'var' . DIRECTORY_SEPARATOR . \Ebizmarts\MailChimp\Model\Api\Result::MAILCHIMP_TEMP_DIR . DIRECTORY_SEPARATOR . $batchId)) {
                 rmdir($baseDir . DIRECTORY_SEPARATOR . 'var' . DIRECTORY_SEPARATOR . \Ebizmarts\MailChimp\Model\Api\Result::MAILCHIMP_TEMP_DIR . DIRECTORY_SEPARATOR . $batchId);
             }
-        } while(!count($fileContent)&&$counter<self::MAX_RETRIES);
+        } while (!count($fileContent) && $counter<self::MAX_RETRIES);
         $resultJson =$this->_resultFactory->create(ResultFactory::TYPE_JSON);
         $resultJson->setHeader('Content-disposition', 'attachment; filename='.$batchId.'.json');
         $resultJson->setHeader('Content-type', 'application/json');

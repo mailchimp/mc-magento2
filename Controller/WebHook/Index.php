@@ -18,7 +18,8 @@ use Magento\Framework\Controller\ResultFactory;
 use Magento\Framework\View\Result\PageFactory;
 use Magento\Framework\App\Action\Context;
 
-class Index extends Action{
+class Index extends Action
+{
     const WEBHOOK__PATH = 'mailchimp/webhook/index';
     /**
      * @var ResultFactory
@@ -37,21 +38,19 @@ class Index extends Action{
     /**
      * Index constructor.
      * @param Context $context
-     * @param ResultFactory $resultFactory
      * @param \Ebizmarts\MailChimp\Helper\Data $helper
      * @param \Ebizmarts\MailChimp\Model\MailChimpWebhookRequestFactory $chimpWebhookRequestFactory
      * @param \Magento\Framework\HTTP\PhpEnvironment\RemoteAddress $remoteAddress
      */
     public function __construct(
         Context $context,
-        \Magento\Framework\Controller\ResultFactory $resultFactory,
         \Ebizmarts\MailChimp\Helper\Data $helper,
         \Ebizmarts\MailChimp\Model\MailChimpWebhookRequestFactory $chimpWebhookRequestFactory,
         \Magento\Framework\HTTP\PhpEnvironment\RemoteAddress $remoteAddress
-    )
-    {
+    ) {
+    
         parent::__construct($context);
-        $this->_resultFactory              = $resultFactory;
+        $this->_resultFactory              = $context->getResultFactory();
         $this->_helper                      = $helper;
         $this->_chimpWebhookRequestFactory  = $chimpWebhookRequestFactory;
         $this->_remoteAddress               = $remoteAddress;
@@ -73,7 +72,7 @@ class Index extends Action{
         }
         if ($this->getRequest()->getPost('type')) {
             $request = $this->getRequest()->getPost();
-            if ($this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_PATH_WEBHOOK_ACTIVE ) ||
+            if ($this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_PATH_WEBHOOK_ACTIVE) ||
                 $request['type']==\Ebizmarts\MailChimp\Cron\Webhook::TYPE_SUBSCRIBE) {
                 $chimpRequest = $this->_chimpWebhookRequestFactory->create();
                 $chimpRequest->setType($request['type']);
@@ -82,8 +81,7 @@ class Index extends Action{
                 $chimpRequest->setProcessed(false);
                 $chimpRequest->getResource()->save($chimpRequest);
             }
-        }
-        else {
+        } else {
             $this->_helper->log('An empty request comes from ip: '.$this->_remoteAddress->getRemoteAddress());
             $result = $this->_resultFactory->create(ResultFactory::TYPE_RAW)->setHttpResponseCode(200);
             return $result;

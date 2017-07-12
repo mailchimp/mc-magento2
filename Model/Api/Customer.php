@@ -68,8 +68,8 @@ class Customer
         \Magento\Directory\Api\CountryInformationAcquirerInterface $countryInformation,
         \Magento\Customer\Model\Address $address,
         \Magento\Framework\Stdlib\DateTime\DateTime $date
-    )
-    {
+    ) {
+    
         $this->_helper              = $helper;
         $this->_collection          = $collection;
         $this->_orderCollection     = $orderCollection;
@@ -81,9 +81,9 @@ class Customer
     }
     public function sendCustomers($storeId)
     {
-        $mailchimpStoreId = $this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_MAILCHIMP_STORE,$storeId);
+        $mailchimpStoreId = $this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_MAILCHIMP_STORE, $storeId);
         $collection = $this->_collection->create();
-        $collection->addFieldToFilter('store_id',array('eq'=>$storeId));
+        $collection->addFieldToFilter('store_id', ['eq'=>$storeId]);
         $collection->getSelect()->joinLeft(
             ['m4m' => 'mailchimp_sync_ecommerce'],
             "m4m.related_id = e.entity_id and m4m.type = '".\Ebizmarts\MailChimp\Helper\Data::IS_CUSTOMER.
@@ -95,12 +95,11 @@ class Customer
             "' and m4m.mailchimp_sync_modified = 1)");
         $collection->getSelect()->limit(self::MAX);
         $counter = 0;
-        $customerArray = array();
+        $customerArray = [];
 
-        foreach($collection as $item)
-        {
+        foreach ($collection as $item) {
             $customer = $this->_customerFactory->create();
-            $customer->getResource()->load($customer,$item->getId());
+            $customer->getResource()->load($customer, $item->getId());
 
 
 //            $item->getId());
@@ -109,7 +108,7 @@ class Customer
 
             try {
                 $customerJson = json_encode($data);
-            } catch(Exception $e) {
+            } catch (Exception $e) {
                 $this->_helper->log('Customer: '.$customer->getId().' json encode failed');
             }
             if (!empty($customerJson)) {
@@ -120,7 +119,6 @@ class Customer
 
                 //update customers delta
                 $this->_updateCustomer($mailchimpStoreId, $customer->getId(), $this->_date->gmtDate(), '', 0);
-
             }
             $counter++;
         }
@@ -134,7 +132,7 @@ class Customer
     protected function _buildCustomerData(\Magento\Customer\Model\Customer $customer)
     {
         $point = 0;
-        $data = array();
+        $data = [];
         $data["id"] = $customer->getId();
         $data["email_address"] = $customer->getEmail() ? $customer->getEmail() : '';
         $data["first_name"] = $customer->getFirstname() ? $customer->getFirstname() : '';
@@ -142,16 +140,16 @@ class Customer
         $data["opt_in_status"] = $this->getOptin();
         // customer order data
         $orderCollection = $this->_orderCollection->create();
-        $orderCollection->addFieldToFilter('state', array(
-            array('neq',\Magento\Sales\Model\Order::STATE_CANCELED),
-            array('neq',\Magento\Sales\Model\Order::STATE_CLOSED)))
-            ->addAttributeToFilter('customer_id', array('eq' => $customer->getId()));
+        $orderCollection->addFieldToFilter('state', [
+            ['neq',\Magento\Sales\Model\Order::STATE_CANCELED],
+            ['neq',\Magento\Sales\Model\Order::STATE_CLOSED]])
+            ->addAttributeToFilter('customer_id', ['eq' => $customer->getId()]);
         $totalOrders = 0;
         $totalAmountSpent = 0;
         /**
          * @var $customerOrder \Magento\Sales\Model\Order
          */
-        foreach($orderCollection as $customerOrder) {
+        foreach ($orderCollection as $customerOrder) {
             $totalOrders++;
             $totalAmountSpent += $customerOrder->getGrandTotal() - $customerOrder->getTotalRefunded()
                 - $customerOrder->getTotalCanceled();
@@ -159,8 +157,8 @@ class Customer
         $data['orders_count']   = $totalOrders;
         $data['total_spent']    = $totalAmountSpent;
         $address = $customer->getDefaultBillingAddress();
-        if($address) {
-            $customerAddress = array();
+        if ($address) {
+            $customerAddress = [];
             if ($street = $address->getStreet()) {
                 $street = $address->getStreet();
                 if ($street[0]) {
@@ -207,7 +205,7 @@ class Customer
      */
     public function getMergeVars(\Magento\Customer\Model\Customer $customer)
     {
-        return array();
+        return [];
     }
 
     /**
@@ -215,7 +213,8 @@ class Customer
      * @param $order
      * @return \Magento\Customer\Api\Data\CustomerInterface
      */
-    public function createGuestCustomer($guestId, $order) {
+    public function createGuestCustomer($guestId, $order)
+    {
         $guestCustomer = $this->_customerFactory->create();
         $guestCustomer->setId($guestId);
         foreach ($order->getData() as $key => $value) {
@@ -227,7 +226,8 @@ class Customer
         return $guestCustomer;
     }
 
-    public function getOptin($storeId = 0) {
+    public function getOptin($storeId = 0)
+    {
         if ($this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_ECOMMERCE_OPTIN, $storeId)) {
             $optin = true;
         } else {
@@ -237,8 +237,13 @@ class Customer
     }
     protected function _updateCustomer($storeId, $entityId, $sync_delta, $sync_error, $sync_modified)
     {
-        $this->_helper->saveEcommerceData($storeId, $entityId, $sync_delta, $sync_error, $sync_modified,
-            \Ebizmarts\MailChimp\Helper\Data::IS_CUSTOMER);
+        $this->_helper->saveEcommerceData(
+            $storeId,
+            $entityId,
+            $sync_delta,
+            $sync_error,
+            $sync_modified,
+            \Ebizmarts\MailChimp\Helper\Data::IS_CUSTOMER
+        );
     }
-
 }

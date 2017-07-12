@@ -62,23 +62,22 @@ class Loadquote extends Action
         \Magento\Customer\Model\Session $customerSession,
         \Ebizmarts\MailChimp\Helper\Data $helper,
         \Magento\Framework\Url $urlHelper,
-        \Magento\Framework\Message\ManagerInterface $message,
         \Magento\Customer\Model\Url $customerUrl
-    )
-    {
+    ) {
+    
         $this->pageFactory      = $pageFactory;
         $this->_quote           = $quote;
         $this->_customerSession = $customerSession;
         $this->_helper          = $helper;
         $this->_urlHelper       = $urlHelper;
-        $this->_message         = $message;
+        $this->_message         = $context->getMessageManager();
         $this->_customerUrl     = $customerUrl;
         parent::__construct($context);
     }
 
     /**
      * Index Action
-     * 
+     *
      * @return \Magento\Framework\View\Result\Page
      */
     public function execute()
@@ -86,9 +85,9 @@ class Loadquote extends Action
         /** @var \Magento\Framework\View\Result\Page $resultPage */
         $resultPage = $this->pageFactory->create();
         $params     = $this->getRequest()->getParams();
-        if(isset($params['id'])) {
+        if (isset($params['id'])) {
             $quote = $this->_quote->create();
-            $quote->getResource()->load($quote,$params['id']);
+            $quote->getResource()->load($quote, $params['id']);
             $magentoStoreId = $quote->getStoreId();
             $mailchimpStoreId = $this->_helper->getConfigValue(
                 \Ebizmarts\MailChimp\Helper\Data::XML_MAILCHIMP_STORE,
@@ -103,7 +102,8 @@ class Loadquote extends Action
                 // @error
                 $this->_message->addErrorMessage(__("You can't access this cart"));
                 $url = $this->_urlHelper->getUrl(
-                    $this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_ABANDONEDCART_PAGE,
+                    $this->_helper->getConfigValue(
+                        \Ebizmarts\MailChimp\Helper\Data::XML_ABANDONEDCART_PAGE,
                         $magentoStoreId
                     )
                 );
@@ -114,13 +114,13 @@ class Loadquote extends Action
                         $this->_helper->getConfigValue(
                             \Ebizmarts\MailChimp\Helper\Data::XML_ABANDONEDCART_PAGE,
                             $magentoStoreId,
-                            array('mc_cid'=> $params['mc_cid'])
+                            ['mc_cid'=> $params['mc_cid']]
                         )
                     );
-                }
-                else {
+                } else {
                     $url = $this->_urlHelper->getUrl(
-                        $this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_ABANDONEDCART_PAGE,
+                        $this->_helper->getConfigValue(
+                            \Ebizmarts\MailChimp\Helper\Data::XML_ABANDONEDCART_PAGE,
                             $magentoStoreId
                         )
                     );
@@ -138,10 +138,9 @@ class Loadquote extends Action
                         if (isset($params['mc_cid'])) {
                             $url = $this->_urlHelper->getUrl(
                                 $this->_customerUrl->getLoginUrl(),
-                                array('mc_cid'=>$params['mc_cid'])
+                                ['mc_cid'=>$params['mc_cid']]
                             );
-                        }
-                        else {
+                        } else {
                             $url = $this->_customerUrl->getLoginUrl();
                         }
                         $this->_redirect($url);

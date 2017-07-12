@@ -13,7 +13,6 @@
 
 namespace Ebizmarts\MailChimp\Block;
 
-
 class Mailchimpjs extends \Magento\Framework\View\Element\Template
 {
     /**
@@ -29,19 +28,17 @@ class Mailchimpjs extends \Magento\Framework\View\Element\Template
      * Mailchimpjs constructor.
      * @param \Magento\Framework\View\Element\Template\Context $context
      * @param \Ebizmarts\MailChimp\Helper\Data $helper
-     * @param \Magento\Store\Model\StoreManagerInterface $storeManager
      * @param array $data
      */
     public function __construct(
         \Magento\Framework\View\Element\Template\Context $context,
         \Ebizmarts\MailChimp\Helper\Data $helper,
-        \Magento\Store\Model\StoreManagerInterface $storeManager,
         array $data
-    )
-    {
+    ) {
+    
         parent::__construct($context, $data);
         $this->_helper          = $helper;
-        $this->_storeManager    = $storeManager;
+        $this->_storeManager    = $context->getStoreManager();
     }
 
     public function getJsUrl()

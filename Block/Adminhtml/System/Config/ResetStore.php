@@ -29,8 +29,9 @@ class ResetStore extends \Magento\Config\Block\System\Config\Form\Field
     public function __construct(
         \Magento\Backend\Block\Template\Context $context,
         \Ebizmarts\MailChimp\Helper\Data $helper,
-        array $data=[])
-    {
+        array $data = []
+    ) {
+    
         $this->_helper = $helper;
         parent::__construct($context, $data);
     }
@@ -74,13 +75,12 @@ class ResetStore extends \Magento\Config\Block\System\Config\Form\Field
     public function getAjaxCheckUrl()
     {
         $params = $this->getRequest()->getParams();
-        $scope = array();
-        if(isset($params['website'])) {
-            $scope = array('website'=>$params['website']);
+        $scope = [];
+        if (isset($params['website'])) {
+            $scope = ['website'=>$params['website']];
+        } elseif (isset($params['store'])) {
+            $scope = ['store'=>$params['store']];
         }
-        elseif(isset($params['store'])) {
-            $scope = array('store'=>$params['store']);
-        }
-        return $this->_urlBuilder->getUrl('mailchimp/ecommerce/ResetStore',$scope);
+        return $this->_urlBuilder->getUrl('mailchimp/ecommerce/ResetStore', $scope);
     }
 }

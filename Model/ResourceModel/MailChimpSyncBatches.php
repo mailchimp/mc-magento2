@@ -21,5 +21,4 @@ class MailChimpSyncBatches extends AbstractDb
     {
         $this->_init('mailchimp_sync_batches', 'id');
     }
-
 }
