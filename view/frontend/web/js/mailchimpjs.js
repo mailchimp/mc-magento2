@@ -1,4 +1,4 @@
-require(["jquery"], function($){
+require(["jquery"], function($) {
     $.ajax({
         url: 'mailchimp/script/get',
         type: 'POST',

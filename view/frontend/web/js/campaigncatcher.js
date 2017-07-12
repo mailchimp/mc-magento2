@@ -11,7 +11,7 @@ define([
         'jquery',
         'mage/cookies'
     ],
-    function($){
+    function($) {
         "use strict";
 
         $.widget('mage.campaigncatcher', {
