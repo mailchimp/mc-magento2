@@ -605,7 +605,17 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
             }
             $this->_api->setApiKey(trim($apiKey));
             $this->_api->setUserAgent('Mailchimp4Magento' . (string)$this->getModuleVersion());
-            $apiStores = $this->_api->ecommerce->stores->get(null, null, null, self::MAXSTORES);
+
+            try {
+                $apiStores = $this->_api->ecommerce->stores->get(null, null, null, self::MAXSTORES);
+            } catch(\Mailchimp_Error $mailchimpError) {
+                $this->log($mailchimpError->getMessage());
+                continue;
+            } catch(\Mailchimp_HttpError $mailchimpError) {
+                $this->log($mailchimpError->getMessage());
+                continue;
+            }
+
             foreach ($apiStores['stores'] as $store) {
                 if ($store['platform']!=self::PLATFORM) {
                     continue;
