@@ -8,6 +8,8 @@
             <!--Declare the data source name which will be defined below-->
         </item>
         <item name="spinner" xsi:type="string">mailchimp_errors_columns</item>
+        <item name="buttons" xsi:type="array">
+        </item>
     </argument>
     <dataSource name="mailchimp_errors_grid_data_source">
         <!--The data source-->
@@ -20,13 +22,50 @@
                 <item name="config" xsi:type="array">
                     <item name="component" xsi:type="string">Magento_Ui/js/grid/provider</item>
                     <item name="update_url" xsi:type="url" path="mui/index/render"/>
-                    <item name="storageConfig" xsi:type="array">
-                        <item name="indexField" xsi:type="string">id</item>
-                    </item>
+                    <!--<item name="storageConfig" xsi:type="array">-->
+                        <!--<item name="indexField" xsi:type="string">id</item>-->
+                    <!--</item>-->
                 </item>
             </argument>
         </argument>
     </dataSource>
+
+    <container name="listing_top">
+        <argument name="data" xsi:type="array">
+            <item name="config" xsi:type="array">
+                <item name="template" xsi:type="string">ui/grid/toolbar</item>
+                <item name="stickyTmpl" xsi:type="string">ui/grid/sticky/toolbar</item>
+            </item>
+        </argument>
+    </container>
+
+    <listingToolbar name="listing_top">
+        <argument name="data" xsi:type="array">
+            <item name="config" xsi:type="array">
+                <item name="sticky" xsi:type="boolean">true</item>
+            </item>
+        </argument>
+        <bookmark name="bookmarks"/>
+        <columnsControls name="columns_controls"/>
+        <filters name="listing_filters">
+            <filterSelect name="store_id">
+                <argument name="optionsProvider" xsi:type="configurableObject">
+                    <argument name="class" xsi:type="string">Magento\Store\Ui\Component\Listing\Column\Store\Options</argument>
+                </argument>
+                <argument name="data" xsi:type="array">
+                    <item name="config" xsi:type="array">
+                        <item name="provider" xsi:type="string">${ $.parentName }</item>
+                        <item name="dataScope" xsi:type="string">store_id</item>
+                        <item name="caption" xsi:type="string" translate="true">All Store Views</item>
+                        <item name="label" xsi:type="string" translate="true">Store View</item>
+                    </item>
+                </argument>
+            </filterSelect>
+        </filters>
+        <paging name="listing_paging"/>
+    </listingToolbar>
+
+
     <columns name="mailchimp_errors_columns">
         <!--The list of columns-->
         <column name="id">
@@ -74,6 +113,15 @@
                 </item>
             </argument>
         </column>
+        <actionsColumn name="actions" class="\Ebizmarts\MailChimp\Ui\Component\Errors\Grid\Column\Batch">
+            <argument name="data" xsi:type="array">
+                <item name="config" xsi:type="array">
+                    <item name="indexField" xsi:type="string">id</item>
+                    <item name="label" xsi:type="string" translate="true">Download Response</item>
+                </item>
+            </argument>
+        </actionsColumn>
+
     </columns>
 </listing>
 

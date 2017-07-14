@@ -53,6 +53,13 @@ class InstallSchema implements InstallSchemaInterface
                 'Store Id'
             )
             ->addColumn(
+                'mailchimp_store_id',
+                \Magento\Framework\DB\Ddl\Table::TYPE_TEXT,
+                50,
+                ['unsigned' => true, 'nullable' => false],
+                'Store Id'
+            )
+            ->addColumn(
                 'batch_id',
                 \Magento\Framework\DB\Ddl\Table::TYPE_TEXT,
                 24,
@@ -65,8 +72,7 @@ class InstallSchema implements InstallSchemaInterface
                 10,
                 [],
                 'Status'
-            )
-        ;
+            );
 
         $installer->getConnection()->createTable($table);
 
@@ -78,6 +84,13 @@ class InstallSchema implements InstallSchemaInterface
                 null,
                 ['identity' => true, 'unsigned' => true, 'nullable' => false, 'primary' => true],
                 'Batch Id'
+            )
+            ->addColumn(
+                'mailchimp_store_id',
+                \Magento\Framework\DB\Ddl\Table::TYPE_TEXT,
+                50,
+                ['unsigned' => true, 'nullable' => false],
+                'Store Id'
             )
             ->addColumn(
                 'type',
@@ -179,21 +192,21 @@ class InstallSchema implements InstallSchemaInterface
                 32,
                 [],
                 'Quote token'
-            )
-
-        ;
+            );
 
         $installer->getConnection()->createTable($table);
 
-        $connection->addColumn(
-            $installer->getTable('newsletter_subscriber'),
-            'mailchimp_id',
-            [
-                'type' => \Magento\Framework\DB\Ddl\Table::TYPE_TEXT,
-                'default' => '',
-                'comment' => 'Mailchimp reference'
-            ]
-        );
+
+
+//        $connection->addColumn(
+//            $installer->getTable('newsletter_subscriber'),
+//            'mailchimp_id',
+//            [
+//                'type' => \Magento\Framework\DB\Ddl\Table::TYPE_TEXT,
+//                'default' => '',
+//                'comment' => 'Mailchimp reference'
+//            ]
+//        );
 
         $connection->addColumn(
             $installer->getTable('quote'),
@@ -220,7 +233,7 @@ class InstallSchema implements InstallSchemaInterface
             if (!is_dir($path)) {
                 mkdir($path);
             }
-        } catch(Exception $e) {
+        } catch (Exception $e) {
             $this->_helper->log($e->getMessage());
         }
         $installer->endSetup();

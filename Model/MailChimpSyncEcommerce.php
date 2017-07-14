@@ -13,8 +13,6 @@
 
 namespace Ebizmarts\MailChimp\Model;
 
-
-
 class MailChimpSyncEcommerce extends \Magento\Framework\Model\AbstractModel
 {
     protected function _construct()
@@ -25,7 +23,7 @@ class MailChimpSyncEcommerce extends \Magento\Framework\Model\AbstractModel
 
     public function getByStoreIdType($storeId, $id, $type)
     {
-        $this->getResource()->getByStoreIdType($this,$storeId, $id, $type);
+        $this->getResource()->getByStoreIdType($this, $storeId, $id, $type);
         return $this;
     }
 }

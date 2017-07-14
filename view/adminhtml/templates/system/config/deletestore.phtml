@@ -1,0 +1,32 @@
+<script type="text/javascript">
+    //<![CDATA[
+    function deleteStore() {
+        jQuery.ajax({
+            url: '<?php echo $this->getAjaxCheckUrl() ?>',
+            data: {form_key: window.FORM_KEY},
+            type: 'POST',
+            success: function(data){
+                if(data.valid==0) {
+                    alert('Error: '+data.message);
+                }
+                else if(data.valid==1) {
+                    alert('The store was deleted');
+                }
+            }
+        }).done(function(a) {
+            console.log(a);
+        });
+    }
+    //]]>
+</script>
+
+
+<?php //echo  __($block->escapeHtml('Reset errors')); ?>
+
+
+<div class="actions actions-delete-store">
+    <div id="validation_result" class="message-validation hidden"></div>
+    <button onclick="javascript:deleteStore(); return false;" class="action-delete-store" type="button" id="<?php echo $block->getHtmlId() ?>">
+        <span><?php echo $block->escapeHtml($block->getButtonLabel()) ?></span>
+    </button>
+</div>

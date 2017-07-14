@@ -17,5 +17,8 @@
        <job name="ebizmarts_ecommerce" instance="Ebizmarts\MailChimp\Cron\Ecommerce" method="execute">
             <schedule>*/5 * * * *</schedule>
         </job>
+        <job name="ebizmarts_webhooks" instance="Ebizmarts\MailChimp\Cron\Webhook" method="execute">
+            <schedule>*/5 * * * *</schedule>
+        </job>
     </group>
 </config>

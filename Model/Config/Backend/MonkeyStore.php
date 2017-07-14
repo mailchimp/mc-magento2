@@ -7,15 +7,13 @@
  * @author Ebizmarts Team <info@ebizmarts.com>
  * @copyright Ebizmarts (http://ebizmarts.com)
  * @license     http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
- * @date: 9/30/16 12:09 PM
- * @file: Monkeylist.php
+ * @date: 3/29/17 4:29 PM
+ * @file: MonkeyStore.php
  */
 
 namespace Ebizmarts\MailChimp\Model\Config\Backend;
 
-use Magento\Framework\App\Config\ScopeConfigInterface;
-
-class Monkeylist extends \Magento\Framework\App\Config\Value
+class MonkeyStore extends \Magento\Framework\App\Config\Value
 {
     /**
      * @var \Ebizmarts\MailChimp\Helper\Data
@@ -29,9 +27,16 @@ class Monkeylist extends \Magento\Framework\App\Config\Value
      * @var \Magento\Framework\Stdlib\DateTime\DateTime
      */
     private $_date;
+    /**
+     * @var \Magento\Store\Model\StoreManager
+     */
+    private $_storeManager;
+
+    private $oldListId = null;
+
 
     /**
-     * Monkeylist constructor.
+     * ApiKey constructor.
      * @param \Magento\Framework\Model\Context $context
      * @param \Magento\Framework\Registry $registry
      * @param ScopeConfigInterface $config
@@ -41,6 +46,7 @@ class Monkeylist extends \Magento\Framework\App\Config\Value
      * @param \Magento\Framework\Data\Collection\AbstractDb|null $resourceCollection
      * @param \Magento\Framework\Stdlib\DateTime\DateTime $date
      * @param \Ebizmarts\MailChimp\Helper\Data $helper
+     * @param \Magento\Store\Model\StoreManager $storeManager
      * @param array $data
      */
     public function __construct(
@@ -53,40 +59,49 @@ class Monkeylist extends \Magento\Framework\App\Config\Value
         \Magento\Framework\Data\Collection\AbstractDb $resourceCollection = null,
         \Magento\Framework\Stdlib\DateTime\DateTime $date,
         \Ebizmarts\MailChimp\Helper\Data $helper,
+        \Magento\Store\Model\StoreManager $storeManager,
         array $data = []
     ) {
-        $this->_helper = $helper;
-        $this->resourceConfig = $resourceConfig;
-        $this->_date = $date;
+        $this->_helper          = $helper;
+        $this->resourceConfig   = $resourceConfig;
+        $this->_date            = $date;
+        $this->_storeManager    = $storeManager;
         parent::__construct($context, $registry, $config, $cacheTypeList, $resource, $resourceCollection, $data);
     }
 
+
     public function beforeSave()
     {
-        $generalData = $this->getData();
         $data = $this->getData('groups');
+        $found = 0;
         if (isset($data['ecommerce']['fields']['active']['value'])) {
             $active = $data['ecommerce']['fields']['active']['value'];
         } elseif ($data['ecommerce']['fields']['active']['inherit']) {
             $active = $data['ecommerce']['fields']['active']['inherit'];
         }
-        if ($active&&$this->isValueChanged()) {
-            if ($this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_PATH_STORE,$generalData['scope_id'])) {
-                $this->_helper->deleteStore();
+        if ($active && $this->isValueChanged()) {
+            $mailchimpStore     = $this->getOldValue();
+            $newListId = $data['general']['fields']['monkeylist']['value'];
+            $this->oldListId = $this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_PATH_LIST, $this->getScopeId());
+
+            $createWebhook = true;
+            foreach ($this->_storeManager->getStores() as $storeId => $val) {
+                $mstoreId = $this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_MAILCHIMP_STORE, $storeId);
+                if ($mstoreId == $mailchimpStore) {
+                    $found++;
+                }
+                $listId = $this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_PATH_LIST, $storeId);
+                if ($listId == $newListId) {
+                    $createWebhook = false;
+                }
+                $this->_helper->deleteConfig(\Ebizmarts\MailChimp\Helper\Data::XML_MAILCHIMP_JS_URL, $storeId, \Magento\Store\Model\ScopeInterface::SCOPE_STORES);
             }
-            $store = $this->_helper->createStore($this->getValue(), $generalData['scope_id']);
-            if ($store) {
-                $this->resourceConfig->saveConfig(
-                    \Ebizmarts\MailChimp\Helper\Data::XML_PATH_STORE, $store,
-                    $generalData['scope'],
-                    $generalData['scope_id']
-                );
-                $this->resourceConfig->saveConfig(
-                    \Ebizmarts\MailChimp\Helper\Data::XML_PATH_SYNC_DATE,
-                    $this->_date->gmtDate(),
-                    $generalData['scope'],
-                    $generalData['scope_id']
-                );
+            if ($found==1) {
+                $this->_helper->markAllBatchesAs($mailchimpStore, 'canceled');
+                $this->_helper->resetErrors($mailchimpStore);
+            }
+            if ($createWebhook) {
+                $this->_helper->createWebHook($data['general']['fields']['apikey']['value'], $newListId);
             }
         }
         return parent::beforeSave();

@@ -37,7 +37,23 @@
             </argument>
         </arguments>
     </type>
+    <virtualType name="Ebizmarts\MailChimp\Model\ResourceModel\MailChimpStores\Collection" type="Magento\Framework\View\Element\UiComponent\DataProvider\SearchResult">
+        <arguments>
+            <argument name="mainTable" xsi:type="string">mailchimp_stores</argument>
+            <argument name="resourceModel" xsi:type="string">Ebizmarts\MailChimp\Model\ResourceModel\MailChimpStores</argument>
+        </arguments>
+    </virtualType>
+    <type name="Magento\Framework\View\Element\UiComponent\DataProvider\CollectionFactory">
+        <arguments>
+            <argument name="collections" xsi:type="array">
+                <item name="mailchimp_stores_grid_data_source" xsi:type="string">Ebizmarts\MailChimp\Model\ResourceModel\MailChimpStores\Collection</item>
+            </argument>
+        </arguments>
+    </type>
     <type name="Magento\Newsletter\Model\Subscriber">
         <plugin name="mailchimp-subscriber" type="Ebizmarts\MailChimp\Model\Plugin\Subscriber" sortOrder="10"/>
+    </type>
+    <type name="Magento\Customer\Model\AccountManagement">
+        <plugin name="abandoned-checkout-save-quote" type="Ebizmarts\MailChimp\Model\Plugin\AccountManagement" sortOrder="10"/>
     </type>
 </config>

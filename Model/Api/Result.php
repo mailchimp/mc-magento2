@@ -17,7 +17,7 @@ class Result
 {
     const MAILCHIMP_TEMP_DIR = 'Mailchimp';
     /**
-     * @var \Ebizmarts\MailChimp\Model\ResourceModel\MailChimpSyncBatches\Collection
+     * @var \Ebizmarts\MailChimp\Model\ResourceModel\MailChimpSyncBatches\CollectionFactory
      */
     private $_batchCollection;
     /**
@@ -29,74 +29,50 @@ class Result
      */
     private $_archive;
     /**
-     * @var \Ebizmarts\MailChimp\Model\MailChimpErrors
+     * @var \Ebizmarts\MailChimp\Model\MailChimpErrorsFactory
      */
     private $_chimpErrors;
-    /**
-     * @var \Magento\Catalog\Model\ProductRepository
-     */
-    private $_productRepository;
-    /**
-     * @var \Magento\Customer\Api\CustomerRepositoryInterface
-     */
-    private $_customerRepository;
-    /**
-     * @var \Magento\Sales\Model\OrderRepository
-     */
-    private $_orderRepository;
-
-    private $_chimpSyncEcommerce;
-
 
     /**
      * Result constructor.
      * @param \Ebizmarts\MailChimp\Helper\Data $helper
      * @param \Ebizmarts\MailChimp\Model\ResourceModel\MailChimpSyncBatches\Collection $batchCollection
-     * @param \Ebizmarts\MailChimp\Model\MailChimpErrors $chimpErrors
+     * @param \Ebizmarts\MailChimp\Model\MailChimpErrorsFactory $chimpErrors
      * @param \Magento\Framework\Archive $archive
-     * @param \Magento\Catalog\Model\ProductRepository $productRepository
      */
     public function __construct(
         \Ebizmarts\MailChimp\Helper\Data $helper,
-        \Ebizmarts\MailChimp\Model\ResourceModel\MailChimpSyncBatches\Collection $batchCollection,
-        \Ebizmarts\MailChimp\Model\MailChimpErrors $chimpErrors,
-        \Magento\Framework\Archive $archive,
-        \Magento\Catalog\Model\ProductRepository $productRepository,
-        \Magento\Customer\Api\CustomerRepositoryInterface $customerRepository,
-        \Magento\Sales\Model\OrderRepository $orderRepository,
-        \Ebizmarts\MailChimp\Model\MailChimpSyncEcommerce $chimpSyncEcommerce
-    )
-    {
+        \Ebizmarts\MailChimp\Model\ResourceModel\MailChimpSyncBatches\CollectionFactory $batchCollection,
+        \Ebizmarts\MailChimp\Model\MailChimpErrorsFactory $chimpErrors,
+        \Magento\Framework\Archive $archive
+    ) {
+    
         $this->_batchCollection     = $batchCollection;
         $this->_helper              = $helper;
         $this->_archive             = $archive;
         $this->_chimpErrors         = $chimpErrors;
-        $this->_productRepository   = $productRepository;
-        $this->_customerRepository  = $customerRepository;
-        $this->_orderRepository     = $orderRepository;
-        $this->_chimpSyncEcommerce  = $chimpSyncEcommerce;
     }
-    public function processResponses($storeId, $isMailChimpStoreId = false)
+    public function processResponses($storeId, $isMailChimpStoreId = false, $mailchimpStoreId)
     {
-        $collection = $this->_batchCollection;
+        $collection = $this->_batchCollection->create();
         $collection
-            ->addFieldToFilter('store_id', array('eq' => $storeId))
-            ->addFieldToFilter('status', array('eq' => 'pending'));
+            ->addFieldToFilter('store_id', ['eq' => $storeId])
+            ->addFieldToFilter('status', ['eq' => 'pending']);
         /**
          * @var $item \Ebizmarts\MailChimp\Model\MailChimpSyncBatches
          */
         $item = null;
         foreach ($collection as $item) {
             try {
-                $storeId = ($isMailChimpStoreId) ? 0 : $storeId;
                 $files = $this->getBatchResponse($item->getBatchId(), $storeId);
                 if (count($files)) {
-                    $this->processEachResponseFile($files, $item->getBatchId());
+                    $this->processEachResponseFile($files, $item->getBatchId(), $mailchimpStoreId, $storeId);
                     $item->setStatus('completed');
                     $item->getResource()->save($item);
                 }
                 $baseDir = $this->_helper->getBaseDir();
                 if (is_dir($baseDir . DIRECTORY_SEPARATOR . 'var' . DIRECTORY_SEPARATOR . self::MAILCHIMP_TEMP_DIR . DIRECTORY_SEPARATOR . $item->getBatchId())) {
+                    array_map('unlink', glob($baseDir . DIRECTORY_SEPARATOR . 'var' . DIRECTORY_SEPARATOR . self::MAILCHIMP_TEMP_DIR . DIRECTORY_SEPARATOR . $item->getBatchId().DIRECTORY_SEPARATOR."*.*"));
                     rmdir($baseDir . DIRECTORY_SEPARATOR . 'var' . DIRECTORY_SEPARATOR . self::MAILCHIMP_TEMP_DIR . DIRECTORY_SEPARATOR . $item->getBatchId());
                 }
             } catch (\Exception $e) {
@@ -104,14 +80,15 @@ class Result
             }
         }
     }
-    protected function getBatchResponse($batchId, $storeId = 0)
+    public function getBatchResponse($batchId, $storeId = null)
     {
-        $files = array();
+        $files = [];
         try {
             $baseDir = $this->_helper->getBaseDir();
-            $api = $this->_helper->getApi();
+            $api = $this->_helper->getApi($storeId);
             // check the status of the job
             $response = $api->batchOperation->status($batchId);
+
             if (isset($response['status']) && $response['status'] == 'finished') {
                 // get the tar.gz file with the results
                 $fileUrl = urldecode($response['response_body_url']);
@@ -145,95 +122,72 @@ class Result
         }
         return $files;
     }
-    protected function processEachResponseFile($files, $batchId)
+    protected function processEachResponseFile($files, $batchId, $mailchimpStoreId, $storeId)
     {
         foreach ($files as $file) {
             $items = json_decode(file_get_contents($file));
-            foreach ($items as $item) {
-                if ($item->status_code != 200) {
-                    $line = explode('_', $item->operation_id);
-                    $type = $line[0];
-                    $id = $line[2];
+            if ($items!==false) {
+                foreach ($items as $item) {
+                    if ($item->status_code != 200) {
+                        $line = explode('_', $item->operation_id);
+                        $type = $line[0];
+                        $id = $line[2];
 
-                    $mailchimpErrors = $this->_chimpErrors;
 
-                    //parse error
-                    $response = json_decode($item->response);
-                    $errorDetails = "";
-                    if (!empty($response->errors)) {
-                        foreach ($response->errors as $error) {
-                            if (isset($error->field) && isset($error->message)) {
-                                $errorDetails .= $errorDetails != "" ? " / " : "";
-                                $errorDetails .= $error->field . " : " . $error->message;
+                        //parse error
+                        $response = json_decode($item->response);
+                        if (preg_match('/already exists/', $response->detail)) {
+                            continue;
+                        }
+                        $mailchimpErrors = $this->_chimpErrors->create();
+                        $errorDetails = "";
+                        if (!empty($response->errors)) {
+                            foreach ($response->errors as $error) {
+                                if (isset($error->field) && isset($error->message)) {
+                                    $errorDetails .= $errorDetails != "" ? " / " : "";
+                                    $errorDetails .= $error->field . " : " . $error->message;
+                                }
                             }
                         }
-                    }
-                    if ($errorDetails == "") {
-                        $errorDetails = $response->detail;
-                    }
+                        if ($errorDetails == "") {
+                            $errorDetails = $response->detail;
+                        }
 
-                    $error = $response->title . " : " . $response->detail;
-
-                    switch ($type) {
-                        case \Ebizmarts\MailChimp\Helper\Data::IS_PRODUCT:
-                            $p = $this->_productRepository->getById($id);
-                            if ($p->getId() == $id) {
-                                $p->setData("mailchimp_sync_error", $error);
-                                //$p->setMailchimpUpdateObserverRan(true);
-                                $this->_productRepository->save($p);
-                            } else {
-                                $this->_helper->log("Error: product " . $id . " not found");
-                            }
-                            break;
-                        case \Ebizmarts\MailChimp\Helper\Data::IS_CUSTOMER:
-                            $c = $this->_customerRepository->getById($id);
-                            if ($c->getId() == $id) {
-//                                $c->setCustomAttribute("mailchimp_sync_error", $error);
-                                $this->_customerRepository->save($c);
-                            } else {
-                                $this->_helper->log("Error: customer " . $id . " not found");
-                            }
-                            break;
-                        case \Ebizmarts\MailChimp\Helper\Data::IS_ORDER:
-                            $o = $this->_orderRepository->get($id);
-                            if ($o->getId() == $id) {
-                                $c = $this->_chimpSyncEcommerce->getByStoreIdType($o->getStoreId(),$id,$type);
-                                $c->setData("mailchimp_sync_error", $error);
-                                $c->getResource()->save($c);
-                            } else {
-                                $this->_helper->log("Error: order " . $id . " not found");
-                            }
-                            break;
-//                        case \Ebizmarts\MailChimp\Helper\Data::IS_QUOTE:
-//                            $q = Mage::getModel('sales/quote')->load($id);
-//                            if ($q->getId() == $id) {
-//                                $q->setData("mailchimp_sync_error", $error);
-//                                $q->save();
-//                            } else {
-//                                $this->_helper->log("Error: quote " . $id . " not found");
-//                            }
-//                            break;
-//                        case \Ebizmarts\MailChimp\Helper\Data::IS_SUBSCRIBER:
-//                            $s = Mage::getModel('newsletter/subscriber')->load($id);
-//                            if ($s->getId() == $id) {
-//                                $s->setData("mailchimp_sync_error", $error);
-//                                $s->save();
-//                            } else {
-//                                $this->_helper->log("Error: subscriber " . $id . " not found");
-//                            }
-//                            break;
-                        default:
-                            $this->_helper->log("Error: no identification " . $type . " found");
-                            break;
+                        $error = $response->title . " : " . $response->detail;
+                        /**
+                         * @var \Ebizmarts\MailChimp\Model\MailChimpSyncEcommerce $chimpSync
+                         */
+                        $chimpSync = $this->_helper->getChimpSyncEcommerce($mailchimpStoreId, $id, $type);
+                        $chimpSync->setData("mailchimp_sync_error", $error);
+                        $chimpSync->getResource()->save($chimpSync);
+                        $mailchimpErrors->setType($response->type);
+                        $mailchimpErrors->setTitle($response->title);
+                        $mailchimpErrors->setStatus($item->status_code);
+                        $mailchimpErrors->setErrors($errorDetails);
+                        $mailchimpErrors->setRegtype($type);
+                        $mailchimpErrors->setOriginalId($id);
+                        $mailchimpErrors->setBatchId($batchId);
+                        $mailchimpErrors->setMailchimpStoreId($mailchimpStoreId);
+                        $mailchimpErrors->setOriginalId($id);
+                        $mailchimpErrors->setBatchId($batchId);
+                        $mailchimpErrors->setStoreId($storeId);
+                        $mailchimpErrors->getResource()->save($mailchimpErrors);
                     }
-                    $mailchimpErrors->setType($response->type);
-                    $mailchimpErrors->setTitle($response->title);
-                    $mailchimpErrors->setStatus($item->status_code);
-                    $mailchimpErrors->setErrors($errorDetails);
-                    $mailchimpErrors->setRegtype($type);
-                    $mailchimpErrors->setOriginalId($id);
-                    $mailchimpErrors->setBatchId($batchId);
-                    $mailchimpErrors->getResource()->save($mailchimpErrors);
+                }
+            } else {
+                switch (json_last_error()) {
+                    case JSON_ERROR_DEPTH:
+                        $this->_helper->log(' - Maximum stack depth exceeded');
+                        break;
+                    case JSON_ERROR_CTRL_CHAR:
+                        $this->_helper->log(' - Unexpected control character found');
+                        break;
+                    case JSON_ERROR_SYNTAX:
+                        $this->_helper->log(' - Syntax error, malformed JSON');
+                        break;
+                    case JSON_ERROR_NONE:
+                        $this->_helper->log(' - No errors');
+                        break;
                 }
             }
             unlink($file);

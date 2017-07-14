@@ -17,6 +17,12 @@
             <field name="mailchimp_abandonedcart_flag">
                 <aspect name="to_order" />
             </field>
+            <field name="mailchimp_campaign_id">
+                <aspect name="to_order" />
+            </field>
+            <field name="mailchimp_landing_page">
+                <aspect name="to_order" />
+            </field>
         </fieldset>
     </scope>
 </config>

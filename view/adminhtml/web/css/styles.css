@@ -12,3 +12,7 @@
     font-family: 'mailchimp';
     content: "\e990"
 }
+
+.admin__data-grid-wrap .data-grid .data-grid-draggable .data-row .data-grid-thumbnail-cell .admin__control-thumbnail > img:before {
+    border:none;
+}

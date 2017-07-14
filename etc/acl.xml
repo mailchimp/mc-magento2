@@ -1,0 +1,35 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * MailChimp Magento Component
+ *
+ * @category Ebizmarts
+ * @package MailChimp
+ * @author Ebizmarts Team <info@ebizmarts.com>
+ * @copyright Ebizmarts (http://ebizmarts.com)
+ * @license     http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * @date: 5/10/17 3:26 PM
+ * @file: acl.xml
+ */
+ -->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:Acl/etc/acl.xsd">
+    <acl>
+        <resources>
+            <resource id="Magento_Backend::admin">
+                <resource id="Magento_Backend::stores">
+                    <resource id="Magento_Backend::stores_settings">
+                        <resource id="Magento_Config::config">
+                            <resource id="Ebizmarts_MailChimp::config_mailchimp" title="MailChimp section" sortOrder="60" />
+                        </resource>
+                    </resource>
+                </resource>
+                <resource id="Ebizmarts_MailChimp::main_menu" title="MailChimp">
+                    <resource id="Ebizmarts_MailChimp::error_grid" title="MailChimp Error Grid" sortOrder="100"/>
+                    <resource id="Ebizmarts_MailChimp::stores_grid" title="MailChimp Stores Grid" sortOrder="110">
+                        <resource id="Ebizmarts_MailChimp::stores_edit" title="MailChimp Stores Edit" sortOrder="120"/>
+                    </resource>
+                </resource>
+            </resource>
+        </resources>
+    </acl>
+</config>

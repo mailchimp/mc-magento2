@@ -1,4 +1,4 @@
-#Issue reporting guidelines
+# Issue reporting guidelines
 
 To maintain an effective bugfix workflow and make sure issues will be solved in a timely manner we kindly ask reporters to follow some simple guidelines.
 
@@ -10,7 +10,7 @@ Before creating an issue, please do the following:
 
 If you are sure that the problem you are experiencing is caused by a bug, file a new issue in a Github issue tracker following the recommendations below.
 
-##Title
+## Title
 
 Title is a vital part of bug report for developer and triager to quickly identify a unique issue. A well written title should contain a clear, brief explanation of the issue, making emphasis on the most important points.
 
@@ -22,9 +22,9 @@ Unclear example:
 
 > Can't checkout.
 
-##Issue Description
+## Issue Description
 
-###Preconditions
+### Preconditions
 
 Describing preconditions is a great start, provide information on system configuration settings you have changed, detailed information on entities created (Products, Customers, etc), Magento and mc-magento versions. Basically, everything that would help developer set up the same environment as you have.
 
@@ -36,7 +36,7 @@ Example:
     4. Virtual Product is created and assigned to the Test Category.
     ...
 
-###Steps to reproduce
+### Steps to reproduce
 
 This part of the bug report is the most important, as developer will use this information to reproduce the issue. Problem is more likely to be fixed if it can be reproduced.
 
@@ -50,7 +50,7 @@ Example:
     4. Open mini shopping cart and click "Proceed to Checkout".
     ...
 
-###Actual and Expected result
+### Actual and Expected result
 
 To make sure that everybody involved in the fix are on the same page, precisely describe the result you expected to get and the result you actually observed after performing the steps.
 
@@ -61,6 +61,6 @@ Example:
     Actual result:
     "Place order" button is not visible, order cannot be placed.
 
-###Additional information
+### Additional information
 
 Additional information is often requested when the bug report is processed, you can save time by providing Magento and browser logs, screenshots, any other artifacts related to the issue at your own judgement.

@@ -1,0 +1,242 @@
+<?php
+/**
+ * mc-magento2 Magento Component
+ *
+ * @category Ebizmarts
+ * @package mc-magento2
+ * @author Ebizmarts Team <info@ebizmarts.com>
+ * @copyright Ebizmarts (http://ebizmarts.com)
+ * @license     http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * @date: 5/30/17 8:34 PM
+ * @file: Webhook.php
+ */
+
+namespace Ebizmarts\MailChimp\Cron;
+
+class Webhook
+{
+    const ACTION_DELETE         = 'delete';
+    const ACTION_UNSUBSCRIBE    = 'unsub';
+
+    const TYPE_SUBSCRIBE        = 'subscribe';
+    const TYPE_UNSUBSCRIBE      = 'unsubscribe';
+    const TYPE_CLEANED          = 'cleaned';
+    const TYPE_UPDATE_EMAIL     = 'upemail';
+    const TYPE_PROFILE          = 'profile';
+    const BATCH_LIMIT           = 50;
+    /**
+     * @var \Ebizmarts\MailChimp\Helper\Data
+     */
+    private $_helper;
+    /**
+     * @var \Magento\Newsletter\Model\SubscriberFactory
+     */
+    private $_subscriberFactory;
+    /**
+     * @var \Ebizmarts\MailChimp\Model\ResourceModel\MailChimpWebhookRequest\CollectionFactory
+     */
+    private $_webhookCollection;
+    /**
+     * @var \Magento\Customer\Model\CustomerFactory
+     */
+    private $_customer;
+
+    /**
+     * Webhook constructor.
+     * @param \Ebizmarts\MailChimp\Helper\Data $helper
+     * @param \Magento\Newsletter\Model\SubscriberFactory $subscriberFactory
+     * @param \Ebizmarts\MailChimp\Model\ResourceModel\MailChimpWebhookRequest\CollectionFactory $webhookCollection
+     * @param \Magento\Customer\Model\CustomerFactory $customer
+     */
+    public function __construct(
+        \Ebizmarts\MailChimp\Helper\Data $helper,
+        \Magento\Newsletter\Model\SubscriberFactory $subscriberFactory,
+        \Ebizmarts\MailChimp\Model\ResourceModel\MailChimpWebhookRequest\CollectionFactory $webhookCollection,
+        \Magento\Customer\Model\CustomerFactory $customer
+    ) {
+    
+        $this->_helper              = $helper;
+        $this->_subscriberFactory   = $subscriberFactory;
+        $this->_webhookCollection   = $webhookCollection;
+        $this->_customer            = $customer;
+    }
+    public function execute()
+    {
+        $this->processWebhooks();
+    }
+    public function processWebhooks()
+    {
+        /**
+         * @var $collection \Ebizmarts\MailChimp\Model\ResourceModel\MailChimpWebhookRequest\Collection
+         */
+        $collection = $this->_webhookCollection->create();
+        $collection->addFieldToFilter('processed', ['eq'=>0]);
+        $collection->getSelect()->limit(self::BATCH_LIMIT);
+        /**
+         * @var $item \Ebizmarts\MailChimp\Model\MailChimpWebhookRequest
+         */
+        foreach ($collection as $item) {
+            $data = unserialize($item->getDataRequest());
+            switch ($item->getType()) {
+                case self::TYPE_SUBSCRIBE:
+                    $this->_subscribe($data);
+                    break;
+                case self::TYPE_UNSUBSCRIBE:
+                    $this->_unsubscribe($data);
+                    break;
+                case self::TYPE_CLEANED:
+                    $this->_clean($data);
+                    break;
+                case self::TYPE_UPDATE_EMAIL:
+                    $this->_updateEmail($data);
+                    break;
+                case self::TYPE_PROFILE:
+                    $this->_profile($data);
+            }
+            $item->setProcessed(1);
+            $item->getResource()->save($item);
+        }
+    }
+    protected function _subscribe($data)
+    {
+        $listId = $data['list_id'];
+        $email  = $data['email'];
+        $subscribers = $this->_helper->loadListSubscribers($listId, $email);
+        /**
+         * @var $sub \Magento\Newsletter\Model\Subscriber
+         */
+        if ($subscribers->count()) {
+            foreach ($subscribers as $sub) {
+                if ($sub->getSubscriberStatus() != \Magento\Newsletter\Model\Subscriber::STATUS_SUBSCRIBED) {
+                    $sub->setSubscriberStatus(\Magento\Newsletter\Model\Subscriber::STATUS_SUBSCRIBED);
+                    $sub->getResource()->save($sub);
+                }
+            }
+        } else {
+            $sub = $this->_subscriberFactory->create();
+            $sub->setSubscriberEmail($email);
+            $this->_subscribeMember($sub, \Magento\Newsletter\Model\Subscriber::STATUS_SUBSCRIBED);
+        }
+    }
+    protected function _unsubscribe($data)
+    {
+        $listId = $data['list_id'];
+        $email  = $data['email'];
+        $subscribers = $this->_helper->loadListSubscribers($listId, $email);
+        /**
+         * @var $sub \Magento\Newsletter\Model\Subscriber
+         */
+        foreach ($subscribers as $sub) {
+            try {
+                $action = isset($data['action']) ? $data['action'] : self::ACTION_DELETE;
+                switch ($action) {
+                    case self::ACTION_DELETE:
+                        if ($this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_PATH_WEBHOOK_DELETE)) {
+                            $sub->getResource()->delete($sub);
+                        } elseif ($sub->getSubscriberStatus()!=\Magento\Newsletter\Model\Subscriber::STATUS_UNSUBSCRIBED) {
+                            $this->_subscribeMember($sub, \Magento\Newsletter\Model\Subscriber::STATUS_UNSUBSCRIBED);
+                        }
+                        break;
+                    case self::ACTION_UNSUBSCRIBE:
+                        if ($sub->getSubscriberStatus()!=\Magento\Newsletter\Model\Subscriber::STATUS_UNSUBSCRIBED) {
+                            $this->_subscribeMember($sub, \Magento\Newsletter\Model\Subscriber::STATUS_UNSUBSCRIBED);
+                        }
+                        break;
+                }
+            } catch (\Exception $e) {
+                $this->_helper->log($e->getMessage());
+            }
+        }
+    }
+    protected function _clean($data)
+    {
+        $subscribers = $this->_helper->loadListSubscribers($data['list_id'], $data['email']);
+        /**
+         * @var $sub \Magento\Newsletter\Model\Subscriber
+         */
+        foreach ($subscribers as $sub) {
+            $sub->getResource()->delete($sub);
+        }
+    }
+    protected function _updateEmail($data)
+    {
+        $oldEmail = $data['old_email'];
+        $newEmail = $data['new_email'];
+        $listId   = $data['list_id'];
+        $oldSubscribers = $this->_helper->loadListSubscribers($listId, $oldEmail);
+        $newSubscribers = $this->_helper->loadListSubscribers($listId, $newEmail);
+        /**
+         * @var $sub \Magento\Newsletter\Model\Subscriber
+         */
+        if (!$newSubscribers->count()) {
+            if ($oldSubscribers->count()) {
+                foreach ($oldSubscribers as $sub) {
+                    $sub->setSubscriberEmail($newEmail);
+                    $sub->getResource()->save($sub);
+                }
+            } else {
+                $sub = $this->_subscriberFactory->create();
+                $sub->setSubscriberEmail($newEmail);
+                $this->_subscribeMember($sub, \Magento\Newsletter\Model\Subscriber::STATUS_SUBSCRIBED);
+            }
+        }
+    }
+    protected function _profile($data)
+    {
+        $listId = $data['list_id'];
+        $email = $data['email'];
+        $fname = isset($data['merges']['FNAME']) ? $data['merges']['FNAME'] : null;
+        $lname = isset($data['merges']['LNAME']) ? $data['merges']['LNAME'] : null;
+        $customers = $this->_helper->loadListCustomers($listId, $email);
+        if ($customers->count() > 0) {
+            /**
+             * @var $customer  \Magento\Customer\Model\Customer
+             */
+            foreach ($customers as $c) {
+                $customer = $this->_customer->create();
+                $customer->getResource()->load($customer, $c->getEntityId());
+                /**
+                 * @todo change the merge vars
+                 */
+                $customer->setFirstname($fname);
+                $customer->setLastname($lname);
+                $customer->getResource()->save($customer);
+            }
+        } else {
+            $subscribers = $this->_helper->loadListSubscribers($listId, $email);
+            if ($subscribers->count() == 0) {
+                $subscriber = $this->_subscriberFactory->create();
+                $subscriber->setSubscriberEmail($email);
+
+                $stores = $this->_helper->getMagentoStoreIdsByListId($listId);
+                if (count($stores)) {
+                    $subscriber->setStreId($stores[0]);
+                    $api = $this->_helper->getApi($stores[0]);
+                    $member =$api->lists->members->get($listId, md5(strtolower($email)));
+                    if ($member) {
+                        if ($member['status']==\Mailchimp::SUBSCRIBED) {
+                            $this->_subscribeMember($subscriber, \Magento\Newsletter\Model\Subscriber::STATUS_SUBSCRIBED);
+                        } elseif ($member['status']==\Mailchimp::UNSUBSCRIBED) {
+                            $this->_subscribeMember($subscriber, \Magento\Newsletter\Model\Subscriber::STATUS_UNSUBSCRIBED);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * @param \Magento\Newsletter\Model\Subscriber $subscriber
+     * @param string $status
+     * @throws \Exception
+     */
+    protected function _subscribeMember(\Magento\Newsletter\Model\Subscriber $subscriber, int $status)
+    {
+        $subscriber->setImportMode(true);
+        $subscriber->setStatus($status);
+        $subscriber->setSubscriberConfirmCode($subscriber->randomSequence());
+//        $subscriber->setSubscriberSource('Mailchimp');
+        $subscriber->setIsStatusChanged(true);
+        $subscriber->getResource()->save($subscriber);
+    }
+}

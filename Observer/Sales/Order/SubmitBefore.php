@@ -17,7 +17,9 @@ use Magento\Framework\Event\Observer;
 class SubmitBefore implements \Magento\Framework\Event\ObserverInterface
 {
     private $attributes = [
-        'mailchimp_abandonedcart_flag'
+        'mailchimp_abandonedcart_flag',
+        'mailchimp_campaign_id',
+        'mailchimp_landing_page'
     ];
     public function execute(\Magento\Framework\Event\Observer $observer)
     {

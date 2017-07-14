@@ -21,5 +21,4 @@ class MailChimpErrors extends AbstractDb
     {
         $this->_init('mailchimp_errors', 'id');
     }
-
 }

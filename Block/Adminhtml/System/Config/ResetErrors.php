@@ -29,8 +29,9 @@ class ResetErrors extends \Magento\Config\Block\System\Config\Form\Field
     public function __construct(
         \Magento\Backend\Block\Template\Context $context,
         \Ebizmarts\MailChimp\Helper\Data $helper,
-        array $data=[])
-    {
+        array $data = []
+    ) {
+    
         $this->_helper = $helper;
         parent::__construct($context, $data);
     }
@@ -70,21 +71,16 @@ class ResetErrors extends \Magento\Config\Block\System\Config\Form\Field
             'html_id' => $element->getHtmlId(),
         ]);
         return $this->_toHtml();
-
-
-//        $button = $this->getLayout()->createBlock('adminhtml/widget_button')
-//            ->setData(
-//                array(
-//                    'id' => 'reseterrors_button',
-//                    'label' => $this->_helper->__('Reset Local Errors'),
-//                    'onclick' => 'javascript:reseterrors(); return false;'
-//                )
-//            );
-//
-//        return $button->toHtml();
     }
     public function getAjaxCheckUrl()
     {
-        return $this->_urlBuilder->getUrl('mailchimp/ecommerce/ResetLocalErrors');
+        $params = $this->getRequest()->getParams();
+        $scope = [];
+        if (isset($params['website'])) {
+            $scope = ['website'=>$params['website']];
+        } elseif (isset($params['store'])) {
+            $scope = ['store'=>$params['store']];
+        }
+        return $this->_urlBuilder->getUrl('mailchimp/ecommerce/ResetLocalErrors', $scope);
     }
 }
