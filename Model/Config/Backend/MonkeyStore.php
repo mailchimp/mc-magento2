@@ -74,6 +74,7 @@ class MonkeyStore extends \Magento\Framework\App\Config\Value
     {
         $data = $this->getData('groups');
         $found = 0;
+        $newListId = null;
         if (isset($data['ecommerce']['fields']['active']['value'])) {
             $active = $data['ecommerce']['fields']['active']['value'];
         } elseif ($data['ecommerce']['fields']['active']['inherit']) {
@@ -81,7 +82,9 @@ class MonkeyStore extends \Magento\Framework\App\Config\Value
         }
         if ($active && $this->isValueChanged()) {
             $mailchimpStore     = $this->getOldValue();
-            $newListId = $data['general']['fields']['monkeylist']['value'];
+            if(isset($data['general']['fields']['monkeylist'])) {
+                $newListId = $data['general']['fields']['monkeylist']['value'];
+            }
             $this->oldListId = $this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_PATH_LIST, $this->getScopeId());
 
             $createWebhook = true;
@@ -100,7 +103,7 @@ class MonkeyStore extends \Magento\Framework\App\Config\Value
                 $this->_helper->markAllBatchesAs($mailchimpStore, 'canceled');
                 $this->_helper->resetErrors($mailchimpStore);
             }
-            if ($createWebhook) {
+            if ($createWebhook&&isset($data['general']['fields']['apikey'])) {
                 $this->_helper->createWebHook($data['general']['fields']['apikey']['value'], $newListId);
             }
         }
