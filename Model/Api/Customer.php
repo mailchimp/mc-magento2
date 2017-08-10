@@ -180,7 +180,7 @@ class Customer
             if ($address->getPostcode()) {
                 $customerAddress["postal_code"] = $address->getPostcode();
             }
-            if ($address->getCountry()) {
+            if ($address->getCountryId()) {
                 $country = $this->_countryInformation->getCountryInfo($address->getCountryId());
                 $countryName = $country->getFullNameLocale();
                 $customerAddress["country"] = $countryName;

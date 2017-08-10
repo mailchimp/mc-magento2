@@ -453,7 +453,7 @@ class Order
             $data['billing_address']["postal_code"] = $billingAddress->getPostcode();
         }
 
-        if ($billingAddress->getCountry()) {
+        if ($billingAddress->getCountryId()) {
             $country = $this->_countryInformation->getCountryInfo($billingAddress->getCountryId());
             $countryName = $country->getFullNameLocale();
             $address["country"] =$data['billing_address']['country'] = $countryName;
