@@ -130,6 +130,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
      * @var \Magento\Customer\Model\ResourceModel\Customer\CollectionFactory
      */
     private $_customerCollection;
+    private $_addressRepositoryInterface;
 
     /**
      * Data constructor.
@@ -151,6 +152,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
      * @param \Magento\Framework\Encryption\Encryptor $encryptor
      * @param \Magento\Newsletter\Model\ResourceModel\Subscriber\CollectionFactory $subscriberCollection
      * @param \Magento\Customer\Model\ResourceModel\Customer\CollectionFactory $customerCollection
+     * @param \Magento\Customer\Api\AddressRepositoryInterface $addressRepositoryInterface
      */
     public function __construct(
         \Magento\Framework\App\Helper\Context $context,
@@ -170,7 +172,8 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         \Ebizmarts\MailChimp\Model\MailChimpStores $mailChimpStores,
         \Magento\Framework\Encryption\Encryptor $encryptor,
         \Magento\Newsletter\Model\ResourceModel\Subscriber\CollectionFactory $subscriberCollection,
-        \Magento\Customer\Model\ResourceModel\Customer\CollectionFactory $customerCollection
+        \Magento\Customer\Model\ResourceModel\Customer\CollectionFactory $customerCollection,
+        \Magento\Customer\Api\AddressRepositoryInterface $addressRepositoryInterface
     ) {
     
         $this->_storeManager  = $storeManager;
@@ -192,6 +195,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         $this->_encryptor               = $encryptor;
         $this->_subscriberCollection    = $subscriberCollection;
         $this->_customerCollection      = $customerCollection;
+        $this->_addressRepositoryInterface = $addressRepositoryInterface;
         parent::__construct($context);
     }
 
@@ -435,35 +439,56 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
                     $merge_vars = array_merge($merge_vars, $this->_updateMergeVars($key, ucfirst($addr[0]), $customer));
                     break;
                 case 'billing_telephone':
-                    if ($address = $customer->{'getDefaultBilling'}()) {
-                        $telephone = $address->getTelephone();
-                        if ($telephone) {
-                            $merge_vars[$key] = $telephone;
+                    try {
+                        $address = $this->_addressRepositoryInterface->getById($customer->getDefaultBilling());
+                        if ($address) {
+                            $telephone = $address->getTelephone();
+                            if ($telephone) {
+                                $merge_vars[$key] = $telephone;
+                            }
                         }
+                    } catch(\Exception $e) {
+                        $this->log($e->getMessage());
                     }
                     break;
                 case 'billing_company':
-                    if ($address = $customer->{'getDefaultBilling'}()) {
-                        $company = $address->getCompany();
-                        if ($company) {
-                            $merge_vars[$key] = $company;
+                    try {
+                        $address = $this->_addressRepositoryInterface->getById($customer->getDefaultBilling());
+                        if ($address) {
+                            $company = $address->getCompany();
+                            if ($company) {
+                                $merge_vars[$key] = $company;
+                            }
                         }
+                    } catch(\Exception $e) {
+                        $this->log($e->getMessage());
                     }
+
                     break;
                 case 'shipping_telephone':
-                    if ($address = $customer->{'getDefaultShipping'}()) {
-                        $telephone = $address->getTelephone();
-                        if ($telephone) {
-                            $merge_vars[$key] = $telephone;
+                    try {
+                        $address = $this->_addressRepositoryInterface->getById($customer->getDefaultShipping());
+                        if ($address) {
+                            $telephone = $address->getTelephone();
+                            if ($telephone) {
+                                $merge_vars[$key] = $telephone;
+                            }
                         }
+                    } catch(\Exception $e) {
+                        $this->log($e->getMessage());
                     }
                     break;
                 case 'shipping_company':
-                    if ($address = $customer->{'getDefaultShipping'}()) {
-                        $company = $address->getCompany();
-                        if ($company) {
-                            $merge_vars[$key] = $company;
+                    try {
+                        $address = $this->_addressRepositoryInterface->getById($customer->getDefaultShipping());
+                        if ($address) {
+                            $company = $address->getCompany();
+                            if ($company) {
+                                $merge_vars[$key] = $company;
+                            }
                         }
+                    } catch(\Exception $e) {
+                        $this->log($e->getMessage());
                     }
                     break;
                 case 'group_id':
@@ -525,18 +550,25 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         }
         return $merge_vars;
     }
+
     protected function _updateMergeVars($key, $type, $customer)
     {
         $merge_vars = [];
-        if ($address = $customer->{'getDefault' . $type}()) {
-            $merge_vars[$key] = [
-                'addr1' => $address->getStreetLine(1),
-                'addr2' => $address->getStreetLine(2),
-                'city' => $address->getCity(),
-                'state' => (!$address->getRegion() ? $address->getCity() : $address->getRegion()),
-                'zip' => $address->getPostcode(),
-                'country' => $address->getCountryId()
-            ];
+        try {
+            $address = $this->_addressRepositoryInterface->getById($customer->{'getDefault' . $type});
+            if ($address) {
+                $merge_vars[$key] = [
+                    'addr1' => $address->getStreetLine(1),
+                    'addr2' => $address->getStreetLine(2),
+                    'city' => $address->getCity(),
+                    'state' => (!$address->getRegion() ? $address->getCity() : $address->getRegion()),
+                    'zip' => $address->getPostcode(),
+                    'country' => $address->getCountryId()
+                ];
+
+            }
+        } catch(\Exception $e) {
+            $this->log($e->getMessage());
         }
         return $merge_vars;
     }
