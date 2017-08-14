@@ -314,7 +314,6 @@ class Product
                     $this->_childtUrl = $data['url'] = $parent->getProductUrl() . $tailUrl;
                 }
             } else {
-                $this->_helper->log('is visible');
                 $data["visibility"] = 'true';
             }
         } else {
