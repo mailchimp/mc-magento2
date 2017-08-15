@@ -18,18 +18,19 @@ class MonkeyList implements \Magento\Framework\Option\ArrayInterface
     private $options = null;
 
     /**
-     * MonkeyStore constructor.
+     * MonkeyList constructor.
      * @param \Ebizmarts\MailChimp\Helper\Data $helper
-     * @param \Magento\Store\Model\StoreManagerInterface $storeManager
+     * @param \Magento\Framework\App\RequestInterface $request
      */
     public function __construct(
         \Ebizmarts\MailChimp\Helper\Data $helper,
-        \Magento\Store\Model\StoreManagerInterface $storeManager
+        \Magento\Framework\App\RequestInterface $request
     ) {
-    
-        if ($helper->getApiKey($storeManager->getStore()->getId())) {
+        $storeId = (int) $request->getParam("store", 0);
+
+        if ($helper->getApiKey($storeId)) {
             try {
-                $this->options = $helper->getApi()->lists->getLists($helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_PATH_LIST, $storeManager->getStore()->getId()));
+                $this->options = $helper->getApi()->lists->getLists($helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_PATH_LIST, $storeId));
             } catch (\Exception $e) {
                 $helper->log($e->getMessage());
             }
