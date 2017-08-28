@@ -27,26 +27,37 @@ class Details implements \Magento\Framework\Option\ArrayInterface
      */
     private $_message;
     private $_error = '';
+    private $storeId;
 
     /**
      * Details constructor.
      * @param \Ebizmarts\MailChimp\Helper\Data $helper
      * @param \Magento\Framework\Message\ManagerInterface $message
+     * @param \Magento\Framework\App\RequestInterface $request
      */
     public function __construct(
         \Ebizmarts\MailChimp\Helper\Data $helper,
-        \Magento\Framework\Message\ManagerInterface $message
+        \Magento\Framework\Message\ManagerInterface $message,
+        \Magento\Framework\App\RequestInterface $request
     ) {
         $this->_message = $message;
         $this->_helper  = $helper;
+        $this->storeId = (int) $request->getParam("store", 0);
+
         if ($this->_helper->getApiKey()) {
             $api = $this->_helper->getApi();
             try {
                 $this->_options = $api->root->info();
-                $mailchimpStoreId = $this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_MAILCHIMP_STORE);
-                if ($mailchimpStoreId && $mailchimpStoreId!=-1 && $this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_PATH_ECOMMERCE_ACTIVE)) {
+                $mailchimpStoreId = $this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_MAILCHIMP_STORE,$this->storeId);
+                if ($mailchimpStoreId && $mailchimpStoreId!=-1 && $this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_PATH_ECOMMERCE_ACTIVE,$this->storeId)) {
                     $storeInfo = $api->ecommerce->stores->get($mailchimpStoreId);
-                    $this->_options['is_syncing'] = $storeInfo['is_syncing'];
+                    if(!$storeInfo['is_syncing']) {
+                        $this->_options['is_syncing'] = $this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_PATH_IS_SYNC,$this->storeId);
+                        $this->_helper->log($this->_options['is_syncing']);
+                    }
+                    else {
+                        $this->_options['is_syncing'] = false;
+                    }
                     $this->_options['store_exists'] = true;
                     $totalCustomers = $api->ecommerce->customers->getAll($mailchimpStoreId, 'total_items');
                     $this->_options['total_customers'] = $totalCustomers['total_items'];
@@ -88,13 +99,13 @@ class Details implements \Magento\Framework\Option\ArrayInterface
                         ['label' => '  Total Orders', 'value' => $this->_options['total_orders']],
                         ['label' => '  Total Carts', 'value' => $this->_options['total_carts']]
                     ]);
-                    if ($this->_options['is_syncing']) {
+                    if (!$this->_options['is_syncing']) {
                         $ret = array_merge($ret, [
                            ['label'=> __('This account is currently syncing'), 'value'=>'']
                         ]);
                     } else {
                         $ret = array_merge($ret, [
-                            ['label'=> __('Synced since'), 'value'=>'']
+                            ['label'=> __('Synced since'), 'value'=>$this->_options['is_syncing']]
                         ]);
                     }
                 } else {

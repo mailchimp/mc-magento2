@@ -89,6 +89,7 @@ class Save extends \Ebizmarts\MailChimp\Controller\Adminhtml\Stores
         } else {
             $date = $this->_helper->getDateMicrotime();
             $mailchimpStoreId = md5($name. '_' . $date);
+            $is_sync = true;
             $ret =$api->ecommerce->stores->add(
                 $mailchimpStoreId,
                 $formData['list_id'],

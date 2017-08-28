@@ -27,10 +27,21 @@ class MonkeyList implements \Magento\Framework\Option\ArrayInterface
         \Magento\Framework\App\RequestInterface $request
     ) {
         $storeId = (int) $request->getParam("store", 0);
+        if($request->getParam('website',0)) {
+            $scope = 'websites';
+            $storeId = $request->getParam('website',0);
+        }
+        elseif($request->getParam('store',0)) {
+            $scope = 'stores';
+            $storeId = $request->getParam('store',0);
+        }
+        else {
+            $scope = 'default';
+        }
 
         if ($helper->getApiKey($storeId)) {
             try {
-                $this->options = $helper->getApi()->lists->getLists($helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_PATH_LIST, $storeId));
+                $this->options = $helper->getApi()->lists->getLists($helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_PATH_LIST, $storeId,$scope));
             } catch (\Exception $e) {
                 $helper->log($e->getMessage());
             }

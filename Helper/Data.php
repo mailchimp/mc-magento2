@@ -257,15 +257,12 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
      */
     public function getConfigValue($path, $storeId = null, $scope = null)
     {
-        switch ($scope) {
-            case 'website':
-                $value = $this->_scopeConfig->getValue($path, \Magento\Store\Model\ScopeInterface::SCOPE_WEBSITE, $storeId);
-                break;
-            default:
-                $value = $this->_scopeConfig->getValue($path, \Magento\Store\Model\ScopeInterface::SCOPE_STORES, $storeId);
-                break;
+        if($scope) {
+            $value = $this->_scopeConfig->getValue($path, $scope, $storeId);
         }
-
+        else {
+            $value = $this->_scopeConfig->getValue($path, \Magento\Store\Model\ScopeInterface::SCOPE_STORES, $storeId);
+        }
         return $value;
     }
     public function deleteConfig($path, $storeId = null, $scope = null)
@@ -275,13 +272,11 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
 
     public function saveConfigValue($path, $value, $storeId = null, $scope = null)
     {
-        switch ($scope) {
-            case 'website':
-                $this->_config->saveConfig($path, $value, \Magento\Store\Model\ScopeInterface::SCOPE_WEBSITE, $storeId);
-                break;
-            default:
-                $this->_config->saveConfig($path, $value, \Magento\Store\Model\ScopeInterface::SCOPE_STORES, $storeId);
-                break;
+        if($scope) {
+            $this->_config->saveConfig($path, $value, $scope, $storeId);
+        }
+        else {
+            $this->_config->saveConfig($path, $value, \Magento\Store\Model\ScopeInterface::SCOPE_STORES, $storeId);
         }
     }
     public function getMCMinSyncing($storeId)
