@@ -19,13 +19,6 @@ use Symfony\Component\Config\Definition\Exception\Exception;
 
 class InstallSchema implements InstallSchemaInterface
 {
-    private $_helper;
-
-    public function __construct(\Ebizmarts\MailChimp\Helper\Data $helper)
-    {
-        $this->_helper = $helper;
-    }
-
     /**
      * {@inheritdoc}
      * @SuppressWarnings(PHPMD.ExcessiveMethodLength)
@@ -228,13 +221,9 @@ class InstallSchema implements InstallSchemaInterface
             ]
         );
 
-        $path = $this->_helper->getBaseDir() . DIRECTORY_SEPARATOR . 'var' . DIRECTORY_SEPARATOR . 'Mailchimp';
-        try {
-            if (!is_dir($path)) {
-                mkdir($path);
-            }
-        } catch (Exception $e) {
-            $this->_helper->log($e->getMessage());
+        $path = BP . DIRECTORY_SEPARATOR . 'var' . DIRECTORY_SEPARATOR . 'Mailchimp';
+        if (!is_dir($path)) {
+            mkdir($path);
         }
         $installer->endSetup();
     }
