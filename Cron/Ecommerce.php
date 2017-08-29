@@ -167,7 +167,6 @@ class Ecommerce
             }
             $countTotal = $countCustomers + $countProducts + $countOrders + $countSubscribers;
             $alreadySynced = $this->_helper->getMCMinSyncing($storeId);
-            $this->_helper->log("Already Synced $alreadySynced total $countTotal");
             if ($countTotal == 0 && !$alreadySynced) {
                 $api = $this->_helper->getApi($storeId);
                 $api->ecommerce->stores->edit($mailchimpStoreId, null, null, null, null, null, null, null, null, null, null, false);
