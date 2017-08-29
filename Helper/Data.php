@@ -490,7 +490,10 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
                     $merge_vars = array_merge($merge_vars, $this->_getCustomerGroup($customer, $key, $merge_vars));
                     break;
                 case 'store_id':
-                    $merge_vars[$key] = $customer->getStoreId();
+                    $storeId = $customer->getStoreId();
+                    if($storeId) {
+                        $merge_vars[$key] = $storeId;
+                    }
                     break;
             }
             return $merge_vars;
@@ -523,7 +526,9 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
                     $merge_vars = $this->_getCustomerGroup($subscriber, $key, $merge_vars);
                     break;
                 case 'store_id':
-                    $merge_vars[$key] = $subscriber->getStoreId();
+                    if($subscriber->getStoreId()) {
+                        $merge_vars[$key] = $subscriber->getStoreId();
+                    }
                     break;
             }
             return $merge_vars;
