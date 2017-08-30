@@ -113,6 +113,13 @@ class Subscriber
 //        $this->_helper->log(__METHOD__);
         $storeId = $this->_storeManager->getStore()->getId();
 
+        /**
+         * Set storeId in $subscriber because if customer subscribe newsletter as a guest, storeId is null and generate error "Data did not match any of the schemas described in anyOf."
+         */
+        if(!$subscriber->getStoreId()) {
+            $subscriber->setStoreId($storeId);
+        }
+
         if ($this->_helper->isMailChimpEnabled($storeId)) {
             $api = $this->_api;
             if ($this->_helper->isDoubleOptInEnabled($storeId)) {
