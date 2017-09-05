@@ -271,7 +271,8 @@ class Product
         $data["title"] = $product->getName();
         $data["url"] = $product->getProductUrl();
         if ($product->getImage()) {
-            $data["image_url"] = $this->_imageHelper->init($product, self::PRODUCTIMAGE)->setImageFile($product->getImage())->getUrl();
+            $filePath = 'catalog/product'.$product->getImage();
+            $data["image_url"] = $this->_helper->getBaserUrl($magentoStoreId, \Magento\Framework\UrlInterface::URL_TYPE_MEDIA).$filePath;
         } elseif ($this->_parentImage) {
             $data['image_url'] = $this->_parentImage;
         }
