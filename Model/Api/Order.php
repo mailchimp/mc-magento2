@@ -187,7 +187,7 @@ class Order
                     $batchArray[$this->_counter]['operation_id'] = $this->_batchId . '_' . $orderId;
                     $batchArray[$this->_counter]['body'] = $orderJson;
                 } else {
-                    $error = $this->_helper->__('Something went wrong when retreiving product information.');
+                    $error = __('Something went wrong when retreiving product information.');
                     $this->_updateOrder($mailchimpStoreId, $orderId, $this->_date->gmtDate(), $error, 0);
                     continue;
                 }
