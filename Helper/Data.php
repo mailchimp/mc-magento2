@@ -284,6 +284,19 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         $ret = $this->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_PATH_IS_SYNC, $storeId);
         return !$ret;
     }
+    public function getCartUrl($storeId,$cartId,$token)
+    {
+        $rc = $this->_storeManager->getStore($storeId)->getUrl(
+            'mailchimp/cart/loadquote',
+            [
+                'id' => $cartId,
+                'token' => $token,
+                '_nosid' => true,
+                '_secure' => true
+            ]
+        );
+        return $rc;
+    }
     /**
      * @param null $store
      * @return mixed
