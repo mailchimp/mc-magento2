@@ -16,6 +16,7 @@ use Magento\Framework\Setup\UpgradeSchemaInterface;
 use Magento\Framework\Setup\SchemaSetupInterface;
 use Magento\Framework\Setup\ModuleContextInterface;
 use Magento\Framework\App\ResourceConnection;
+use Magento\Framework\App\DeploymentConfig;
 
 class UpgradeSchema implements UpgradeSchemaInterface
 {
@@ -23,9 +24,14 @@ class UpgradeSchema implements UpgradeSchemaInterface
      * @var ResourceConnection
      */
     protected $_resource;
-    public function __construct(ResourceConnection $resource)
+    /**
+     * @var DeploymentConfig
+     */
+    protected $_deploymentConfig;
+    public function __construct(ResourceConnection $resource,DeploymentConfig $deploymentConfig)
     {
         $this->_resource = $resource;
+        $this->_deploymentConfig = $deploymentConfig;
     }
 
     /**
@@ -34,7 +40,12 @@ class UpgradeSchema implements UpgradeSchemaInterface
     public function upgrade(SchemaSetupInterface $setup, ModuleContextInterface $context)
     {
         $connection = $this->_resource->getConnectionByName('default');
-        $checkoutConnection = $this->_resource->getConnectionByName('checkout');
+        if ($this->_deploymentConfig->get(\Magento\Framework\Config\ConfigOptionsListConstants::CONFIG_PATH_DB_CONNECTIONS . '/checkout')) {
+            $checkoutConnection = $this->_resource->getConnectionByName('checkout');
+        }
+        else {
+            $checkoutConnection = $connection;
+        }
         if (version_compare($context->getVersion(), '1.0.5') < 0) {
             $table = $connection
                 ->newTable($connection->getTableName('mailchimp_stores'))

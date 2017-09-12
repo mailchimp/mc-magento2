@@ -17,6 +17,7 @@ use Magento\Framework\Setup\ModuleContextInterface;
 use Magento\Framework\Setup\SchemaSetupInterface;
 use Symfony\Component\Config\Definition\Exception\Exception;
 use Magento\Framework\App\ResourceConnection;
+use Magento\Framework\App\DeploymentConfig;
 
 class InstallSchema implements InstallSchemaInterface
 {
@@ -24,9 +25,14 @@ class InstallSchema implements InstallSchemaInterface
      * @var ResourceConnection
      */
     protected $_resource;
-    public function __construct(ResourceConnection $resource)
+    /**
+     * @var DeploymentConfig
+     */
+    protected $_deploymentConfig;
+    public function __construct(ResourceConnection $resource,DeploymentConfig $deploymentConfig)
     {
         $this->_resource = $resource;
+        $this->_deploymentConfig = $deploymentConfig;
     }
 
     /**
@@ -205,7 +211,9 @@ class InstallSchema implements InstallSchemaInterface
                 'comment' => 'Retrieved from Mailchimp'
             ]
         );
-        $connection = $this->_resource->getConnectionByName('checkout');
+        if ($this->_deploymentConfig->get(\Magento\Framework\Config\ConfigOptionsListConstants::CONFIG_PATH_DB_CONNECTIONS . '/checkout')) {
+            $connection = $this->_resource->getConnectionByName('checkout');
+        }
         $connection->addColumn(
             $connection->getTableName('quote'),
             'mailchimp_abandonedcart_flag',
