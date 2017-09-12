@@ -202,6 +202,10 @@ class InstallSchema implements InstallSchemaInterface
 
         $connection->createTable($table);
 
+        if ($this->_deploymentConfig->get(\Magento\Framework\Config\ConfigOptionsListConstants::CONFIG_PATH_DB_CONNECTIONS . '/sales')) {
+            $connection = $this->_resource->getConnectionByName('sales');
+        }
+
         $connection->addColumn(
             $connection->getTableName('sales_order'),
             'mailchimp_abandonedcart_flag',

@@ -46,6 +46,12 @@ class UpgradeSchema implements UpgradeSchemaInterface
         else {
             $checkoutConnection = $connection;
         }
+        if ($this->_deploymentConfig->get(\Magento\Framework\Config\ConfigOptionsListConstants::CONFIG_PATH_DB_CONNECTIONS . '/sales')) {
+            $salesConnection = $this->_resource->getConnectionByName('sales');
+        }
+        else {
+            $salesConnection = $connection;
+        }
         if (version_compare($context->getVersion(), '1.0.5') < 0) {
             $table = $connection
                 ->newTable($connection->getTableName('mailchimp_stores'))
@@ -211,8 +217,8 @@ class UpgradeSchema implements UpgradeSchemaInterface
                 ]
             );
 
-            $connection->addColumn(
-                $connection->getTableName('sales_order'),
+            $salesConnection->addColumn(
+                $salesConnection->getTableName('sales_order'),
                 'mailchimp_campaign_id',
                 [
                     'type' => \Magento\Framework\DB\Ddl\Table::TYPE_TEXT,
@@ -232,8 +238,8 @@ class UpgradeSchema implements UpgradeSchemaInterface
                 ]
             );
 
-            $connection->addColumn(
-                $connection->getTableName('sales_order'),
+            $salesConnection->addColumn(
+                $salesConnection->getTableName('sales_order'),
                 'mailchimp_landing_page',
                 [
                     'type' => \Magento\Framework\DB\Ddl\Table::TYPE_TEXT,
