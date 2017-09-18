@@ -393,5 +393,25 @@ class UpgradeSchema implements UpgradeSchemaInterface
                 );
             $connection->createTable($table);
         }
+        if (version_compare($context->getVersion(), '1.0.24') < 0) {
+            $salesConnection->addColumn(
+                $salesConnection->getTableName('sales_order_grid'),
+                'mailchimp_flag',
+                [
+                    'type' => \Magento\Framework\DB\Ddl\Table::TYPE_BOOLEAN,
+                    'default' => 0,
+                    'comment' => 'Retrieved from Mailchimp'
+                ]
+            );
+            $salesConnection->addColumn(
+                $salesConnection->getTableName('sales_order'),
+                'mailchimp_flag',
+                [
+                    'type' => \Magento\Framework\DB\Ddl\Table::TYPE_BOOLEAN,
+                    'default' => 0,
+                    'comment' => 'Retrieved from Mailchimp'
+                ]
+            );
+        }
     }
 }

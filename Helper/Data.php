@@ -739,6 +739,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
 
     public function createWebHook($apikey, $listId)
     {
+        $this->log(__METHOD__);
         $events = [
             'subscribe' => true,
             'unsubscribe' => true,
@@ -758,6 +759,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
             '_nosid' => true,
             '_secure' => true]);
         try {
+            $this->log($hookUrl);
             $ret = $api->lists->webhooks->add($listId, urlencode($hookUrl), $events, $sources);
         } catch (\Mailchimp_Error $e) {
             $this->log($e->getMessage());

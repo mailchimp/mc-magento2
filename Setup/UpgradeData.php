@@ -13,18 +13,29 @@
 namespace Ebizmarts\MailChimp\Setup;
 
 use Magento\Framework\Setup\ModuleContextInterface;
-use Magento\Eav\Setup\EavSetupFactory;
 use Magento\Framework\Setup\ModuleDataSetupInterface;
 use Magento\Framework\Setup\UpgradeDataInterface;
 
 class UpgradeData implements UpgradeDataInterface
 {
-
-//    public function __construct(EavSetupFactory $eavSetupFactory)
-//    {
-//        $this->eavSetupFactory = $eavSetupFactory;
-//    }
     public function upgrade(ModuleDataSetupInterface $setup, ModuleContextInterface $context)
     {
+        if (version_compare($context->getVersion(), '1.0.24') < 0)
+        {
+            $setup->startSetup();
+
+            $table = $setup->getConnection()->getTableName('sales_order');
+            $select = $setup->getConnection()->select()
+                ->from(
+                    false,
+                    ['mailchimp_flag' => new \Zend_Db_Expr('IF(mailchimp_abandonedcart_flag OR mailchimp_campaign_id OR mailchimp_landing_page, 1, 0)')]
+                )->join(['O'=>$table],'O.entity_id = G.entity_id',[]);
+
+            $query = $setup->getConnection()->updateFromSelect($select, ['G' => $setup->getConnection()->getTableName('sales_order_grid')]);
+            $setup->getConnection()->query($query);
+
+            $setup->endSetup();
+
+        }
     }
 }
