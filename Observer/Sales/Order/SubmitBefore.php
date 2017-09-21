@@ -27,13 +27,17 @@ class SubmitBefore implements \Magento\Framework\Event\ObserverInterface
         $order = $observer->getEvent()->getData('order');
         /* @var \Magento\Quote\Model\Quote $quote */
         $quote = $observer->getEvent()->getData('quote');
+        $flag = 0;
 
         foreach ($this->attributes as $attribute) {
             if ($quote->hasData($attribute)) {
                 $order->setData($attribute, $quote->getData($attribute));
+                if($quote->getData($attribute)) {
+                    $flag = 1;
+                }
             }
         }
-
+        $order->setData('mailchimp_flag',$flag);
         return $this;
     }
 }

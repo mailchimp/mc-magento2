@@ -166,10 +166,11 @@ class Ecommerce
                 }
             }
             $countTotal = $countCustomers + $countProducts + $countOrders + $countSubscribers;
-            if ($countTotal == 0 && $this->_helper->getMCMinSyncing($storeId)) {
+            $alreadySynced = $this->_helper->getMCMinSyncing($storeId);
+            if ($countTotal == 0 && !$alreadySynced) {
                 $api = $this->_helper->getApi($storeId);
                 $api->ecommerce->stores->edit($mailchimpStoreId, null, null, null, null, null, null, null, null, null, null, false);
-                $this->_helper->saveConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_PATH_IS_SYNC, true, $storeId);
+                $this->_helper->saveConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_PATH_IS_SYNC, date('Y-m-d His'), $storeId);
             }
         }
 

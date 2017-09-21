@@ -54,18 +54,14 @@ class Subscriber
         $subscriber,
         $customerId
     ) {
-//        $this->_helper->log(__METHOD__);
         $subscriber->loadByCustomerId($customerId);
-//        if ($subscriber->getMailchimpId() != null) {
-            $api = $this->_api;
+        $api = $this->_api;
         try {
             $md5HashEmail = md5(strtolower($subscriber->getSubscriberEmail()));
             $api->lists->members->update($this->_helper->getDefaultList(), $md5HashEmail, null, 'unsubscribed');
-//                $subscriber->setMailchimpId('')->save();
         } catch (\Exception $e) {
             $this->_helper->log($e->getMessage());
         }
-//        }
         return [$customerId];
     }
 
@@ -73,7 +69,6 @@ class Subscriber
         $subscriber,
         $customerId
     ) {
-//        $this->_helper->log(__METHOD__);
         $subscriber->loadByCustomerId($customerId);
         $subscriber->setImportMode(true);
         $storeId = $subscriber->getStoreId();
@@ -93,12 +88,7 @@ class Subscriber
                 $emailHash = md5(strtolower($customer->getEmail()));
                 if (!$subscriber->getMailchimpId()) {
                     $return = $api->lists->members->addOrUpdate($this->_helper->getDefaultList(), $emailHash, null, $status, $mergeVars, null, null, null, null, $email, $status);
-//                    $this->_helper->log($return);
-//                    if (isset($return['id'])) {
-//                        $subscriber->setMailchimpId($return['id']);
-//                    }
                 }
-//                $subscriber->setMailchimpId($emailHash)->save();
             } catch (\Exception $e) {
                 $this->_helper->log($e->getMessage());
             }
@@ -110,8 +100,14 @@ class Subscriber
         $subscriber,
         $email
     ) {
-//        $this->_helper->log(__METHOD__);
         $storeId = $this->_storeManager->getStore()->getId();
+
+        /**
+         * Set storeId in $subscriber because if customer subscribe newsletter as a guest, storeId is null and generate error "Data did not match any of the schemas described in anyOf."
+         */
+        if(!$subscriber->getStoreId()) {
+            $subscriber->setStoreId($storeId);
+        }
 
         if ($this->_helper->isMailChimpEnabled($storeId)) {
             $api = $this->_api;
@@ -124,10 +120,6 @@ class Subscriber
             try {
                 $md5HashEmail = md5(strtolower($email));
                 $return = $api->lists->members->addOrUpdate($this->_helper->getDefaultList(), $md5HashEmail, null, $status, $mergeVars, null, null, null, null, $email, $status);
-//                $this->_helper->log($return);
-//                if (isset($return['id'])) {
-//                    $subscriber->setMailchimpId($return['id']);
-//                }
             } catch (\Exception $e) {
                 $this->_helper->log($e->getMessage());
             }
@@ -137,19 +129,15 @@ class Subscriber
 
     public function beforeUnsubscribe(
         $subscriber
-    ) {
-//        $this->_helper->log(__METHOD__);
-//        if ($subscriber->getMailchimpId()) {
-//            $this->_helper->log('has id');
+    )
+    {
             $api = $this->_helper->getApi();
         try {
             $md5HashEmail = md5(strtolower($subscriber->getSubscriberEmail()));
             $api->lists->members->update($this->_helper->getDefaultList(), $md5HashEmail, null, 'unsubscribed');
-//                $subscriber->setMailchimpId('');
         } catch (\Exception $e) {
             $this->_helper->log($e->getMessage());
         }
-//        }
         return null;
     }
 }

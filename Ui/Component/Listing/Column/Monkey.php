@@ -37,6 +37,10 @@ class Monkey extends Column
      * @var \Magento\Framework\App\RequestInterface
      */
     protected $_requestInterfase;
+    /**
+     * @var \Ebizmarts\MailChimp\Helper\Data
+     */
+    protected $_helper;
 
     /**
      * Monkey constructor.
@@ -46,6 +50,7 @@ class Monkey extends Column
      * @param \Magento\Framework\View\Asset\Repository $assetRepository
      * @param \Magento\Framework\App\RequestInterface $requestInterface
      * @param SearchCriteriaBuilder $criteria
+     * @param \Ebizmarts\MailChimp\Helper\Data $helper
      * @param array $components
      * @param array $data
      */
@@ -56,6 +61,7 @@ class Monkey extends Column
         \Magento\Framework\View\Asset\Repository $assetRepository,
         \Magento\Framework\App\RequestInterface $requestInterface,
         SearchCriteriaBuilder $criteria,
+        \Ebizmarts\MailChimp\Helper\Data $helper,
         array $components = [],
         array $data = []
     ) {
@@ -64,6 +70,7 @@ class Monkey extends Column
         $this->_searchCriteria  = $criteria;
         $this->_assetRepository = $assetRepository;
         $this->_requestInterfase= $requestInterface;
+        $this->_helper          = $helper;
         parent::__construct($context, $uiComponentFactory, $components, $data);
     }
 
@@ -71,11 +78,7 @@ class Monkey extends Column
     {
         if (isset($dataSource['data']['items'])) {
             foreach ($dataSource['data']['items'] as & $item) {
-                $order = $this->_orderRepository->get($item["entity_id"]);
-                $status = $order->getData("mailchimp_abandonedcart_flag");
-                if ($order->getMailchimpCampaignId() || $order->getMailchimpLandingPage()) {
-                    $status = 1;
-                }
+                $status = $item['mailchimp_flag'];
                 $fieldName = $this->getData('name');
 
                 switch ($status) {
@@ -92,7 +95,6 @@ class Monkey extends Column
                         $item[$fieldName . '_src'] = $url;
                         $item[$fieldName . '_alt'] = 'hep hep thanks MailChimp';
                         $item[$fieldName . '_link'] = '';
-//                        $item[$fieldName . '_orig_src'] = $url;
                         break;
                 }
             }

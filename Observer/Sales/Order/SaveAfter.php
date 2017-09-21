@@ -49,5 +49,6 @@ class SaveAfter implements \Magento\Framework\Event\ObserverInterface
             $ecom->setMailchimpSyncModified(1);
             $ecom->getResource()->save($ecom);
         }
+
     }
 }
