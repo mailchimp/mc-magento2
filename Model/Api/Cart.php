@@ -213,6 +213,7 @@ class Cart
          * @var $cart \Magento\Quote\Model\Quote
          */
         foreach ($modifiedCarts as $cart) {
+            $this->_token = null;
             $cartId = $cart->getEntityId();
             $allCarts[$this->_counter]['method'] = 'DELETE';
             $allCarts[$this->_counter]['path'] = '/ecommerce/stores/' . $mailchimpStoreId . '/carts/' . $cartId;
@@ -309,6 +310,7 @@ class Cart
          * @var $cart \Magento\Quote\Model\Quote
          */
         foreach ($newCarts as $cart) {
+            $this->_token = null;
             $cartId = $cart->getEntityId();
             $orderCollection = $this->_getOrderCollection();
             $orderCollection->addFieldToFilter('main_table.customer_email', ['eq' => $cart->getCustomerEmail()])
@@ -399,7 +401,6 @@ class Cart
      */
     protected function _makeCart(\Magento\Quote\Model\Quote $cart, $mailchimpStoreId, $magentoStoreId)
     {
-        $this->_token = null;
         $campaignId = $cart->getMailchimpCampaignId();
         $oneCart = [];
         $oneCart['id'] = $cart->getEntityId();
@@ -408,7 +409,7 @@ class Cart
             $oneCart['campaign_id'] = $campaignId;
         }
 
-        $oneCart['checkout_url'] = $this->_getCheckoutUrl($cart);
+        $oneCart['checkout_url'] = $this->_getCheckoutUrl($cart,$magentoStoreId);
         $oneCart['currency_code'] = $cart->getQuoteCurrencyCode();
         $oneCart['order_total'] = $cart->getGrandTotal();
         $oneCart['tax_total'] = 0;
@@ -468,18 +469,10 @@ class Cart
      * @param \Magento\Quote\Model\Quote $cart
      * @return string
      */
-    protected function _getCheckoutUrl(\Magento\Quote\Model\Quote $cart)
+    protected function _getCheckoutUrl(\Magento\Quote\Model\Quote $cart, $storeId)
     {
         $token = md5(rand(0, 9999999));
-        $url = $this->_urlHelper->getUrl(
-            'mailchimp/cart/loadquote',
-            [
-                'id' => $cart->getId(),
-                'token' => $token,
-                '_nosid' => true,
-                '_secure' => true
-            ]
-        );
+        $url = $this->_helper->getCartUrl($storeId,$cart->getId(),$token);
         $this->_token = $token;
         return $url;
     }

@@ -130,6 +130,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
      * @var \Magento\Customer\Model\ResourceModel\Customer\CollectionFactory
      */
     private $_customerCollection;
+    private $_addressRepositoryInterface;
 
     /**
      * Data constructor.
@@ -151,6 +152,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
      * @param \Magento\Framework\Encryption\Encryptor $encryptor
      * @param \Magento\Newsletter\Model\ResourceModel\Subscriber\CollectionFactory $subscriberCollection
      * @param \Magento\Customer\Model\ResourceModel\Customer\CollectionFactory $customerCollection
+     * @param \Magento\Customer\Api\AddressRepositoryInterface $addressRepositoryInterface
      */
     public function __construct(
         \Magento\Framework\App\Helper\Context $context,
@@ -170,7 +172,8 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         \Ebizmarts\MailChimp\Model\MailChimpStores $mailChimpStores,
         \Magento\Framework\Encryption\Encryptor $encryptor,
         \Magento\Newsletter\Model\ResourceModel\Subscriber\CollectionFactory $subscriberCollection,
-        \Magento\Customer\Model\ResourceModel\Customer\CollectionFactory $customerCollection
+        \Magento\Customer\Model\ResourceModel\Customer\CollectionFactory $customerCollection,
+        \Magento\Customer\Api\AddressRepositoryInterface $addressRepositoryInterface
     ) {
     
         $this->_storeManager  = $storeManager;
@@ -192,6 +195,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         $this->_encryptor               = $encryptor;
         $this->_subscriberCollection    = $subscriberCollection;
         $this->_customerCollection      = $customerCollection;
+        $this->_addressRepositoryInterface = $addressRepositoryInterface;
         parent::__construct($context);
     }
 
@@ -253,15 +257,12 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
      */
     public function getConfigValue($path, $storeId = null, $scope = null)
     {
-        switch ($scope) {
-            case 'website':
-                $value = $this->_scopeConfig->getValue($path, \Magento\Store\Model\ScopeInterface::SCOPE_WEBSITE, $storeId);
-                break;
-            default:
-                $value = $this->_scopeConfig->getValue($path, \Magento\Store\Model\ScopeInterface::SCOPE_STORES, $storeId);
-                break;
+        if($scope) {
+            $value = $this->_scopeConfig->getValue($path, $scope, $storeId);
         }
-
+        else {
+            $value = $this->_scopeConfig->getValue($path, \Magento\Store\Model\ScopeInterface::SCOPE_STORES, $storeId);
+        }
         return $value;
     }
     public function deleteConfig($path, $storeId = null, $scope = null)
@@ -271,19 +272,30 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
 
     public function saveConfigValue($path, $value, $storeId = null, $scope = null)
     {
-        switch ($scope) {
-            case 'website':
-                $this->_config->saveConfig($path, $value, \Magento\Store\Model\ScopeInterface::SCOPE_WEBSITE, $storeId);
-                break;
-            default:
-                $this->_config->saveConfig($path, $value, \Magento\Store\Model\ScopeInterface::SCOPE_STORES, $storeId);
-                break;
+        if($scope) {
+            $this->_config->saveConfig($path, $value, $scope, $storeId);
+        }
+        else {
+            $this->_config->saveConfig($path, $value, \Magento\Store\Model\ScopeInterface::SCOPE_STORES, $storeId);
         }
     }
     public function getMCMinSyncing($storeId)
     {
         $ret = $this->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_PATH_IS_SYNC, $storeId);
         return !$ret;
+    }
+    public function getCartUrl($storeId,$cartId,$token)
+    {
+        $rc = $this->_storeManager->getStore($storeId)->getUrl(
+            'mailchimp/cart/loadquote',
+            [
+                'id' => $cartId,
+                'token' => $token,
+                '_nosid' => true,
+                '_secure' => true
+            ]
+        );
+        return $rc;
     }
     /**
      * @param null $store
@@ -345,6 +357,10 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     public function getMCStoreName($storeId)
     {
         return $this->_storeManager->getStore($storeId)->getFrontendName();
+    }
+    public function getBaserUrl($storeId, $type)
+    {
+        return $this->_storeManager->getStore($storeId)->getBaseUrl($type);
     }
     public function createStore($listId = null, $storeId)
     {
@@ -435,42 +451,66 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
                     $merge_vars = array_merge($merge_vars, $this->_updateMergeVars($key, ucfirst($addr[0]), $customer));
                     break;
                 case 'billing_telephone':
-                    if ($address = $customer->{'getDefaultBilling'}()) {
-                        $telephone = $address->getTelephone();
-                        if ($telephone) {
-                            $merge_vars[$key] = $telephone;
+                    try {
+                        $address = $this->_addressRepositoryInterface->getById($customer->getDefaultBilling());
+                        if ($address) {
+                            $telephone = $address->getTelephone();
+                            if ($telephone) {
+                                $merge_vars[$key] = $telephone;
+                            }
                         }
+                    } catch(\Exception $e) {
+                        $this->log($e->getMessage());
                     }
                     break;
                 case 'billing_company':
-                    if ($address = $customer->{'getDefaultBilling'}()) {
-                        $company = $address->getCompany();
-                        if ($company) {
-                            $merge_vars[$key] = $company;
+                    try {
+                        $address = $this->_addressRepositoryInterface->getById($customer->getDefaultBilling());
+                        if ($address) {
+                            $company = $address->getCompany();
+                            if ($company) {
+                                $merge_vars[$key] = $company;
+                            }
                         }
+                    } catch(\Exception $e) {
+                        $this->log($e->getMessage());
                     }
+
                     break;
                 case 'shipping_telephone':
-                    if ($address = $customer->{'getDefaultShipping'}()) {
-                        $telephone = $address->getTelephone();
-                        if ($telephone) {
-                            $merge_vars[$key] = $telephone;
+                    try {
+                        $address = $this->_addressRepositoryInterface->getById($customer->getDefaultShipping());
+                        if ($address) {
+                            $telephone = $address->getTelephone();
+                            if ($telephone) {
+                                $merge_vars[$key] = $telephone;
+                            }
                         }
+                    } catch(\Exception $e) {
+                        $this->log($e->getMessage());
                     }
                     break;
                 case 'shipping_company':
-                    if ($address = $customer->{'getDefaultShipping'}()) {
-                        $company = $address->getCompany();
-                        if ($company) {
-                            $merge_vars[$key] = $company;
+                    try {
+                        $address = $this->_addressRepositoryInterface->getById($customer->getDefaultShipping());
+                        if ($address) {
+                            $company = $address->getCompany();
+                            if ($company) {
+                                $merge_vars[$key] = $company;
+                            }
                         }
+                    } catch(\Exception $e) {
+                        $this->log($e->getMessage());
                     }
                     break;
                 case 'group_id':
                     $merge_vars = array_merge($merge_vars, $this->_getCustomerGroup($customer, $key, $merge_vars));
                     break;
                 case 'store_id':
-                    $merge_vars[$key] = $customer->getStoreId();
+                    $storeId = $customer->getStoreId();
+                    if($storeId) {
+                        $merge_vars[$key] = $storeId;
+                    }
                     break;
             }
             return $merge_vars;
@@ -503,7 +543,9 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
                     $merge_vars = $this->_getCustomerGroup($subscriber, $key, $merge_vars);
                     break;
                 case 'store_id':
-                    $merge_vars[$key] = $subscriber->getStoreId();
+                    if($subscriber->getStoreId()) {
+                        $merge_vars[$key] = $subscriber->getStoreId();
+                    }
                     break;
             }
             return $merge_vars;
@@ -525,18 +567,25 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         }
         return $merge_vars;
     }
+
     protected function _updateMergeVars($key, $type, $customer)
     {
         $merge_vars = [];
-        if ($address = $customer->{'getDefault' . $type}()) {
-            $merge_vars[$key] = [
-                'addr1' => $address->getStreetLine(1),
-                'addr2' => $address->getStreetLine(2),
-                'city' => $address->getCity(),
-                'state' => (!$address->getRegion() ? $address->getCity() : $address->getRegion()),
-                'zip' => $address->getPostcode(),
-                'country' => $address->getCountryId()
-            ];
+        try {
+            $address = $this->_addressRepositoryInterface->getById($customer->{'getDefault' . $type});
+            if ($address) {
+                $merge_vars[$key] = [
+                    'addr1' => $address->getStreetLine(1),
+                    'addr2' => $address->getStreetLine(2),
+                    'city' => $address->getCity(),
+                    'state' => (!$address->getRegion() ? $address->getCity() : $address->getRegion()),
+                    'zip' => $address->getPostcode(),
+                    'country' => $address->getCountryId()
+                ];
+
+            }
+        } catch(\Exception $e) {
+            $this->log($e->getMessage());
         }
         return $merge_vars;
     }
@@ -690,6 +739,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
 
     public function createWebHook($apikey, $listId)
     {
+        $this->log(__METHOD__);
         $events = [
             'subscribe' => true,
             'unsubscribe' => true,
@@ -709,6 +759,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
             '_nosid' => true,
             '_secure' => true]);
         try {
+            $this->log($hookUrl);
             $ret = $api->lists->webhooks->add($listId, urlencode($hookUrl), $events, $sources);
         } catch (\Mailchimp_Error $e) {
             $this->log($e->getMessage());

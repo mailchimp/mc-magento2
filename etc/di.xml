@@ -56,4 +56,11 @@
     <type name="Magento\Customer\Model\AccountManagement">
         <plugin name="abandoned-checkout-save-quote" type="Ebizmarts\MailChimp\Model\Plugin\AccountManagement" sortOrder="10"/>
     </type>
+    <virtualType name="Magento\Sales\Model\ResourceModel\Order\Grid" type="Magento\Sales\Model\ResourceModel\Grid">
+        <arguments>
+            <argument name="columns" xsi:type="array">
+                <item name="mailchimp_flag" xsi:type="string">sales_order.mailchimp_flag</item>
+            </argument>
+        </arguments>
+    </virtualType>
 </config>

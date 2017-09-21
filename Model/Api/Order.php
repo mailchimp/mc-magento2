@@ -167,7 +167,12 @@ class Order
                 $orderId = $item->getEntityId();
                 $order = $this->_order->get($orderId);
                 //create missing products first
-                $productData = $this->_apiProduct->sendModifiedProduct($order, $mailchimpStoreId, $magentoStoreId);
+                try {
+                    $productData = $this->_apiProduct->sendModifiedProduct($order, $mailchimpStoreId, $magentoStoreId);
+                } catch(\Exception $e) {
+                    $this->_helper->log($e->getMessage());
+                    continue;
+                }
                 if (count($productData)) {
                     foreach ($productData as $p) {
                         $batchArray[$this->_counter] = $p;
@@ -182,7 +187,7 @@ class Order
                     $batchArray[$this->_counter]['operation_id'] = $this->_batchId . '_' . $orderId;
                     $batchArray[$this->_counter]['body'] = $orderJson;
                 } else {
-                    $error = $this->_helper->__('Something went wrong when retreiving product information.');
+                    $error = __('Something went wrong when retreiving product information.');
                     $this->_updateOrder($mailchimpStoreId, $orderId, $this->_date->gmtDate(), $error, 0);
                     continue;
                 }
@@ -229,7 +234,12 @@ class Order
                 $orderId = $item->getEntityId();
                 $order = $this->_order->get($orderId);
                 //create missing products first
-                $productData = $this->_apiProduct->sendModifiedProduct($order, $mailchimpStoreId, $magentoStoreId);
+                try {
+                    $productData = $this->_apiProduct->sendModifiedProduct($order, $mailchimpStoreId, $magentoStoreId);
+                } catch(\Exception $e) {
+                    $this->_helper->log($e->getMessage());
+                    continue;
+                }
                 if (count($productData)) {
                     foreach ($productData as $p) {
                         $batchArray[$this->_counter] = $p;
@@ -453,7 +463,7 @@ class Order
             $data['billing_address']["postal_code"] = $billingAddress->getPostcode();
         }
 
-        if ($billingAddress->getCountry()) {
+        if ($billingAddress->getCountryId()) {
             $country = $this->_countryInformation->getCountryInfo($billingAddress->getCountryId());
             $countryName = $country->getFullNameLocale();
             $address["country"] =$data['billing_address']['country'] = $countryName;

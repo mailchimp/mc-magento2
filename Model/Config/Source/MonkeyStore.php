@@ -20,14 +20,15 @@ class MonkeyStore implements \Magento\Framework\Option\ArrayInterface
     /**
      * MonkeyStore constructor.
      * @param \Ebizmarts\MailChimp\Helper\Data $helper
-     * @param \Magento\Store\Model\StoreManagerInterface $storeManager
+     * @param \Magento\Framework\App\RequestInterface $request
      */
     public function __construct(
         \Ebizmarts\MailChimp\Helper\Data $helper,
-        \Magento\Store\Model\StoreManagerInterface $storeManager
+        \Magento\Framework\App\RequestInterface $request
     ) {
-    
-        if ($helper->getApiKey($storeManager->getStore()->getId())) {
+        $storeId = (int) $request->getParam("store", 0);
+
+        if ($helper->getApiKey($storeId)) {
             try {
                 $this->options = $helper->getApi()->ecommerce->stores->get(null, null, null, \Ebizmarts\MailChimp\Helper\Data::MAXSTORES);
             } catch (\Exception $e) {
