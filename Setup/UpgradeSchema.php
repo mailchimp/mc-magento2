@@ -413,5 +413,12 @@ class UpgradeSchema implements UpgradeSchemaInterface
                 ]
             );
         }
+        if (version_compare($context->getVersion(), '1.0.25') < 0) {
+            $connection->addIndex(
+                $connection->getTableName('mailchimp_sync_ecommerce'),
+                $connection->getIndexName($connection->getTableName('mailchimp_sync_ecommerce'),'related_id','index'),
+                'related_id'
+            );
+        }
     }
 }
