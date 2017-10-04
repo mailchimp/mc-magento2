@@ -175,7 +175,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         \Magento\Customer\Model\ResourceModel\Customer\CollectionFactory $customerCollection,
         \Magento\Customer\Api\AddressRepositoryInterface $addressRepositoryInterface
     ) {
-    
+
         $this->_storeManager  = $storeManager;
         $this->_mlogger       = $logger;
         $this->_groupRegistry = $groupRegistry;

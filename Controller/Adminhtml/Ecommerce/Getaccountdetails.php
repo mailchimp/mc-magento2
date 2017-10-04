@@ -53,12 +53,13 @@ class Getaccountdetails extends Action
             $options = [];
             if (isset($apiInfo['account_name'])) {
                 $options['username'] = ['label' => __('User name:'), 'value' => $apiInfo['account_name']];
-                $options['total_subscribers'] = ['label' => __('Total Subscribers:'), 'value' => $apiInfo['total_subscribers']];
+                $options['total_subscribers'] = ['label' => __('Total Account Subscribers:'), 'value' => $apiInfo['total_subscribers']];
                 if ($store != -1) {
                     $storeData = $api->ecommerce->stores->get($store);
                     $options['list_id'] = $storeData['list_id'];
                     $list = $api->lists->getLists($storeData['list_id']);
                     $options['list_name'] = $list['name'];
+                    $options['total_list_subscribers'] = ['label' => __('Total List Subscribers:'), 'value' => $list['stats']['member_count']];
                     $options['subtitle'] = ['label' => __('Ecommerce Data uploaded to MailChimp:'), 'value' => ''];
                     $totalCustomers = $api->ecommerce->customers->getAll($store, 'total_items');
                     $options['total_customers'] = ['label' => __('Total customers:'), 'value' => $totalCustomers['total_items']];
