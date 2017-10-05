@@ -43,7 +43,7 @@ class InstallSchema implements InstallSchemaInterface
     {
         $connection = $this->_resource->getConnectionByName('default');
         $table = $connection
-            ->newTable($connection->getTableName('mailchimp_sync_batches'))
+            ->newTable($setup->getTable('mailchimp_sync_batches'))
             ->addColumn(
                 'id',
                 \Magento\Framework\DB\Ddl\Table::TYPE_INTEGER,
@@ -83,7 +83,7 @@ class InstallSchema implements InstallSchemaInterface
         $connection->createTable($table);
 
         $table = $connection
-            ->newTable($connection->getTableName('mailchimp_errors'))
+            ->newTable($setup->getTable('mailchimp_errors'))
             ->addColumn(
                 'id',
                 \Magento\Framework\DB\Ddl\Table::TYPE_INTEGER,
@@ -138,7 +138,7 @@ class InstallSchema implements InstallSchemaInterface
 
 
         $table = $connection
-            ->newTable($connection->getTableName('mailchimp_sync_ecommerce'))
+            ->newTable($setup->getTable('mailchimp_sync_ecommerce'))
             ->addColumn(
                 'id',
                 \Magento\Framework\DB\Ddl\Table::TYPE_INTEGER,
@@ -207,7 +207,7 @@ class InstallSchema implements InstallSchemaInterface
         }
 
         $connection->addColumn(
-            $connection->getTableName('sales_order'),
+            $setup->getTable('sales_order'),
             'mailchimp_abandonedcart_flag',
             [
                 'type' => \Magento\Framework\DB\Ddl\Table::TYPE_BOOLEAN,
@@ -219,7 +219,7 @@ class InstallSchema implements InstallSchemaInterface
             $connection = $this->_resource->getConnectionByName('checkout');
         }
         $connection->addColumn(
-            $connection->getTableName('quote'),
+            $setup->getTable('quote'),
             'mailchimp_abandonedcart_flag',
             [
                 'type' => \Magento\Framework\DB\Ddl\Table::TYPE_BOOLEAN,
