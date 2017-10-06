@@ -67,7 +67,7 @@ class Subscriber
         $collection->addFieldToFilter('subscriber_status', array('eq' => 1))
             ->addFieldToFilter('store_id', array('eq' => $storeId));
         $collection->getSelect()->joinLeft(
-            ['m4m' => 'mailchimp_sync_ecommerce'],
+            ['m4m' => $this->_helper->getTableName('mailchimp_sync_ecommerce')],
             "m4m.related_id = main_table.subscriber_id and m4m.type = '".\Ebizmarts\MailChimp\Helper\Data::IS_SUBSCRIBER.
             "' and m4m.mailchimp_store_id = '".$listId."'",
             ['m4m.*']

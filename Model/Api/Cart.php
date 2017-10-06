@@ -141,7 +141,7 @@ class Cart
         $convertedCarts->addFieldToFilter('is_active', ['eq' => 0]);
         //join with mailchimp_ecommerce_sync_data table to filter by sync data.
         $convertedCarts->getSelect()->joinLeft(
-            ['m4m' => 'mailchimp_sync_ecommerce'],
+            ['m4m' => $this->_helper->getTableName('mailchimp_sync_ecommerce')],
             "m4m.related_id = main_table.entity_id and m4m.type = '".\Ebizmarts\MailChimp\Helper\Data::IS_QUOTE."'
             AND m4m.mailchimp_store_id = '" . $mailchimpStoreId . "'",
             ['m4m.*']
@@ -199,7 +199,7 @@ class Cart
         $modifiedCarts->addFieldToFilter('store_id', ['eq' => $magentoStoreId]);
         //join with mailchimp_ecommerce_sync_data table to filter by sync data.
         $modifiedCarts->getSelect()->joinLeft(
-            ['m4m' => 'mailchimp_sync_ecommerce'],
+            ['m4m' => $this->_helper->getTableName('mailchimp_sync_ecommerce')],
             "m4m.related_id = main_table.entity_id and m4m.type = '".\Ebizmarts\MailChimp\Helper\Data::IS_QUOTE."'
             AND m4m.mailchimp_store_id = '" . $mailchimpStoreId . "'",
             ['m4m.*']
@@ -297,7 +297,7 @@ class Cart
         }
         //join with mailchimp_ecommerce_sync_data table to filter by sync data.
         $newCarts->getSelect()->joinLeft(
-            ['m4m' => 'mailchimp_sync_ecommerce'],
+            ['m4m' => $this->_helper->getTableName('mailchimp_sync_ecommerce')],
             "m4m.related_id = main_table.entity_id and m4m.type = '" . \Ebizmarts\MailChimp\Helper\Data::IS_QUOTE . "'
             AND m4m.mailchimp_store_id = '" . $mailchimpStoreId . "'",
             ['m4m.*']
@@ -383,7 +383,7 @@ class Cart
         $allCartsForEmail->addFieldToFilter('store_id', ['eq' => $magentoStoreId]);
         $allCartsForEmail->addFieldToFilter('customer_email', ['eq' => $email]);
         $allCartsForEmail->getSelect()->joinLeft(
-            ['m4m' => 'mailchimp_sync_ecommerce'],
+            ['m4m' => $this->_helper->getTableName('mailchimp_sync_ecommerce')],
             "m4m.related_id = main_table.entity_id and m4m.type = '".\Ebizmarts\MailChimp\Helper\Data::IS_QUOTE."'
             AND m4m.mailchimp_store_id = '" . $mailchimpStoreId . "'",
             ['m4m.*']

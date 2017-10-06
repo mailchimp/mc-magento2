@@ -113,7 +113,7 @@ class Product
         $collection = $this->_getCollection();
         $collection->setStoreId($magentoStoreId);
         $collection->getSelect()->joinLeft(
-            ['m4m' => 'mailchimp_sync_ecommerce'],
+            ['m4m' => $this->_helper->getTableName('mailchimp_sync_ecommerce')],
             "m4m.related_id = e.entity_id and m4m.type = '".\Ebizmarts\MailChimp\Helper\Data::IS_PRODUCT.
                 "' and m4m.mailchimp_store_id = '".$mailchimpStoreId."'",
             ['m4m.*']
