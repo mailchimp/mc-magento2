@@ -131,6 +131,10 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
      */
     private $_customerCollection;
     private $_addressRepositoryInterface;
+    /**
+     * @var \Magento\Framework\DB\Adapter\AdapterInterface
+     */
+    private $connection;
 
     /**
      * Data constructor.
@@ -153,6 +157,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
      * @param \Magento\Newsletter\Model\ResourceModel\Subscriber\CollectionFactory $subscriberCollection
      * @param \Magento\Customer\Model\ResourceModel\Customer\CollectionFactory $customerCollection
      * @param \Magento\Customer\Api\AddressRepositoryInterface $addressRepositoryInterface
+     * @param \Magento\Framework\App\ResourceConnection $resource
      */
     public function __construct(
         \Magento\Framework\App\Helper\Context $context,
@@ -173,7 +178,8 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         \Magento\Framework\Encryption\Encryptor $encryptor,
         \Magento\Newsletter\Model\ResourceModel\Subscriber\CollectionFactory $subscriberCollection,
         \Magento\Customer\Model\ResourceModel\Customer\CollectionFactory $customerCollection,
-        \Magento\Customer\Api\AddressRepositoryInterface $addressRepositoryInterface
+        \Magento\Customer\Api\AddressRepositoryInterface $addressRepositoryInterface,
+        \Magento\Framework\App\ResourceConnection $resource
     ) {
 
         $this->_storeManager  = $storeManager;
@@ -196,6 +202,8 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         $this->_subscriberCollection    = $subscriberCollection;
         $this->_customerCollection      = $customerCollection;
         $this->_addressRepositoryInterface = $addressRepositoryInterface;
+//        $this->_resource                = $resource;
+        $this->connection               = $resource->getConnection();
         parent::__construct($context);
     }
 
@@ -833,5 +841,15 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
                 ->addFieldToFilter('email', ['eq' => $email]);
         }
         return $customer;
+    }
+
+    /**
+     * @param $tableName
+     * @return string
+     */
+    public function getTableName($tableName)
+    {
+        return $this->connection->getTableName($tableName);
+
     }
 }
