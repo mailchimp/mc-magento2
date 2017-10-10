@@ -114,6 +114,30 @@ class Ecommerce
                 }
             }
         }
+        $syncs = [];
+        foreach ($this->_storeManager->getStores() as $storeId => $val) {
+            $mailchimpStoreId = $this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_MAILCHIMP_STORE, $storeId);
+            $dateSync = $this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_PATH_IS_SYNC, $storeId);
+            if(isset($syncs[$mailchimpStoreId])) {
+                if($syncs[$mailchimpStoreId]&&$syncs[$mailchimpStoreId]['datesync'] < $dateSync) {
+                    $syncs[$mailchimpStoreId]['datesync'] = $dateSync;
+                    $syncs[$mailchimpStoreId]['storeid'] = $storeId;
+                }
+            } elseif($dateSync) {
+                $syncs[$mailchimpStoreId]['datesync'] = $dateSync;
+                $syncs[$mailchimpStoreId]['storeid'] = $storeId;
+            } else {
+                $syncs[$mailchimpStoreId] = false;
+            }
+        }
+        foreach($syncs as $mailchimpStoreId => $val) {
+            if($val) {
+                $api = $this->_helper->getApi($val['storeid']);
+                $api->ecommerce->stores->edit($mailchimpStoreId, null, null, null, null, null, null, null, null, null, null, false);
+            }
+        }
+
+
     }
 
     protected function _processStore($storeId, $mailchimpStoreId, $listId)
@@ -168,9 +192,7 @@ class Ecommerce
             $countTotal = $countCustomers + $countProducts + $countOrders + $countSubscribers;
             $syncing = $this->_helper->getMCMinSyncing($storeId);
             if ($countTotal == 0 && $syncing) {
-                $api = $this->_helper->getApi($storeId);
-                $api->ecommerce->stores->edit($mailchimpStoreId, null, null, null, null, null, null, null, null, null, null, false);
-                $this->_helper->saveConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_PATH_IS_SYNC, date('Y-m-d His'), $storeId);
+                $this->_helper->saveConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_PATH_IS_SYNC, date('Y-m-d'), $storeId);
             }
         }
 
