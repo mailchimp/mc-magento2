@@ -135,6 +135,10 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
      * @var \Magento\Framework\DB\Adapter\AdapterInterface
      */
     private $connection;
+    /**
+     * @var \Magento\Framework\App\ResourceConnection
+     */
+    private $_resource;
 
     /**
      * Data constructor.
@@ -202,7 +206,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         $this->_subscriberCollection    = $subscriberCollection;
         $this->_customerCollection      = $customerCollection;
         $this->_addressRepositoryInterface = $addressRepositoryInterface;
-//        $this->_resource                = $resource;
+        $this->_resource                = $resource;
         $this->connection               = $resource->getConnection();
         parent::__construct($context);
     }
@@ -849,7 +853,6 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
      */
     public function getTableName($tableName)
     {
-        return $this->connection->getTableName($tableName);
-
+        return $this->_resource->getTableName($tableName);
     }
 }
