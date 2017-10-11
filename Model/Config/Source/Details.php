@@ -124,24 +124,6 @@ class Details implements \Magento\Framework\Option\ArrayInterface
     }
     private function getDateSync($mailchimpStoreId)
     {
-        $date = null;
-        foreach ($this->storeManager->getStores() as $storeId => $val) {
-            if($mailchimpStoreId == $this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_MAILCHIMP_STORE,$storeId)) {
-                $dateSync =$this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_PATH_IS_SYNC,$storeId);
-                if(!$dateSync) {
-                    return null;
-                }
-                else {
-                    if($date) {
-                        if(strtotime($date)<strtotime($dateSync)) {
-                            $date = $dateSync;
-                        }
-                    } else {
-                        $date = $dateSync;
-                    }
-                }
-            }
-        }
-        return $date;
+        return $this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_PATH_IS_SYNC."/$mailchimpStoreId", 0, "default");
     }
 }

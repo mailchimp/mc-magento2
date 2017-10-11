@@ -131,9 +131,10 @@ class Ecommerce
             }
         }
         foreach($syncs as $mailchimpStoreId => $val) {
-            if($val) {
+            if($val&&!$this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_PATH_IS_SYNC."/$mailchimpStoreId", $storeId)) {
                 $api = $this->_helper->getApi($val['storeid']);
                 $api->ecommerce->stores->edit($mailchimpStoreId, null, null, null, null, null, null, null, null, null, null, false);
+                $this->_helper->saveConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_PATH_IS_SYNC."/$mailchimpStoreId", date('Y-m-d'), $storeId);
             }
         }
 
