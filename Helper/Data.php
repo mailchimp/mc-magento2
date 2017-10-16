@@ -49,6 +49,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     const IS_ORDER      = "ORD";
     const IS_QUOTE      = "QUO";
     const IS_SUBSCRIBER = "SUB";
+    const IS_COUPON     = "COU";
 
     const PLATFORM      = 'Magento2';
     const MAXSTORES     = 100;
@@ -139,6 +140,10 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
      * @var \Magento\Framework\App\ResourceConnection
      */
     private $_resource;
+    /**
+     * @var \Magento\Framework\App\Cache\TypeListInterface
+     */
+    private $_cacheTypeList;
 
     /**
      * Data constructor.
@@ -150,6 +155,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
      * @param \Magento\Framework\Module\ModuleList\Loader $loader
      * @param \Magento\Config\Model\ResourceModel\Config $config
      * @param \Mailchimp $api
+     * @param \Magento\Framework\App\Cache\TypeListInterface $cacheTypeList
      * @param \Magento\Customer\Model\ResourceModel\CustomerRepository $customer
      * @param \Ebizmarts\MailChimp\Model\MailChimpErrors $mailChimpErrors
      * @param \Ebizmarts\MailChimp\Model\MailChimpSyncEcommerceFactory $mailChimpSyncEcommerce
@@ -172,6 +178,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         \Magento\Framework\Module\ModuleList\Loader $loader,
         \Magento\Config\Model\ResourceModel\Config $config,
         \Mailchimp $api,
+        \Magento\Framework\App\Cache\TypeListInterface $cacheTypeList,
         \Magento\Customer\Model\ResourceModel\CustomerRepository $customer,
         \Ebizmarts\MailChimp\Model\MailChimpErrors $mailChimpErrors,
         \Ebizmarts\MailChimp\Model\MailChimpSyncEcommerceFactory $mailChimpSyncEcommerce,
@@ -208,6 +215,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         $this->_addressRepositoryInterface = $addressRepositoryInterface;
         $this->_resource                = $resource;
         $this->connection               = $resource->getConnection();
+        $this->_cacheTypeList           = $cacheTypeList;
         parent::__construct($context);
     }
 
@@ -290,6 +298,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         else {
             $this->_config->saveConfig($path, $value, \Magento\Store\Model\ScopeInterface::SCOPE_STORES, $storeId);
         }
+        $this->_cacheTypeList->cleanType('config');
     }
     public function getMCMinSyncing($storeId)
     {
