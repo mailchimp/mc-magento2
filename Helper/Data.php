@@ -49,7 +49,8 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     const IS_ORDER      = "ORD";
     const IS_QUOTE      = "QUO";
     const IS_SUBSCRIBER = "SUB";
-    const IS_COUPON     = "COU";
+    const IS_PROMO_RULE = "PRL";
+    const IS_PROMO_CODE = "PCD";
 
     const PLATFORM      = 'Magento2';
     const MAXSTORES     = 100;
@@ -311,6 +312,19 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
             'mailchimp/cart/loadquote',
             [
                 'id' => $cartId,
+                'token' => $token,
+                '_nosid' => true,
+                '_secure' => true
+            ]
+        );
+        return $rc;
+    }
+    public function getRedemptionUrl($storeId,$couponId,$token)
+    {
+        $rc = $this->_storeManager->getStore($storeId)->getUrl(
+            'mailchimp/cart/loadcoupon',
+            [
+                'id' => $couponId,
                 'token' => $token,
                 '_nosid' => true,
                 '_secure' => true
@@ -863,5 +877,9 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     public function getTableName($tableName)
     {
         return $this->_resource->getTableName($tableName);
+    }
+    public function getWebsiteId($storeId)
+    {
+        return $this->_storeManager->getStore($storeId)->getWebsiteId();
     }
 }

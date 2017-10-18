@@ -54,6 +54,10 @@ class Ecommerce
      * @var \Ebizmarts\MailChimp\Model\Api\Subscriber
      */
     private $_apiSubscribers;
+    /**
+     * @var \Ebizmarts\MailChimp\Model\Api\PromoCodes
+     */
+    private $_apiPromoCodes;
 
     /**
      * Ecommerce constructor.
@@ -65,6 +69,7 @@ class Ecommerce
      * @param \Ebizmarts\MailChimp\Model\Api\Order $apiOrder
      * @param \Ebizmarts\MailChimp\Model\Api\Cart $apiCart
      * @param \Ebizmarts\MailChimp\Model\Api\Subscriber $apiSubscriber
+     * @param \Ebizmarts\MailChimp\Model\Api\PromoCodes $apiPromocodes
      * @param \Ebizmarts\MailChimp\Model\MailChimpSyncBatches $mailChimpSyncBatches
      * @param \Ebizmarts\MailChimp\Model\MailChimpSyncEcommerce $chimpSyncEcommerce
      */
@@ -77,6 +82,7 @@ class Ecommerce
         \Ebizmarts\MailChimp\Model\Api\Order $apiOrder,
         \Ebizmarts\MailChimp\Model\Api\Cart $apiCart,
         \Ebizmarts\MailChimp\Model\Api\Subscriber $apiSubscriber,
+        \Ebizmarts\MailChimp\Model\Api\PromoCodes $apiPromocodes,
         \Ebizmarts\MailChimp\Model\MailChimpSyncBatches $mailChimpSyncBatches,
         \Ebizmarts\MailChimp\Model\MailChimpSyncEcommerce $chimpSyncEcommerce
     ) {
@@ -91,6 +97,7 @@ class Ecommerce
         $this->_apiCart         = $apiCart;
         $this->_apiSubscribers  = $apiSubscriber;
         $this->_chimpSyncEcommerce  = $chimpSyncEcommerce;
+        $this->_apiPromoCodes   = $apiPromocodes;
     }
 
     public function execute()
@@ -143,6 +150,7 @@ class Ecommerce
 
     protected function _processStore($storeId, $mailchimpStoreId, $listId)
     {
+        $this->_helper->log(__METHOD__);
         $batchId = null;
         $batchArray = [];
         $results = [];
@@ -160,6 +168,8 @@ class Ecommerce
             $results = array_merge($results, $orders);
             $carts = $this->_apiCart->createBatchJson($storeId);
             $results= array_merge($results, $carts);
+            $coupons = $this->_apiPromoCodes->sendCoupons($storeId);
+            $results= array_merge($results, $coupons);
 
             if (!empty($results)) {
                 try {
