@@ -419,6 +419,16 @@ class UpgradeSchema implements UpgradeSchemaInterface
                 $connection->getIndexName($setup->getTable('mailchimp_sync_ecommerce'),'related_id','index'),
                 'related_id'
             );
+            $connection->addColumn(
+                $setup->getTable('mailchimp_sync_ecommerce'),
+                'deleted_related_id',
+                [
+                    'type' => \Magento\Framework\DB\Ddl\Table::TYPE_INTEGER,
+                    'length' => 11,
+                    'default' => null,
+                    'comment' => 'Id related to deleted item'
+                ]
+            );
         }
     }
 }
