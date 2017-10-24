@@ -128,7 +128,6 @@ class Loadquote extends Action
                 $quote->setData('mailchimp_abandonedcart_flag', true);
                 $quote->getResource()->save($quote);
                 if (!$quote->getCustomerId()) {
-                    $this->_helper->log('is guest');
                     $this->_customerSession->setQuoteId($quote->getId());
                     $this->_redirect($url);
                 } else {
