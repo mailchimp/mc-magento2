@@ -58,6 +58,10 @@ class Ecommerce
      * @var \Ebizmarts\MailChimp\Model\Api\PromoCodes
      */
     private $_apiPromoCodes;
+    /**
+     * @var \Ebizmarts\MailChimp\Model\Api\PromoRules
+     */
+    private $_apiPromoRules;
 
     /**
      * Ecommerce constructor.
@@ -69,7 +73,8 @@ class Ecommerce
      * @param \Ebizmarts\MailChimp\Model\Api\Order $apiOrder
      * @param \Ebizmarts\MailChimp\Model\Api\Cart $apiCart
      * @param \Ebizmarts\MailChimp\Model\Api\Subscriber $apiSubscriber
-     * @param \Ebizmarts\MailChimp\Model\Api\PromoCodes $apiPromocodes
+     * @param \Ebizmarts\MailChimp\Model\Api\PromoCodes $apiPromoCodes
+     * @param \Ebizmarts\MailChimp\Model\Api\PromoRules $apiPromoRules
      * @param \Ebizmarts\MailChimp\Model\MailChimpSyncBatches $mailChimpSyncBatches
      * @param \Ebizmarts\MailChimp\Model\MailChimpSyncEcommerce $chimpSyncEcommerce
      */
@@ -82,7 +87,8 @@ class Ecommerce
         \Ebizmarts\MailChimp\Model\Api\Order $apiOrder,
         \Ebizmarts\MailChimp\Model\Api\Cart $apiCart,
         \Ebizmarts\MailChimp\Model\Api\Subscriber $apiSubscriber,
-        \Ebizmarts\MailChimp\Model\Api\PromoCodes $apiPromocodes,
+        \Ebizmarts\MailChimp\Model\Api\PromoCodes $apiPromoCodes,
+        \Ebizmarts\MailChimp\Model\Api\PromoRules $apiPromoRules,
         \Ebizmarts\MailChimp\Model\MailChimpSyncBatches $mailChimpSyncBatches,
         \Ebizmarts\MailChimp\Model\MailChimpSyncEcommerce $chimpSyncEcommerce
     ) {
@@ -97,7 +103,8 @@ class Ecommerce
         $this->_apiCart         = $apiCart;
         $this->_apiSubscribers  = $apiSubscriber;
         $this->_chimpSyncEcommerce  = $chimpSyncEcommerce;
-        $this->_apiPromoCodes   = $apiPromocodes;
+        $this->_apiPromoCodes   = $apiPromoCodes;
+        $this->_apiPromoRules   = $apiPromoRules;
     }
 
     public function execute()
@@ -167,6 +174,8 @@ class Ecommerce
             $results = array_merge($results, $orders);
             $carts = $this->_apiCart->createBatchJson($storeId);
             $results= array_merge($results, $carts);
+            $rules = $this->_apiPromoRules->sendRules($storeId);
+            $results= array_merge($results, $rules);
             $coupons = $this->_apiPromoCodes->sendCoupons($storeId);
             $results= array_merge($results, $coupons);
 
