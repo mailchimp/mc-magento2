@@ -138,10 +138,10 @@ class Ecommerce
             }
         }
         foreach($syncs as $mailchimpStoreId => $val) {
-            if($val&&!$this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_PATH_IS_SYNC."/$mailchimpStoreId", $storeId)) {
+            if($val&&!$this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_PATH_IS_SYNC."/$mailchimpStoreId", 0, 'default')) {
                 $api = $this->_helper->getApi($val['storeid']);
                 $api->ecommerce->stores->edit($mailchimpStoreId, null, null, null, null, null, null, null, null, null, null, false);
-                $this->_helper->saveConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_PATH_IS_SYNC."/$mailchimpStoreId", date('Y-m-d'), $storeId);
+                $this->_helper->saveConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_PATH_IS_SYNC."/$mailchimpStoreId", date('Y-m-d'), 0, 'default');
             }
         }
 
@@ -150,7 +150,6 @@ class Ecommerce
 
     protected function _processStore($storeId, $mailchimpStoreId, $listId)
     {
-        $this->_helper->log(__METHOD__);
         $batchId = null;
         $batchArray = [];
         $results = [];
