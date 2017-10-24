@@ -65,23 +65,15 @@ class PromoCodes
     }
     public function sendCoupons($magentoStoreId)
     {
-        $this->_helper->log(__METHOD__);
-
         $mailchimpStoreId = $this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_MAILCHIMP_STORE, $magentoStoreId);
-        $batchArray = array();
-//        $this->_batchId = 'storeid-' . $magentoStoreId . '_' . \Ebizmarts\MailChimp\Helper\Data::IS_PROMO_CODE . '_' . $this->_helper->getDateMicrotime();
+        $batchArray = [];
         $batchArray = array_merge($batchArray, $this->_sendDeletedCoupons($mailchimpStoreId, $magentoStoreId));
-        $batchArray = array_merge($batchArray, $this->_sendModifiedCoupons($mailchimpStoreId, $magentoStoreId));
+//        $batchArray = array_merge($batchArray, $this->_sendModifiedCoupons($mailchimpStoreId, $magentoStoreId));
         $batchArray = array_merge($batchArray, $this->_sendNewCoupons($mailchimpStoreId, $magentoStoreId));
 
         return $batchArray;
     }
     protected function _sendDeletedCoupons($mailchimpStoreId, $magentoStoreId)
-    {
-        return [];
-
-    }
-    protected function _sendModifiedCoupons($mailchimpStoreId, $magentoStoreId)
     {
         $batchArray = [];
         $websiteId = $this->_helper->getWebsiteId($magentoStoreId);
@@ -96,35 +88,25 @@ class PromoCodes
             "' and m4m.mailchimp_store_id = '".$mailchimpStoreId."'",
             ['m4m.*']
         );
-        $collection->getSelect()->where("m4m.mailchimp_sync_modified = 1");
+        $collection->getSelect()->where("m4m.mailchimp_sync_deleted = 1");
         $collection->getSelect()->limit(self::MAX);
         $counter = 0;
-        foreach($collection as $item)
+        /**
+         * @var $coupon \Magento\SalesRule\Model\Coupon
+         * @var $syncCoupon \Ebizmarts\MailChimp\Model\MailChimpSyncEcommerce
+         */
+        foreach($collection as $coupon)
         {
-            $this->_token = null;
-            $ruleId = $item->getRuleId();
-            $couponId = $item->getCouponId();
-            try {
-                $promoCodeJson = json_encode($this->generateCodeData($item, $magentoStoreId));
-                if($promoCodeJson) {
-                    $batchArray[$counter]['method'] = 'PATCH';
-                    $batchArray[$counter]['path'] = "/ecommerce/stores/$mailchimpStoreId/promo-rules/$ruleId/promo-codes/$couponId";
-                    $batchArray[$counter]['operation_id'] = $this->_batchId . '_' . $couponId;
-                    $batchArray[$counter]['body'] = $promoCodeJson;
-                }
-                else {
-                    $error = __('Something went wrong when retrieving the information for promo rule');
-                    $this->_updateSyncData($mailchimpStoreId, $ruleId, $this->_date->gmtDate(), $error, 0);
-                    continue;
-                }
-                $counter++;
-                $this->_updateSyncData($mailchimpStoreId, $couponId, $this->_date->gmtDate(), '', 0);
-            } catch(Exception $e) {
-                $this->_helper->log($e->getMessage());
-            }
+            $couponId = $coupon->getCouponId();
+            $ruleId = $coupon->getRuleId();
+            $batchArray[$counter]['method'] = 'DELETE';
+            $batchArray[$counter]['operation_id'] = $this->_batchId . '_' . $couponId;
+            $batchArray[$counter]['path'] = "/ecommerce/stores/$mailchimpStoreId/promo-rules/$ruleId/promo-codes/$couponId";
+            $counter++;
+            $syncCoupon =$this->_helper->getChimpSyncEcommerce($mailchimpStoreId, $couponId, \Ebizmarts\MailChimp\Helper\Data::IS_PROMO_CODE);
+            $syncCoupon->getResource()->delete($syncCoupon);
         }
         return $batchArray;
-
     }
     protected function _sendNewCoupons($mailchimpStoreId, $magentoStoreId)
     {
@@ -144,6 +126,9 @@ class PromoCodes
         $collection->getSelect()->where("m4m.mailchimp_sync_delta IS null");
         $collection->getSelect()->limit(self::MAX);
         $counter = 0;
+        /**
+         * @var $item \Magento\SalesRule\Model\Coupon
+         */
         foreach($collection as $item)
         {
             $this->_token = null;
