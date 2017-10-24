@@ -26,4 +26,19 @@ class MailChimpSyncEcommerce extends \Magento\Framework\Model\AbstractModel
         $this->getResource()->getByStoreIdType($this, $storeId, $id, $type);
         return $this;
     }
+    public function markAllAsDeleted($id, $type)
+    {
+        $this->getResource()->markAllAsDeleted($this, $id, $type);
+        return $this;
+    }
+    public function markAllAsModified($id, $type)
+    {
+        $this->getResource()->markAllAsModified($this, $id, $type);
+        return $this;
+    }
+    public function deleteAllByIdType($id,$type)
+    {
+        $this->getResource()->deleteAllByIdType($this, $id, $type);
+        return $this;
+    }
 }
