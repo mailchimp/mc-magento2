@@ -37,10 +37,11 @@ class MailChimpSyncEcommerce extends AbstractDb
         }
         return $chimp;
     }
-    public function markAllAsDeleted(\Ebizmarts\MailChimp\Model\MailChimpSyncEcommerce $chimp, $id, $type)
+    public function markAllAsDeleted(\Ebizmarts\MailChimp\Model\MailChimpSyncEcommerce $chimp, $id, $type, $relatedDeletedId)
     {
         $connection = $this->getConnection();
-        $connection->update($this->getTable('mailchimp_sync_ecommerce'),['mailchimp_sync_deleted'=>1],['related_id = ?'=> $id, 'type = ?'=>$type]);
+        $connection->update($this->getTable('mailchimp_sync_ecommerce'),['mailchimp_sync_deleted'=>1, 'deleted_related_id'=> $relatedDeletedId],
+            ['related_id = ?'=> $id,'type = ?'=>$type]);
         return $this;
     }
     public function markAllAsModified(\Ebizmarts\MailChimp\Model\MailChimpSyncEcommerce $chimp, $id, $type)
