@@ -210,7 +210,7 @@ class Webhook
 
                 $stores = $this->_helper->getMagentoStoreIdsByListId($listId);
                 if (count($stores)) {
-                    $subscriber->setStreId($stores[0]);
+                    $subscriber->setStoreId($stores[0]);
                     $api = $this->_helper->getApi($stores[0]);
                     $member =$api->lists->members->get($listId, md5(strtolower($email)));
                     if ($member) {
