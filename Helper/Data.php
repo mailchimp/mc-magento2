@@ -672,9 +672,9 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     {
         $this->_mailChimpSyncE->markAllAsModified($relatedId,$type);
     }
-    public function markEcommerceAsDeleted($relatedId, $type)
+    public function markEcommerceAsDeleted($relatedId, $type, $relatedDeletedId = null)
     {
-        $this->_mailChimpSyncE->markAllAsDeleted($relatedId,$type);
+        $this->_mailChimpSyncE->markAllAsDeleted($relatedId,$type, $relatedDeletedId);
     }
     public function ecommerceDeleteAllByIdType($id, $type)
     {
