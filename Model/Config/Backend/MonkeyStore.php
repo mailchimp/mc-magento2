@@ -73,7 +73,6 @@ class MonkeyStore extends \Magento\Framework\App\Config\Value
 
     public function beforeSave()
     {
-        $this->_helper->log(__METHOD__);
         $data = $this->getData('groups');
         $found = 0;
         $newListId = null;
@@ -125,7 +124,6 @@ class MonkeyStore extends \Magento\Framework\App\Config\Value
     }
     private function getStore($apiKey,$store)
     {
-        $this->_helper->log(__METHOD__);
         $api = $this->_helper->getApiByApiKey($apiKey);
         $store = $api->ecommerce->stores->get($store);
         return $store['list_id'];
