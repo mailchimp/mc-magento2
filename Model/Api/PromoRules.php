@@ -13,6 +13,8 @@
 
 namespace Ebizmarts\MailChimp\Model\Api;
 
+use Magento\Cms\Test\Unit\Controller\Adminhtml\Page\MassEnableTest;
+
 class PromoRules
 {
     const TYPE_FIXED = 'fixed';
@@ -159,13 +161,19 @@ class PromoRules
          */
         $rule = $this->_ruleRepo->getById($ruleId);
         try {
-            $promoRulesJson = json_encode($this->_generateRuleData($rule));
-            if(!empty($promoRulesJson)) {
-                $data['method'] = 'POST';
-                $data['path'] = '/ecommerce/stores/' . $mailchimpStoreId . '/promo-rules';
-                $data['operation_id'] = $this->_batchId. '_' .$ruleId;
-                $data['body'] = $promoRulesJson;
-                $this->_updateSyncData($mailchimpStoreId, $ruleId, $this->_date->gmtDate());
+            $promoRules = $this->_generateRuleData($rule);
+            if(!empty($promoRules)) {
+                $promoRulesJson = json_encode($promoRules);
+                if (!empty($promoRulesJson)) {
+                    $data['method'] = 'POST';
+                    $data['path'] = '/ecommerce/stores/' . $mailchimpStoreId . '/promo-rules';
+                    $data['operation_id'] = $this->_batchId . '_' . $ruleId;
+                    $data['body'] = $promoRulesJson;
+                    $this->_updateSyncData($mailchimpStoreId, $ruleId, $this->_date->gmtDate());
+                } else {
+                    $error = __('Something went wrong when retrieving the information.');
+                    $this->_updateSyncData($mailchimpStoreId, $ruleId, $this->_date->gmtDate(), $error);
+                }
             } else {
                 $error = __('Something went wrong when retrieving the information.');
                 $this->_updateSyncData($mailchimpStoreId, $ruleId, $this->_date->gmtDate(), $error);
@@ -199,6 +207,9 @@ class PromoRules
         }
         $data['target'] = $this->_getMailChimpTarget($promoAction);
         $data['enabled'] = (bool)$rule->getIsActive();
+        if(!$data['target']||!$data['amount']||!$data['type']) {
+            return [];
+        }
 
         return $data;
     }
