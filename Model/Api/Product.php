@@ -194,7 +194,6 @@ class Product
         try {
             $body = json_encode($bodyData, JSON_HEX_APOS|JSON_HEX_QUOT);
 
-//            $this->_helper->log($body);
         } catch (\Exception $e) {
             //json encode failed
             $this->_helper->log("Product " . $product->getId() . " json encode failed");

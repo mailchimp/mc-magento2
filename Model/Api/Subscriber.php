@@ -110,7 +110,6 @@ class Subscriber
 
     protected function _buildSubscriberData(\Magento\Newsletter\Model\Subscriber $subscriber)
     {
-        $this->_helper->log(__METHOD__);
         $storeId = $subscriber->getStoreId();
         $data = array();
         $data["email_address"] = $subscriber->getSubscriberEmail();
