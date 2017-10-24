@@ -667,6 +667,20 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         $chimpSyncEcommerce->setMailchimpToken($token);
         $chimpSyncEcommerce->getResource()->save($chimpSyncEcommerce);
     }
+
+    public function markEcommerceAsModified($relatedId, $type)
+    {
+        $this->_mailChimpSyncE->markAllAsModified($relatedId,$type);
+    }
+    public function markEcommerceAsDeleted($relatedId, $type)
+    {
+        $this->_mailChimpSyncE->markAllAsDeleted($relatedId,$type);
+    }
+    public function ecommerceDeleteAllByIdType($id, $type)
+    {
+        $this->_mailChimpSyncE->deleteAllByIdType($id, $type);
+    }
+
     public function getChimpSyncEcommerce($storeId, $id, $type)
     {
         $chimp = $this->_mailChimpSyncEcommerce->create();
@@ -774,7 +788,6 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
 
     public function createWebHook($apikey, $listId)
     {
-        $this->log(__METHOD__);
         $events = [
             'subscribe' => true,
             'unsubscribe' => true,
