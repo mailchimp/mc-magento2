@@ -113,9 +113,8 @@ class Loadquote extends Action
                     $url = $this->_urlHelper->getUrl(
                         $this->_helper->getConfigValue(
                             \Ebizmarts\MailChimp\Helper\Data::XML_ABANDONEDCART_PAGE,
-                            $magentoStoreId,
+                            $magentoStoreId),
                             ['mc_cid'=> $params['mc_cid']]
-                        )
                     );
                 } else {
                     $url = $this->_urlHelper->getUrl(
