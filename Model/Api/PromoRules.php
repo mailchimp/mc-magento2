@@ -178,7 +178,7 @@ class PromoRules
                 $error = __('Something went wrong when retrieving the information.');
                 $this->_updateSyncData($mailchimpStoreId, $ruleId, $this->_date->gmtDate(), $error);
             }
-        } catch(Exception $e) {
+        } catch(\Exception $e) {
             $this->_helper->log($e->getMessage());
         }
         return $data;
