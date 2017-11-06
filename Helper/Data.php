@@ -38,6 +38,8 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     const XML_ABANDONEDCART_FIRSTDATE   = 'mailchimp/abandonedcart/firstdate';
     const XML_ABANDONEDCART_PAGE     = 'mailchimp/abandonedcart/page';
     const XML_PATH_IS_SYNC           = 'mailchimp/general/issync';
+    const XML_MERGEVARS              = 'mailchimp/general/map_fields';
+    const XML_DATE_FORMAT            = 'mailchimp/general/date_format';
 
 
     const ORDER_STATE_OK             = 'complete';
@@ -145,7 +147,11 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
      * @var \Magento\Framework\App\Cache\TypeListInterface
      */
     private $_cacheTypeList;
-
+    /**
+     * @var \Magento\Customer\Model\ResourceModel\Attribute\CollectionFactory
+     */
+    private $_attCollection;
+    private $customerAtt = null;
     /**
      * Data constructor.
      * @param \Magento\Framework\App\Helper\Context $context
@@ -164,6 +170,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
      * @param \Ebizmarts\MailChimp\Model\MailChimpSyncBatches $syncBatches
      * @param \Ebizmarts\MailChimp\Model\MailChimpStoresFactory $mailChimpStoresFactory
      * @param \Ebizmarts\MailChimp\Model\MailChimpStores $mailChimpStores
+     * @param \Magento\Customer\Model\ResourceModel\Attribute\CollectionFactory $attCollection
      * @param \Magento\Framework\Encryption\Encryptor $encryptor
      * @param \Magento\Newsletter\Model\ResourceModel\Subscriber\CollectionFactory $subscriberCollection
      * @param \Magento\Customer\Model\ResourceModel\Customer\CollectionFactory $customerCollection
@@ -187,6 +194,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         \Ebizmarts\MailChimp\Model\MailChimpSyncBatches $syncBatches,
         \Ebizmarts\MailChimp\Model\MailChimpStoresFactory $mailChimpStoresFactory,
         \Ebizmarts\MailChimp\Model\MailChimpStores $mailChimpStores,
+        \Magento\Customer\Model\ResourceModel\Attribute\CollectionFactory $attCollection,
         \Magento\Framework\Encryption\Encryptor $encryptor,
         \Magento\Newsletter\Model\ResourceModel\Subscriber\CollectionFactory $subscriberCollection,
         \Magento\Customer\Model\ResourceModel\Customer\CollectionFactory $customerCollection,
@@ -217,6 +225,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         $this->_resource                = $resource;
         $this->connection               = $resource->getConnection();
         $this->_cacheTypeList           = $cacheTypeList;
+        $this->_attCollection           = $attCollection;
         parent::__construct($context);
     }
 
@@ -258,7 +267,62 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         $this->_api->setUserAgent('Mailchimp4Magento' . (string)$this->getModuleVersion());
         return $this->_api;
     }
+    private function getCustomerAtts()
+    {
+        $ret = [];
+        if(!$this->customerAtt) {
+            $collection = $this->_attCollection->create();
+            /**
+             * @var $item \Magento\Customer\Model\Attribute
+             */
+            foreach ($collection as $item) {
+                try {
+                    $options = $item->getSource()->getAllOptions();
+                }
+                catch(\Exception $e) {
+                    $options = [];
+                }
+                $isDate = ($item->getBackendModel()=='Magento\Eav\Model\Entity\Attribute\Backend\Datetime') ? 1:0;
+                $isAddress = ($item->getBackendModel()=='Magento\Customer\Model\Customer\Attribute\Backend\Billing'||
+                    $item->getBackendModel()=='Magento\Customer\Model\Customer\Attribute\Backend\Shipping') ? 1:0;
+                $ret[$item->getId()] = ['attCode' => $item->getAttributeCode(), 'isDate' =>$isDate, 'isAddress' => $isAddress, 'options'=>$options] ;
+            }
 
+            $this->customerAtt = $ret;
+        }
+        return $this->customerAtt;
+
+    }
+    public function getMapFields($storeId = null)
+    {
+        $retData = [];
+        $customerAtt = $this->getCustomerAtts();
+        $data = $this->getConfigValue(self::XML_MERGEVARS, $storeId);
+        $data = unserialize($data);
+        foreach ($data as $customerFieldId => $mailchimpName) {
+            $retData[] = [
+                'mailchimp' => strtoupper($mailchimpName) ,
+                'customer_field' => $customerAtt[$customerFieldId]['attCode'],
+                'isDate' =>$customerAtt[$customerFieldId]['isDate'],
+                'isAddress' => $customerAtt[$customerFieldId]['isAddress'],
+                'options' => $customerAtt[$customerFieldId]['options']
+            ];
+        }
+        return $retData;
+    }
+    public function getDateFormat($storeId)
+    {
+        $ret = '';
+        switch($this->getConfigValue(self::XML_DATE_FORMAT, $storeId)) {
+            case 0:
+                $ret = 'd/m/Y';
+                break;
+            case 1:
+                $ret = 'm/d/Y';
+                break;
+        }
+        return $ret;
+    }
     /**
      * @param $apiKey
      * @return \Mailchimp
@@ -425,6 +489,87 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     {
         return BP;
     }
+
+    /**
+     * @param \Magento\Newsletter\Model\Subscriber $subscriber
+     * @return array
+     */
+//    public function getMergeVars(\Magento\Newsletter\Model\Subscriber $subscriber)
+//    {
+//        $mergeVars = [];
+//        $storeId = $subscriber->getStoreId();
+//        $mapFields = $this->_helper->getMapFields($storeId);
+//        $webSiteId = $this->_helper->getWebsiteId($subscriber->getStoreId());
+//        try {
+//            /**
+//             * @var $customer \Magento\Customer\Model\Customer
+//             */
+//            $customer = $this->_customerFactory->create();
+//            $customer->setWebsiteId($webSiteId);
+//            $customer->loadByEmail($subscriber->getEmail());
+//            if($customer->getData('email')==$subscriber->getEmail()) {
+//                foreach ($mapFields as $map) {
+//                    $value = $customer->getData($map['customer_field']);
+//                    if($value) {
+//                        if ($map['isDate']) {
+//                            $format = $this->_helper->getDateFormat($storeId);
+//                            if($map['customer_field']=='dob') {
+//                                $format = substr($format,0,3);
+//                            }
+//                            $value = date($format, strtotime($value));
+//                        } elseif($map['isAddress']) {
+//                            $value = $this->_getAddressValues($customer->getPrimaryAddress($map['customer_field']));
+//                        }
+//                        $mergeVars[$map['mailchimp']] = $value;
+//                    }
+//                }
+//            }
+//        } catch(\Exception $e) {
+//            $this->_helper->log($e->getMessage());
+//        }
+//        return (!empty($mergeVars)) ? $mergeVars : null;
+//    }
+
+    /**
+     * @param \Magento\Customer\Model\Address\AbstractAddress $value
+     * @return array
+     */
+//    private function _getAddressValues(\Magento\Customer\Model\Address\AbstractAddress $address)
+//    {
+//        $addressData = array();
+//        if ($address) {
+//            $street = $address->getStreet();
+//            if (count($street) > 1) {
+//                $addressData["addr1"] = $street[0];
+//                $addressData["addr2"] = $street[1];
+//            } else {
+//                if (!empty($street[0])) {
+//                    $addressData["addr1"] = $street[0];
+//                }
+//            }
+//            if ($address->getCity()) {
+//                $addressData["city"] = $address->getCity();
+//            }
+//            if ($address->getRegion()) {
+//                $addressData["state"] = $address->getRegion();
+//            }
+//            if ($address->getPostcode()) {
+//                $addressData["zip"] = $address->getPostcode();
+//            }
+//            if ($address->getCountry()) {
+//                $country = $this->_countryInformation->getCountryInfo($address->getCountryId());
+//                $addressData["country"] = $country->getFullNameLocale();
+//            }
+//        }
+//        return $addressData;
+//    }
+
+
+
+
+
+
+
 
     public function getMergeVars($object, $email)
     {
