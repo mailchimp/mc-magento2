@@ -527,6 +527,13 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
                     $value = date($format, strtotime($value));
                 } elseif($map['isAddress']) {
                     $value = $this->_getAddressValues($customer->getPrimaryAddress($map['customer_field']));
+                } elseif(count($map['options'])) {
+                    foreach($map['options'] as $option) {
+                        if($option['value']==$value) {
+                            $value = $option['label'];
+                            break;
+                        }
+                    }
                 }
                 $mergeVars[$map['mailchimp']] = $value;
             }
