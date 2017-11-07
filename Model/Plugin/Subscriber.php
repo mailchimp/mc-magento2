@@ -75,7 +75,7 @@ class Subscriber
         if ($this->_helper->isMailChimpEnabled($storeId)) {
             $customer = $this->_customer->getById($customerId);
             $email = $customer->getEmail();
-            $mergeVars = $this->_helper->getMergeVars($customer, $email);
+            $mergeVars = $this->_helper->getMergeVarsByCustomer($customer, $email);
             $api = $this->_api;
             $isSubscribeOwnEmail = $this->_customerSession->isLoggedIn()
                 && $this->_customerSession->getCustomerDataObject()->getEmail() == $subscriber->getSubscriberEmail();
@@ -109,7 +109,7 @@ class Subscriber
             } else {
                 $status = 'subscribed';
             }
-            $mergeVars = $this->_helper->getMergeVars($subscriber, $email);
+            $mergeVars = $this->_helper->getMergeVarsBySubscriber($subscriber, $email);
             try {
                 $md5HashEmail = md5(strtolower($email));
                 $return = $api->lists->members->addOrUpdate($this->_helper->getDefaultList(), $md5HashEmail, null, $status, $mergeVars, null, null, null, null, $email, $status);

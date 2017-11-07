@@ -35,15 +35,6 @@ class Subscriber
      * @var \Magento\Newsletter\Model\SubscriberFactory
      */
     protected $_subscriberFactory;
-    /**
-     * @var \Magento\Customer\Api\CustomerRepositoryInterface
-     */
-    protected $_customerRepo;
-    /**
-     * @var \Magento\Customer\Model\CustomerFactory
-     */
-    protected $_customerFactory;
-    protected $_countryInformation;
 
     /**
      * Subscriber constructor.
@@ -59,9 +50,6 @@ class Subscriber
         \Ebizmarts\MailChimp\Helper\Data $helper,
         \Magento\Newsletter\Model\ResourceModel\Subscriber\CollectionFactory $subscriberCollection,
         \Magento\Newsletter\Model\SubscriberFactory $subscriberFactory,
-        \Magento\Customer\Api\CustomerRepositoryInterface $customerRepo,
-        \Magento\Customer\Model\CustomerFactory $customerFactory,
-        \Magento\Directory\Api\CountryInformationAcquirerInterface $countryInformation,
         \Magento\Framework\Stdlib\DateTime\DateTime $date,
         \Magento\Framework\Message\ManagerInterface $message
     )
@@ -71,9 +59,6 @@ class Subscriber
         $this->_date                    = $date;
         $this->_message                 = $message;
         $this->_subscriberFactory       = $subscriberFactory;
-        $this->_customerRepo            = $customerRepo;
-        $this->_customerFactory         = $customerFactory;
-        $this->_countryInformation      = $countryInformation;
     }
 
     public function sendSubscribers($storeId, $listId)
@@ -130,7 +115,7 @@ class Subscriber
         $storeId = $subscriber->getStoreId();
         $data = array();
         $data["email_address"] = $subscriber->getSubscriberEmail();
-        $mergeVars = $this->getMergeVars($subscriber);
+        $mergeVars = $this->_helper->getMergeVarsBySubscriber($subscriber);
         if ($mergeVars) {
             $data["merge_fields"] = $mergeVars;
         }
@@ -138,86 +123,6 @@ class Subscriber
         return $data;
     }
 
-    /**
-     * @param \Magento\Newsletter\Model\Subscriber $subscriber
-     * @return array
-     */
-    public function getMergeVars(\Magento\Newsletter\Model\Subscriber $subscriber)
-    {
-        $mergeVars = [];
-        $storeId = $subscriber->getStoreId();
-        $mapFields = $this->_helper->getMapFields($storeId);
-        $webSiteId = $this->_helper->getWebsiteId($subscriber->getStoreId());
-        try {
-            /**
-             * @var $customer \Magento\Customer\Model\Customer
-             */
-            $customer = $this->_customerFactory->create();
-            $customer->setWebsiteId($webSiteId);
-            $customer->loadByEmail($subscriber->getEmail());
-            if($customer->getData('email')==$subscriber->getEmail()) {
-                foreach ($mapFields as $map) {
-                    $value = $customer->getData($map['customer_field']);
-                    if($value) {
-                        if ($map['isDate']) {
-                            $format = $this->_helper->getDateFormat($storeId);
-                            if($map['customer_field']=='dob') {
-                                $format = substr($format,0,3);
-                            }
-                            $value = date($format, strtotime($value));
-                        } elseif($map['isAddress']) {
-                            $value = $this->_getAddressValues($customer->getPrimaryAddress($map['customer_field']));
-                        } elseif(count($map['options'])) {
-                            foreach($map['options'] as $option) {
-                                if($option['value']==$value) {
-                                    $value = $option['label'];
-                                    break;
-                                }
-                            }
-                        }
-                        $mergeVars[$map['mailchimp']] = $value;
-                    }
-                }
-            }
-        } catch(\Exception $e) {
-            $this->_helper->log($e->getMessage());
-        }
-        return (!empty($mergeVars)) ? $mergeVars : null;
-    }
-
-    /**
-     * @param \Magento\Customer\Model\Address\AbstractAddress $value
-     * @return array
-     */
-    private function _getAddressValues(\Magento\Customer\Model\Address\AbstractAddress $address)
-    {
-        $addressData = array();
-        if ($address) {
-            $street = $address->getStreet();
-            if (count($street) > 1) {
-                $addressData["addr1"] = $street[0];
-                $addressData["addr2"] = $street[1];
-            } else {
-                if (!empty($street[0])) {
-                    $addressData["addr1"] = $street[0];
-                }
-            }
-            if ($address->getCity()) {
-                $addressData["city"] = $address->getCity();
-            }
-            if ($address->getRegion()) {
-                $addressData["state"] = $address->getRegion();
-            }
-            if ($address->getPostcode()) {
-                $addressData["zip"] = $address->getPostcode();
-            }
-            if ($address->getCountry()) {
-                $country = $this->_countryInformation->getCountryInfo($address->getCountryId());
-                $addressData["country"] = $country->getFullNameLocale();
-            }
-        }
-        return $addressData;
-    }
     /**
      * @param \Magento\Newsletter\Model\Subscriber $subscriber
      * @param bool|false $updateStatus
@@ -230,7 +135,7 @@ class Subscriber
         $newStatus = $this->_getMCStatus($subscriber->getStatus(), $storeId);
         $forceStatus = ($updateStatus) ? $newStatus : null;
         $api = $this->_helper->getApi($storeId);
-        $mergeVars = $this->getMergeVars($subscriber);
+        $mergeVars = $this->_helper->getMergeVarsBySubscriber($subscriber);
         $md5HashEmail = md5(strtolower($subscriber->getSubscriberEmail()));
         try {
             $api->lists->members->addOrUpdate(

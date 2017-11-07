@@ -201,14 +201,6 @@ class Customer
     }
 
     /**
-     * @param \Magento\Customer\Model\Customer $customer
-     */
-    public function getMergeVars(\Magento\Customer\Model\Customer $customer)
-    {
-        return [];
-    }
-
-    /**
      * @param $guestId
      * @param $order
      * @return \Magento\Customer\Api\Data\CustomerInterface
