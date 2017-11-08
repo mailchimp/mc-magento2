@@ -170,7 +170,8 @@ class Order
                 try {
                     $productData = $this->_apiProduct->sendModifiedProduct($order, $mailchimpStoreId, $magentoStoreId);
                 } catch(\Exception $e) {
-                    $this->_helper->log($e->getMessage());
+                    $error = $e->getMessage();
+                    $this->_updateOrder($mailchimpStoreId, $orderId, $this->_date->gmtDate(), $error, 0);
                     continue;
                 }
                 if (count($productData)) {
@@ -237,7 +238,8 @@ class Order
                 try {
                     $productData = $this->_apiProduct->sendModifiedProduct($order, $mailchimpStoreId, $magentoStoreId);
                 } catch(\Exception $e) {
-                    $this->_helper->log($e->getMessage());
+                    $error = $e->getMessage();
+                    $this->_updateOrder($mailchimpStoreId, $orderId, $this->_date->gmtDate(), $error, 0);
                     continue;
                 }
                 if (count($productData)) {

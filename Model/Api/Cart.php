@@ -253,7 +253,13 @@ class Cart
             }
 
             // send the products that not already sent
-            $productData = $this->_apiProduct->sendQuoteModifiedProduct($cart, $mailchimpStoreId, $magentoStoreId);
+            try {
+                $productData = $this->_apiProduct->sendQuoteModifiedProduct($cart, $mailchimpStoreId, $magentoStoreId);
+            } catch(\Exception $e) {
+                $error = $e->getMessage();
+                $this->_updateQuote($mailchimpStoreId, $cartId, $this->_date->gmtDate(), $error);
+                continue;
+            }
             if (count($productData)) {
                 foreach ($productData as $p) {
                     $allCarts[$this->_counter] = $p;
@@ -346,7 +352,13 @@ class Cart
             }
 
             // send the products that not already sent
-            $productData = $this->_apiProduct->sendQuoteModifiedProduct($cart, $mailchimpStoreId, $magentoStoreId);
+            try {
+                $productData = $this->_apiProduct->sendQuoteModifiedProduct($cart, $mailchimpStoreId, $magentoStoreId);
+            } catch(\Exception $e) {
+                $error = $e->getMessage();
+                $this->_updateQuote($mailchimpStoreId, $cartId, $this->_date->gmtDate(), $error);
+                continue;
+            }
             if (count($productData)) {
                 foreach ($productData as $p) {
                     $allCarts[$this->_counter] = $p;
