@@ -808,7 +808,8 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
             '_secure' => true]);
         try {
             $this->log($hookUrl);
-            $ret = $api->lists->webhooks->add($listId, urlencode($hookUrl), $events, $sources);
+            // the urlencode of the hookUrl not work
+            $ret = $api->lists->webhooks->add($listId, $hookUrl, $events, $sources);
         } catch (\Mailchimp_Error $e) {
             $this->log($e->getMessage());
         }
