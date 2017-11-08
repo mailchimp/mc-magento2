@@ -70,6 +70,13 @@
                         <field id="*/*/active">1</field>
                     </depends>
                 </field>
+                <field id="date_format" translate="label" type="select" sortOrder="45" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>MailChimp Date Format</label>
+                    <source_model>Ebizmarts\MailChimp\Model\Config\Source\DateFormat</source_model>
+                    <depends>
+                        <field id="*/*/active">1</field>
+                    </depends>
+                </field>
                 <field id="webhook_active" translate="label" type="select" sortOrder="50" showInDefault="1">
                     <label>Enable Two Way Sync</label>
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
@@ -88,6 +95,18 @@
                 <field id="log" translate="label" type="select" sortOrder="70" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Enable Log</label>
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <depends>
+                        <field id="*/*/active">1</field>
+                    </depends>
+                </field>
+                <field id="map_fields" translate="label comment tooltip" sortOrder="80" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Customer Fields Mapping</label>
+                    <frontend_model>Ebizmarts\MailChimp\Block\Adminhtml\System\Config\Form\Field\CustomerMap</frontend_model>
+                    <backend_model>Ebizmarts\MailChimp\Model\Config\Backend\VarsMap</backend_model>
+                    <comment>
+                        <![CDATA[Add the magento to mailchimp mapping]]>
+                    </comment>
+                    <tooltip>Map the magento customer field to mailchimp merge_fields</tooltip>
                     <depends>
                         <field id="*/*/active">1</field>
                     </depends>
@@ -117,13 +136,6 @@
                         <field id="*/*/active">1</field>
                     </depends>
                 </field>
-                <!--<field id="reset_store" translate="button_label" type="button" sortOrder="130" showInDefault="1" showInWebsite="1" showInStore="1">-->
-                    <!--<button_label>Reset Store</button_label>-->
-                    <!--<frontend_model>Ebizmarts\MailChimp\Block\Adminhtml\System\Config\ResetStore</frontend_model>-->
-                    <!--<depends>-->
-                        <!--<field id="*/*/active">1</field>-->
-                    <!--</depends>-->
-                <!--</field>-->
                 <field id="delete_store" translate="button_label" type="button" sortOrder="130" showInDefault="1" showInWebsite="1" showInStore="1">
                     <button_label>Delete Store</button_label>
                     <comment>Proceed with caution, this delete the mailchimp store for all the connected magento stores</comment>

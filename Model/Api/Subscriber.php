@@ -40,7 +40,9 @@ class Subscriber
      * Subscriber constructor.
      * @param \Ebizmarts\MailChimp\Helper\Data $helper
      * @param \Magento\Newsletter\Model\ResourceModel\Subscriber\CollectionFactory $subscriberCollection
-     * @param \Magento\Newsletter\Model\Subscriber Factory $subscriberFactory
+     * @param \Magento\Newsletter\Model\SubscriberFactory $subscriberFactory
+     * @param \Magento\Customer\Api\CustomerRepositoryInterface $customerRepo
+     * @param \Magento\Customer\Model\CustomerFactory $customerFactory
      * @param \Magento\Framework\Stdlib\DateTime\DateTime $date
      * @param \Magento\Framework\Message\ManagerInterface $message
      */
@@ -113,195 +115,12 @@ class Subscriber
         $storeId = $subscriber->getStoreId();
         $data = array();
         $data["email_address"] = $subscriber->getSubscriberEmail();
-        $mergeVars = $this->getMergeVars($subscriber);
+        $mergeVars = $this->_helper->getMergeVarsBySubscriber($subscriber);
         if ($mergeVars) {
             $data["merge_fields"] = $mergeVars;
         }
         $data["status_if_new"] = $this->_getMCStatus($subscriber->getStatus(), $storeId);
         return $data;
-    }
-    public function getMergeVars($subscriber)
-    {
-        return null;
-//        $storeId = $subscriber->getStoreId();
-//        $mapFields = Mage::helper('mailchimp')->getMapFields($storeId);
-//        $maps = unserialize($mapFields);
-//        $websiteId = Mage::getModel('core/store')->load($storeId)->getWebsiteId();
-//        $attrSetId = Mage::getResourceModel('eav/entity_attribute_collection')
-//            ->setEntityTypeFilter(1)
-//            ->addSetInfo()
-//            ->getData();
-//        $mergeVars = array();
-//        $subscriberEmail = $subscriber->getSubscriberEmail();
-//        $customer = Mage::getModel('customer/customer')->setWebsiteId($websiteId)->loadByEmail($subscriberEmail);
-//        foreach ($maps as $map) {
-//            $customAtt = $map['magento'];
-//            $chimpTag = $map['mailchimp'];
-//            if ($chimpTag && $customAtt) {
-//                $eventValue = null;
-//                $key = strtoupper($chimpTag);
-//                if (is_numeric($customAtt)) {
-//                    foreach ($attrSetId as $attribute) {
-//                        if ($attribute['attribute_id'] == $customAtt) {
-//                            $attributeCode = $attribute['attribute_code'];
-//                            switch ($attributeCode) {
-//                                case 'email':
-//                                    break;
-//                                case 'default_billing':
-//                                case 'default_shipping':
-//                                    $address = $customer->getPrimaryAddress($attributeCode);
-//                                    if ($address) {
-//                                        $street = $address->getStreet();
-//                                        $eventValue = $mergeVars[$key] = array(
-//                                            "addr1" => $street[0] ? $street[0] : "",
-//                                            "addr2" => count($street) > 1 ? $street[1] : "",
-//                                            "city" => $address->getCity() ? $address->getCity() : "",
-//                                            "state" => $address->getRegion() ? $address->getRegion() : "",
-//                                            "zip" => $address->getPostcode() ? $address->getPostcode() : "",
-//                                            "country" => $address->getCountry() ? Mage::getModel('directory/country')->loadByCode($address->getCountry())->getName() : ""
-//                                        );
-//                                    }
-//                                    break;
-//                                case 'gender':
-//                                    if ($customer->getData($attributeCode)) {
-//                                        $genderValue = $customer->getData($attributeCode);
-//                                        if ($genderValue == 1) {
-//                                            $eventValue = $mergeVars[$key] = 'Male';
-//                                        } elseif ($genderValue == 2) {
-//                                            $eventValue = $mergeVars[$key] = 'Female';
-//                                        }
-//                                    }
-//                                    break;
-//                                case 'group_id':
-//                                    if ($customer->getData($attributeCode)) {
-//                                        $group_id = (int)$customer->getData($attributeCode);
-//                                        $customerGroup = Mage::helper('customer')->getGroups()->toOptionHash();
-//                                        $eventValue = $mergeVars[$key] = $customerGroup[$group_id];
-//                                    } else {
-//                                        $eventValue = $mergeVars[$key] = __('NOT LOGGED IN');
-//                                    }
-//                                    break;
-//                                case 'firstname':
-//                                    $firstName = $customer->getFirstname();
-//                                    if (!$firstName) {
-//                                        $firstName = $subscriber->getSubscriberFirstname();
-//                                    }
-//                                    if ($firstName) {
-//                                        $eventValue = $mergeVars[$key] = $firstName;
-//                                    }
-//                                    break;
-//                                case 'lastname':
-//                                    $lastName = $customer->getLastname();
-//                                    if (!$lastName) {
-//                                        $lastName = $subscriber->getSubscriberLastname();
-//                                    }
-//                                    if ($lastName) {
-//                                        $eventValue = $mergeVars[$key] = $lastName;
-//                                    }
-//                                    break;
-//                                case 'store_id':
-//                                    $eventValue = $mergeVars[$key] = $storeId;
-//                                    break;
-//                                case 'website_id':
-//                                    $websiteId = Mage::getModel('core/store')->load($storeId)->getWebsiteId();
-//                                    $eventValue = $mergeVars[$key] = $websiteId;
-//                                    break;
-//                                case 'created_in':
-//                                    if ($customer->getData($attributeCode)) {
-//                                        $eventValue = $mergeVars[$key] = $customer->getData($attributeCode);
-//                                    } else {
-//                                        $storeCode = Mage::getModel('core/store')->load($storeId)->getCode();
-//                                        $eventValue = $mergeVars[$key] = $storeCode;
-//                                    }
-//                                    break;
-//                                case 'dob':
-//                                    if ($customer->getData($attributeCode)) {
-//                                        $eventValue = $mergeVars[$key] = date("m/d", strtotime($customer->getData($attributeCode)));
-//                                    }
-//                                    break;
-//                                default:
-//                                    if ($customer->getData($attributeCode)) {
-//                                        $eventValue = $mergeVars[$key] = $customer->getData($attributeCode);
-//                                    }
-//                                    break;
-//                            }
-//                            Mage::dispatchEvent(
-//                                'mailchimp_merge_field_send_before', array(
-//                                    'subscriber_email' => $subscriberEmail,
-//                                    'merge_field_tag' => $attributeCode,
-//                                    'merge_field_value' => &$eventValue
-//                                )
-//                            );
-//                        }
-//                    }
-//                } else {
-//                    switch ($customAtt) {
-//                        case 'billing_company':
-//                        case 'shipping_company':
-//                            $addr = explode('_', $customAtt);
-//                            $address = $customer->getPrimaryAddress('default_' . ucfirst($addr[0]));
-//                            if ($address) {
-//                                $company = $address->getCompany();
-//                                if ($company) {
-//                                    $eventValue = $mergeVars[$key] = $company;
-//                                }
-//                            }
-//                            break;
-//                        case 'billing_telephone':
-//                        case 'shipping_telephone':
-//                            $addr = explode('_', $customAtt);
-//                            $address = $customer->getPrimaryAddress('default_' . ucfirst($addr[0]));
-//                            if ($address) {
-//                                $telephone = $address->getTelephone();
-//                                if ($telephone) {
-//                                    $eventValue = $mergeVars[$key] = $telephone;
-//                                }
-//                            }
-//                            break;
-//                        case 'billing_country':
-//                        case 'shipping_country':
-//                            $addr = explode('_', $customAtt);
-//                            $address = $customer->getPrimaryAddress('default_' . ucfirst($addr[0]));
-//                            if ($address) {
-//                                $countryCode = $address->getCountry();
-//                                if ($countryCode) {
-//                                    $countryName = Mage::getModel('directory/country')->loadByCode($countryCode)->getName();
-//                                    $eventValue = $mergeVars[$key] = $countryName;
-//                                }
-//                            }
-//                            break;
-//                        case 'billing_zipcode':
-//                        case 'shipping_zipcode':
-//                            $addr = explode('_', $customAtt);
-//                            $address = $customer->getPrimaryAddress('default_' . ucfirst($addr[0]));
-//                            if ($address) {
-//                                $zipCode = $address->getPostcode();
-//                                if ($zipCode) {
-//                                    $eventValue = $mergeVars[$key] = $zipCode;
-//                                }
-//                            }
-//                            break;
-//                        case 'dop':
-//                            $dop = Mage::helper('mailchimp')->getLastDateOfPurchase($subscriberEmail);
-//                            if ($dop) {
-//                                $eventValue = $mergeVars[$key] = $dop;
-//                            }
-//                            break;
-//                    }
-//                    Mage::dispatchEvent(
-//                        'mailchimp_merge_field_send_before', array(
-//                            'subscriber_email' => $subscriberEmail,
-//                            'merge_field_tag' => $customAtt,
-//                            'merge_field_value' => &$eventValue
-//                        )
-//                    );
-//                }
-//                if ($eventValue) {
-//                    $mergeVars[$key] = $eventValue;
-//                }
-//            }
-//        }
-//        return (!empty($mergeVars)) ? $mergeVars : null;
     }
 
     /**
@@ -316,7 +135,7 @@ class Subscriber
         $newStatus = $this->_getMCStatus($subscriber->getStatus(), $storeId);
         $forceStatus = ($updateStatus) ? $newStatus : null;
         $api = $this->_helper->getApi($storeId);
-        $mergeVars = $this->getMergeVars($subscriber);
+        $mergeVars = $this->_helper->getMergeVarsBySubscriber($subscriber);
         $md5HashEmail = md5(strtolower($subscriber->getSubscriberEmail()));
         try {
             $api->lists->members->addOrUpdate(
