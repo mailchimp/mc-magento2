@@ -124,49 +124,6 @@ class Subscriber
     }
 
     /**
-     * @param \Magento\Newsletter\Model\Subscriber $subscriber
-     * @param bool|false $updateStatus
-     * @throws \Magento\Framework\Exception\LocalizedException
-     */
-    public function updateSubscriber(\Magento\Newsletter\Model\Subscriber $subscriber, $updateStatus = false)
-    {
-        $storeId = $subscriber->getStoreId();
-        $listId = $this->_helper->getGeneralList($storeId);
-        $newStatus = $this->_getMCStatus($subscriber->getStatus(), $storeId);
-        $forceStatus = ($updateStatus) ? $newStatus : null;
-        $api = $this->_helper->getApi($storeId);
-        $mergeVars = $this->_helper->getMergeVarsBySubscriber($subscriber);
-        $md5HashEmail = md5(strtolower($subscriber->getSubscriberEmail()));
-        try {
-            $api->lists->members->addOrUpdate(
-                $listId, $md5HashEmail, $subscriber->getSubscriberEmail(), $newStatus, null, $forceStatus, $mergeVars,
-                null, null, null, null
-            );
-            $this->_updateSubscriber($listId, $subscriber->getId(), $this->_date->gmtDate(), '', 0);
-        } catch(\MailChimp_Error $e) {
-            if ($newStatus === 'subscribed' && strstr($e->getMessage(), 'is in a compliance state')) {
-                try {
-                    $api->lists->members->update($listId, $md5HashEmail, null, 'pending', $mergeVars);
-                    $subscriber->setSubscriberStatus(\Magento\Newsletter\Model\Subscriber::STATUS_UNCONFIRMED);
-                    $message = __('To begin receiving the newsletter, you must first confirm your subscription');
-                    $this->_message->addWarningMessage($message);
-                } catch(\MailChimp_Error $e) {
-                    $this->_helper->log($e->getMessage(), $storeId);
-                    $this->_message->addErrorMessage(($e->getMessage()));
-                    $subscriber->unsubscribe();
-                } catch (\Exception $e) {
-                    $this->_helper->log($e->getMessage(), $storeId);
-                }
-            } else {
-                $subscriber->unsubscribe();
-                $this->_helper->log($e->getMessage(), $storeId);
-                $this->_message->addErrorMessage($e->getMessage());
-            }
-        } catch (\Exception $e) {
-            $this->_helper->log($e->getMessage(), $storeId);
-        }
-    }
-    /**
      * Get status to send confirmation if Need to Confirm enabled on Magento
      *
      * @param $status
@@ -188,21 +145,6 @@ class Subscriber
         }
         return $status;
     }
-    public function removeSubscriber(\Magento\Newsletter\Model\Subscriber  $subscriber)
-    {
-        $storeId = $subscriber->getStoreId();
-        $listId = $this->_helper->getGeneralList($storeId);
-        $api = $this->_helper->getApi($storeId);
-        try {
-            $md5HashEmail = md5(strtolower($subscriber->getSubscriberEmail()));
-            $api->lists->members->update($listId, $md5HashEmail, null, 'unsubscribed');
-        } catch(\MailChimp_Error $e) {
-            $this->_helper->log($e->getMessage(), $storeId);
-            $this->_message->addErrorMessage($e->getMessage());
-        } catch (\Exception $e) {
-            $this->_helper->log($e->getMessage(), $storeId);
-        }
-    }
     public function deleteSubscriber(\Magento\Newsletter\Model\Subscriber $subscriber)
     {
         $storeId = $subscriber->getStoreId();
@@ -218,15 +160,11 @@ class Subscriber
             $this->_helper->log($e->getMessage(), $storeId);
         }
     }
-    public function update($emailAddress, $storeId)
+    public function update(\Magento\Newsletter\Model\Subscriber $subscriber)
     {
-        $subscriber = $this->_subscriberFactory->create();
-        $subscriber->getResource()->loadByEmail($emailAddress);
-        if ($subscriber->getStatus() == \Magento\Newsletter\Model\Subscriber::STATUS_SUBSCRIBED &&
-            $subscriber->getMailchimpSyncDelta() > $this->_helper->getMCMinSyncDateFlag($storeId)) {
-            $listId = $this->_helper->getGeneralList($storeId);
-            $this->_updateSubscriber($listId, $subscriber->getId(),$this->_date->gmtDate(),'',1 );
-        }
+        $storeId = $subscriber->getStoreId();
+        $listId = $this->_helper->getGeneralList($storeId);
+        $this->_updateSubscriber($listId, $subscriber->getId(),$this->_date->gmtDate(),'',1 );
     }
     protected function _updateSubscriber($listId, $entityId, $sync_delta, $sync_error='', $sync_modified=0)
     {
