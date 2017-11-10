@@ -125,7 +125,7 @@ class PromoCodes
           ['rules'=>$this->_helper->getTableName('salesrule')],
           'main_table.rule_id = rules.rule_id'
         );
-        $collection->getSelect()->where("m4m.mailchimp_sync_delta IS null and rules.use_auto_generation = 1 and main_table.is_primary is null or rules.use_auto_generation = 0 and main_table.is_primary = 1");
+        $collection->getSelect()->where("m4m.mailchimp_sync_delta IS null and (rules.use_auto_generation = 1 and main_table.is_primary is null or rules.use_auto_generation = 0 and main_table.is_primary = 1)");
         $collection->getSelect()->limit(self::MAX);
         $counter = 0;
         /**
