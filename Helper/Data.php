@@ -40,6 +40,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     const XML_PATH_IS_SYNC           = 'mailchimp/general/issync';
     const XML_MERGEVARS              = 'mailchimp/general/map_fields';
     const XML_DATE_FORMAT            = 'mailchimp/general/date_format';
+    const XML_INTEREST               = 'mailchimp/general/interest';
 
 
     const ORDER_STATE_OK             = 'complete';

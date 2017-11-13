@@ -111,6 +111,15 @@
                         <field id="*/*/active">1</field>
                     </depends>
                 </field>
+                <field id="interest" translate="label" type="multiselect" sortOrder="90" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Interest Group</label>
+                    <source_model>Ebizmarts\MailChimp\Model\Config\Source\Interest</source_model>
+                    <can_be_empty>1</can_be_empty>
+                    <depends>
+                        <field id="*/*/active">1</field>
+                    </depends>
+
+                </field>
             </group>
             <group id="ecommerce" translate="label" type="text" sortOrder="110" showInDefault="1" showInWebsite="1" showInStore="1">
                 <label>Ecommerce Configuration</label>
