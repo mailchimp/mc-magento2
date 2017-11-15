@@ -897,4 +897,23 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     {
         return $this->_storeManager->getStore($storeId)->getWebsiteId();
     }
+    public function getInterest($storeId)
+    {
+        $rc = [];
+        $interest = $this->getConfigValue(self::XML_INTEREST,$storeId);
+        $interest = explode(",",$interest);
+        $api = $this->getApi($storeId);
+        $listId =$this->getConfigValue(self::XML_PATH_LIST,$storeId);
+        $allInterest = $api->lists->interestCategory->getAll($listId);
+        foreach($allInterest['categories'] as $item) {
+            $rc[$item['id']]['interest'] = ['id'=>$item['id'],'title'=>$item['title'],'type'=>$item['type']];
+        }
+        foreach($interest as $interestId) {
+            $mailchimpInterest = $api->lists->interestCategory->interests->getAll($listId,$interestId);
+            foreach($mailchimpInterest['interests'] as $mi) {
+                $rc[$mi['category_id']]['category'][$mi['display_order']] = ['id'=>$mi['id'],'name'=>$mi['name']];
+            }
+        }
+        return $rc;
+    }
 }
