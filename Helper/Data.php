@@ -906,7 +906,9 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         $listId =$this->getConfigValue(self::XML_PATH_LIST,$storeId);
         $allInterest = $api->lists->interestCategory->getAll($listId);
         foreach($allInterest['categories'] as $item) {
-            $rc[$item['id']]['interest'] = ['id'=>$item['id'],'title'=>$item['title'],'type'=>$item['type']];
+            if(in_array($item['id'],$interest)) {
+                $rc[$item['id']]['interest'] = ['id' => $item['id'], 'title' => $item['title'], 'type' => $item['type']];
+            }
         }
         foreach($interest as $interestId) {
             $mailchimpInterest = $api->lists->interestCategory->interests->getAll($listId,$interestId);
