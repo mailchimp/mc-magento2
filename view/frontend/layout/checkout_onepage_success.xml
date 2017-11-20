@@ -1,7 +1,8 @@
 <?xml version="1.0"?>
-<body>
-    <referenceContainer name="order.success.additional.info">
-        <block class="Ebizmarts\MailChimp\Block\Checkout\Success" name="mailchimp.order.success" template="Ebizmarts_MailChimp::checkout/order/success.phtml" after="-">
-        </block>
-    </referenceContainer>
-</body>
+<page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
+    <body>
+        <referenceContainer name="order.success.additional.info">
+            <block class="Ebizmarts\MailChimp\Block\Checkout\Success" ifconfig="mailchimp/general/interest_in_success" name="mailchimp.order.success" template="Ebizmarts_MailChimp::checkout/order/success.phtml"/>
+        </referenceContainer>
+    </body>
+</page>

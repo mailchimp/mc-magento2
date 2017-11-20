@@ -41,6 +41,9 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     const XML_MERGEVARS              = 'mailchimp/general/map_fields';
     const XML_DATE_FORMAT            = 'mailchimp/general/date_format';
     const XML_INTEREST               = 'mailchimp/general/interest';
+    const XML_INTEREST_IN_SUCCESS    = 'mailchimp/general/interest_in_success';
+    const XML_INTEREST_SUCCESS_HTML_BEFORE  = 'mailchimp/general/interest_success_html_before';
+    const XML_INTEREST_SUCCESS_HTML_AFTER   = 'mailchimp/general/interest_success_html_after';
 
 
     const ORDER_STATE_OK             = 'complete';
