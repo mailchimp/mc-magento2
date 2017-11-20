@@ -416,6 +416,17 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         );
         return $rc;
     }
+    public function getSuccessInterestUrl($storeId)
+    {
+        $rc = $this->_storeManager->getStore($storeId)->getUrl(
+            'mailchimp/checout/success',
+            [
+                '_nosid' => true,
+                '_secure' => true
+            ]
+        );
+        return $rc;
+    }
     /**
      * @param null $store
      * @return mixed

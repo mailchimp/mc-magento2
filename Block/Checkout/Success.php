@@ -64,5 +64,10 @@ class Success extends \Magento\Framework\View\Element\Template
     {
         return $this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_INTEREST_SUCCESS_HTML_AFTER);
     }
+    public function getFormUrl()
+    {
+        $order = $this->_checkoutSession->getLastRealOrder();
+        return $this->_helper->getSuccessInterestUrl($order->getStoreId());
+    }
 
 }
