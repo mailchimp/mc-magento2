@@ -1,5 +1,6 @@
 
 <h3>Labels applied by the team</h3>
+
 | Label        | Description           |
 | ------------- |-------------|
 | ![bug](https://s3.amazonaws.com/ebizmartsgithubimages/bug.png) | Bug report contains sufficient information to reproduce. Will be solved for associated Milestone.|
