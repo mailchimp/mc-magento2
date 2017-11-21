@@ -13,56 +13,55 @@
 
 namespace Ebizmarts\MailChimp\Model\Config\Source;
 
+/**
+ * Source model for MailChimp lists
+ */
 class MonkeyList implements \Magento\Framework\Option\ArrayInterface
 {
-    private $options = null;
-
     /**
      * MonkeyList constructor.
      * @param \Ebizmarts\MailChimp\Helper\Data $helper
-     * @param \Magento\Framework\App\RequestInterface $request
      */
     public function __construct(
-        \Ebizmarts\MailChimp\Helper\Data $helper,
-        \Magento\Framework\App\RequestInterface $request
+        \Ebizmarts\MailChimp\Helper\Data $helper
     ) {
-        $storeId = (int) $request->getParam("store", 0);
-        if($request->getParam('website',0)) {
-            $scope = 'websites';
-            $storeId = $request->getParam('website',0);
-        }
-        elseif($request->getParam('store',0)) {
-            $scope = 'stores';
-            $storeId = $request->getParam('store',0);
-        }
-        else {
-            $scope = 'default';
-        }
-
-        if ($helper->getApiKey($storeId)) {
-            try {
-                $this->options = $helper->getApi()->lists->getLists($helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_PATH_LIST, $storeId,$scope));
-            } catch (\Exception $e) {
-                $helper->log($e->getMessage());
-            }
-        }
+        $this->_helper = $helper;
     }
+
+    /**
+     * Get lists options array
+     * @return array
+     */
     public function toOptionArray()
     {
-        if (is_array($this->options)) {
-            $rc = [];
-            if (isset($this->options['id'])) {
-                $rc[] = ['value' => $this->options['id'], 'label' => $this->options['name']];
-            }
+        $options = [];
+
+        if (empty($this->toArray())) {
+            $options[] = ['value' => 0, 'label' => __('---No Data---')];
         } else {
-            $rc[] = ['value' => 0, 'label' => __('---No Data---')];
+            foreach ($this->toArray() as $id => $name) {
+                $options[] = ['value' => $id, 'label' => $name];
+            }
         }
-        return $rc;
+
+        return $options;
     }
+
+    /**
+     * Get array of lists
+     * @return array
+     */
     public function toArray()
     {
-        $rc = [];
-        $rc[$this->options['id']] = $this->options['name'];
-        return $rc;
+        $lists = $this->_helper->getApi()->lists->getLists();
+        $options = [];
+
+        if (is_array($lists) && is_array($lists['lists'])) {
+            foreach ($lists['lists'] as $list) {
+                $options[$list['id']] = $list['name'];
+            }
+        }
+
+        return $options;
     }
 }
