@@ -7,7 +7,7 @@ $interest = $block->getInterest();
 ?>
 <p>
     <?php echo $block->getMessageBefore() ?>
-<form class="form" action="" method="get" id="mailchimp-groups">
+<form class="form" action="<?php echo $block->getFormUrl() ?>" method="get" id="mailchimp-groups">
     <fieldset class="fieldset">
             <?php foreach($interest as $i): ?>
                 <div class="field">
