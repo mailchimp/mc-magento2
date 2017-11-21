@@ -19,6 +19,11 @@ namespace Ebizmarts\MailChimp\Model\Config\Source;
 class MonkeyList implements \Magento\Framework\Option\ArrayInterface
 {
     /**
+     * @var array
+     */
+    protected $_options;
+
+    /**
      * MonkeyList constructor.
      * @param \Ebizmarts\MailChimp\Helper\Data $helper
      */
@@ -53,15 +58,16 @@ class MonkeyList implements \Magento\Framework\Option\ArrayInterface
      */
     public function toArray()
     {
-        $lists = $this->_helper->getApi()->lists->getLists();
-        $options = [];
+        if (is_null($this->_options)) {
+            $this->_options = [];
+            $lists = $this->_helper->getApi()->lists->getLists();
 
-        if (is_array($lists) && is_array($lists['lists'])) {
-            foreach ($lists['lists'] as $list) {
-                $options[$list['id']] = $list['name'];
+            if (is_array($lists) && is_array($lists['lists'])) {
+                foreach ($lists['lists'] as $list) {
+                    $this->_options[$list['id']] = $list['name'];
+                }
             }
         }
-
-        return $options;
+        return $this->_options;
     }
 }
