@@ -29,7 +29,7 @@ class MailChimpInterestGroup extends AbstractDb
         $select = $connection->select()->from(
             $this->getTable('mailchimp_interest_group')
         )->where(
-            'sbuscriber_id = :subscriber_id AND store_id = :store_id'
+            'subscriber_id = :subscriber_id AND store_id = :store_id'
         );
         $data = $connection->fetchRow($select, $bind);
         if ($data) {
