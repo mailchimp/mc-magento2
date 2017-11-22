@@ -462,7 +462,7 @@ class UpgradeSchema implements UpgradeSchemaInterface
                     'date of the request'
                 )
                 ->addColumn(
-                    'data',
+                    'groupdata',
                     \Magento\Framework\DB\Ddl\Table::TYPE_TEXT,
                     4096,
                     ['unsigned' => true, 'nullable' => false],
