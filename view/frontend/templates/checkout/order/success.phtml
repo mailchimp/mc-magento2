@@ -22,7 +22,7 @@ $interest = $block->getInterest();
                                     <?php foreach($i['category'] as $c): ?>
                                         <li class="field no-label">
                                             <input class=""
-                                                   name="<?php echo $i['interest']['id'] ?>"
+                                                   name="group[<?php echo $i['interest']['id'] ?>][<?php echo $c['id']?>]"
                                                    type="checkbox"
                                                    value="<?php echo $c['id'] ?>"
                                                    id="<?php echo 'mailchimp_group_'.$c['id'] ?>"
@@ -36,7 +36,7 @@ $interest = $block->getInterest();
                                 case 'dropdown': ?>
                                     <div class="field no-label">
                                         <select class="field"
-                                                name="<?php echo $i['interest']['id'] ?>"
+                                                name="group[<?php echo $i['interest']['id'] ?>]"
                                                 id="<?php echo 'mailchimp_group_'.$i['interest']['id'] ?>"
                                                 title="<?php echo $i['interest']['title'] ?>">
                                             <option value=""></option>
@@ -52,7 +52,7 @@ $interest = $block->getInterest();
                                         <?php foreach($i['category'] as $c): ?>
                                             <li class="field no-label" style="list-style: none">
                                                 <input class=""
-                                                       name="<?php echo $i['interest']['id'] ?>"
+                                                       name="group[<?php echo $i['interest']['id'] ?>]"
                                                        type="radio"
                                                        value="<?php echo $c['id'] ?>"
                                                        id="<?php echo 'mailchimp_group_'.$c['id'] ?>"
