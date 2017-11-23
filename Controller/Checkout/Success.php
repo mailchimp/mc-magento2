@@ -84,16 +84,18 @@ class Success extends \Magento\Framework\App\Action\Action
         try {
             $subscriber->loadByEmail($order->getCustomerEmail());
             if($subscriber->getEmail()==$order->getCustomerEmail()) {
-                $interestGroup->getBySubscriberIdStoreId($subscriber->getSubscriberId(),$order->getStoreId());
+                $interestGroup->getBySubscriberIdStoreId($subscriber->getSubscriberId(),$subscriber->getStoreId());
                 $interestGroup->setGroupdata(serialize($params));
                 $interestGroup->setSubscriberId($subscriber->getSubscriberId());
                 $interestGroup->setStoreId($subscriber->getStoreId());
                 $interestGroup->setUpdatedAt($this->_date->gmtDate());
                 $interestGroup->getResource()->save($interestGroup);
+                $listId = $this->_helper->getGeneralList($order->getStoreId());
+                $this->_updateSubscriber($listId, $subscriber->getId(), $this->_date->gmtDate(), '', 0);
             } else {
                 $this->_subscriberFactory->create()->subscribe($order->getCustomerEmail());
                 $subscriber->loadByEmail($order->getCustomerEmail());
-                $interestGroup->getBySubscriberIdStoreId($subscriber->getSubscriberId(),$order->getStoreId());
+                $interestGroup->getBySubscriberIdStoreId($subscriber->getSubscriberId(),$subscriber->getStoreId());
                 $interestGroup->setGroupdata(serialize($params));
                 $interestGroup->setSubscriberId($subscriber->getSubscriberId());
                 $interestGroup->setStoreId($subscriber->getStoreId());
@@ -103,5 +105,12 @@ class Success extends \Magento\Framework\App\Action\Action
         } catch(\Exception $e) {
             $this->_helper->log($e->getMessage());
         }
+        $this->messageManager->addNoticeMessage(__('Thanks for share your interest with us'));
+        $this->_redirect($this->_helper->getBaserUrl($order->getStoreId(),\Magento\Framework\UrlInterface::URL_TYPE_WEB));
+    }
+    protected function _updateSubscriber($listId, $entityId, $sync_delta, $sync_error='', $sync_modified=0)
+    {
+        $this->_helper->saveEcommerceData($listId, $entityId, $sync_delta, $sync_error, $sync_modified,
+            \Ebizmarts\MailChimp\Helper\Data::IS_SUBSCRIBER);
     }
 }
