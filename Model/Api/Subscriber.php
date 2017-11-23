@@ -35,6 +35,7 @@ class Subscriber
      * @var \Magento\Newsletter\Model\SubscriberFactory
      */
     protected $_subscriberFactory;
+    protected $_interest=null;
 
     /**
      * Subscriber constructor.
@@ -65,6 +66,7 @@ class Subscriber
     {
         //get subscribers
 //        $listId = $this->_helper->getGeneralList($storeId);
+        $this->_interest = $this->_helper->getInterest($storeId);
         $collection = $this->_subscriberCollection->create();
         $collection->addFieldToFilter('subscriber_status', array('eq' => 1))
             ->addFieldToFilter('store_id', array('eq' => $storeId));
@@ -120,9 +122,28 @@ class Subscriber
             $data["merge_fields"] = $mergeVars;
         }
         $data["status_if_new"] = $this->_getMCStatus($subscriber->getStatus(), $storeId);
+        $interest = $this->_getInterest($subscriber);
+        if(count($interest)) {
+            $data['interests'] = $interest;
+        }
+
         return $data;
     }
+    protected function _getInterest(\Magento\Newsletter\Model\Subscriber $subscriber)
+    {
+        $rc = [];
+        $interest = $this->_helper->getSubscriberInterest($subscriber->getSubscriberId(),$subscriber->getStoreId(),$this->_interest);
+        foreach($interest as $i) {
+            foreach($i['category'] as $key=>$value) {
+                $rc[$value['id']] = $value['checked'];
+            }
+        }
+        return $rc;
+    }
+    protected function _getInterestFromMailchimp($listId)
+    {
 
+    }
     /**
      * Get status to send confirmation if Need to Confirm enabled on Magento
      *
