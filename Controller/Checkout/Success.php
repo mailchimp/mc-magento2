@@ -91,7 +91,7 @@ class Success extends \Magento\Framework\App\Action\Action
                 $interestGroup->setUpdatedAt($this->_date->gmtDate());
                 $interestGroup->getResource()->save($interestGroup);
                 $listId = $this->_helper->getGeneralList($order->getStoreId());
-                $this->_updateSubscriber($listId, $subscriber->getId(), $this->_date->gmtDate(), '', 0);
+                $this->_updateSubscriber($listId, $subscriber->getId(), $this->_date->gmtDate(), '', 1);
             } else {
                 $this->_subscriberFactory->create()->subscribe($order->getCustomerEmail());
                 $subscriber->loadByEmail($order->getCustomerEmail());
@@ -105,7 +105,7 @@ class Success extends \Magento\Framework\App\Action\Action
         } catch(\Exception $e) {
             $this->_helper->log($e->getMessage());
         }
-        $this->messageManager->addNoticeMessage(__('Thanks for share your interest with us'));
+        $this->messageManager->addSuccessMessage(__('Thanks for share your interest with us'));
         $this->_redirect($this->_helper->getBaserUrl($order->getStoreId(),\Magento\Framework\UrlInterface::URL_TYPE_WEB));
     }
     protected function _updateSubscriber($listId, $entityId, $sync_delta, $sync_error='', $sync_modified=0)
