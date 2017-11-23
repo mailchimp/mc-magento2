@@ -27,6 +27,7 @@ $interest = $block->getInterest();
                                                    value="<?php echo $c['id'] ?>"
                                                    id="<?php echo 'mailchimp_group_'.$c['id'] ?>"
                                                    title="<?php echo $c['name'] ?>"
+                                                   <?php if($c['checked']) { echo 'checked';} ?>
                                             />
                                             <label class="field label"><?php echo $c['name']?></label>
                                         </li>
@@ -41,7 +42,7 @@ $interest = $block->getInterest();
                                                 title="<?php echo $i['interest']['title'] ?>">
                                             <option value=""></option>
                                             <?php foreach($i['category'] as $c): ?>
-                                                <option value="<?php echo $c['id']?>"><?php echo $c['name'] ?></option>
+                                                <option value="<?php echo $c['id']?>" <?php if($c['checked']) { echo 'selected'; } ?>><?php echo $c['name'] ?></option>
                                             <?php endforeach; ?>
                                         </select>
 
@@ -57,6 +58,7 @@ $interest = $block->getInterest();
                                                        value="<?php echo $c['id'] ?>"
                                                        id="<?php echo 'mailchimp_group_'.$c['id'] ?>"
                                                        title="<?php echo $c['name'] ?>"
+                                                    <?php if($c['checked']) { echo 'checked';} ?>
                                                 />
                                                 <label class="field label"><?php echo $c['name']?></label>
                                             </li>
