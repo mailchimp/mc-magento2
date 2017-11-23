@@ -59,41 +59,13 @@ class Success extends \Magento\Framework\View\Element\Template
     public function getInterest()
     {
         $order = $this->_checkoutSession->getLastRealOrder();
-        $interest = $this->_helper->getInterest($order->getStoreId());
         /**
          * @var $subscriber \Magento\Newsletter\Model\Subscriber
-         * @var $interestGroup \Ebizmarts\MailChimp\Model\MailChimpInterestGroup
          */
         $subscriber = $this->_subscriberFactory->create();
         $subscriber->loadByEmail($order->getCustomerEmail());
-        $interestGroup = $this->_interestGroupFactory->create();
-        $interestGroup->getBySubscriberIdStoreId($subscriber->getSubscriberId(),$subscriber->getStoreId());
-        $groups = unserialize($interestGroup->getGroupdata());
-        foreach($groups['group'] as $key => $value) {
-            if(isset($interest[$key])) {
-                if(is_array($value)) {
-                    foreach ($value as $groupId) {
-                        foreach ($interest[$key]['category'] as $gkey => $gvalue) {
-                            if ($gvalue['id'] == $groupId) {
-                                $interest[$key]['category'][$gkey]['checked'] = true;
-                            } elseif(!isset($interest[$key]['category'][$gkey]['checked'])) {
-                                $interest[$key]['category'][$gkey]['checked'] = false;
-                            }
-                        }
-                    }
-                } else {
-                    foreach ($interest[$key]['category'] as $gkey => $gvalue) {
-                        if ($gvalue['id'] == $value) {
-                            $interest[$key]['category'][$gkey]['checked'] = true;
-                        } else {
-                            $interest[$key]['category'][$gkey]['checked'] = false;
-                        }
-                    }
 
-                }
-            }
-        }
-        return $interest;
+        return $this->_helper->getSubscriberInterest($subscriber->getSubscriberId(),$subscriber->getStoreId());
     }
     protected function getValues($category)
     {

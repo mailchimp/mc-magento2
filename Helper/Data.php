@@ -162,6 +162,11 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
      * @var \Magento\Directory\Api\CountryInformationAcquirerInterface
      */
     protected $_countryInformation;
+    /**
+     * @var \Ebizmarts\MailChimp\Model\MailChimpInterestGroupFactory
+     */
+    protected $_interestGroupFactory;
+
 
     private $customerAtt = null;
 
@@ -191,6 +196,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
      * @param \Magento\Customer\Model\CustomerFactory $customerFactory
      * @param \Magento\Directory\Api\CountryInformationAcquirerInterface $countryInformation
      * @param \Magento\Framework\App\ResourceConnection $resource
+     * @param \Ebizmarts\MailChimp\Model\MailChimpInterestGroupFactory $interestGroupFactory
      */
     public function __construct(
         \Magento\Framework\App\Helper\Context $context,
@@ -216,7 +222,8 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         \Magento\Customer\Api\AddressRepositoryInterface $addressRepositoryInterface,
         \Magento\Customer\Model\CustomerFactory $customerFactory,
         \Magento\Directory\Api\CountryInformationAcquirerInterface $countryInformation,
-        \Magento\Framework\App\ResourceConnection $resource
+        \Magento\Framework\App\ResourceConnection $resource,
+        \Ebizmarts\MailChimp\Model\MailChimpInterestGroupFactory $interestGroupFactory
     ) {
 
         $this->_storeManager  = $storeManager;
@@ -245,7 +252,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         $this->_attCollection           = $attCollection;
         $this->_customerFactory         = $customerFactory;
         $this->_countryInformation      = $countryInformation;
-
+        $this->_interestGroupFactory    = $interestGroupFactory;
         parent::__construct($context);
     }
 
@@ -931,5 +938,43 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
             }
         }
         return $rc;
+    }
+    public function getSubscriberInterest($subscriberId, $storeId, $interest = null)
+    {
+        if(!$interest) {
+            $interest = $this->getInterest($storeId);
+        }
+        /**
+         * @var $interestGroup \Ebizmarts\MailChimp\Model\MailChimpInterestGroup
+         */
+
+        $interestGroup = $this->_interestGroupFactory->create();
+        $interestGroup->getBySubscriberIdStoreId($subscriberId,$storeId);
+        $groups = unserialize($interestGroup->getGroupdata());
+        foreach($groups['group'] as $key => $value) {
+            if(isset($interest[$key])) {
+                if(is_array($value)) {
+                    foreach ($value as $groupId) {
+                        foreach ($interest[$key]['category'] as $gkey => $gvalue) {
+                            if ($gvalue['id'] == $groupId) {
+                                $interest[$key]['category'][$gkey]['checked'] = true;
+                            } elseif(!isset($interest[$key]['category'][$gkey]['checked'])) {
+                                $interest[$key]['category'][$gkey]['checked'] = false;
+                            }
+                        }
+                    }
+                } else {
+                    foreach ($interest[$key]['category'] as $gkey => $gvalue) {
+                        if ($gvalue['id'] == $value) {
+                            $interest[$key]['category'][$gkey]['checked'] = true;
+                        } else {
+                            $interest[$key]['category'][$gkey]['checked'] = false;
+                        }
+                    }
+
+                }
+            }
+        }
+        return $interest;
     }
 }
