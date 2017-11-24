@@ -934,7 +934,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         foreach($interest as $interestId) {
             $mailchimpInterest = $api->lists->interestCategory->interests->getAll($listId,$interestId);
             foreach($mailchimpInterest['interests'] as $mi) {
-                $rc[$mi['category_id']]['category'][$mi['display_order']] = ['id'=>$mi['id'],'name'=>$mi['name']];
+                $rc[$mi['category_id']]['category'][$mi['display_order']] = ['id'=>$mi['id'],'name'=>$mi['name'],'checked'=>false];
             }
         }
         return $rc;
@@ -951,27 +951,29 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         $interestGroup = $this->_interestGroupFactory->create();
         $interestGroup->getBySubscriberIdStoreId($subscriberId,$storeId);
         $groups = unserialize($interestGroup->getGroupdata());
-        foreach($groups['group'] as $key => $value) {
-            if(isset($interest[$key])) {
-                if(is_array($value)) {
-                    foreach ($value as $groupId) {
+        if(isset($groups['group'])) {
+            foreach ($groups['group'] as $key => $value) {
+                if (isset($interest[$key])) {
+                    if (is_array($value)) {
+                        foreach ($value as $groupId) {
+                            foreach ($interest[$key]['category'] as $gkey => $gvalue) {
+                                if ($gvalue['id'] == $groupId) {
+                                    $interest[$key]['category'][$gkey]['checked'] = true;
+                                } elseif (!isset($interest[$key]['category'][$gkey]['checked'])) {
+                                    $interest[$key]['category'][$gkey]['checked'] = false;
+                                }
+                            }
+                        }
+                    } else {
                         foreach ($interest[$key]['category'] as $gkey => $gvalue) {
-                            if ($gvalue['id'] == $groupId) {
+                            if ($gvalue['id'] == $value) {
                                 $interest[$key]['category'][$gkey]['checked'] = true;
-                            } elseif(!isset($interest[$key]['category'][$gkey]['checked'])) {
+                            } else {
                                 $interest[$key]['category'][$gkey]['checked'] = false;
                             }
                         }
-                    }
-                } else {
-                    foreach ($interest[$key]['category'] as $gkey => $gvalue) {
-                        if ($gvalue['id'] == $value) {
-                            $interest[$key]['category'][$gkey]['checked'] = true;
-                        } else {
-                            $interest[$key]['category'][$gkey]['checked'] = false;
-                        }
-                    }
 
+                    }
                 }
             }
         }
