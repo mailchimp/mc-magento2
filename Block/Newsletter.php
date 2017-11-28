@@ -62,8 +62,5 @@ class Newsletter extends \Magento\Framework\View\Element\Template
     {
         return  $this->getUrl('mailchimp/accountmanage/save');
     }
-//    public function toHtml()
-//    {
-//        return 'hola mundo';
-//    }
+
 }
