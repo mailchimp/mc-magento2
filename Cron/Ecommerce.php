@@ -160,9 +160,9 @@ class Ecommerce
         $batchId = null;
         $batchArray = [];
         $results = [];
+        $results = $this->_apiSubscribers->sendSubscribers($storeId, $listId);
+        $countSubscribers = count($results);
         if ($this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_PATH_ECOMMERCE_ACTIVE, $storeId)) {
-            $results = $this->_apiSubscribers->sendSubscribers($storeId, $listId);
-            $countSubscribers = count($results);
             $products =  $this->_apiProduct->_sendProducts($storeId);
             $countProducts = count($products);
             $results = array_merge($results, $products);
