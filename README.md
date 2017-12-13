@@ -87,3 +87,7 @@ Example:
 ### Additional information
 
 Additional information is often requested when the bug report is processed, you can save time by providing Magento and browser logs, screenshots, any other artifacts related to the issue at your own judgement.
+
+## Pull requests
+
+Before creating a pull request please make sure to follow this [guidelines](https://github.com/mailchimp/mc-magento2/wiki/Pull-Request-guideliness) or it will be rejected.
