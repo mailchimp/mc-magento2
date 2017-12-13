@@ -57,42 +57,44 @@ class SaveAfter implements \Magento\Framework\Event\ObserverInterface
         $customer = $observer->getCustomer();
         $request  = $observer->getEvent()->getRequest();
         $allParams = $request->getParams();
-        $params = ['group' => $allParams['customer']['interestgroup']];
-        foreach($params['group'] as $index=>$ig) {
-            if(is_array($ig)) {
-                foreach($ig as $i=>$v) {
-                    if($v==1) {
-                        $params['group'][$index][$i] = $i;
+        if(isset($allParams['customer']['interestgroup'])) {
+            $params = ['group' => $allParams['customer']['interestgroup']];
+            foreach ($params['group'] as $index => $ig) {
+                if (is_array($ig)) {
+                    foreach ($ig as $i => $v) {
+                        if ($v == 1) {
+                            $params['group'][$index][$i] = $i;
+                        }
                     }
                 }
             }
-        }
-        $subscriber = $this->subscriberFactory->create();
-        $interestGroup = $this->interestGroupFactory->create();
-        try {
-            $subscriber->loadByEmail($customer->getEmail());
-            if($subscriber->getEmail()==$customer->getEmail()) {
-                $interestGroup->getBySubscriberIdStoreId($subscriber->getSubscriberId(),$subscriber->getStoreId());
-                $interestGroup->setGroupdata(serialize($params));
-                $interestGroup->setSubscriberId($subscriber->getSubscriberId());
-                $interestGroup->setStoreId($subscriber->getStoreId());
-                $interestGroup->setUpdatedAt($this->date->gmtDate());
-                $interestGroup->getResource()->save($interestGroup);
-                $listId = $this->helper->getGeneralList($subscriber->getStoreId());
-                $this->_updateSubscriber($listId, $subscriber->getId(), $this->date->gmtDate(), '', 1);
-            } else {
-                $this->subscriberFactory->create()->subscribe($customer->getEmail());
+            $subscriber = $this->subscriberFactory->create();
+            $interestGroup = $this->interestGroupFactory->create();
+            try {
                 $subscriber->loadByEmail($customer->getEmail());
-                $interestGroup->getBySubscriberIdStoreId($subscriber->getSubscriberId(),$subscriber->getStoreId());
-                $interestGroup->setGroupdata(serialize($params));
-                $interestGroup->setSubscriberId($subscriber->getSubscriberId());
-                $interestGroup->setStoreId($subscriber->getStoreId());
-                $interestGroup->setUpdatedAt($this->date->gmtDate());
-                $interestGroup->getResource()->save($interestGroup);
+                if ($subscriber->getEmail() == $customer->getEmail()) {
+                    $interestGroup->getBySubscriberIdStoreId($subscriber->getSubscriberId(), $subscriber->getStoreId());
+                    $interestGroup->setGroupdata(serialize($params));
+                    $interestGroup->setSubscriberId($subscriber->getSubscriberId());
+                    $interestGroup->setStoreId($subscriber->getStoreId());
+                    $interestGroup->setUpdatedAt($this->date->gmtDate());
+                    $interestGroup->getResource()->save($interestGroup);
+                    $listId = $this->helper->getGeneralList($subscriber->getStoreId());
+                    $this->_updateSubscriber($listId, $subscriber->getId(), $this->date->gmtDate(), '', 1);
+                } else {
+                    $this->subscriberFactory->create()->subscribe($customer->getEmail());
+                    $subscriber->loadByEmail($customer->getEmail());
+                    $interestGroup->getBySubscriberIdStoreId($subscriber->getSubscriberId(), $subscriber->getStoreId());
+                    $interestGroup->setGroupdata(serialize($params));
+                    $interestGroup->setSubscriberId($subscriber->getSubscriberId());
+                    $interestGroup->setStoreId($subscriber->getStoreId());
+                    $interestGroup->setUpdatedAt($this->date->gmtDate());
+                    $interestGroup->getResource()->save($interestGroup);
+                }
+
+            } catch (\Exception $e) {
+
             }
-
-        } catch(\Exception $e) {
-
         }
     }
     protected function _updateSubscriber($listId, $entityId, $sync_delta, $sync_error='', $sync_modified=0)
