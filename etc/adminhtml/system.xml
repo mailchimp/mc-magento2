@@ -111,6 +111,36 @@
                         <field id="*/*/active">1</field>
                     </depends>
                 </field>
+                <field id="interest" translate="label" type="multiselect" sortOrder="90" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Interest Group</label>
+                    <source_model>Ebizmarts\MailChimp\Model\Config\Source\Interest</source_model>
+                    <can_be_empty>1</can_be_empty>
+                    <depends>
+                        <field id="*/*/active">1</field>
+                    </depends>
+                </field>
+                <field id="interest_in_success" translate="label" type="select" sortOrder="100" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Interest groups in checkout success</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <comment><![CDATA[Don't use in magento 2.1 see at <a href="https://github.com/magento/magento2/issues/4999" target="_blank">here</a>]]></comment>
+                    <depends>
+                        <field id="*/*/active">1</field>
+                    </depends>
+                </field>
+                <field id="interest_success_html_before" translate="label" type="textarea" sortOrder="110" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Success message before</label>
+                    <depends>
+                        <field id="*/*/active">1</field>
+                        <field id="*/*/interest_in_success">1</field>
+                    </depends>
+                </field>
+                <field id="interest_success_html_after" translate="label" type="textarea" sortOrder="120" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Success message after</label>
+                    <depends>
+                        <field id="*/*/active">1</field>
+                        <field id="*/*/interest_in_success">1</field>
+                    </depends>
+                </field>
             </group>
             <group id="ecommerce" translate="label" type="text" sortOrder="110" showInDefault="1" showInWebsite="1" showInStore="1">
                 <label>Ecommerce Configuration</label>

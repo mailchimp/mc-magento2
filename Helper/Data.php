@@ -40,6 +40,10 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     const XML_PATH_IS_SYNC           = 'mailchimp/general/issync';
     const XML_MERGEVARS              = 'mailchimp/general/map_fields';
     const XML_DATE_FORMAT            = 'mailchimp/general/date_format';
+    const XML_INTEREST               = 'mailchimp/general/interest';
+    const XML_INTEREST_IN_SUCCESS    = 'mailchimp/general/interest_in_success';
+    const XML_INTEREST_SUCCESS_HTML_BEFORE  = 'mailchimp/general/interest_success_html_before';
+    const XML_INTEREST_SUCCESS_HTML_AFTER   = 'mailchimp/general/interest_success_html_after';
 
 
     const ORDER_STATE_OK             = 'complete';
@@ -158,6 +162,11 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
      * @var \Magento\Directory\Api\CountryInformationAcquirerInterface
      */
     protected $_countryInformation;
+    /**
+     * @var \Ebizmarts\MailChimp\Model\MailChimpInterestGroupFactory
+     */
+    protected $_interestGroupFactory;
+
 
     private $customerAtt = null;
 
@@ -187,6 +196,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
      * @param \Magento\Customer\Model\CustomerFactory $customerFactory
      * @param \Magento\Directory\Api\CountryInformationAcquirerInterface $countryInformation
      * @param \Magento\Framework\App\ResourceConnection $resource
+     * @param \Ebizmarts\MailChimp\Model\MailChimpInterestGroupFactory $interestGroupFactory
      */
     public function __construct(
         \Magento\Framework\App\Helper\Context $context,
@@ -212,7 +222,8 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         \Magento\Customer\Api\AddressRepositoryInterface $addressRepositoryInterface,
         \Magento\Customer\Model\CustomerFactory $customerFactory,
         \Magento\Directory\Api\CountryInformationAcquirerInterface $countryInformation,
-        \Magento\Framework\App\ResourceConnection $resource
+        \Magento\Framework\App\ResourceConnection $resource,
+        \Ebizmarts\MailChimp\Model\MailChimpInterestGroupFactory $interestGroupFactory
     ) {
 
         $this->_storeManager  = $storeManager;
@@ -241,7 +252,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         $this->_attCollection           = $attCollection;
         $this->_customerFactory         = $customerFactory;
         $this->_countryInformation      = $countryInformation;
-
+        $this->_interestGroupFactory    = $interestGroupFactory;
         parent::__construct($context);
     }
 
@@ -406,6 +417,17 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
             [
                 'id' => $couponId,
                 'token' => $token,
+                '_nosid' => true,
+                '_secure' => true
+            ]
+        );
+        return $rc;
+    }
+    public function getSuccessInterestUrl($storeId)
+    {
+        $rc = $this->_storeManager->getStore($storeId)->getUrl(
+            'mailchimp/checkout/success',
+            [
                 '_nosid' => true,
                 '_secure' => true
             ]
@@ -895,5 +917,66 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     public function getWebsiteId($storeId)
     {
         return $this->_storeManager->getStore($storeId)->getWebsiteId();
+    }
+    public function getInterest($storeId)
+    {
+        $rc = [];
+        $interest = $this->getConfigValue(self::XML_INTEREST,$storeId);
+        $interest = explode(",",$interest);
+        $api = $this->getApi($storeId);
+        $listId =$this->getConfigValue(self::XML_PATH_LIST,$storeId);
+        $allInterest = $api->lists->interestCategory->getAll($listId);
+        foreach($allInterest['categories'] as $item) {
+            if(in_array($item['id'],$interest)) {
+                $rc[$item['id']]['interest'] = ['id' => $item['id'], 'title' => $item['title'], 'type' => $item['type']];
+            }
+        }
+        foreach($interest as $interestId) {
+            $mailchimpInterest = $api->lists->interestCategory->interests->getAll($listId,$interestId);
+            foreach($mailchimpInterest['interests'] as $mi) {
+                $rc[$mi['category_id']]['category'][$mi['display_order']] = ['id'=>$mi['id'],'name'=>$mi['name'],'checked'=>false];
+            }
+        }
+        return $rc;
+    }
+    public function getSubscriberInterest($subscriberId, $storeId, $interest = null)
+    {
+        if(!$interest) {
+            $interest = $this->getInterest($storeId);
+        }
+        /**
+         * @var $interestGroup \Ebizmarts\MailChimp\Model\MailChimpInterestGroup
+         */
+
+        $interestGroup = $this->_interestGroupFactory->create();
+        $interestGroup->getBySubscriberIdStoreId($subscriberId,$storeId);
+        $groups = unserialize($interestGroup->getGroupdata());
+        if(isset($groups['group'])) {
+            foreach ($groups['group'] as $key => $value) {
+                if (isset($interest[$key])) {
+                    if (is_array($value)) {
+                        foreach ($value as $groupId) {
+                            foreach ($interest[$key]['category'] as $gkey => $gvalue) {
+                                if ($gvalue['id'] == $groupId) {
+                                    $interest[$key]['category'][$gkey]['checked'] = true;
+                                } elseif (!isset($interest[$key]['category'][$gkey]['checked'])) {
+                                    $interest[$key]['category'][$gkey]['checked'] = false;
+                                }
+                            }
+                        }
+                    } else {
+                        foreach ($interest[$key]['category'] as $gkey => $gvalue) {
+                            if ($gvalue['id'] == $value) {
+                                $interest[$key]['category'][$gkey]['checked'] = true;
+                            } else {
+                                $interest[$key]['category'][$gkey]['checked'] = false;
+                            }
+                        }
+
+                    }
+                }
+            }
+        }
+        return $interest;
     }
 }

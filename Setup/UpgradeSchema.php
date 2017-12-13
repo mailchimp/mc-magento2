@@ -430,5 +430,45 @@ class UpgradeSchema implements UpgradeSchemaInterface
                 ]
             );
         }
+        if (version_compare($context->getVersion(),'1.0.26') < 0) {
+            $table = $connection
+                ->newTable($setup->getTable('mailchimp_interest_group'))
+                ->addColumn(
+                    'id',
+                    \Magento\Framework\DB\Ddl\Table::TYPE_INTEGER,
+                    null,
+                    ['identity' => true, 'unsigned' => true, 'nullable' => false, 'primary' => true],
+                    'Id'
+                )
+                ->addColumn(
+                    'subscriber_id',
+                    \Magento\Framework\DB\Ddl\Table::TYPE_INTEGER,
+                    10,
+                    ['unsigned' => true, 'nullable' => false],
+                    'subscriber id'
+                )
+                ->addColumn(
+                    'store_id',
+                    \Magento\Framework\DB\Ddl\Table::TYPE_SMALLINT,
+                    5,
+                    ['unsigned' => true, 'nullable' => false],
+                    'subscriber id'
+                )
+                ->addColumn(
+                    'updated_at',
+                    \Magento\Framework\DB\Ddl\Table::TYPE_DATETIME,
+                    null,
+                    [],
+                    'date of the request'
+                )
+                ->addColumn(
+                    'groupdata',
+                    \Magento\Framework\DB\Ddl\Table::TYPE_TEXT,
+                    4096,
+                    ['unsigned' => true, 'nullable' => false],
+                    'data'
+                );
+            $connection->createTable($table);
+        }
     }
 }

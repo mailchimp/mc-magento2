@@ -1,0 +1,69 @@
+<?php
+/**
+ * @var $block \Ebizmarts\MailChimp\Block\Newsletter
+ */
+$interest = $block->getInterest();
+?>
+    <fieldset class="fieldset">
+        <?php foreach($interest as $i): ?>
+            <div class="field">
+                <label class="label" for="<?php echo $i['interest']['id'] ?>">
+                    <span><?php echo $i['interest']['title'] ?></span>
+                </label>
+                <div class="control">
+                    <div class="fields">
+                        <?php switch($i['interest']['type']):
+                            case 'checkboxes': ?>
+                                <ul class="field" style="list-style: none">
+                                    <?php foreach($i['category'] as $c): ?>
+                                        <li class="field no-label">
+                                            <input class=""
+                                                   name="group[<?php echo $i['interest']['id'] ?>][<?php echo $c['id']?>]"
+                                                   type="checkbox"
+                                                   value="<?php echo $c['id'] ?>"
+                                                   id="<?php echo 'mailchimp_group_'.$c['id'] ?>"
+                                                   title="<?php echo $c['name'] ?>"
+                                                <?php if($c['checked']) { echo 'checked';} ?>
+                                            />
+                                            <label class="field label"><?php echo $c['name']?></label>
+                                        </li>
+                                    <?php endforeach; ?>
+                                </ul>
+                                <?php       break;
+                            case 'dropdown': ?>
+                                <div class="field no-label">
+                                    <select class="field"
+                                            name="group[<?php echo $i['interest']['id'] ?>]"
+                                            id="<?php echo 'mailchimp_group_'.$i['interest']['id'] ?>"
+                                            title="<?php echo $i['interest']['title'] ?>">
+                                        <option value=""></option>
+                                        <?php foreach($i['category'] as $c): ?>
+                                            <option value="<?php echo $c['id']?>" <?php if($c['checked']) { echo 'selected'; } ?>><?php echo $c['name'] ?></option>
+                                        <?php endforeach; ?>
+                                    </select>
+
+                                </div>
+                                <?php       break;
+                            case 'radio': ?>
+                                <ul class="field">
+                                    <?php foreach($i['category'] as $c): ?>
+                                        <li class="field no-label" style="list-style: none">
+                                            <input class=""
+                                                   name="group[<?php echo $i['interest']['id'] ?>]"
+                                                   type="radio"
+                                                   value="<?php echo $c['id'] ?>"
+                                                   id="<?php echo 'mailchimp_group_'.$c['id'] ?>"
+                                                   title="<?php echo $c['name'] ?>"
+                                                <?php if($c['checked']) { echo 'checked';} ?>
+                                            />
+                                            <label class="field label"><?php echo $c['name']?></label>
+                                        </li>
+                                    <?php endforeach; ?>
+                                </ul>
+                                <?php       break; ?>
+                            <?php endswitch; ?>
+                    </div>
+                </div>
+            </div>
+        <?php endforeach; ?>
+    </fieldset>

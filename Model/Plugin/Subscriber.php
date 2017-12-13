@@ -69,29 +69,34 @@ class Subscriber
         $subscriber,
         $customerId
     ) {
+        /**
+         * @var $subscriber \Magento\Newsletter\Model\Subscriber
+         */
         $subscriber->loadByCustomerId($customerId);
-        $subscriber->setImportMode(true);
-        $storeId = $subscriber->getStoreId();
-        if ($this->_helper->isMailChimpEnabled($storeId)) {
-            $customer = $this->_customer->getById($customerId);
-            $email = $customer->getEmail();
-            $mergeVars = $this->_helper->getMergeVarsBySubscriber($subscriber, $email);
+        if(!$subscriber->isSubscribed()) {
+            $subscriber->setImportMode(true);
+            $storeId = $subscriber->getStoreId();
+            if ($this->_helper->isMailChimpEnabled($storeId)) {
+                $customer = $this->_customer->getById($customerId);
+                $email = $customer->getEmail();
+                $mergeVars = $this->_helper->getMergeVarsBySubscriber($subscriber, $email);
 //            $mergeVars = $this->_helper->getMergeVarsByCustomer($customer, $email);
-            $api = $this->_api;
-            $isSubscribeOwnEmail = $this->_customerSession->isLoggedIn()
-                && $this->_customerSession->getCustomerDataObject()->getEmail() == $subscriber->getSubscriberEmail();
-            if ($this->_helper->isDoubleOptInEnabled($storeId) && !$isSubscribeOwnEmail) {
-                $status = 'pending';
-            } else {
-                $status = 'subscribed';
-            }
-            try {
-                $emailHash = md5(strtolower($customer->getEmail()));
-                if (!$subscriber->getMailchimpId()) {
-                    $return = $api->lists->members->addOrUpdate($this->_helper->getDefaultList(), $emailHash, null, $status, $mergeVars, null, null, null, null, $email, $status);
+                $api = $this->_api;
+                $isSubscribeOwnEmail = $this->_customerSession->isLoggedIn()
+                    && $this->_customerSession->getCustomerDataObject()->getEmail() == $subscriber->getSubscriberEmail();
+                if ($this->_helper->isDoubleOptInEnabled($storeId) && !$isSubscribeOwnEmail) {
+                    $status = 'pending';
+                } else {
+                    $status = 'subscribed';
                 }
-            } catch (\Exception $e) {
-                $this->_helper->log($e->getMessage());
+                try {
+                    $emailHash = md5(strtolower($customer->getEmail()));
+                    if (!$subscriber->getMailchimpId()) {
+                        $return = $api->lists->members->addOrUpdate($this->_helper->getDefaultList(), $emailHash, null, $status, $mergeVars, null, null, null, null, $email, $status);
+                    }
+                } catch (\Exception $e) {
+                    $this->_helper->log($e->getMessage());
+                }
             }
         }
         return [$customerId];

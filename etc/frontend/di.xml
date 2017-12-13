@@ -14,4 +14,7 @@
     <type name="Magento\Quote\Model\Quote">
         <plugin name="mailchimp-save-quote" type="Ebizmarts\MailChimp\Model\Plugin\Quote" sortOrder="10"/>
     </type>
+    <type name="Magento\Newsletter\Controller\Manage\Save">
+        <plugin name="mailchimp-account-interest-group" type="Ebizmarts\MailChimp\Model\Plugin\Newsletter\Save" sortOrder="10"/>
+    </type>
 </config>
