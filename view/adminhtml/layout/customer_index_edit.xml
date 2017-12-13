@@ -13,8 +13,16 @@
 <page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" layout="admin-2columns-left"
       xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
     <body>
-        <referenceBlock name="customer_form">
-            <block class="Ebizmarts\MailChimp\Block\Adminhtml\Customer\Edit\Tabs\Mailchimp" name="customer_edit_tab_mailchimp"/>
-        </referenceBlock>
+        <referenceContainer name="content">
+            <referenceBlock name="customer_form">
+                <block class="Ebizmarts\MailChimp\Block\Adminhtml\Customer\Edit\Tabs\Mailchimp" name="customer_edit_tab_mailchimp" template="tab/view.phtml">
+                    <arguments>
+                        <argument name="tab_label" xsi:type="string" translate="true">Mailchimp</argument>
+                        <argument name="sort_order" xsi:type="number">50</argument>
+                    </arguments>
+                    <block class="Ebizmarts\MailChimp\Block\Adminhtml\Customer\Edit\Tabs\View\Customer" name="mailchimp"  template="customer/edit/tabs/mailchimp.phtml" />
+                </block>
+            </referenceBlock>
+        </referenceContainer>
     </body>
 </page>

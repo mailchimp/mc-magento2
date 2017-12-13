@@ -18,7 +18,7 @@ use Magento\Ui\Component\Layout\Tabs\TabInterface;
 use Magento\Backend\Block\Widget\Form;
 use Magento\Backend\Block\Widget\Form\Generic;
 
-class Mailchimp extends Generic implements TabInterface
+class Mailchimp extends \Magento\Backend\Block\Template implements TabInterface
 {
     /**
      * @var \Magento\Store\Model\System\Store
@@ -28,12 +28,14 @@ class Mailchimp extends Generic implements TabInterface
      * @var \Magento\Framework\Registry
      */
     protected $_coreRegistry;
+
     /**
      * Mailchimp constructor.
      * @param \Magento\Backend\Block\Template\Context $context
      * @param \Magento\Framework\Registry $registry
      * @param \Magento\Framework\Data\FormFactory $formFactory
      * @param \Magento\Store\Model\System\Store $systemStore
+     * @param \Ebizmarts\MailChimp\Helper\Data $helper
      * @param array $data
      */
     public function __construct(
@@ -41,11 +43,12 @@ class Mailchimp extends Generic implements TabInterface
         \Magento\Framework\Registry $registry,
         \Magento\Framework\Data\FormFactory $formFactory,
         \Magento\Store\Model\System\Store $systemStore,
+        \Ebizmarts\MailChimp\Helper\Data $helper,
         array $data = []
     ) {
         $this->_coreRegistry = $registry;
         $this->_systemStore = $systemStore;
-        parent::__construct($context, $registry, $formFactory, $data);
+        parent::__construct($context, $data);
     }
 
     public function getCustomerId()
@@ -108,7 +111,7 @@ class Mailchimp extends Generic implements TabInterface
      */
     public function getTabUrl()
     {
-        return $this->getUrl('mailchimp/*/customer', ['_current' => true]);
+        return '';
     }
 
     /**
@@ -118,6 +121,6 @@ class Mailchimp extends Generic implements TabInterface
      */
     public function isAjaxLoaded()
     {
-        return true;
+        return false;
     }
 }

@@ -23,6 +23,7 @@ class Customer extends \Magento\Backend\Block\Template
      * @var \Magento\Newsletter\Model\SubscriberFactory
      */
     protected $subscriberFactory;
+
     /**
      * @var \Magento\Framework\Registry
      */
