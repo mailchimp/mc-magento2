@@ -70,13 +70,6 @@
                         <field id="*/*/active">1</field>
                     </depends>
                 </field>
-                <field id="date_format" translate="label" type="select" sortOrder="45" showInDefault="1" showInWebsite="1" showInStore="1">
-                    <label>MailChimp Date Format</label>
-                    <source_model>Ebizmarts\MailChimp\Model\Config\Source\DateFormat</source_model>
-                    <depends>
-                        <field id="*/*/active">1</field>
-                    </depends>
-                </field>
                 <field id="webhook_active" translate="label" type="select" sortOrder="50" showInDefault="1">
                     <label>Enable Two Way Sync</label>
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
