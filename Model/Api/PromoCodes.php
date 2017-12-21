@@ -141,7 +141,6 @@ class PromoCodes
             );
             $collection->getSelect()->where("m4m.mailchimp_sync_delta IS null and (rules.use_auto_generation = 1 and main_table.is_primary is null or rules.use_auto_generation = 0 and main_table.is_primary = 1) and main_table.rule_id in ($inRoules)");
             $collection->getSelect()->limit(self::MAX);
-            $this->_helper->log((string)$collection->getSelect());
             $counter = 0;
             /**
              * @var $item \Magento\SalesRule\Model\Coupon
