@@ -912,7 +912,11 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     {
         $rc = [];
         $interest = $this->getConfigValue(self::XML_INTEREST,$storeId);
-        $interest = explode(",",$interest);
+        if($interest!='') {
+            $interest = explode(",", $interest);
+        } else {
+            $interest = [];
+        }
         $api = $this->getApi($storeId);
         $listId =$this->getConfigValue(self::XML_PATH_LIST,$storeId);
         $allInterest = $api->lists->interestCategory->getAll($listId);
