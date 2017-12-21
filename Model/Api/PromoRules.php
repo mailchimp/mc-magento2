@@ -118,11 +118,11 @@ class PromoRules
     {
         $batchArray = [];
         $websiteId = $this->_helper->getWebsiteId($magentoStoreId);
+        /**
+         * @var $collection \Magento\SalesRule\Model\ResourceModel\Rule\Collection
+         */
         $collection = $this->_collection->create();
-        $collection->getSelect()->joinLeft(
-            ["websites" => $this->_helper->getTableName("salesrule_website")],
-            "main_table.rule_id = websites.rule_id and website_id = $websiteId"
-        );
+        $collection->addWebsiteFilter($websiteId);
         $collection->getSelect()->joinLeft(
             ['m4m' => $this->_helper->getTableName('mailchimp_sync_ecommerce')],
             "m4m.related_id = main_table.rule_id and m4m.type = '".\Ebizmarts\MailChimp\Helper\Data::IS_PROMO_RULE.
