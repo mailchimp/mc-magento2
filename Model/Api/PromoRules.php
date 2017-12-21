@@ -45,6 +45,10 @@ class PromoRules
      * @var \Magento\SalesRule\Model\RuleRepository
      */
     private $_ruleRepo;
+    /**
+     * @var \Ebizmarts\MailChimp\Model\ResourceModel\MailChimpSyncEcommerce\CollectionFactory
+     */
+    protected $_syncCollection;
 
     /**
      * PromoRules constructor.
@@ -52,6 +56,7 @@ class PromoRules
      * @param \Magento\SalesRule\Model\ResourceModel\Rule\CollectionFactory $collection
      * @param \Magento\SalesRule\Model\RuleRepository $ruleRepo
      * @param \Ebizmarts\MailChimp\Model\MailChimpSyncEcommerceFactory $chimpSyncEcommerce
+     * @param \Ebizmarts\MailChimp\Model\ResourceModel\MailChimpSyncEcommerce\CollectionFactory $syncCollection
      * @param \Magento\Framework\Stdlib\DateTime\DateTime $date
      */
     public function __construct(
@@ -59,6 +64,7 @@ class PromoRules
         \Magento\SalesRule\Model\ResourceModel\Rule\CollectionFactory $collection,
         \Magento\SalesRule\Model\RuleRepository $ruleRepo,
         \Ebizmarts\MailChimp\Model\MailChimpSyncEcommerceFactory $chimpSyncEcommerce,
+        \Ebizmarts\MailChimp\Model\ResourceModel\MailChimpSyncEcommerce\CollectionFactory $syncCollection,
         \Magento\Framework\Stdlib\DateTime\DateTime $date
     )
     {
@@ -68,6 +74,7 @@ class PromoRules
         $this->_date                = $date;
         $this->_ruleRepo             = $ruleRepo;
         $this->_batchId             = \Ebizmarts\MailChimp\Helper\Data::IS_PROMO_RULE. '_' . $this->_date->gmtTimestamp();
+        $this->_syncCollection      = $syncCollection;
     }
     public function sendRules($magentoStoreId)
     {
@@ -81,19 +88,10 @@ class PromoRules
     protected function _getDeletedPromoRules($mailchimpStoreId, $magentoStoreId)
     {
         $batchArray = [];
-        $websiteId = $this->_helper->getWebsiteId($magentoStoreId);
-        $collection = $this->_collection->create();
-        $collection->getSelect()->joinLeft(
-            ["websites" => $this->_helper->getTableName("salesrule_website")],
-            "main_table.rule_id = websites.rule_id and website_id = $websiteId"
-        );
-        $collection->getSelect()->joinLeft(
-            ['m4m' => $this->_helper->getTableName('mailchimp_sync_ecommerce')],
-            "m4m.related_id = main_table.rule_id and m4m.type = '".\Ebizmarts\MailChimp\Helper\Data::IS_PROMO_RULE.
-            "' and m4m.mailchimp_store_id = '".$mailchimpStoreId."'",
-            ['m4m.*']
-        );
-        $collection->getSelect()->where("m4m.mailchimp_sync_deleted = 1");
+        $collection = $this->_syncCollection->create();
+        $collection->addFieldToFilter('mailchimp_store_id',['eq'=>$mailchimpStoreId])
+            ->addFieldToFilter('type',['eq'=>\Ebizmarts\MailChimp\Helper\Data::IS_PROMO_RULE])
+            ->addFieldToFilter('mailchimp_sync_deleted',['eq'=>1]);
         $collection->getSelect()->limit(self::MAX);
         $count = 0;
         $api = $this->_helper->getApi($magentoStoreId);
