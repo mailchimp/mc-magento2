@@ -106,6 +106,7 @@ class Subscriber
         $subscriber,
         $email
     ) {
+	$subscriber->setImportMode(true);
         $storeId = $this->_storeManager->getStore()->getId();
 
         if ($this->_helper->isMailChimpEnabled($storeId)) {
