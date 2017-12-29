@@ -163,7 +163,6 @@ class Ecommerce
         $countOrders = 0;
         $batchArray = [];
         $results = $this->_apiSubscribers->sendSubscribers($storeId, $listId);
-        $countSubscribers = count($results);
         if ($this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_PATH_ECOMMERCE_ACTIVE, $storeId)) {
             $products =  $this->_apiProduct->_sendProducts($storeId);
             $countProducts = count($products);
@@ -211,7 +210,7 @@ class Ecommerce
                 $this->_helper->log(var_export($batchArray, true));
             }
         }
-        $countTotal = $countCustomers + $countProducts + $countOrders + $countSubscribers;
+        $countTotal = $countCustomers + $countProducts + $countOrders;
         $syncing = $this->_helper->getMCMinSyncing($storeId);
         if ($countTotal == 0 && $syncing) {
             $this->_helper->saveConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_PATH_IS_SYNC, date('Y-m-d'), $storeId);
