@@ -13,6 +13,7 @@
 
 namespace Ebizmarts\MailChimp\Model\Api;
 
+use Magento\Directory\Model\CountryFactory;
 use Magento\Framework\Exception\State\ExpiredException;
 use Symfony\Component\Config\Definition\Exception\Exception;
 
@@ -36,9 +37,9 @@ class Customer
      */
     protected $_date;
     /**
-     * @var \Magento\Directory\Api\CountryInformationAcquirerInterface
+     * @var CountryFactory
      */
-    protected $_countryInformation;
+    protected $_countryFactory;
     /**
      * @var \Magento\Customer\Model\CustomerFactory
      */
@@ -56,7 +57,7 @@ class Customer
      * @param \Magento\Customer\Model\CustomerFactory $customerFactory
      * @param \Magento\Customer\Model\ResourceModel\Customer\CollectionFactory $collection
      * @param \Magento\Sales\Model\ResourceModel\Order\CollectionFactory $orderCollection
-     * @param \Magento\Directory\Api\CountryInformationAcquirerInterface $countryInformation
+     * @param CountryFactory $countryFactory
      * @param \Magento\Customer\Model\Address $address
      * @param \Magento\Framework\Stdlib\DateTime\DateTime $date
      */
@@ -65,7 +66,7 @@ class Customer
         \Magento\Customer\Model\CustomerFactory $customerFactory,
         \Magento\Customer\Model\ResourceModel\Customer\CollectionFactory $collection,
         \Magento\Sales\Model\ResourceModel\Order\CollectionFactory $orderCollection,
-        \Magento\Directory\Api\CountryInformationAcquirerInterface $countryInformation,
+        \Magento\Directory\Model\CountryFactory $countryFactory,
         \Magento\Customer\Model\Address $address,
         \Magento\Framework\Stdlib\DateTime\DateTime $date
     ) {
@@ -75,9 +76,9 @@ class Customer
         $this->_orderCollection     = $orderCollection;
         $this->_date                = $date;
         $this->_batchId             = \Ebizmarts\MailChimp\Helper\Data::IS_CUSTOMER. '_' . $this->_date->gmtTimestamp();
-        $this->_countryInformation  = $countryInformation;
         $this->_address             = $address;
         $this->_customerFactory     = $customerFactory;
+        $this->_countryFactory      = $countryFactory;
     }
     public function sendCustomers($storeId)
     {
@@ -181,21 +182,16 @@ class Customer
                 $customerAddress["postal_code"] = $address->getPostcode();
             }
             if ($address->getCountryId()) {
-                $country = $this->_countryInformation->getCountryInfo($address->getCountryId());
-                $countryName = $country->getFullNameLocale();
-                $customerAddress["country"] = $countryName;
-                $customerAddress["country_code"] = $country->getTwoLetterAbbreviation();
+                /**
+                 * @var $country \Magento\Directory\Model\Country
+                 */
+                $country = $this->_countryFactory->create()->loadByCode($address->getCountryId());
+                $customerAddress["country"] = $country->getName();
+                $customerAddress["country_code"] = $address->getCountryId();
             }
             if (count($customerAddress)) {
                 $data["address"] = $customerAddress;
             }
-            //company
-//                if ($address->getCompany()) {
-//                    $data["company"] = $address->getCompany();
-//                }
-//                break;
-//            }
-//        }
         }
         return $data;
     }

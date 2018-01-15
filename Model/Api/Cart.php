@@ -54,9 +54,9 @@ class Cart
      */
     protected $_apiCustomer;
     /**
-     * @var \Magento\Directory\Api\CountryInformationAcquirerInterface
+     * @var \Magento\Directory\Model\CountryFactory
      */
-    protected $_countryInformation;
+    protected $_countryFactory;
     /**
      * @var \Magento\Framework\Url
      */
@@ -71,6 +71,7 @@ class Cart
      * @param Product $apiProduct
      * @param Customer $apiCustomer
      * @param \Magento\Directory\Api\CountryInformationAcquirerInterface $countryInformation
+     * @param \Magento\Directory\Model\CountryFactory $countryFactory
      * @param \Magento\Sales\Model\ResourceModel\Order\CollectionFactory $orderCollectionFactory
      * @param \Magento\Framework\Url $urlHelper
      */
@@ -81,7 +82,7 @@ class Cart
         \Magento\Customer\Model\CustomerFactory $customerFactory,
         \Ebizmarts\MailChimp\Model\Api\Product $apiProduct,
         \Ebizmarts\MailChimp\Model\Api\Customer $apiCustomer,
-        \Magento\Directory\Api\CountryInformationAcquirerInterface $countryInformation,
+        \Magento\Directory\Model\CountryFactory $countryFactory,
         \Magento\Sales\Model\ResourceModel\Order\CollectionFactory $orderCollectionFactory,
         \Magento\Framework\Url $urlHelper
     ) {
@@ -93,7 +94,7 @@ class Cart
         $this->_apiProduct              = $apiProduct;
         $this->_apiCustomer             = $apiCustomer;
         $this->_orderCollectionFactory  = $orderCollectionFactory;
-        $this->_countryInformation      = $countryInformation;
+        $this->_countryFactory          = $countryFactory;
         $this->_urlHelper               = $urlHelper;
     }
 
@@ -558,10 +559,14 @@ class Cart
             }
 
             if ($billingAddress->getCountryId()) {
-                $country = $this->_countryInformation->getCountryInfo($billingAddress->getCountryId());
-                $countryName = $country->getFullNameLocale();
-                $address['shipping_address']['country'] = $countryName;
-                $address['shipping_address']['country_code'] = $country->getTwoLetterAbbreviation();
+                /**
+                 * @var $country \Magento\Directory\Model\Country
+                 */
+                $country = $this->_countryFactory->create()->loadByCode($billingAddress->getCountryId());
+                $address['shipping_address']['country'] = $country->getName();
+                $address['shipping_address']['country_code'] = $billingAddress->getCountryId();
+
+
             }
 
             if (count($address)) {
