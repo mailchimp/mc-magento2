@@ -130,6 +130,7 @@ class Product
 //                \Ebizmarts\MailChimp\Helper\Data::IS_PRODUCT);
             if ($item->getMailchimpSyncModified() && $item->getMailchimpSyncDelta() &&
                 $item->getMailchimpSyncDelta() > $this->_helper->getMCMinSyncDateFlag()) {
+                $batchArray = array_merge($this->_buildOldProductRequest($product,$this->_batchId,$mailchimpStoreId, $magentoStoreId),$batchArray);
                 $this->_updateProduct($mailchimpStoreId, $product->getId(), $this->_date->gmtDate(), "", 0);
                 continue;
             } else {
@@ -212,48 +213,79 @@ class Product
         $mailchimpStoreId,
         $magentoStoreId
     ) {
-    
         $operations = [];
+        $variantProducts = [];
         if ($product->getTypeId() == \Magento\Catalog\Model\Product\Type::TYPE_SIMPLE ||
             $product->getTypeId() == \Magento\Catalog\Model\Product\Type::TYPE_VIRTUAL ||
             $product->getTypeId() == "downloadable") {
             $data = $this-> _buildProductData($product, $magentoStoreId);
 
-            $parentIds = $product->getTypeInstance()->getParentIdsByChild($product->getId());
-
-            if (empty($parentIds)) {
-                $parentIds = [$product->getId()];
-            }
+//            $parentIds = $product->getTypeInstance()->getParentIdsByChild($product->getId());
+            $parentIds =  $this->_configurable->getParentIdsByChild($product->getId());
+            $this->_helper->log('parents---->');
+            $this->_helper->log($parentIds);
 
             //add or update variant
             foreach ($parentIds as $parentId) {
-                $variendata = [];
-                $variendata["id"] = $data["id"];
-                $variendata["title"] = $data["title"];
-                $variendata["url"] = $data["url"];
-                $variendata["sku"] = $data["sku"];
-                $variendata["price"] = $data["price"];
-                $variendata["inventory_quantity"] = $data["inventory_quantity"];
-                $variendata["image_url"] = $data["image_url"];
-                $variendata["backorders"] = $data["backorders"];
-                $variendata["visibility"] = $data["visibility"];
-                $productdata = [];
-                $productdata['method'] = "PUT";
-                $productdata['path'] = "/ecommerce/stores/" . $mailchimpStoreId . "/products/".$parentId.'/variants/'.$data['id'];
-                $productdata['operation_id'] = $batchId . '_' . $parentId;
-                try {
-                    $body = json_encode($variendata);
-                } catch (\Exception $e) {
-                    //json encode failed
-                    $this->_helper->log("Product " . $product->getId() . " json encode failed");
-                    continue;
-                }
+                $productSync = $this->_chimpSyncEcommerce->create()->getByStoreIdType($mailchimpStoreId,
+                                                                                    $parentId,
+                                                                              \Ebizmarts\MailChimp\Helper\Data::IS_PRODUCT);
+                if($productSync->getMailchimpSyncDelta()) {
+                    $variendata = [];
+                    $variendata["id"] = $data["id"];
+                    $variendata["title"] = $data["title"];
+                    $variendata["url"] = $data["url"];
+                    $variendata["sku"] = $data["sku"];
+                    $variendata["price"] = $data["price"];
+                    $variendata["inventory_quantity"] = $data["inventory_quantity"];
+                    $variendata["image_url"] = $data["image_url"];
+                    $variendata["backorders"] = $data["backorders"];
+                    $variendata["visibility"] = $data["visibility"];
+                    $productdata = [];
+                    $productdata['method'] = "PUT";
+                    $productdata['path'] = "/ecommerce/stores/" . $mailchimpStoreId . "/products/" . $parentId . '/variants/' . $data['id'];
+                    $productdata['operation_id'] = $batchId . '_' . $parentId;
+                    try {
+                        $body = json_encode($variendata);
+                    } catch (\Exception $e) {
+                        //json encode failed
+                        $this->_helper->log("Product " . $product->getId() . " json encode failed");
+                        continue;
+                    }
 
-                $productdata['body'] = $body;
-                $operations[] = $productdata;
+                    $productdata['body'] = $body;
+                    $operations[] = $productdata;
+                }
             }
+        } elseif($product->getTypeId() == \Magento\ConfigurableProduct\Model\Product\Type\Configurable::TYPE_CODE) {
+            $this->_helper->log('es un configurable');
+            $childProducts = $product->getTypeInstance()->getChildrenIds($product->getId());
+            $variantProducts[] = $product;
+            if (count($childProducts[0])) {
+                foreach ($childProducts[0] as $childId) {
+                    $variantProducts[] = $this->_productRepository->getById($childId);
+                }
+            }
+        } else {
+            return [];
         }
 
+        $bodyData = $this->_buildProductData($product, $magentoStoreId, false, $variantProducts);
+        try {
+            $body = json_encode($bodyData, JSON_HEX_APOS|JSON_HEX_QUOT);
+
+        } catch (\Exception $e) {
+            //json encode failed
+            $this->_helper->log("Product " . $product->getId() . " json encode failed");
+            return [];
+        }
+        $data = [];
+        $data['method'] = "PATCH";
+        $data['path'] = "/ecommerce/stores/" . $mailchimpStoreId . "/products/".$product->getId();
+        $data['operation_id'] = $this->_batchId . '_' . $product->getId();
+        $data['body'] = $body;
+        $operations[] = $data;
+        $this->_helper->log($operations);
         return $operations;
     }
     protected function _buildProductData(
@@ -312,6 +344,10 @@ class Product
                 }
                 if ($parent) {
                     $this->_childtUrl = $data['url'] = $parent->getProductUrl() . $tailUrl;
+                    if(!isset($data['image_url'])) {
+                        $filePath = 'catalog/product'.$parent->getImage();
+                        $data["image_url"] = $this->_helper->getBaserUrl($magentoStoreId, \Magento\Framework\UrlInterface::URL_TYPE_MEDIA).$filePath;
+                    }
                 }
             } else {
                 $data["visibility"] = 'true';
