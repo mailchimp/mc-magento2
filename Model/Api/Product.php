@@ -222,8 +222,6 @@ class Product
 
 //            $parentIds = $product->getTypeInstance()->getParentIdsByChild($product->getId());
             $parentIds =  $this->_configurable->getParentIdsByChild($product->getId());
-            $this->_helper->log('parents---->');
-            $this->_helper->log($parentIds);
 
             //add or update variant
             foreach ($parentIds as $parentId) {
@@ -258,7 +256,6 @@ class Product
                 }
             }
         } elseif($product->getTypeId() == \Magento\ConfigurableProduct\Model\Product\Type\Configurable::TYPE_CODE) {
-            $this->_helper->log('es un configurable');
             $childProducts = $product->getTypeInstance()->getChildrenIds($product->getId());
             $variantProducts[] = $product;
             if (count($childProducts[0])) {
@@ -285,7 +282,6 @@ class Product
         $data['operation_id'] = $this->_batchId . '_' . $product->getId();
         $data['body'] = $body;
         $operations[] = $data;
-        $this->_helper->log($operations);
         return $operations;
     }
     protected function _buildProductData(
