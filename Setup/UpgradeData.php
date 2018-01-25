@@ -59,14 +59,14 @@ class UpgradeData implements UpgradeDataInterface
             else {
                     $salesConnection = $connection;
             }
-            $table = $salesConnection->getTableName('sales_order');
+            $table = $setup->getTable('sales_order');
             $select = $salesConnection->select()
                 ->from(
                     false,
                     ['mailchimp_flag' => new \Zend_Db_Expr('IF(mailchimp_abandonedcart_flag OR mailchimp_campaign_id OR mailchimp_landing_page, 1, 0)')]
                 )->join(['O'=>$table],'O.entity_id = G.entity_id',[]);
 
-            $query = $salesConnection->updateFromSelect($select, ['G' => $salesConnection->getTableName('sales_order_grid')]);
+            $query = $salesConnection->updateFromSelect($select, ['G' => $setup->getTable('sales_order_grid')]);
 
             $salesConnection->query($query);
             $setup->endSetup();
