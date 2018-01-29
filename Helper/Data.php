@@ -167,7 +167,8 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     protected $_interestGroupFactory;
 
 
-    private $customerAtt = null;
+    private $customerAtt    = null;
+    private $_mapFields     = null;
 
     /**
      * Data constructor.
@@ -303,9 +304,13 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
              */
             foreach ($collection as $item) {
                 try {
-                    $options = $item->getSource()->getAllOptions();
-                }
-                catch(\Exception $e) {
+                    if($item->usesSource()) {
+                        $options = $item->getSource()->getAllOptions();
+                    } else {
+                        $options = [];
+                    }
+
+                } catch(\Exception $e) {
                     $options = [];
                 }
                 $isDate = ($item->getBackendModel()=='Magento\Eav\Model\Entity\Attribute\Backend\Datetime') ? 1:0;
@@ -321,20 +326,21 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     }
     public function getMapFields($storeId = null)
     {
-        $retData = [];
-        $customerAtt = $this->getCustomerAtts();
-        $data = $this->getConfigValue(self::XML_MERGEVARS, $storeId);
-        $data = unserialize($data);
-        foreach ($data as $customerFieldId => $mailchimpName) {
-            $retData[] = [
-                'mailchimp' => strtoupper($mailchimpName) ,
-                'customer_field' => $customerAtt[$customerFieldId]['attCode'],
-                'isDate' =>$customerAtt[$customerFieldId]['isDate'],
-                'isAddress' => $customerAtt[$customerFieldId]['isAddress'],
-                'options' => $customerAtt[$customerFieldId]['options']
-            ];
+        if(!$this->_mapFields) {
+            $customerAtt = $this->getCustomerAtts();
+            $data = $this->getConfigValue(self::XML_MERGEVARS, $storeId);
+            $data = unserialize($data);
+            foreach ($data as $customerFieldId => $mailchimpName) {
+                $this->_mapFields[] = [
+                    'mailchimp' => strtoupper($mailchimpName),
+                    'customer_field' => $customerAtt[$customerFieldId]['attCode'],
+                    'isDate' => $customerAtt[$customerFieldId]['isDate'],
+                    'isAddress' => $customerAtt[$customerFieldId]['isAddress'],
+                    'options' => $customerAtt[$customerFieldId]['options']
+                ];
+            }
         }
-        return $retData;
+        return $this->_mapFields;
     }
     public function getDateFormat()
     {
