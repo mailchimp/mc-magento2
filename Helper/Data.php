@@ -57,7 +57,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     const IS_PROMO_CODE = "PCD";
 
     const PLATFORM      = 'Magento2';
-    const MAXSTORES     = 100;
+    const MAXSTORES     = 200;
 
     /**
      * @var \Magento\Store\Model\StoreManagerInterface

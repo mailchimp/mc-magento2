@@ -13,6 +13,8 @@
 
 namespace Ebizmarts\MailChimp\Model\Api;
 
+
+
 class Product
 {
     const DOWNLOADABLE  = 'downloadable';
@@ -34,7 +36,7 @@ class Product
      */
     protected $_productRepository;
     /**
-     * @var \Magento\Catalog\Model\ResourceModel\Product\Collection
+     * @var \Magento\Catalog\Model\ResourceModel\Product\CollectionFactory
      */
     protected $_productCollection;
     /**
@@ -65,12 +67,15 @@ class Product
      * @var \Magento\Catalog\Model\Product\Option
      */
     protected $_option;
+    /**
+     * @var \Magento\Catalog\Model\ResourceModel\Category\CollectionFactory
+     */
+    protected $_categoryCollection;
 
     /**
      * Product constructor.
      * @param \Magento\Catalog\Model\ResourceModel\Product\CollectionFactory $productCollection
      * @param \Magento\Catalog\Model\ProductRepository $productRepository
-     * @param \Magento\Catalog\Model\ProductFactory $productFactory
      * @param \Magento\Framework\Stdlib\DateTime\DateTime $date
      * @param \Ebizmarts\MailChimp\Helper\Data $helper
      * @param \Magento\Catalog\Helper\Image $imageHelper
@@ -78,6 +83,7 @@ class Product
      * @param \Magento\Catalog\Model\CategoryRepository $categoryRepository
      * @param \Ebizmarts\MailChimp\Model\MailChimpSyncEcommerceFactory $chimpSyncEcommerce
      * @param \Magento\ConfigurableProduct\Model\Product\Type\Configurable $configurable
+     * @param \Magento\Catalog\Model\ResourceModel\Category\CollectionFactory $categoryCollection
      * @param \Magento\Catalog\Model\Product\Option $option
      */
     public function __construct(
@@ -90,6 +96,7 @@ class Product
         \Magento\Catalog\Model\CategoryRepository $categoryRepository,
         \Ebizmarts\MailChimp\Model\MailChimpSyncEcommerceFactory $chimpSyncEcommerce,
         \Magento\ConfigurableProduct\Model\Product\Type\Configurable $configurable,
+        \Magento\Catalog\Model\ResourceModel\Category\CollectionFactory $categoryCollection,
         \Magento\Catalog\Model\Product\Option $option
     ) {
     
@@ -103,6 +110,7 @@ class Product
         $this->_chimpSyncEcommerce  = $chimpSyncEcommerce;
         $this->_configurable        = $configurable;
         $this->_option              = $option;
+        $this->_categoryCollection  = $categoryCollection;
         $this->_batchId             = \Ebizmarts\MailChimp\Helper\Data::IS_PRODUCT. '_' . $this->_date->gmtTimestamp();
     }
     public function _sendProducts($magentoStoreId)
@@ -355,14 +363,17 @@ class Product
             }
 
             //mailchimp product type (magento category)
-            $categoryIds = $product->getCategoryIds();
-            if (count($categoryIds)) {
-                $category = $this->_categoryRepository->get($categoryIds[0]);
-                $data["type"] = $category->getName();
+//            $categoryIds = $product->getCategoryIds();
+//            if (count($categoryIds)) {
+//                $category = $this->_categoryRepository->get($categoryIds[0]);
+//                $data["type"] = $category->getName();
+//            }
+            $categoryName = $this->getProductCategories($product,$magentoStoreId);
+            if($categoryName) {
+                $data['type'] = $data['vendor'] = $categoryName;
             }
 
             //missing data
-            $data["vendor"] = "";
             $data["handle"] = "";
             if (isset($data['image_url'])) {
                 $this->_parentImage = $data['image_url'];
@@ -384,6 +395,29 @@ class Product
         return $data;
     }
 
+    /**
+     * @param \Magento\Catalog\Model\Product $product
+     * @param $storeId
+     */
+    protected function getProductCategories(\Magento\Catalog\Model\Product $product,$storeId)
+    {
+        $categoryIds = $product->getCategoryIds();
+        $categoryNames = [];
+        $categoryName = null;
+        if( is_array($categoryIds) && count($categoryIds)) {
+            $collection = $this->_categoryCollection->create();
+            $collection->addAttributeToSelect(['name'])
+                ->setStoreId($storeId)
+                ->addAttributeToFilter('is_active',['eq'=>'1'])
+                ->addAttributeToFilter('entity_id',['in'=>$categoryIds])
+                ->addAttributeToSort('level','asc');
+            foreach ($collection as $category) {
+                $categoryNames[] = $category->getName();
+            }
+            $categoryName = (count($categoryNames)) ? implode(" - ",$categoryNames) : 'None';
+        }
+        return $categoryName;
+    }
     /**
      * @param \Magento\Sales\Model\Order $order
      * @param $mailchimpStoreId

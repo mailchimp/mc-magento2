@@ -43,6 +43,9 @@ class MonkeyStore implements \Magento\Framework\Option\ArrayInterface
             $rc[] = ['value' => -1, 'label' => 'Select one Mailchimp Store'];
             foreach ($this->options['stores'] as $store) {
                 if ($store['platform'] == \Ebizmarts\MailChimp\Helper\Data::PLATFORM) {
+                    if($store['list_id']=='') {
+                        continue;
+                    }
                     $rc[] = ['value'=> $store['id'], 'label' => $store['name']];
                 }
             }
