@@ -316,8 +316,11 @@ class Product
         if ($isVarient) {
             //this is for a varient product
             $data["sku"] = $product->getSku();
-            $data["price"] = $product->getPrice();
-
+            if($product->getSpecialPrice()) {
+                $data["price"] = $product->getSpecialPrice();
+            } else {
+                $data["price"] = $product->getPrice();
+            }
             //stock
             $stock = $this->_stockRegistry->getStockItem($product->getId(), $magentoStoreId);
             $data["inventory_quantity"] = (int)$stock->getQty();
