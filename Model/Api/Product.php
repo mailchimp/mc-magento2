@@ -227,6 +227,7 @@ class Product
             $product->getTypeId() == \Magento\Catalog\Model\Product\Type::TYPE_VIRTUAL ||
             $product->getTypeId() == "downloadable") {
             $data = $this-> _buildProductData($product, $magentoStoreId);
+            $variantProducts [] = $product;
 
 //            $parentIds = $product->getTypeInstance()->getParentIdsByChild($product->getId());
             $parentIds =  $this->_configurable->getParentIdsByChild($product->getId());
