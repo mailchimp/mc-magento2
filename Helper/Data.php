@@ -165,6 +165,10 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
      * @var \Ebizmarts\MailChimp\Model\MailChimpInterestGroupFactory
      */
     protected $_interestGroupFactory;
+    /**
+     * @var \Magento\Framework\Stdlib\DateTime\DateTime
+     */
+    protected $_date;
 
 
     private $customerAtt    = null;
@@ -197,6 +201,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
      * @param \Magento\Directory\Api\CountryInformationAcquirerInterface $countryInformation
      * @param \Magento\Framework\App\ResourceConnection $resource
      * @param \Ebizmarts\MailChimp\Model\MailChimpInterestGroupFactory $interestGroupFactory
+     * @param \Magento\Framework\Stdlib\DateTime\DateTime $date
      */
     public function __construct(
         \Magento\Framework\App\Helper\Context $context,
@@ -223,7 +228,8 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         \Magento\Customer\Model\CustomerFactory $customerFactory,
         \Magento\Directory\Api\CountryInformationAcquirerInterface $countryInformation,
         \Magento\Framework\App\ResourceConnection $resource,
-        \Ebizmarts\MailChimp\Model\MailChimpInterestGroupFactory $interestGroupFactory
+        \Ebizmarts\MailChimp\Model\MailChimpInterestGroupFactory $interestGroupFactory,
+        \Magento\Framework\Stdlib\DateTime\DateTime $date
     ) {
 
         $this->_storeManager  = $storeManager;
@@ -253,6 +259,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         $this->_customerFactory         = $customerFactory;
         $this->_countryInformation      = $countryInformation;
         $this->_interestGroupFactory    = $interestGroupFactory;
+        $this->_date                    = $date;
         parent::__construct($context);
     }
 
@@ -672,18 +679,31 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     {
         $this->resetErrors();
     }
-    public function saveEcommerceData($storeId, $entityId, $date, $error, $modified, $type, $deleted = 0, $token = null)
+    public function saveEcommerceData($storeId, $entityId, $type, $date = null, $error = null , $modified = null, $deleted = null, $token = null)
     {
 
         $chimpSyncEcommerce = $this->getChimpSyncEcommerce($storeId, $entityId, $type);
         $chimpSyncEcommerce->setMailchimpStoreId($storeId);
         $chimpSyncEcommerce->setType($type);
         $chimpSyncEcommerce->setRelatedId($entityId);
-        $chimpSyncEcommerce->setMailchimpSyncModified($modified);
-        $chimpSyncEcommerce->setMailchimpSyncDelta($date);
-        $chimpSyncEcommerce->setMailchimpSyncError($error);
-        $chimpSyncEcommerce->setMailchimpSyncDeleted($deleted);
-        $chimpSyncEcommerce->setMailchimpToken($token);
+        if($modified) {
+            $chimpSyncEcommerce->setMailchimpSyncModified($modified);
+        }
+        if($date) {
+            $chimpSyncEcommerce->setMailchimpSyncDelta($date);
+        } else {
+            $chimpSyncEcommerce->setBatchId(null);
+        }
+        if($error) {
+            $chimpSyncEcommerce->setMailchimpSyncError($error);
+        }
+        if($deleted) {
+            $chimpSyncEcommerce->setMailchimpSyncDeleted($deleted);
+            $chimpSyncEcommerce->setMailchimpSyncModified(0);
+        }
+        if($token) {
+            $chimpSyncEcommerce->setMailchimpToken($token);
+        }
         $chimpSyncEcommerce->getResource()->save($chimpSyncEcommerce);
     }
 
@@ -979,4 +999,13 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         }
         return $interest;
     }
+    public function getGmtDate()
+    {
+        return $this->_date->gmtDate();
+    }
+    public function getGmtTimeStamp()
+    {
+        return $this->_date->gmtTimestamp();
+    }
+
 }

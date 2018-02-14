@@ -34,10 +34,6 @@ class Cart
      */
     protected $_quoteCollection;
     /**
-     * @var \Magento\Framework\Stdlib\DateTime\DateTime
-     */
-    protected $_date;
-    /**
      * @var \Magento\Customer\Model\CustomerFactory
      */
     protected $_customerFactory;
@@ -66,11 +62,9 @@ class Cart
      * Cart constructor.
      * @param \Ebizmarts\MailChimp\Helper\Data $helper
      * @param \Magento\Quote\Model\ResourceModel\Quote\CollectionFactory $quoteColletcion
-     * @param \Magento\Framework\Stdlib\DateTime\DateTime $date
      * @param \Magento\Customer\Model\CustomerFactory $customerFactory
      * @param Product $apiProduct
      * @param Customer $apiCustomer
-     * @param \Magento\Directory\Api\CountryInformationAcquirerInterface $countryInformation
      * @param \Magento\Directory\Model\CountryFactory $countryFactory
      * @param \Magento\Sales\Model\ResourceModel\Order\CollectionFactory $orderCollectionFactory
      * @param \Magento\Framework\Url $urlHelper
@@ -78,7 +72,6 @@ class Cart
     public function __construct(
         \Ebizmarts\MailChimp\Helper\Data $helper,
         \Magento\Quote\Model\ResourceModel\Quote\CollectionFactory $quoteColletcion,
-        \Magento\Framework\Stdlib\DateTime\DateTime $date,
         \Magento\Customer\Model\CustomerFactory $customerFactory,
         \Ebizmarts\MailChimp\Model\Api\Product $apiProduct,
         \Ebizmarts\MailChimp\Model\Api\Customer $apiCustomer,
@@ -89,7 +82,6 @@ class Cart
     
         $this->_helper                  = $helper;
         $this->_quoteCollection         = $quoteColletcion;
-        $this->_date                    = $date;
         $this->_customerFactory         = $customerFactory;
         $this->_apiProduct              = $apiProduct;
         $this->_apiCustomer             = $apiCustomer;
@@ -168,7 +160,7 @@ class Cart
                     $allCarts[$this->_counter]['path'] = '/ecommerce/stores/' . $mailchimpStoreId . '/carts/' . $alreadySentCartId;
                     $allCarts[$this->_counter]['operation_id'] = $this->_batchId . '_' . $alreadySentCartId;
                     $allCarts[$this->_counter]['body'] = '';
-                    $this->_updateQuote($mailchimpStoreId, $alreadySentCartId, $this->_date->gmtDate(), "", 0, 1);
+                    $this->_updateQuote($mailchimpStoreId, $alreadySentCartId, null, null, null, 1);
                     $this->_counter += 1;
                 }
             }
@@ -178,7 +170,7 @@ class Cart
             $allCarts[$this->_counter]['path'] = '/ecommerce/stores/' . $mailchimpStoreId . '/carts/' . $cartId;
             $allCarts[$this->_counter]['operation_id'] = $this->_batchId . '_' . $cartId;
             $allCarts[$this->_counter]['body'] = '';
-            $this->_updateQuote($mailchimpStoreId, $cartId, $this->_date->gmtDate(), "", 0, 1);
+            $this->_updateQuote($mailchimpStoreId, $cartId, null, null, null, 1);
             $this->_counter += 1;
         }
 
@@ -240,7 +232,7 @@ class Cart
                         $allCarts[$this->_counter]['path'] = '/ecommerce/stores/' . $mailchimpStoreId . '/carts/' . $alreadySentCartId;
                         $allCarts[$this->_counter]['operation_id'] = $this->_batchId . '_' . $alreadySentCartId;
                         $allCarts[$this->_counter]['body'] = '';
-                        $this->_updateQuote($mailchimpStoreId, $alreadySentCartId, $this->_date->gmtDate(), null, null, 1);
+                        $this->_updateQuote($mailchimpStoreId, $alreadySentCartId, null, null, null, 1);
                         $this->_counter += 1;
                     }
                 }
@@ -249,7 +241,7 @@ class Cart
             }
             // avoid carts abandoned as guests when customer email associated to a registered customer.
             if (!$cart->getCustomerId() && $customer->getEmail()==$cart->getCustomerEmail()) {
-                $this->_updateQuote($mailchimpStoreId, $cartId, $this->_date->gmtDate());
+                $this->_updateQuote($mailchimpStoreId, $cartId);
                 continue;
             }
 
@@ -258,7 +250,7 @@ class Cart
                 $productData = $this->_apiProduct->sendQuoteModifiedProduct($cart, $mailchimpStoreId, $magentoStoreId);
             } catch(\Exception $e) {
                 $error = $e->getMessage();
-                $this->_updateQuote($mailchimpStoreId, $cartId, $this->_date->gmtDate(), $error);
+                $this->_updateQuote($mailchimpStoreId, $cartId);
                 continue;
             }
             if (count($productData)) {
@@ -279,7 +271,7 @@ class Cart
                 }
             }
 
-            $this->_updateQuote($mailchimpStoreId, $cartId, $this->_date->gmtDate());
+            $this->_updateQuote($mailchimpStoreId, $cartId);
         }
 
         return $allCarts;
@@ -324,7 +316,7 @@ class Cart
                 ->addFieldToFilter('main_table.updated_at', ['from' => $cart->getUpdatedAt()]);
             //if cart is empty or customer has an order made after the abandonment skip current cart.
             if (!count($cart->getAllVisibleItems()) || $orderCollection->getSize()) {
-                $this->_updateQuote($mailchimpStoreId, $cartId, $this->_date->gmtDate());
+                $this->_updateQuote($mailchimpStoreId, $cartId);
                 continue;
             }
             $customer = $this->_customerFactory->create();
@@ -339,7 +331,7 @@ class Cart
                     $allCarts[$this->_counter]['path'] = '/ecommerce/stores/' . $mailchimpStoreId . '/carts/' . $alreadySentCartId;
                     $allCarts[$this->_counter]['operation_id'] = $this->_batchId . '_' . $alreadySentCartId;
                     $allCarts[$this->_counter]['body'] = '';
-                    $this->_updateQuote($mailchimpStoreId, $alreadySentCartId, $this->_date->gmtDate(), null, null, 1);
+                    $this->_updateQuote($mailchimpStoreId, $alreadySentCartId, null, null, null, 1);
                     $this->_counter += 1;
                 }
 
@@ -348,7 +340,7 @@ class Cart
 
             // don't send the carts for guest customers who are registered
             if (!$cart->getCustomerId() && $customer->getEmail()==$cart->getCustomerEmail()) {
-                $this->_updateQuote($mailchimpStoreId, $cartId, $this->_date->gmtDate());
+                $this->_updateQuote($mailchimpStoreId, $cartId, $this->_helper->getGmtDate(), null , 0);
                 continue;
             }
 
@@ -357,7 +349,7 @@ class Cart
                 $productData = $this->_apiProduct->sendQuoteModifiedProduct($cart, $mailchimpStoreId, $magentoStoreId);
             } catch(\Exception $e) {
                 $error = $e->getMessage();
-                $this->_updateQuote($mailchimpStoreId, $cartId, $this->_date->gmtDate(), $error);
+                $this->_updateQuote($mailchimpStoreId, $cartId, $this->_helper->getGmtDate(), $error, 0);
                 continue;
             }
             if (count($productData)) {
@@ -373,7 +365,7 @@ class Cart
                 $allCarts[$this->_counter]['path'] = '/ecommerce/stores/' . $mailchimpStoreId . '/carts';
                 $allCarts[$this->_counter]['operation_id'] = $this->_batchId . '_' . $cartId;
                 $allCarts[$this->_counter]['body'] = $cartJson;
-                $this->_updateQuote($mailchimpStoreId, $cartId, $this->_date->gmtDate());
+                $this->_updateQuote($mailchimpStoreId, $cartId);
                 $this->_counter += 1;
             }
         }
@@ -606,15 +598,15 @@ class Cart
      * @param $sync_modified
      * @param $sync_deleted
      */
-    protected function _updateQuote($storeId, $entityId, $sync_delta, $sync_error = '', $sync_modified = 0, $sync_deleted = 0)
+    protected function _updateQuote($storeId, $entityId, $sync_delta =null, $sync_error = null, $sync_modified = null, $sync_deleted = null)
     {
         $this->_helper->saveEcommerceData(
             $storeId,
             $entityId,
+            \Ebizmarts\MailChimp\Helper\Data::IS_QUOTE,
             $sync_delta,
             $sync_error,
             $sync_modified,
-            \Ebizmarts\MailChimp\Helper\Data::IS_QUOTE,
             $sync_deleted,
             $this->_token
         );

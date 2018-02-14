@@ -24,10 +24,6 @@ class Subscriber
      */
     protected $_subscriberCollection;
     /**
-     * @var \Magento\Framework\Stdlib\DateTime\DateTime
-     */
-    protected $_date;
-    /**
      * @var \Magento\Framework\Message\ManagerInterface
      */
     protected $_message;
@@ -42,22 +38,17 @@ class Subscriber
      * @param \Ebizmarts\MailChimp\Helper\Data $helper
      * @param \Magento\Newsletter\Model\ResourceModel\Subscriber\CollectionFactory $subscriberCollection
      * @param \Magento\Newsletter\Model\SubscriberFactory $subscriberFactory
-     * @param \Magento\Customer\Api\CustomerRepositoryInterface $customerRepo
-     * @param \Magento\Customer\Model\CustomerFactory $customerFactory
-     * @param \Magento\Framework\Stdlib\DateTime\DateTime $date
      * @param \Magento\Framework\Message\ManagerInterface $message
      */
     public function __construct(
         \Ebizmarts\MailChimp\Helper\Data $helper,
         \Magento\Newsletter\Model\ResourceModel\Subscriber\CollectionFactory $subscriberCollection,
         \Magento\Newsletter\Model\SubscriberFactory $subscriberFactory,
-        \Magento\Framework\Stdlib\DateTime\DateTime $date,
         \Magento\Framework\Message\ManagerInterface $message
     )
     {
         $this->_helper                  = $helper;
         $this->_subscriberCollection    = $subscriberCollection;
-        $this->_date                    = $date;
         $this->_message                 = $message;
         $this->_subscriberFactory       = $subscriberFactory;
     }
@@ -105,7 +96,7 @@ class Subscriber
                 $subscriberArray[$counter]['operation_id'] = $batchId . '_' . $subscriber->getSubscriberId();
                 $subscriberArray[$counter]['body'] = $subscriberJson;
                 //update subscribers delta
-                $this->_updateSubscriber($listId, $subscriber->getId(), $this->_date->gmtDate(), '', 0);
+                $this->_updateSubscriber($listId, $subscriber->getId());
             }
             $counter++;
         }
@@ -185,11 +176,11 @@ class Subscriber
     {
         $storeId = $subscriber->getStoreId();
         $listId = $this->_helper->getGeneralList($storeId);
-        $this->_updateSubscriber($listId, $subscriber->getId(),$this->_date->gmtDate(),'',1 );
+        $this->_updateSubscriber($listId, $subscriber->getId(),$this->_helper->getGmtDate(),'',1 );
     }
-    protected function _updateSubscriber($listId, $entityId, $sync_delta, $sync_error='', $sync_modified=0)
+    protected function _updateSubscriber($listId, $entityId, $sync_delta = null, $sync_error=null, $sync_modified=null)
     {
-        $this->_helper->saveEcommerceData($listId, $entityId, $sync_delta, $sync_error, $sync_modified,
-            \Ebizmarts\MailChimp\Helper\Data::IS_SUBSCRIBER);
+        $this->_helper->saveEcommerceData($listId, $entityId, \Ebizmarts\MailChimp\Helper\Data::IS_SUBSCRIBER,
+            $sync_delta, $sync_error, $sync_modified);
     }
 }
