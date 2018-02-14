@@ -43,10 +43,6 @@ class Order
      */
     protected $_orderCollectionFactory;
     /**
-     * @var \Magento\Framework\Stdlib\DateTime\DateTime
-     */
-    protected $_date;
-    /**
      * @var Product
      */
     protected $_apiProduct;
@@ -82,7 +78,6 @@ class Order
      * @param \Magento\Sales\Model\OrderRepository $order
      * @param \Magento\Sales\Model\ResourceModel\Order\CollectionFactory $orderCollectionFactory
      * @param \Magento\Catalog\Model\ResourceModel\Product $product
-     * @param \Magento\Framework\Stdlib\DateTime\DateTime $date
      * @param Product $apiProduct
      * @param Customer $apiCustomer
      * @param \Magento\Catalog\Model\ProductFactory $productFactory
@@ -96,7 +91,6 @@ class Order
         \Magento\Sales\Model\OrderRepository $order,
         \Magento\Sales\Model\ResourceModel\Order\CollectionFactory $orderCollectionFactory,
         \Magento\Catalog\Model\ResourceModel\Product $product,
-        \Magento\Framework\Stdlib\DateTime\DateTime $date,
         \Ebizmarts\MailChimp\Model\Api\Product $apiProduct,
         \Ebizmarts\MailChimp\Model\Api\Customer $apiCustomer,
         \Magento\Catalog\Model\ProductFactory $productFactory,
@@ -108,14 +102,13 @@ class Order
         $this->_helper          = $helper;
         $this->_order           = $order;
         $this->_orderCollectionFactory = $orderCollectionFactory;
-        $this->_date            = $date;
         $this->_apiProduct      = $apiProduct;
         $this->_productFactory   = $productFactory;
         $this->_product         = $product;
         $this->_apiCustomer     = $apiCustomer;
         $this->_countryFactory  = $countryFactory;
         $this->_chimpSyncEcommerce  = $chimpSyncEcommerce;
-        $this->_batchId         = \Ebizmarts\MailChimp\Helper\Data::IS_ORDER. '_' . $this->_date->gmtTimestamp();
+        $this->_batchId         = \Ebizmarts\MailChimp\Helper\Data::IS_ORDER. '_' . $this->_helper->getGmtTimeStamp();
         $this->_firstDate = $this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_ECOMMERCE_FIRSTDATE);
         $this->_counter = 0;
         $this->_urlHelper    = $urlHelper;
@@ -173,7 +166,7 @@ class Order
                     $productData = $this->_apiProduct->sendModifiedProduct($order, $mailchimpStoreId, $magentoStoreId);
                 } catch(\Exception $e) {
                     $error = $e->getMessage();
-                    $this->_updateOrder($mailchimpStoreId, $orderId, $this->_date->gmtDate(), $error, 0);
+                    $this->_updateOrder($mailchimpStoreId, $orderId, $this->_helper->getGmtDate(), $error, 0);
                     continue;
                 }
                 if (count($productData)) {
@@ -191,12 +184,12 @@ class Order
                     $batchArray[$this->_counter]['body'] = $orderJson;
                 } else {
                     $error = __('Something went wrong when retreiving product information.');
-                    $this->_updateOrder($mailchimpStoreId, $orderId, $this->_date->gmtDate(), $error, 0);
+                    $this->_updateOrder($mailchimpStoreId, $orderId, $this->_helper->getGmtDate(), $error, 0);
                     continue;
                 }
 
                 //update order delta
-                $this->_updateOrder($mailchimpStoreId, $orderId, $this->_date->gmtDate(), $error, 0);
+                $this->_updateOrder($mailchimpStoreId, $orderId);
                 $this->_counter++;
             } catch (Exception $e) {
                 $this->_helper->log($e->getMessage());
@@ -241,7 +234,7 @@ class Order
                     $productData = $this->_apiProduct->sendModifiedProduct($order, $mailchimpStoreId, $magentoStoreId);
                 } catch(\Exception $e) {
                     $error = $e->getMessage();
-                    $this->_updateOrder($mailchimpStoreId, $orderId, $this->_date->gmtDate(), $error, 0);
+                    $this->_updateOrder($mailchimpStoreId, $orderId, $this->_helper->getGmtDate(), $error, 0);
                     continue;
                 }
                 if (count($productData)) {
@@ -262,7 +255,7 @@ class Order
                 }
 
                 //update order delta
-                $this->_updateOrder($mailchimpStoreId, $orderId, $this->_date->gmtDate(), $error, 0);
+                $this->_updateOrder($mailchimpStoreId, $orderId);
                 $this->_counter++;
             } catch (Exception $e) {
                 $this->_helper->log($e->getMessage());
@@ -652,15 +645,15 @@ class Order
 //        return $this->_api;
 //    }
 
-    protected function _updateOrder($storeId, $entityId, $sync_delta, $sync_error, $sync_modified)
+    protected function _updateOrder($storeId, $entityId, $sync_delta = null, $sync_error=null, $sync_modified=null)
     {
         $this->_helper->saveEcommerceData(
             $storeId,
             $entityId,
+            \Ebizmarts\MailChimp\Helper\Data::IS_ORDER,
             $sync_delta,
             $sync_error,
-            $sync_modified,
-            \Ebizmarts\MailChimp\Helper\Data::IS_ORDER
+            $sync_modified
         );
     }
 }

@@ -37,10 +37,6 @@ class Success extends \Magento\Framework\App\Action\Action
      * @var \Ebizmarts\MailChimp\Model\MailChimpInterestGroupFactory
      */
     protected $_interestGroupFactory;
-    /**
-     * @var \Magento\Framework\Stdlib\DateTime\DateTime
-     */
-    protected $_date;
 
     /**
      * Success constructor.
@@ -50,7 +46,6 @@ class Success extends \Magento\Framework\App\Action\Action
      * @param \Magento\Checkout\Model\Session $checkoutSession
      * @param \Magento\Newsletter\Model\SubscriberFactory $subscriberFactory
      * @param \Ebizmarts\MailChimp\Model\MailChimpInterestGroupFactory $interestGroupFactory
-     * @param \Magento\Framework\Stdlib\DateTime\DateTime $date
      */
     public function __construct(
         \Magento\Framework\App\Action\Context $context,
@@ -58,8 +53,7 @@ class Success extends \Magento\Framework\App\Action\Action
         \Ebizmarts\MailChimp\Helper\Data $helper,
         \Magento\Checkout\Model\Session $checkoutSession,
         \Magento\Newsletter\Model\SubscriberFactory $subscriberFactory,
-        \Ebizmarts\MailChimp\Model\MailChimpInterestGroupFactory $interestGroupFactory,
-        \Magento\Framework\Stdlib\DateTime\DateTime $date
+        \Ebizmarts\MailChimp\Model\MailChimpInterestGroupFactory $interestGroupFactory
     )
     {
         $this->_pageFactory         =$pageFactory;
@@ -67,7 +61,6 @@ class Success extends \Magento\Framework\App\Action\Action
         $this->_checkoutSession     = $checkoutSession;
         $this->_subscriberFactory   = $subscriberFactory;
         $this->_interestGroupFactory= $interestGroupFactory;
-        $this->_date                = $date;
         parent::__construct($context);
     }
 
@@ -88,10 +81,10 @@ class Success extends \Magento\Framework\App\Action\Action
                 $interestGroup->setGroupdata(serialize($params));
                 $interestGroup->setSubscriberId($subscriber->getSubscriberId());
                 $interestGroup->setStoreId($subscriber->getStoreId());
-                $interestGroup->setUpdatedAt($this->_date->gmtDate());
+                $interestGroup->setUpdatedAt($this->_helper->getGmtDate());
                 $interestGroup->getResource()->save($interestGroup);
                 $listId = $this->_helper->getGeneralList($order->getStoreId());
-                $this->_updateSubscriber($listId, $subscriber->getId(), $this->_date->gmtDate(), '', 1);
+                $this->_updateSubscriber($listId, $subscriber->getId(), $this->_helper->getGmtDate(), '', 1);
             } else {
                 $this->_subscriberFactory->create()->subscribe($order->getCustomerEmail());
                 $subscriber->loadByEmail($order->getCustomerEmail());
@@ -99,7 +92,7 @@ class Success extends \Magento\Framework\App\Action\Action
                 $interestGroup->setGroupdata(serialize($params));
                 $interestGroup->setSubscriberId($subscriber->getSubscriberId());
                 $interestGroup->setStoreId($subscriber->getStoreId());
-                $interestGroup->setUpdatedAt($this->_date->gmtDate());
+                $interestGroup->setUpdatedAt($this->_helper->getGmtDate());
                 $interestGroup->getResource()->save($interestGroup);
             }
         } catch(\Exception $e) {
@@ -108,9 +101,9 @@ class Success extends \Magento\Framework\App\Action\Action
         $this->messageManager->addSuccessMessage(__('Thanks for share your interest with us'));
         $this->_redirect($this->_helper->getBaserUrl($order->getStoreId(),\Magento\Framework\UrlInterface::URL_TYPE_WEB));
     }
-    protected function _updateSubscriber($listId, $entityId, $sync_delta, $sync_error='', $sync_modified=0)
+    protected function _updateSubscriber($listId, $entityId, $sync_delta = null, $sync_error=null, $sync_modified=null)
     {
-        $this->_helper->saveEcommerceData($listId, $entityId, $sync_delta, $sync_error, $sync_modified,
-            \Ebizmarts\MailChimp\Helper\Data::IS_SUBSCRIBER);
+        $this->_helper->saveEcommerceData($listId, $entityId, \Ebizmarts\MailChimp\Helper\Data::IS_SUBSCRIBER,
+            $sync_delta, $sync_error, $sync_modified);
     }
 }

@@ -33,10 +33,6 @@ class Customer
      */
     protected $_orderCollection;
     /**
-     * @var \Magento\Framework\Stdlib\DateTime\DateTime
-     */
-    protected $_date;
-    /**
      * @var CountryFactory
      */
     protected $_countryFactory;
@@ -59,7 +55,6 @@ class Customer
      * @param \Magento\Sales\Model\ResourceModel\Order\CollectionFactory $orderCollection
      * @param CountryFactory $countryFactory
      * @param \Magento\Customer\Model\Address $address
-     * @param \Magento\Framework\Stdlib\DateTime\DateTime $date
      */
     public function __construct(
         \Ebizmarts\MailChimp\Helper\Data $helper,
@@ -67,15 +62,13 @@ class Customer
         \Magento\Customer\Model\ResourceModel\Customer\CollectionFactory $collection,
         \Magento\Sales\Model\ResourceModel\Order\CollectionFactory $orderCollection,
         \Magento\Directory\Model\CountryFactory $countryFactory,
-        \Magento\Customer\Model\Address $address,
-        \Magento\Framework\Stdlib\DateTime\DateTime $date
+        \Magento\Customer\Model\Address $address
     ) {
     
         $this->_helper              = $helper;
         $this->_collection          = $collection;
         $this->_orderCollection     = $orderCollection;
-        $this->_date                = $date;
-        $this->_batchId             = \Ebizmarts\MailChimp\Helper\Data::IS_CUSTOMER. '_' . $this->_date->gmtTimestamp();
+        $this->_batchId             = \Ebizmarts\MailChimp\Helper\Data::IS_CUSTOMER. '_' . $this->_helper->getGmtTimeStamp();
         $this->_address             = $address;
         $this->_customerFactory     = $customerFactory;
         $this->_countryFactory      = $countryFactory;
@@ -119,7 +112,7 @@ class Customer
                 $customerArray[$counter]['body'] = $customerJson;
 
                 //update customers delta
-                $this->_updateCustomer($mailchimpStoreId, $customer->getId(), $this->_date->gmtDate(), '', 0);
+                $this->_updateCustomer($mailchimpStoreId, $customer->getId());
             }
             $counter++;
         }
@@ -223,15 +216,15 @@ class Customer
         }
         return $optin;
     }
-    protected function _updateCustomer($storeId, $entityId, $sync_delta, $sync_error, $sync_modified)
+    protected function _updateCustomer($storeId, $entityId, $sync_delta = null, $sync_error = null, $sync_modified = null)
     {
         $this->_helper->saveEcommerceData(
             $storeId,
             $entityId,
+            \Ebizmarts\MailChimp\Helper\Data::IS_CUSTOMER,
             $sync_delta,
             $sync_error,
-            $sync_modified,
-            \Ebizmarts\MailChimp\Helper\Data::IS_CUSTOMER
+            $sync_modified
         );
     }
 }

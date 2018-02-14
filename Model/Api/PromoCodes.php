@@ -36,10 +36,6 @@ class PromoCodes
      */
     private $_chimpSyncEcommerce;
     /**
-     * @var \Magento\Framework\Stdlib\DateTime\DateTime
-     */
-    private $_date;
-    /**
      * @var PromoRules
      */
     private $_promoRules;
@@ -54,7 +50,6 @@ class PromoCodes
      * @param \Magento\SalesRule\Model\ResourceModel\Coupon\CollectionFactory $couponCollection
      * @param \Magento\SalesRule\Model\ResourceModel\Rule\CollectionFactory $ruleCollection
      * @param \Ebizmarts\MailChimp\Model\MailChimpSyncEcommerceFactory $chimpSyncEcommerce
-     * @param \Magento\Framework\Stdlib\DateTime\DateTime $date
      * @param PromoRules $promoRules
      * @param \Ebizmarts\MailChimp\Model\ResourceModel\MailChimpSyncEcommerce\CollectionFactory $syncCollection
      */
@@ -63,7 +58,6 @@ class PromoCodes
         \Magento\SalesRule\Model\ResourceModel\Coupon\CollectionFactory $couponCollection,
         \Magento\SalesRule\Model\ResourceModel\Rule\CollectionFactory $ruleCollection,
         \Ebizmarts\MailChimp\Model\MailChimpSyncEcommerceFactory $chimpSyncEcommerce,
-        \Magento\Framework\Stdlib\DateTime\DateTime $date,
         \Ebizmarts\MailChimp\Model\Api\PromoRules $promoRules,
         \Ebizmarts\MailChimp\Model\ResourceModel\MailChimpSyncEcommerce\CollectionFactory $syncCollection
     )
@@ -72,8 +66,7 @@ class PromoCodes
         $this->_couponCollection    = $couponCollection;
         $this->_ruleCollection      = $ruleCollection;
         $this->_chimpSyncEcommerce  = $chimpSyncEcommerce;
-        $this->_date                = $date;
-        $this->_batchId             = \Ebizmarts\MailChimp\Helper\Data::IS_PROMO_CODE. '_' . $this->_date->gmtTimestamp();
+        $this->_batchId             = \Ebizmarts\MailChimp\Helper\Data::IS_PROMO_CODE. '_' . $this->_helper->getGmtTimeStamp();
         $this->_promoRules          = $promoRules;
         $this->_syncCollection      = $syncCollection;
     }
@@ -159,14 +152,14 @@ class PromoCodes
                             $counter++;
                         } else {
                             $error = __('Parent rule with id ' . $ruleId . 'has not been correctly sent.');
-                            $this->_updateSyncData($mailchimpStoreId, $ruleId, $this->_date->gmtDate(), $error, 0);
+                            $this->_updateSyncData($mailchimpStoreId, $ruleId, $this->_helper->getGmtDate(), $error, 0);
                             continue;
                         }
                     }
                     if ($promoRule->getMailchimpSyncError()) {
                         // the promorule associated has an error
                         $error = __('Parent rule with id ' . $ruleId . 'has not been correctly sent.');
-                        $this->_updateSyncData($mailchimpStoreId, $couponId, $this->_date->gmtDate(), $error, 0);
+                        $this->_updateSyncData($mailchimpStoreId, $couponId, $this->_helper->getGmtDate(), $error, 0);
                         continue;
                     }
                     $promoCodeJson = json_encode($this->generateCodeData($item, $magentoStoreId));
@@ -177,11 +170,11 @@ class PromoCodes
                         $batchArray[$counter]['body'] = $promoCodeJson;
                     } else {
                         $error = __('Something went wrong when retrieving the information for promo rule');
-                        $this->_updateSyncData($mailchimpStoreId, $couponId, $this->_date->gmtDate(), $error, 0);
+                        $this->_updateSyncData($mailchimpStoreId, $couponId, $this->_helper->getGmtDate(), $error, 0);
                         continue;
                     }
                     $counter++;
-                    $this->_updateSyncData($mailchimpStoreId, $couponId, $this->_date->gmtDate(), '', 0);
+                    $this->_updateSyncData($mailchimpStoreId, $couponId);
                 } catch (Exception $e) {
                     $this->_helper->log($e->getMessage());
                 }
@@ -207,15 +200,15 @@ class PromoCodes
         return $url;
 
     }
-    protected function _updateSyncData($storeId, $entityId, $sync_delta, $sync_error = '', $sync_modified = 0, $sync_deleted = 0)
+    protected function _updateSyncData($storeId, $entityId, $sync_delta=null, $sync_error = null, $sync_modified = null, $sync_deleted = null)
     {
         $this->_helper->saveEcommerceData(
             $storeId,
             $entityId,
+            \Ebizmarts\MailChimp\Helper\Data::IS_PROMO_CODE,
             $sync_delta,
             $sync_error,
             $sync_modified,
-            \Ebizmarts\MailChimp\Helper\Data::IS_PROMO_CODE,
             $sync_deleted,
             $this->_token
         );
