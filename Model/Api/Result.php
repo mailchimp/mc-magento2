@@ -57,7 +57,8 @@ class Result
         $collection = $this->_batchCollection->create();
         $collection
             ->addFieldToFilter('store_id', ['eq' => $storeId])
-            ->addFieldToFilter('status', ['eq' => 'pending']);
+            ->addFieldToFilter('status', ['eq' => 'pending'])
+            ->addFieldToFilter('mailchimp_store_id', ['eq' => $mailchimpStoreId]);
         /**
          * @var $item \Ebizmarts\MailChimp\Model\MailChimpSyncBatches
          */
