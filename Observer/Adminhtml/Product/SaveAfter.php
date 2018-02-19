@@ -18,18 +18,16 @@ class SaveAfter implements \Magento\Framework\Event\ObserverInterface
      * @var \Ebizmarts\MailChimp\Helper\Data
      */
     protected $helper;
-    /**
-     * @var \Magento\Framework\Stdlib\DateTime\DateTime
-     */
-    protected $date;
 
+    /**
+     * SaveAfter constructor.
+     * @param \Ebizmarts\MailChimp\Helper\Data $helper
+     */
     public function __construct(
-        \Ebizmarts\MailChimp\Helper\Data $helper,
-        \Magento\Framework\Stdlib\DateTime\DateTime $date
+        \Ebizmarts\MailChimp\Helper\Data $helper
     )
     {
         $this->helper               = $helper;
-        $this->date                 = $date;
     }
 
     public function execute(\Magento\Framework\Event\Observer $observer)
@@ -39,19 +37,19 @@ class SaveAfter implements \Magento\Framework\Event\ObserverInterface
          */
         $product = $observer->getProduct();
         $mailchimpStore = $this->helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_MAILCHIMP_STORE, $product->getStoreId());
-        $this->_updateProduct($mailchimpStore, $product->getId(), $this->date->gmtDate(), '', 1);
+        $this->_updateProduct($mailchimpStore, $product->getId(), null, '', 1);
 
 
     }
-    protected function _updateProduct($storeId, $entityId, $sync_delta, $sync_error, $sync_modified)
+    protected function _updateProduct($storeId, $entityId, $sync_delta = null, $sync_error = null, $sync_modified= null)
     {
         $this->helper->saveEcommerceData(
             $storeId,
             $entityId,
+            \Ebizmarts\MailChimp\Helper\Data::IS_PRODUCT,
             $sync_delta,
             $sync_error,
-            $sync_modified,
-            \Ebizmarts\MailChimp\Helper\Data::IS_PRODUCT
+            $sync_modified
         );
     }
 }
