@@ -28,10 +28,6 @@ class Product
      */
     protected $_helper;
     /**
-     * @var \Magento\Framework\Stdlib\DateTime\DateTime
-     */
-    protected $_date;
-    /**
      * @var \Magento\Catalog\Model\ProductRepository
      */
     protected $_productRepository;
@@ -76,7 +72,6 @@ class Product
      * Product constructor.
      * @param \Magento\Catalog\Model\ResourceModel\Product\CollectionFactory $productCollection
      * @param \Magento\Catalog\Model\ProductRepository $productRepository
-     * @param \Magento\Framework\Stdlib\DateTime\DateTime $date
      * @param \Ebizmarts\MailChimp\Helper\Data $helper
      * @param \Magento\Catalog\Helper\Image $imageHelper
      * @param \Magento\CatalogInventory\Api\StockRegistryInterface $stockRegistry
@@ -89,7 +84,6 @@ class Product
     public function __construct(
         \Magento\Catalog\Model\ResourceModel\Product\CollectionFactory $productCollection,
         \Magento\Catalog\Model\ProductRepository $productRepository,
-        \Magento\Framework\Stdlib\DateTime\DateTime $date,
         \Ebizmarts\MailChimp\Helper\Data $helper,
         \Magento\Catalog\Helper\Image $imageHelper,
         \Magento\CatalogInventory\Api\StockRegistryInterface $stockRegistry,
@@ -102,7 +96,6 @@ class Product
     
         $this->_productRepository   = $productRepository;
         $this->_helper              = $helper;
-        $this->_date                = $date;
         $this->_productCollection   = $productCollection;
         $this->_imageHelper         = $imageHelper;
         $this->_stockRegistry       = $stockRegistry;
@@ -111,13 +104,14 @@ class Product
         $this->_configurable        = $configurable;
         $this->_option              = $option;
         $this->_categoryCollection  = $categoryCollection;
-        $this->_batchId             = \Ebizmarts\MailChimp\Helper\Data::IS_PRODUCT. '_' . $this->_date->gmtTimestamp();
+        $this->_batchId             = \Ebizmarts\MailChimp\Helper\Data::IS_PRODUCT. '_' . $this->_helper->getGmtTimeStamp();
     }
     public function _sendProducts($magentoStoreId)
     {
         $batchArray = [];
         $counter = 0;
         $mailchimpStoreId = $this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_MAILCHIMP_STORE, $magentoStoreId);
+        $this->_markSpecialPrices($magentoStoreId,$mailchimpStoreId);
         $collection = $this->_getCollection();
         $collection->setStoreId($magentoStoreId);
         $collection->getSelect()->joinLeft(
@@ -139,7 +133,7 @@ class Product
             if ($item->getMailchimpSyncModified() && $item->getMailchimpSyncDelta() &&
                 $item->getMailchimpSyncDelta() > $this->_helper->getMCMinSyncDateFlag()) {
                 $batchArray = array_merge($this->_buildOldProductRequest($product,$this->_batchId,$mailchimpStoreId, $magentoStoreId),$batchArray);
-                $this->_updateProduct($mailchimpStoreId, $product->getId(), $this->_date->gmtDate(), "", 0);
+                $this->_updateProduct($mailchimpStoreId, $product->getId());
                 continue;
             } else {
                 $data = $this->_buildNewProductRequest($product, $mailchimpStoreId, $magentoStoreId);
@@ -149,12 +143,12 @@ class Product
                 $counter++;
 
                 //update product delta
-                $this->_updateProduct($mailchimpStoreId, $product->getId(), $this->_date->gmtDate(), "", 0);
+                $this->_updateProduct($mailchimpStoreId, $product->getId());
             } else {
                 $this->_updateProduct(
                     $mailchimpStoreId,
                     $product->getId(),
-                    $this->_date->gmtDate(),
+                    $this->_helper->getGmtDate(),
                     "This product type is not supported on MailChimp.",
                     0
                 );
@@ -162,7 +156,53 @@ class Product
         }
         return $batchArray;
     }
+    protected function _markSpecialPrices($magentoStoreId, $mailchimpStoreId)
+    {
+        $collection = $this->_getCollection();
+        $collection->setStoreId($magentoStoreId);
+        $collection->addAttributeToFilter(
+            'special_price',
+            ['gt'=>0], 'left'
+        )->addAttributeToFilter(
+            'special_from_date',['or' => [ 0 => ['date' => true,
+            'to' => date('Y-m-d',time()).' 23:59:59'],
+            1 => ['is' => new \Zend_Db_Expr(
+                'null'
+            )],]], 'left'
+        )->addAttributeToFilter(
+            'special_to_date',  ['or' => [ 0 => ['date' => true,
+            'from' => date('Y-m-d',time()).' 00:00:00'],
+            1 => ['is' => new \Zend_Db_Expr(
+                'null'
+            )],]], 'left'
+        );
+        $collection->getSelect()->joinLeft(['mc' => $collection->getTable('mailchimp_sync_ecommerce')],
+            "mc.type = 'PRO' AND mc.related_id = e.entity_id AND mc.mailchimp_sync_modified = 0 ".$collection->getConnection()->quoteInto(" AND  mc.mailchimp_store_id = ?",$mailchimpStoreId) ." and mc.mailchimp_sync_delta < (IF(at_special_from_date.value_id > 0, at_special_from_date.value, at_special_from_date_default.value))");
+        $collection->getSelect()->where('mc.mailchimp_sync_delta is not null');
+        foreach ($collection as $item) {
+            $this->_updateProduct($mailchimpStoreId, $item->getEntityId(),null,null, 1);
+        }
 
+
+
+        $collection2 = $this->_getCollection();
+        $collection2->setStoreId($magentoStoreId);
+        $collection2->addAttributeToFilter(
+            'special_price',
+            ['gt'=>0], 'left'
+        )->addAttributeToFilter(
+            'special_to_date',  ['or' => [ 0 => ['date' => true,
+            'to' => date('Y-m-d',time()).' 00:00:00'],
+            ]], 'left'
+        );
+        $collection2->getSelect()->joinLeft(['mc' => $collection2->getTable('mailchimp_sync_ecommerce')],
+            "mc.type = 'PRO' and mc.related_id = e.entity_id and mc.mailchimp_sync_modified = 0 ".$collection->getConnection()->quoteInto(" AND  mc.mailchimp_store_id = ?",$mailchimpStoreId) ." and mc.mailchimp_sync_delta < (IF(at_special_to_date.value_id > 0, at_special_to_date.value, at_special_to_date_default.value))",[]);
+        $collection2->getSelect()->where('mc.mailchimp_sync_delta is not null');
+        foreach ($collection2 as $item) {
+            $this->_updateProduct($mailchimpStoreId, $item->getEntityId(),null,null, 1);
+        }
+
+    }
     /**
      * @return \Magento\Catalog\Model\ResourceModel\Product\Collection
      */
@@ -321,6 +361,7 @@ class Product
             } else {
                 $data["price"] = $product->getPrice();
             }
+
             //stock
             $stock = $this->_stockRegistry->getStockItem($product->getId(), $magentoStoreId);
             $data["inventory_quantity"] = (int)$stock->getQty();
@@ -431,7 +472,7 @@ class Product
     public function sendModifiedProduct(\Magento\Sales\Model\Order $order, $mailchimpStoreId, $magentoStoreId)
     {
         $data = [];
-        $batchId = \Ebizmarts\MailChimp\Helper\Data::IS_PRODUCT . '_' . $this->_date->gmtTimestamp();
+        $batchId = \Ebizmarts\MailChimp\Helper\Data::IS_PRODUCT . '_' . $this->_helper->getGmtTimeStamp();
         $items = $order->getAllVisibleItems();
         foreach ($items as $item) {
             //@todo get from the store not the default
@@ -447,11 +488,11 @@ class Product
             if ($productSyncData->getMailchimpSyncModified() &&
                 $productSyncData->getMailchimpSyncDelta() > $this->_helper->getMCMinSyncDateFlag()) {
                 $data[] = $this->_buildOldProductRequest($product, $batchId, $mailchimpStoreId, $magentoStoreId);
-                $this->_updateProduct($mailchimpStoreId, $product->getId(), $this->_date->gmtDate(), '', 0);
+                $this->_updateProduct($mailchimpStoreId, $product->getId());
             } elseif (!$productSyncData->getMailchimpSyncDelta() ||
                 $productSyncData->getMailchimpSyncDelta() < $this->_helper->getMCMinSyncDateFlag()) {
                 $data[] = $this->_buildNewProductRequest($product, $mailchimpStoreId, $magentoStoreId);
-                $this->_updateProduct($mailchimpStoreId, $product->getId(), $this->_date->gmtDate(), '', 0);
+                $this->_updateProduct($mailchimpStoreId, $product->getId());
             }
         }
         return $data;
@@ -460,7 +501,7 @@ class Product
     public function sendQuoteModifiedProduct(\Magento\Quote\Model\Quote $quote, $mailchimpStoreId, $magentoStoreId)
     {
         $data = [];
-        $batchId = \Ebizmarts\MailChimp\Helper\Data::IS_PRODUCT . '_' . $this->_date->gmtTimestamp();
+        $batchId = \Ebizmarts\MailChimp\Helper\Data::IS_PRODUCT . '_' . $this->_helper->getGmtTimeStamp();
         $items = $quote->getAllVisibleItems();
         /**
          * @var $item \Magento\Quote\Model\Quote\Item
@@ -481,11 +522,11 @@ class Product
             if ($productSyncData->getMailchimpSyncModified() &&
                 $productSyncData->getMailchimpSyncDelta() > $this->_helper->getMCMinSyncDateFlag()) {
                 $data[] = $this->_buildOldProductRequest($product, $batchId, $mailchimpStoreId, $magentoStoreId);
-                $this->_updateProduct($mailchimpStoreId, $product->getId(), $this->_date->gmtDate(), '', 0);
+                $this->_updateProduct($mailchimpStoreId, $product->getId());
             } elseif (!$productSyncData->getMailchimpSyncDelta() ||
                 $productSyncData->getMailchimpSyncDelta() < $this->_helper->getMCMinSyncDateFlag()) {
                 $data[] = $this->_buildNewProductRequest($product, $mailchimpStoreId, $magentoStoreId);
-                $this->_updateProduct($mailchimpStoreId, $product->getId(), $this->_date->gmtDate(), '', 0);
+                $this->_updateProduct($mailchimpStoreId, $product->getId());
             }
         }
         return $data;
@@ -497,15 +538,15 @@ class Product
      * @param $sync_error
      * @param $sync_modified
      */
-    protected function _updateProduct($storeId, $entityId, $sync_delta, $sync_error, $sync_modified)
+    protected function _updateProduct($storeId, $entityId, $sync_delta=null, $sync_error=null, $sync_modified=null)
     {
         $this->_helper->saveEcommerceData(
             $storeId,
             $entityId,
+            \Ebizmarts\MailChimp\Helper\Data::IS_PRODUCT,
             $sync_delta,
             $sync_error,
-            $sync_modified,
-            \Ebizmarts\MailChimp\Helper\Data::IS_PRODUCT
+            $sync_modified
         );
     }
 }
