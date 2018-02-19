@@ -158,6 +158,9 @@ class Product
     }
     protected function _markSpecialPrices($magentoStoreId, $mailchimpStoreId)
     {
+        /**
+         * get the products with current special price that are not synced and mark it as modified
+         */
         $collection = $this->_getCollection();
         $collection->setStoreId($magentoStoreId);
         $collection->addAttributeToFilter(
@@ -182,9 +185,9 @@ class Product
         foreach ($collection as $item) {
             $this->_updateProduct($mailchimpStoreId, $item->getEntityId(),null,null, 1);
         }
-
-
-
+        /**
+         * get the products that was synced when it have special price and have no more special price
+         */
         $collection2 = $this->_getCollection();
         $collection2->setStoreId($magentoStoreId);
         $collection2->addAttributeToFilter(
