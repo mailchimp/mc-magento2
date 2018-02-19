@@ -111,6 +111,7 @@ class Product
         $batchArray = [];
         $counter = 0;
         $mailchimpStoreId = $this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_MAILCHIMP_STORE, $magentoStoreId);
+        $this->_markSpecialPrices($magentoStoreId,$mailchimpStoreId);
         $collection = $this->_getCollection();
         $collection->setStoreId($magentoStoreId);
         $collection->getSelect()->joinLeft(
@@ -155,7 +156,56 @@ class Product
         }
         return $batchArray;
     }
+    protected function _markSpecialPrices($magentoStoreId, $mailchimpStoreId)
+    {
+        /**
+         * get the products with current special price that are not synced and mark it as modified
+         */
+        $collection = $this->_getCollection();
+        $collection->setStoreId($magentoStoreId);
+        $collection->addAttributeToFilter(
+            'special_price',
+            ['gt'=>0], 'left'
+        )->addAttributeToFilter(
+            'special_from_date',['or' => [ 0 => ['date' => true,
+            'to' => date('Y-m-d',time()).' 23:59:59'],
+            1 => ['is' => new \Zend_Db_Expr(
+                'null'
+            )],]], 'left'
+        )->addAttributeToFilter(
+            'special_to_date',  ['or' => [ 0 => ['date' => true,
+            'from' => date('Y-m-d',time()).' 00:00:00'],
+            1 => ['is' => new \Zend_Db_Expr(
+                'null'
+            )],]], 'left'
+        );
+        $collection->getSelect()->joinLeft(['mc' => $collection->getTable('mailchimp_sync_ecommerce')],
+            "mc.type = 'PRO' AND mc.related_id = e.entity_id AND mc.mailchimp_sync_modified = 0 ".$collection->getConnection()->quoteInto(" AND  mc.mailchimp_store_id = ?",$mailchimpStoreId) ." and mc.mailchimp_sync_delta < (IF(at_special_from_date.value_id > 0, at_special_from_date.value, at_special_from_date_default.value))");
+        $collection->getSelect()->where('mc.mailchimp_sync_delta is not null');
+        foreach ($collection as $item) {
+            $this->_updateProduct($mailchimpStoreId, $item->getEntityId(),null,null, 1);
+        }
+        /**
+         * get the products that was synced when it have special price and have no more special price
+         */
+        $collection2 = $this->_getCollection();
+        $collection2->setStoreId($magentoStoreId);
+        $collection2->addAttributeToFilter(
+            'special_price',
+            ['gt'=>0], 'left'
+        )->addAttributeToFilter(
+            'special_to_date',  ['or' => [ 0 => ['date' => true,
+            'to' => date('Y-m-d',time()).' 00:00:00'],
+            ]], 'left'
+        );
+        $collection2->getSelect()->joinLeft(['mc' => $collection2->getTable('mailchimp_sync_ecommerce')],
+            "mc.type = 'PRO' and mc.related_id = e.entity_id and mc.mailchimp_sync_modified = 0 ".$collection->getConnection()->quoteInto(" AND  mc.mailchimp_store_id = ?",$mailchimpStoreId) ." and mc.mailchimp_sync_delta < (IF(at_special_to_date.value_id > 0, at_special_to_date.value, at_special_to_date_default.value))",[]);
+        $collection2->getSelect()->where('mc.mailchimp_sync_delta is not null');
+        foreach ($collection2 as $item) {
+            $this->_updateProduct($mailchimpStoreId, $item->getEntityId(),null,null, 1);
+        }
 
+    }
     /**
      * @return \Magento\Catalog\Model\ResourceModel\Product\Collection
      */
@@ -309,7 +359,11 @@ class Product
         if ($isVarient) {
             //this is for a varient product
             $data["sku"] = $product->getSku();
-            $data["price"] = $product->getPrice();
+            if($product->getSpecialPrice()) {
+                $data["price"] = $product->getSpecialPrice();
+            } else {
+                $data["price"] = $product->getPrice();
+            }
 
             //stock
             $stock = $this->_stockRegistry->getStockItem($product->getId(), $magentoStoreId);
