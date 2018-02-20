@@ -198,10 +198,11 @@ class Cart
             ['m4m.*']
         );
         // be sure that the quotes are already in mailchimp and not deleted
-        $modifiedCarts->getSelect()->where("m4m.mailchimp_sync_modified = 1 AND m4m.mailchimp_sync_deleted = 0".
+        $modifiedCarts->getSelect()->where("(m4m.mailchimp_sync_deleted is null or m4m.mailchimp_sync_deleted = 0)".
             " AND m4m.mailchimp_sync_delta < main_table.updated_at");
         // limit the collection
         $modifiedCarts->getSelect()->limit(self::BATCH_LIMIT);
+
         /**
          * @var $cart \Magento\Quote\Model\Quote
          */
@@ -449,7 +450,7 @@ class Cart
             //id can not be 0 so we add 1 to $itemCount before setting the id.
             $itemCount++;
             $line['id'] = (string)$itemCount;
-            $line['product_id'] = $item->getProductId();
+            $line['product_id'] = $variantId;
             $line['product_variant_id'] = $variantId;
             $line['quantity'] = (int)$item->getQty();
             $line['price'] = $item->getPrice();
