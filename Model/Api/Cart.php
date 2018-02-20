@@ -198,10 +198,11 @@ class Cart
             ['m4m.*']
         );
         // be sure that the quotes are already in mailchimp and not deleted
-        $modifiedCarts->getSelect()->where("m4m.mailchimp_sync_modified = 1 AND m4m.mailchimp_sync_deleted = 0".
+        $modifiedCarts->getSelect()->where("(m4m.mailchimp_sync_deleted is null or m4m.mailchimp_sync_deleted = 0)".
             " AND m4m.mailchimp_sync_delta < main_table.updated_at");
         // limit the collection
         $modifiedCarts->getSelect()->limit(self::BATCH_LIMIT);
+
         /**
          * @var $cart \Magento\Quote\Model\Quote
          */
