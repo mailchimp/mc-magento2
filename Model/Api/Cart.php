@@ -449,7 +449,7 @@ class Cart
             //id can not be 0 so we add 1 to $itemCount before setting the id.
             $itemCount++;
             $line['id'] = (string)$itemCount;
-            $line['product_id'] = $item->getProductId();
+            $line['product_id'] = $variantId;
             $line['product_variant_id'] = $variantId;
             $line['quantity'] = (int)$item->getQty();
             $line['price'] = $item->getPrice();
