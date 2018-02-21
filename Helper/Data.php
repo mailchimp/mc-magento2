@@ -757,11 +757,16 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
                 if ($store['platform']!=self::PLATFORM) {
                     continue;
                 }
+                if(isset($store['connected_site'])) {
+                    $name = $store['name'];
+                } else {
+                    $name = $store['name'].' (Warning: not connected)';
+                }
                 $mstore = $this->_mailChimpStoresFactory->create();
                 $mstore->setApikey(trim($apiKey));
                 $mstore->setStoreid($store['id']);
                 $mstore->setListId($store['list_id']);
-                $mstore->setName($store['name']);
+                $mstore->setName($name);
                 $mstore->setPlatform($store['platform']);
                 $mstore->setIsSync($store['is_syncing']);
                 $mstore->setEmailAddress($store['email_address']);
