@@ -46,7 +46,13 @@ class MonkeyStore implements \Magento\Framework\Option\ArrayInterface
                     if($store['list_id']=='') {
                         continue;
                     }
-                    $rc[] = ['value'=> $store['id'], 'label' => $store['name']];
+                    if(isset($store['connected_site'])) {
+                        $label = $store['name'];
+                    } else {
+                        $label = $store['name'].' (Warning: not connected)';
+                    }
+
+                    $rc[] = ['value'=> $store['id'], 'label' => $label];
                 }
             }
         } else {
