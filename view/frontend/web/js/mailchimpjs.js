@@ -1,7 +1,7 @@
 require(["jquery"], function ($) {
     $.ajax({
         url: '/mailchimp/script/get',
-        type: 'POST',
+        type: 'GET',
         dataType: 'json',
         showLoader: false
     }).done(function (data) {
