@@ -29,6 +29,13 @@
                     <label>Enabled</label>
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
                 </field>
+                <field id="oauth_wizard" translate="label" sortOrder="12" showInDefault="1" showInStore="1" showInWebsite="1">
+                    <attribute type="button_label">Get API credentials</attribute>
+                    <frontend_model>Ebizmarts\MailChimp\Block\Adminhtml\System\Config\OauthWizard</frontend_model>
+                    <depends>
+                        <field id="*/*/active">1</field>
+                    </depends>
+                </field>
                 <field id="apikeylist" translate="label" type="textarea" sortOrder="15" showInDefault="1">
                     <label>API Key list</label>
                     <backend_model>Ebizmarts\MailChimp\Model\Config\Backend\ApiKey</backend_model>
@@ -57,7 +64,6 @@
                 <field id="monkeylist" translate="label" type="select" sortOrder="30" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Mailchimp List</label>
                     <source_model>Ebizmarts\MailChimp\Model\Config\Source\MonkeyList</source_model>
-                    <!--<backend_model>Ebizmarts\MailChimp\Model\Config\Backend\MonkeyList</backend_model>-->
                     <depends>
                         <field id="*/*/active">1</field>
                     </depends>

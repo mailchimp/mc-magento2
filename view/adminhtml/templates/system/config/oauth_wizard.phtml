@@ -1,0 +1,6 @@
+<div class="actions actions-get-apikey">
+    <div id="validation_result" class="message-validation hidden"></div>
+    <button onclick="javascript:window.open('<?php echo $this->authorizeRequestUrl() ?>', 'apiwizard','toolbar=no, location=no, directories=no, status=no, menubar=no, scrollbars=yes, resizable=yes, ,left=100, top=100, width=500, height=700'); return false;" class="action-get-apikey" type="button" id="<?php echo $block->getHtmlId() ?>">
+        <span><?php echo $block->escapeHtml($block->getButtonLabel()) ?></span>
+    </button>
+</div>

@@ -17,8 +17,8 @@ class OauthWizard extends \Magento\Config\Block\System\Config\Form\Field
 
     private $_authorizeUri     = "https://login.mailchimp.com/oauth2/authorize";
     private $_accessTokenUri   = "https://login.mailchimp.com/oauth2/token";
-    private $_redirectUri      = "http://ebizmarts.com/magento/mailchimp/oauth2/complete_header_M2.php";
-    private $_clientId         = 976537930266;
+    private $_redirectUri      = "https://ebizmarts.com/magento/mc-magento2/oauth2/complete.php";
+    private $_clientId         = 390007044048;
 
     protected function _getElementHtml(\Magento\Framework\Data\Form\Element\AbstractElement $element)
     {
@@ -31,7 +31,7 @@ class OauthWizard extends \Magento\Config\Block\System\Config\Form\Field
             'button_url'   => $this->authorizeRequestUrl(),
             'html_id' => $element->getHtmlId(),
         ]);
-        return $this->_toHtml();
+        return parent::_toHtml();;
     }
     public function authorizeRequestUrl()
     {
