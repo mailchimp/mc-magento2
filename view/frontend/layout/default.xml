@@ -17,7 +17,7 @@
     </head>
     <body>
         <referenceContainer name="content">
-            <block class="Ebizmarts\MailChimp\Block\Catcher" template="Ebizmarts_MailChimp::catcher.phtml" ifconfig="mailchimp/general/active"/>
+            <block class="Ebizmarts\MailChimp\Block\Catcher" name="mailchimp.block.catcher" template="Ebizmarts_MailChimp::catcher.phtml" ifconfig="mailchimp/general/active"/>
         </referenceContainer>
     </body>
 </page>
