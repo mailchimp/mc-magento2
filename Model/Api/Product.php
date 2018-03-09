@@ -307,6 +307,11 @@ class Product
                     $operations[] = $productdata;
                 }
             }
+            
+            if (count($operations) > 0) {
+                return $operations;
+            }
+            
         } elseif($product->getTypeId() == \Magento\ConfigurableProduct\Model\Product\Type\Configurable::TYPE_CODE) {
             $childProducts = $product->getTypeInstance()->getChildrenIds($product->getId());
             $variantProducts[] = $product;
