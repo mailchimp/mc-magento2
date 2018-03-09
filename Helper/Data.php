@@ -730,6 +730,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     }
     public function loadStores()
     {
+        
         $mcUserName = [];
         $connection = $this->_mailChimpStores->getResource()->getConnection();
         $tableName = $this->_mailChimpStores->getResource()->getMainTable();
@@ -1002,6 +1003,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
                 }
             }
         }
+        $this->log($interest);
         return $interest;
     }
     public function getGmtDate()
