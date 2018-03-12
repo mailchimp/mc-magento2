@@ -1,0 +1,32 @@
+<script type="text/javascript">
+    //<![CDATA[
+    function createwebhook() {
+        jQuery.ajax({
+            url: '<?php echo $this->getAjaxCreateWebhookUrl() ?>',
+            data: {form_key: window.FORM_KEY},
+            type: 'POST',
+            success: function(data){
+                if(data.valid==0) {
+                    alert('Error: '+data.message);
+                }
+                else if(data.valid==1) {
+                    alert('Errors cleaned');
+                }
+            }
+        }).done(function(a) {
+            console.log(a);
+        });
+    }
+    //]]>
+</script>
+
+
+<?php //echo  __($block->escapeHtml('Reset errors')); ?>
+
+
+<div class="actions actions-create-webhook">
+    <div id="validation_result" class="message-validation hidden"></div>
+    <button onclick="javascript:createwebhook(); return false;" class="action-create-webhook" type="button" id="<?php echo $block->getHtmlId() ?>">
+        <span><?php echo $block->escapeHtml($block->getButtonLabel()) ?></span>
+    </button>
+</div>
