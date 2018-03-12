@@ -84,6 +84,14 @@
                         <field id="*/*/active">1</field>
                     </depends>
                 </field>
+                <field id="webhook_create" translate="button_label" type="button" sortOrder="55" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <button_label>Create Webhook</button_label>
+                    <frontend_model>Ebizmarts\MailChimp\Block\Adminhtml\System\Config\CreateWebhook</frontend_model>
+                    <depends>
+                        <field id="*/*/active">1</field>
+                        <field id="*/*/webhook_active">1</field>
+                    </depends>
+                </field>
                 <field id="webhook_delete" translate="label" type="select" sortOrder="60" showInDefault="1">
                     <label>Webhooks Delete action</label>
                     <source_model>Ebizmarts\MailChimp\Model\Config\Source\WebhookDelete</source_model>
