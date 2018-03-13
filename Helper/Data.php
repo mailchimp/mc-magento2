@@ -730,6 +730,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     }
     public function loadStores()
     {
+        
         $mcUserName = [];
         $connection = $this->_mailChimpStores->getResource()->getConnection();
         $tableName = $this->_mailChimpStores->getResource()->getMainTable();
@@ -854,8 +855,10 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
             // the urlencode of the hookUrl not work
             $ret = $api->lists->webhooks->add($listId, $hookUrl, $events, $sources);
         } catch (\Mailchimp_Error $e) {
-            $this->log($e->getMessage());
+            $this->log(__METHOD__.' '.$e->getMessage());
+            $ret ['message']= $e->getMessage();
         }
+        return $ret;
     }
     public function deleteWebHook($apikey, $listId)
     {
@@ -1002,6 +1005,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
                 }
             }
         }
+        $this->log($interest);
         return $interest;
     }
     public function getGmtDate()
