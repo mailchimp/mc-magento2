@@ -27,7 +27,7 @@ To maintain an effective bugfix workflow and make sure issues will be solved in 
 
 Before creating an issue, please do the following:
 
-* Check the [documentation](http://kb.mailchimp.com/integrations/e-commerce/connect-or-disconnect-mailchimp-for-magento) to make sure the behavior you are reporting is really a bug, not a feature.
+* Check the [documentation](https://kb.mailchimp.com/integrations/e-commerce/connect-or-disconnect-mailchimp-for-magento-2) to make sure the behavior you are reporting is really a bug, not a feature.
 * Check the existing [issues](https://github.com/mailchimp/mc-magento2/issues) to make sure you are not duplicating somebody’s work.
 * Make sure, that information you are about to report is a technical issue, please refer to the [Community Forums](http://ebizmarts.com/mailchimp-for-magento-support)  for technical questions.
 
