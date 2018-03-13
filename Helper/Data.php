@@ -856,7 +856,9 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
             $ret = $api->lists->webhooks->add($listId, $hookUrl, $events, $sources);
         } catch (\Mailchimp_Error $e) {
             $this->log($e->getMessage());
+            $ret ['message']= $e->getMessage();
         }
+        return $ret;
     }
     public function deleteWebHook($apikey, $listId)
     {
