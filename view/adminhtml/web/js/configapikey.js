@@ -51,16 +51,15 @@ define(
                     url: createWebhookUrl,
                     data: {'form_key': window.FORM_KEY,'apikey': apiKey, 'listId': listId},
                     type: 'POST',
-                    success: function(data){
-                        if(data.valid==0) {
-                            alert('Error: '+data.message);
-                        }
-                        else if(data.valid==1) {
-                            alert('WebHook created');
-                        }
+                    dataType: 'json',
+                    showLoader: true
+                }).done(function(data) {
+                    if(data.valid==0) {
+                        alert('Error: can\'t create WebHook. Your WebHook is already created or your web is private');
                     }
-                }).done(function(a) {
-                    console.log(a);
+                    else if(data.valid==1) {
+                        alert('WebHook created');
+                    }
                 });
             },
             _loadStores: function (apiKey) {
