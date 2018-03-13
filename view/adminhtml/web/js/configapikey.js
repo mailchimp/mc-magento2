@@ -18,7 +18,8 @@ define(
             "options": {
               "storeUrl": "",
               "detailsUrl": "",
-              "storeGridUrl": ""
+              "storeGridUrl": "",
+              "createWebhookUrl": ""
             },
 
             _init: function () {
@@ -38,9 +39,30 @@ define(
                 if ($('#mailchimp_general_monkeystore option').length>1) {
                     $('#row_mailchimp_general_monkeystore .note').hide();
                 }
-                //$('#mailchimp_general_monkeylist').prop('disabled', true);
+                $('#mailchimp_general_webhook_create').click(function() {
+                    var apiKey = $('#mailchimp_general_apikey').find(':selected').val();
+                    var listId = $('#mailchimp_general_monkeylist').find(':selected').val();
+                    self._createWebhook(apiKey, listId);
+                });
             },
-
+            _createWebhook: function(apiKey, listId) {
+                var createWebhookUrl = this.options.createWebhookUrl;
+                $.ajax({
+                    url: createWebhookUrl,
+                    data: {'form_key': window.FORM_KEY,'apikey': apiKey, 'listId': listId},
+                    type: 'POST',
+                    success: function(data){
+                        if(data.valid==0) {
+                            alert('Error: '+data.message);
+                        }
+                        else if(data.valid==1) {
+                            alert('WebHook created');
+                        }
+                    }
+                }).done(function(a) {
+                    console.log(a);
+                });
+            },
             _loadStores: function (apiKey) {
                 var self = this;
                 var storeUrl = this.options.storeUrl;
