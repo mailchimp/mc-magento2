@@ -855,7 +855,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
             // the urlencode of the hookUrl not work
             $ret = $api->lists->webhooks->add($listId, $hookUrl, $events, $sources);
         } catch (\Mailchimp_Error $e) {
-            $this->log($e->getMessage());
+            $this->log(__METHOD__.' '.$e->getMessage());
             $ret ['message']= $e->getMessage();
         }
         return $ret;
