@@ -117,7 +117,6 @@ class MonkeyStore extends \Magento\Framework\App\Config\Value
             }
             if ($createWebhook) {
                 $this->_helper->createWebHook($apiKey, $newListId);
-                //$this->_helper->createWebHook($data['general']['fields']['apikey']['value'], $newListId);
             }
         }
         return parent::beforeSave();
