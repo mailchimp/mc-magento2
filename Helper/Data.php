@@ -804,8 +804,8 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     }
     public function getJsUrl($storeId)
     {
-        $url = '';
-        if ($this->getConfigValue(self::XML_PATH_ACTIVE, $storeId)) {
+        $url = $this->getConfigValue(self::XML_MAILCHIMP_JS_URL, $storeId);
+        if ($this->getConfigValue(self::XML_PATH_ACTIVE, $storeId) && !$url) {
             $mailChimpStoreId = $this->getConfigValue(self::XML_MAILCHIMP_STORE, $storeId);
             $api = $this->getApi($storeId);
             $storeData = $api->ecommerce->stores->get($mailChimpStoreId);
