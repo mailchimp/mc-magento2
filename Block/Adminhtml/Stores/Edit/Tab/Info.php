@@ -103,6 +103,7 @@ class Info extends Generic implements TabInterface
                 ['name' => 'storeid']
             );
         } else {
+            $this->_apikey->getAllApiKeys();
             $apikey = $this->_apikey->toOptionArray();
             $apikeyArray = [];
             foreach ($apikey as $a) {
@@ -141,17 +142,6 @@ class Info extends Generic implements TabInterface
                 'required'     => true
             ]
         );
-
-//        $fieldset->addField(
-//            'is_sync',
-//            'select',
-//            [
-//                'name'        => 'is_sync',
-//                'label'    => __('Synced'),
-//                'required'     => true,
-//                'options'   => $this->_yesno->toArray(),
-//            ]
-//        );
 
         $fieldset->addField(
             'domain',
