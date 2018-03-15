@@ -36,7 +36,7 @@
                         <field id="*/*/active">1</field>
                     </depends>
                 </field>
-                <field id="apikeylist" translate="label" type="textarea" sortOrder="15" showInDefault="1">
+                <field id="apikeylist" translate="label" type="textarea" sortOrder="15" showInDefault="1" showInStore="1" showInWebsite="1">
                     <label>API Key list</label>
                     <backend_model>Ebizmarts\MailChimp\Model\Config\Backend\ApiKey</backend_model>
                     <comment>Enterlist of API keys one per line</comment>
