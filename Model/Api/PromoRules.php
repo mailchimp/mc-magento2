@@ -250,7 +250,7 @@ class PromoRules
      * @param string $sync_error
      * @param int $sync_modified
      */
-    protected function _updateSyncData($storeId, $entityId, $sync_delta, $sync_error = '', $sync_modified = 0)
+    protected function _updateSyncData($storeId, $entityId, $sync_delta = null, $sync_error = '', $sync_modified = 0)
     {
         $this->_helper->saveEcommerceData(
             $storeId,
