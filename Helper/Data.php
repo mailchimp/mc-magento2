@@ -541,26 +541,28 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     {
         $mergeVars = [];
         $mapFields = $this->getMapFields($storeId);
-        foreach ($mapFields as $map) {
-            $value = $customer->getData($map['customer_field']);
-            if($value) {
-                if ($map['isDate']) {
-                    $format = $this->getDateFormat();
-                    if($map['customer_field']=='dob') {
-                        $format = substr($format,0,3);
-                    }
-                    $value = date($format, strtotime($value));
-                } elseif($map['isAddress']) {
-                    $value = $this->_getAddressValues($customer->getPrimaryAddress($map['customer_field']));
-                } elseif(count($map['options'])) {
-                    foreach($map['options'] as $option) {
-                        if($option['value']==$value) {
-                            $value = $option['label'];
-                            break;
+        if(is_array($mapFields)) {
+            foreach ($mapFields as $map) {
+                $value = $customer->getData($map['customer_field']);
+                if ($value) {
+                    if ($map['isDate']) {
+                        $format = $this->getDateFormat();
+                        if ($map['customer_field'] == 'dob') {
+                            $format = substr($format, 0, 3);
+                        }
+                        $value = date($format, strtotime($value));
+                    } elseif ($map['isAddress']) {
+                        $value = $this->_getAddressValues($customer->getPrimaryAddress($map['customer_field']));
+                    } elseif (count($map['options'])) {
+                        foreach ($map['options'] as $option) {
+                            if ($option['value'] == $value) {
+                                $value = $option['label'];
+                                break;
+                            }
                         }
                     }
+                    $mergeVars[$map['mailchimp']] = $value;
                 }
-                $mergeVars[$map['mailchimp']] = $value;
             }
         }
         return (!empty($mergeVars)) ? $mergeVars : null;
