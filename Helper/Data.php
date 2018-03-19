@@ -693,7 +693,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         }
         if($date) {
             $chimpSyncEcommerce->setMailchimpSyncDelta($date);
-        } else {
+        } elseif($modified!=1) {
             $chimpSyncEcommerce->setBatchId(null);
         }
         if($error) {
