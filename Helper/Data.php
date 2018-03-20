@@ -1010,9 +1010,9 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         $this->log($interest);
         return $interest;
     }
-    public function getGmtDate()
+    public function getGmtDate($format = null)
     {
-        return $this->_date->gmtDate();
+        return $this->_date->gmtDate($format);
     }
     public function getGmtTimeStamp()
     {
