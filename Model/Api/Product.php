@@ -359,7 +359,7 @@ class Product
         if ($isVarient) {
             //this is for a varient product
             $data["sku"] = $product->getSku();
-            $today = $this->_helper->getGmtDate();
+            $today = $this->_helper->getGmtDate("Y-m-d");
             if($product->getSpecialFromDate() <= $today && $today <= $product->getSpecialToDate()) {
                 $data["price"] = $product->getSpecialPrice();
             } else {
