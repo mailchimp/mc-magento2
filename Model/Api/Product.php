@@ -360,12 +360,16 @@ class Product
             //this is for a varient product
             $data["sku"] = $product->getSku();
             $today = $this->_helper->getGmtDate("Y-m-d");
-            if($product->getSpecialFromDate() <= $today && $today <= $product->getSpecialToDate()) {
-                $data["price"] = $product->getSpecialPrice();
+            if($product->getSpecialFromDate() && $product->getSpecialFromDate() <= $today)
+            {
+                if(!$product->getSpecialToDate() || ($product->getSpecialToDate() && $today <= $product->getSpecialToDate())) {
+                    $data["price"] = $product->getSpecialPrice();
+                } else {
+                    $data["price"] = $product->getPrice();
+                }
             } else {
                 $data["price"] = $product->getPrice();
             }
-
 
             //stock
             $stock = $this->_stockRegistry->getStockItem($product->getId(), $magentoStoreId);
