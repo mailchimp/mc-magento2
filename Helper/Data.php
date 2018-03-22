@@ -494,6 +494,12 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         $tableName = $this->_syncBatches->getResource()->getMainTable();
         $connection->update($tableName, ['status' => $status], "mailchimp_store_id = '".$mailchimpStore."'");
     }
+    public function markProductAsModified($productId)
+    {
+        $connection = $this->_mailChimpSyncE->getResource()->getConnection();
+        $tableName = $this->_mailChimpSyncE->getResource()->getMainTable();
+        $connection->update($tableName,['mailchimp_sync_modified' => 1],"type = '".self::IS_PRODUCT."' and related_id = $productId");
+    }
     public function getMCStoreName($storeId)
     {
         return $this->_storeManager->getStore($storeId)->getFrontendName();

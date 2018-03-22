@@ -37,19 +37,12 @@ class SaveAfter implements \Magento\Framework\Event\ObserverInterface
          */
         $product = $observer->getProduct();
         $mailchimpStore = $this->helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_MAILCHIMP_STORE, $product->getStoreId());
-        $this->_updateProduct($mailchimpStore, $product->getId(), null, '', 1);
+        $this->_updateProduct($product->getId());
 
 
     }
-    protected function _updateProduct($storeId, $entityId, $sync_delta = null, $sync_error = null, $sync_modified= null)
+    protected function _updateProduct($entityId)
     {
-        $this->helper->saveEcommerceData(
-            $storeId,
-            $entityId,
-            \Ebizmarts\MailChimp\Helper\Data::IS_PRODUCT,
-            $sync_delta,
-            $sync_error,
-            $sync_modified
-        );
+        $this->helper->markProductAsModified($entityId);
     }
 }
