@@ -81,6 +81,8 @@ class MonkeyStore extends \Magento\Framework\App\Config\Value
             $active = $data['ecommerce']['fields']['active']['value'];
         } elseif ($data['ecommerce']['fields']['active']['inherit']) {
             $active = $data['ecommerce']['fields']['active']['inherit'];
+        } else {
+            $active = 0;
         }
         if ($active && $this->isValueChanged()) {
             $mailchimpStore     = $this->getOldValue();
