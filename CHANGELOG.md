@@ -1,5 +1,33 @@
 # Change Log
 
+## [1.0.28](https://github.com/mailchimp/mc-magento2/tree/1.0.28) (2018-03-27)
+
+[Full Changelog](https://github.com/mailchimp/mc-magento2/compare/1.0.27...1.0.28)
+
+**Implemented enhancements:**
+
+- Not necessary mailchimp/script/get requests [\#248](https://github.com/mailchimp/mc-magento2/issues/248)
+- Add a button to create the webhooks [\#229](https://github.com/mailchimp/mc-magento2/issues/229)
+- Add get Api credentials button using oauth. [\#207](https://github.com/mailchimp/mc-magento2/issues/207)
+- Special price management [\#194](https://github.com/mailchimp/mc-magento2/issues/194)
+- Use a checkbox on Checkout to determine Opt-in status. [\#36](https://github.com/mailchimp/mc-magento2/issues/36)
+
+**Fixed bugs:**
+
+- Don't delete the batch\_id when modify a register [\#246](https://github.com/mailchimp/mc-magento2/issues/246)
+- Invalid argument supplied for foreach\(\) [\#243](https://github.com/mailchimp/mc-magento2/issues/243)
+- Missing argument on call to \_updateSyncData\(\) [\#241](https://github.com/mailchimp/mc-magento2/issues/241)
+- MailChimp js file loaded each time the page loads [\#232](https://github.com/mailchimp/mc-magento2/issues/232)
+- Mark non existing batchs as canceled [\#216](https://github.com/mailchimp/mc-magento2/issues/216)
+- Modified carts are not re synced [\#212](https://github.com/mailchimp/mc-magento2/issues/212)
+- Try to get result for not existing batch [\#210](https://github.com/mailchimp/mc-magento2/issues/210)
+- Wrong error management [\#204](https://github.com/mailchimp/mc-magento2/issues/204)
+- When modify a simple product, the variant is empty [\#202](https://github.com/mailchimp/mc-magento2/issues/202)
+- Abandoned cart email product price has range starting at $0 when using configurable products [\#197](https://github.com/mailchimp/mc-magento2/issues/197)
+- Error due to customer data race condition [\#112](https://github.com/mailchimp/mc-magento2/issues/112)
+- Show "Mailchimp" customer tab when the extension is enabled [\#201](https://github.com/mailchimp/mc-magento2/pull/201) ([t-richards](https://github.com/t-richards))
+- Update default.xml [\#180](https://github.com/mailchimp/mc-magento2/pull/180) ([jhruehl](https://github.com/jhruehl))
+
 ## [1.0.27](https://github.com/mailchimp/mc-magento2/tree/1.0.27) (2018-01-30)
 [Full Changelog](https://github.com/mailchimp/mc-magento2/compare/1.0.26...1.0.27)
 
