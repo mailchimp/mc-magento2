@@ -67,7 +67,9 @@ class VarsMap  extends \Magento\Framework\App\Config\Value
     public function beforeSave()
     {
         $value = $this->getValue();
-        $value = $this->_varsHelper->makeStorableArrayFieldValue($value);
+        if(is_array($value)) {
+            $value = $this->_varsHelper->makeStorableArrayFieldValue($value);
+        }
         $this->setValue($value);
     }
 
