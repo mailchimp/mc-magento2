@@ -51,13 +51,13 @@ class Interest  implements \Magento\Framework\Option\ArrayInterface
 
     public function toOptionArray()
     {
-        if (is_array($this->options)) {
+        if (is_array($this->options['categories'])&&count($this->options['categories'])) {
             $rc = [];
             foreach($this->options['categories'] as $interest) {
                 $rc[] = ['value'=> $interest['id'], 'label' => $interest['title']];
             }
         } else {
-            $rc[] = ['value' => 0, 'label' => __('---No Data---')];
+            $rc[] = ['value' => [], 'label' => __('---No Data---')];
         }
         return $rc;
     }
