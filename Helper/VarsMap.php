@@ -45,7 +45,7 @@ class VarsMap extends \Magento\Framework\App\Helper\AbstractHelper
     }
     public function makeStorableArrayFieldValue($value)
     {
-        $value = $this->decodeArrayFieldValue($value);
+        $value = is_array($value) ? $this->decodeArrayFieldValue($value) : $value;
         $value = $this->serializeValue($value);
         return $value;
     }
