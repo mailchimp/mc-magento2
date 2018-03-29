@@ -691,28 +691,30 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     {
 
         $chimpSyncEcommerce = $this->getChimpSyncEcommerce($storeId, $entityId, $type);
-        $chimpSyncEcommerce->setMailchimpStoreId($storeId);
-        $chimpSyncEcommerce->setType($type);
-        $chimpSyncEcommerce->setRelatedId($entityId);
-        if($modified) {
-            $chimpSyncEcommerce->setMailchimpSyncModified($modified);
+        if($chimpSyncEcommerce->getRelatedId()==$entityId||!$chimpSyncEcommerce->getRelatedId()&&$modified!=1) {
+            $chimpSyncEcommerce->setMailchimpStoreId($storeId);
+            $chimpSyncEcommerce->setType($type);
+            $chimpSyncEcommerce->setRelatedId($entityId);
+            if ($modified) {
+                $chimpSyncEcommerce->setMailchimpSyncModified($modified);
+            }
+            if ($date) {
+                $chimpSyncEcommerce->setMailchimpSyncDelta($date);
+            } elseif ($modified != 1) {
+                $chimpSyncEcommerce->setBatchId(null);
+            }
+            if ($error) {
+                $chimpSyncEcommerce->setMailchimpSyncError($error);
+            }
+            if ($deleted) {
+                $chimpSyncEcommerce->setMailchimpSyncDeleted($deleted);
+                $chimpSyncEcommerce->setMailchimpSyncModified(0);
+            }
+            if ($token) {
+                $chimpSyncEcommerce->setMailchimpToken($token);
+            }
+            $chimpSyncEcommerce->getResource()->save($chimpSyncEcommerce);
         }
-        if($date) {
-            $chimpSyncEcommerce->setMailchimpSyncDelta($date);
-        } elseif($modified!=1) {
-            $chimpSyncEcommerce->setBatchId(null);
-        }
-        if($error) {
-            $chimpSyncEcommerce->setMailchimpSyncError($error);
-        }
-        if($deleted) {
-            $chimpSyncEcommerce->setMailchimpSyncDeleted($deleted);
-            $chimpSyncEcommerce->setMailchimpSyncModified(0);
-        }
-        if($token) {
-            $chimpSyncEcommerce->setMailchimpToken($token);
-        }
-        $chimpSyncEcommerce->getResource()->save($chimpSyncEcommerce);
     }
 
     public function markEcommerceAsModified($relatedId, $type)

@@ -17,25 +17,18 @@ use Magento\Framework\Event\Observer;
 class SaveBefore implements \Magento\Framework\Event\ObserverInterface
 {
     /**
-     * @var \Ebizmarts\MailChimp\Model\MailChimpSyncEcommerce
-     */
-    protected $_ecommerce;
-    /**
      * @var \Ebizmarts\MailChimp\Helper\Data
      */
     protected $_helper;
 
     /**
      * SaveBefore constructor.
-     * @param \Ebizmarts\MailChimp\Model\MailChimpSyncEcommerce $ecommerce
      * @param \Ebizmarts\MailChimp\Helper\Data $helper
      */
     public function __construct(
-        \Ebizmarts\MailChimp\Model\MailChimpSyncEcommerce $ecommerce,
         \Ebizmarts\MailChimp\Helper\Data $helper
     ) {
 
-        $this->_ecommerce           = $ecommerce;
         $this->_helper              = $helper;
     }
 
@@ -47,11 +40,7 @@ class SaveBefore implements \Magento\Framework\Event\ObserverInterface
         $customer = $observer->getCustomer();
         $storeId  = $customer->getStoreId();
         $mailchimpStoreId = $this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_MAILCHIMP_STORE, $storeId);
-        $ecom = $this->_ecommerce->getByStoreIdType($mailchimpStoreId, $customer->getId(), \Ebizmarts\MailChimp\Helper\Data::IS_CUSTOMER);
-        if ($ecom) {
-            $ecom->setMailchimpSyncModified(1);
-            $ecom->getResource()->save($ecom);
-        }
+        $this->_helper->saveEcommerceData($mailchimpStoreId, $customer->getId(), \Ebizmarts\MailChimp\Helper\Data::IS_CUSTOMER, null, null, 1);
 
     }
 }
