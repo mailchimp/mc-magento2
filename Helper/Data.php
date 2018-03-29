@@ -337,14 +337,16 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
             $customerAtt = $this->getCustomerAtts();
             $data = $this->getConfigValue(self::XML_MERGEVARS, $storeId);
             $data = unserialize($data);
-            foreach ($data as $customerFieldId => $mailchimpName) {
-                $this->_mapFields[] = [
-                    'mailchimp' => strtoupper($mailchimpName),
-                    'customer_field' => $customerAtt[$customerFieldId]['attCode'],
-                    'isDate' => $customerAtt[$customerFieldId]['isDate'],
-                    'isAddress' => $customerAtt[$customerFieldId]['isAddress'],
-                    'options' => $customerAtt[$customerFieldId]['options']
-                ];
+            if(is_array($data)) {
+                foreach ($data as $customerFieldId => $mailchimpName) {
+                    $this->_mapFields[] = [
+                        'mailchimp' => strtoupper($mailchimpName),
+                        'customer_field' => $customerAtt[$customerFieldId]['attCode'],
+                        'isDate' => $customerAtt[$customerFieldId]['isDate'],
+                        'isAddress' => $customerAtt[$customerFieldId]['isAddress'],
+                        'options' => $customerAtt[$customerFieldId]['options']
+                    ];
+                }
             }
         }
         return $this->_mapFields;
