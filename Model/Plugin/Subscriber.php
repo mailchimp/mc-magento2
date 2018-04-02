@@ -80,7 +80,6 @@ class Subscriber
                 $customer = $this->_customer->getById($customerId);
                 $email = $customer->getEmail();
                 $mergeVars = $this->_helper->getMergeVarsBySubscriber($subscriber, $email);
-//            $mergeVars = $this->_helper->getMergeVarsByCustomer($customer, $email);
                 $api = $this->_api;
                 $isSubscribeOwnEmail = $this->_customerSession->isLoggedIn()
                     && $this->_customerSession->getCustomerDataObject()->getEmail() == $subscriber->getSubscriberEmail();
