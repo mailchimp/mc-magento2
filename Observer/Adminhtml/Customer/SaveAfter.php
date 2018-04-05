@@ -52,6 +52,7 @@ class SaveAfter implements \Magento\Framework\Event\ObserverInterface
         $allParams = $request->getParams();
         $subscriber = $this->subscriberFactory->create();
         if(isset($allParams['customer']['interestgroup'])) {
+
             $params = ['group' => $allParams['customer']['interestgroup']];
             foreach ($params['group'] as $index => $ig) {
                 if (is_array($ig)) {
@@ -72,9 +73,7 @@ class SaveAfter implements \Magento\Framework\Event\ObserverInterface
                     $interestGroup->setStoreId($subscriber->getStoreId());
                     $interestGroup->setUpdatedAt($this->helper->getGmtDate());
                     $interestGroup->getResource()->save($interestGroup);
-                    $listId = $this->helper->getGeneralList($subscriber->getStoreId());
                     $this->helper->markRegisterAsModified($subscriber->getId(),\Ebizmarts\MailChimp\Helper\Data::IS_SUBSCRIBER);
-//                    $this->_updateSubscriber($listId, $subscriber->getId(), $this->helper->getGmtDate(), null, 1);
                 } else {
                     $this->subscriberFactory->create()->subscribe($customer->getEmail());
                     $subscriber->loadByEmail($customer->getEmail());
