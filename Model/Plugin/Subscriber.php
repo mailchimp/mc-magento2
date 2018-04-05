@@ -105,7 +105,7 @@ class Subscriber
         $subscriber,
         $email
     ) {
-	$subscriber->setImportMode(true);
+        $subscriber->setImportMode(true);
         $storeId = $this->_storeManager->getStore()->getId();
 
         if ($this->_helper->isMailChimpEnabled($storeId)) {
@@ -127,15 +127,34 @@ class Subscriber
     }
 
     public function beforeUnsubscribe(
-        $subscriber
+        \Magento\Newsletter\Model\Subscriber $subscriber
     )
     {
-            $api = $this->_helper->getApi();
+        $api = $this->_helper->getApi();
         try {
             $md5HashEmail = md5(strtolower($subscriber->getSubscriberEmail()));
             $api->lists->members->update($this->_helper->getDefaultList(), $md5HashEmail, null, 'unsubscribed');
         } catch (\Exception $e) {
             $this->_helper->log($e->getMessage());
+        }
+        return null;
+    }
+    public function afterDelete(
+        \Magento\Newsletter\Model\Subscriber $subscriber
+    )
+    {
+        $api = $this->_helper->getApi();
+        if($subscriber->isSubscribed()) {
+            try {
+                $md5HashEmail = md5(strtolower($subscriber->getSubscriberEmail()));
+                if($subscriber->getCustomerId()) {
+                    $api->lists->members->update($this->_helper->getDefaultList(), $md5HashEmail, null, 'unsubscribed');
+                } else {
+                    $api->lists->members->delete($this->_helper->getDefaultList(), $md5HashEmail);
+                }
+            } catch (\Exception $e) {
+                $this->_helper->log($e->getMessage());
+            }
         }
         return null;
     }
