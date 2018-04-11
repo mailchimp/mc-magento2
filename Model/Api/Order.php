@@ -179,7 +179,7 @@ class Order
                 $orderJson = $this->GeneratePOSTPayload($order, $mailchimpStoreId, $magentoStoreId, true);
                 if (!empty($orderJson)) {
                     $batchArray[$this->_counter]['method'] = "PATCH";
-                    $batchArray[$this->_counter]['path'] = '/ecommerce/stores/' . $mailchimpStoreId . '/orders/' . $orderId;
+                    $batchArray[$this->_counter]['path'] = '/ecommerce/stores/' . $mailchimpStoreId . '/orders/' . $order->getIncrementId();
                     $batchArray[$this->_counter]['operation_id'] = $this->_batchId . '_' . $orderId;
                     $batchArray[$this->_counter]['body'] = $orderJson;
                 } else {
