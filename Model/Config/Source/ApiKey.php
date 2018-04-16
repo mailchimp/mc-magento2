@@ -14,16 +14,42 @@ namespace Ebizmarts\MailChimp\Model\Config\Source;
 
 class ApiKey implements \Magento\Framework\Option\ArrayInterface
 {
-    private $options = null;
+    protected $options = null;
     /**
-     * MonkeyStore constructor.
+     * @var \Magento\Store\Model\StoreManager
+     */
+    protected $storeManager;
+    /**
+     * @var \Ebizmarts\MailChimp\Helper\Data
+     */
+    protected $helper;
+
+    /**
+     * ApiKey constructor.
+     * @param \Magento\Store\Model\StoreManager $storeManager
      * @param \Ebizmarts\MailChimp\Helper\Data $helper
+     * @param \Magento\Framework\App\RequestInterface $request
      */
     public function __construct(
-        \Ebizmarts\MailChimp\Helper\Data $helper
+        \Magento\Store\Model\StoreManager $storeManager,
+        \Ebizmarts\MailChimp\Helper\Data $helper,
+        \Magento\Framework\App\RequestInterface $request
     ) {
-    
-        $apiKeys = $helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_PATH_APIKEY_LIST);
+        $this->storeManager = $storeManager;
+        $this->helper = $helper;
+        $storeId = (int) $request->getParam("store", 0);
+        if($request->getParam('website',0)) {
+            $scope = 'websites';
+            $storeId = $request->getParam('website',0);
+        }
+        elseif($request->getParam('store',0)) {
+            $scope = 'stores';
+            $storeId = $request->getParam('store',0);
+        }
+        else {
+            $scope = 'default';
+        }
+        $apiKeys = $helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_PATH_APIKEY_LIST, $storeId, $scope);
         if ($apiKeys) {
             $this->options = explode("\n", $apiKeys);
         } else {
@@ -42,5 +68,18 @@ class ApiKey implements \Magento\Framework\Option\ArrayInterface
             $rc[] = ['value' => 0, 'label' => __('---Enter first an APIKey list---')];
         }
         return $rc;
+    }
+    public function getAllApiKeys() {
+        $apiKeys = [];
+        foreach ($this->storeManager->getStores() as $storeId => $val) {
+            $apiKey = $this->helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_PATH_APIKEY_LIST, $storeId);
+            $tempApiKeys = explode("\n",$apiKey);
+            foreach ($tempApiKeys as $tempAkiKey) {
+                if(!in_array($tempAkiKey,$apiKeys)) {
+                    $apiKeys[] = $tempAkiKey;
+                }
+            }
+        }
+        $this->options = $apiKeys;
     }
 }

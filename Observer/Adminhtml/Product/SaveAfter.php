@@ -43,6 +43,6 @@ class SaveAfter implements \Magento\Framework\Event\ObserverInterface
     }
     protected function _updateProduct($entityId)
     {
-        $this->helper->markProductAsModified($entityId);
+        $this->helper->markRegisterAsModified($entityId, \Ebizmarts\MailChimp\Helper\Data::IS_PRODUCT);
     }
 }

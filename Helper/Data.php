@@ -337,14 +337,16 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
             $customerAtt = $this->getCustomerAtts();
             $data = $this->getConfigValue(self::XML_MERGEVARS, $storeId);
             $data = unserialize($data);
-            foreach ($data as $customerFieldId => $mailchimpName) {
-                $this->_mapFields[] = [
-                    'mailchimp' => strtoupper($mailchimpName),
-                    'customer_field' => $customerAtt[$customerFieldId]['attCode'],
-                    'isDate' => $customerAtt[$customerFieldId]['isDate'],
-                    'isAddress' => $customerAtt[$customerFieldId]['isAddress'],
-                    'options' => $customerAtt[$customerFieldId]['options']
-                ];
+            if(is_array($data)) {
+                foreach ($data as $customerFieldId => $mailchimpName) {
+                    $this->_mapFields[] = [
+                        'mailchimp' => strtoupper($mailchimpName),
+                        'customer_field' => $customerAtt[$customerFieldId]['attCode'],
+                        'isDate' => $customerAtt[$customerFieldId]['isDate'],
+                        'isAddress' => $customerAtt[$customerFieldId]['isAddress'],
+                        'options' => $customerAtt[$customerFieldId]['options']
+                    ];
+                }
             }
         }
         return $this->_mapFields;
@@ -494,11 +496,11 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         $tableName = $this->_syncBatches->getResource()->getMainTable();
         $connection->update($tableName, ['status' => $status], "mailchimp_store_id = '".$mailchimpStore."'");
     }
-    public function markProductAsModified($productId)
+    public function markRegisterAsModified($registerId, $type)
     {
         $connection = $this->_mailChimpSyncE->getResource()->getConnection();
         $tableName = $this->_mailChimpSyncE->getResource()->getMainTable();
-        $connection->update($tableName,['mailchimp_sync_modified' => 1],"type = '".self::IS_PRODUCT."' and related_id = $productId");
+        $connection->update($tableName,['mailchimp_sync_modified' => 1,'batch_id' => null],"type = '".$type."' and related_id = $registerId");
     }
     public function getMCStoreName($storeId)
     {
@@ -691,28 +693,30 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     {
 
         $chimpSyncEcommerce = $this->getChimpSyncEcommerce($storeId, $entityId, $type);
-        $chimpSyncEcommerce->setMailchimpStoreId($storeId);
-        $chimpSyncEcommerce->setType($type);
-        $chimpSyncEcommerce->setRelatedId($entityId);
-        if($modified) {
-            $chimpSyncEcommerce->setMailchimpSyncModified($modified);
+        if($chimpSyncEcommerce->getRelatedId()==$entityId||!$chimpSyncEcommerce->getRelatedId()&&$modified!=1) {
+            $chimpSyncEcommerce->setMailchimpStoreId($storeId);
+            $chimpSyncEcommerce->setType($type);
+            $chimpSyncEcommerce->setRelatedId($entityId);
+            if ($modified) {
+                $chimpSyncEcommerce->setMailchimpSyncModified($modified);
+            }
+            if ($date) {
+                $chimpSyncEcommerce->setMailchimpSyncDelta($date);
+            } elseif ($modified != 1) {
+                $chimpSyncEcommerce->setBatchId(null);
+            }
+            if ($error) {
+                $chimpSyncEcommerce->setMailchimpSyncError($error);
+            }
+            if ($deleted) {
+                $chimpSyncEcommerce->setMailchimpSyncDeleted($deleted);
+                $chimpSyncEcommerce->setMailchimpSyncModified(0);
+            }
+            if ($token) {
+                $chimpSyncEcommerce->setMailchimpToken($token);
+            }
+            $chimpSyncEcommerce->getResource()->save($chimpSyncEcommerce);
         }
-        if($date) {
-            $chimpSyncEcommerce->setMailchimpSyncDelta($date);
-        } elseif($modified!=1) {
-            $chimpSyncEcommerce->setBatchId(null);
-        }
-        if($error) {
-            $chimpSyncEcommerce->setMailchimpSyncError($error);
-        }
-        if($deleted) {
-            $chimpSyncEcommerce->setMailchimpSyncDeleted($deleted);
-            $chimpSyncEcommerce->setMailchimpSyncModified(0);
-        }
-        if($token) {
-            $chimpSyncEcommerce->setMailchimpToken($token);
-        }
-        $chimpSyncEcommerce->getResource()->save($chimpSyncEcommerce);
     }
 
     public function markEcommerceAsModified($relatedId, $type)
