@@ -89,20 +89,20 @@ class PromoRules
         $count = 0;
         $api = $this->_helper->getApi($magentoStoreId);
         /**
-         * @var $rule \Magento\SalesRule\Model\Rule
+         * @var $rule \Ebizmarts\MailChimp\Model\MailChimpSyncEcommerce
          */
         foreach($collection as $rule)
         {
-            $ruleId = $rule->getRuleId();
+            $ruleId = $rule->getData('related_id');
             $mailchimpRule = $api->ecommerce->promoCodes->getAll($mailchimpStoreId,$ruleId);
             foreach($mailchimpRule['promo_codes'] as $promoCode)
             {
                 $this->_helper->ecommerceDeleteAllByIdType($promoCode['id'], \Ebizmarts\MailChimp\Helper\Data::IS_PROMO_CODE);
             }
-            $this->_helper->ecommerceDeleteAllByIdType($rule->getRuleId(), \Ebizmarts\MailChimp\Helper\Data::IS_PROMO_RULE);
+            $this->_helper->ecommerceDeleteAllByIdType($ruleId, \Ebizmarts\MailChimp\Helper\Data::IS_PROMO_RULE);
             $batchArray[$count]['method'] = 'DELETE';
             $batchArray[$count]['path'] = "/ecommerce/stores/$mailchimpStoreId/promo-rules/$ruleId";
-            $batchArray[$count]['operation_id'] = $this->_batchId. '_' . $rule->getRuleId();
+            $batchArray[$count]['operation_id'] = $this->_batchId. '_' . $ruleId;
             $count++;
         }
         return $batchArray;
