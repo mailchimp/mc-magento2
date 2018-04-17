@@ -198,8 +198,12 @@ class Webhook
                 /**
                  * @todo change the merge vars
                  */
-                $customer->setFirstname($fname);
-                $customer->setLastname($lname);
+                if ($fname != "") {
+                    $customer->setFirstname($fname);
+                }
+                if ($lname != "") {
+                    $customer->setLastname($lname);
+                }
                 $customer->getResource()->save($customer);
             }
         } else {
