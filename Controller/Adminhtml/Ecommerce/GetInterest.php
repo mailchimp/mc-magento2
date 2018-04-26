@@ -49,19 +49,21 @@ class GetInterest extends Action
     public function execute()
     {
         $param = $this->getRequest()->getParams();
-        $apiKey = $param['apikey'];
-        $list  = $param['list'];
-        $this->_helper->log("apikey [$apiKey] list [$list]");
         $rc = [];
         $error = 0;
-        try {
-            $api = $this->_helper->getApiByApiKey($apiKey);
-            $result = $api->lists->interestCategory->getAll($list);
-            if (is_array($result['categories'])&&count($result['categories'])) {
-                $rc = $result['categories'];
+        if(array_key_exists('apikey',$param)&&array_key_exists('list',$param)) {
+            $apiKey = $param['apikey'];
+            $list  = $param['list'];
+            $this->_helper->log("apikey [$apiKey] list [$list]");
+            try {
+                $api = $this->_helper->getApiByApiKey($apiKey);
+                $result = $api->lists->interestCategory->getAll($list);
+                if (is_array($result['categories'])&&count($result['categories'])) {
+                    $rc = $result['categories'];
+                }
+            } catch(\Mailchimp_Error $e) {
+                $error = 1;
             }
-        } catch(\Mailchimp_Error $e) {
-            $error = 1;
         }
         $resultJson = $this->_resultFactory->create(ResultFactory::TYPE_JSON);
         $resultJson->setData(['error' => $error, 'data' => $rc]);
