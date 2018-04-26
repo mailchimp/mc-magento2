@@ -48,8 +48,8 @@ class Details implements \Magento\Framework\Option\ArrayInterface
         $this->storeId = (int) $request->getParam("store", 0);
         $this->storeManager = $storeManager;
 
-        if ($this->_helper->getApiKey()) {
-            $api = $this->_helper->getApi();
+        if ($this->_helper->getApiKey($this->storeId)) {
+            $api = $this->_helper->getApi($this->storeId);
             try {
                 $this->_options = $api->root->info();
                 $mailchimpStoreId = $this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_MAILCHIMP_STORE,$this->storeId);
