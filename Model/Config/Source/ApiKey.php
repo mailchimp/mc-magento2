@@ -70,16 +70,6 @@ class ApiKey implements \Magento\Framework\Option\ArrayInterface
         return $rc;
     }
     public function getAllApiKeys() {
-        $apiKeys = [];
-        foreach ($this->storeManager->getStores() as $storeId => $val) {
-            $apiKey = $this->helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_PATH_APIKEY_LIST, $storeId);
-            $tempApiKeys = explode("\n",$apiKey);
-            foreach ($tempApiKeys as $tempAkiKey) {
-                if(!in_array($tempAkiKey,$apiKeys)) {
-                    $apiKeys[] = $tempAkiKey;
-                }
-            }
-        }
-        $this->options = $apiKeys;
+        $this->options = $this->helper->getAllApiKeys();
     }
 }
