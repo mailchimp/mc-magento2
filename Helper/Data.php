@@ -747,8 +747,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         $connection = $this->_mailChimpStores->getResource()->getConnection();
         $tableName = $this->_mailChimpStores->getResource()->getMainTable();
         $connection->truncateTable($tableName);
-        $apiKeys = $this->getConfigValue(self::XML_PATH_APIKEY_LIST);
-        $keys = explode("\n", $apiKeys);
+        $keys = $this->getAllApiKeys();
         foreach ($keys as $apiKey) {
             if (!$apiKey || $apiKey =='') {
                 continue;
@@ -1028,5 +1027,17 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     {
         return $this->_date->gmtTimestamp();
     }
-
+    public function getAllApiKeys() {
+        $apiKeys = [];
+        foreach ($this->_storeManager->getStores() as $storeId => $val) {
+            $apiKey = $this->getConfigValue(self::XML_PATH_APIKEY_LIST, $storeId);
+            $tempApiKeys = explode("\n",$apiKey);
+            foreach ($tempApiKeys as $tempAkiKey) {
+                if(!in_array($tempAkiKey,$apiKeys)) {
+                    $apiKeys[] = $tempAkiKey;
+                }
+            }
+        }
+        return $apiKeys;
+    }
 }
