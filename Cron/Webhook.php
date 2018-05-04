@@ -198,6 +198,8 @@ class Webhook
                 /**
                  * @todo change the merge vars
                  */
+                $fname = trim($fname);
+                $lname = trim($lname);
                 if ($fname != "") {
                     $customer->setFirstname($fname);
                 }
