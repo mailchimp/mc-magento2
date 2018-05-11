@@ -354,6 +354,8 @@ class Product
             $data["image_url"] = $this->_helper->getBaserUrl($magentoStoreId, \Magento\Framework\UrlInterface::URL_TYPE_MEDIA).$filePath;
         } elseif ($this->_parentImage) {
             $data['image_url'] = $this->_parentImage;
+        } else {
+            $data['image_url'] = '';
         }
         $data["published_at_foreign"] = "";
         if ($isVarient) {
