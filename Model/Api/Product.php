@@ -403,7 +403,6 @@ class Product
                     }
                 }
                 if ($parent) {
-                    $this->_helper->log("tiene parent");
                     $this->_childtUrl = $data['url'] = $parent->getProductUrl() . $tailUrl;
                     if(!isset($data['image_url'])) {
                         $filePath = 'catalog/product'.$parent->getImage();
