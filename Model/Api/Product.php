@@ -403,6 +403,7 @@ class Product
                     }
                 }
                 if ($parent) {
+                    $this->_helper->log("tiene parent");
                     $this->_childtUrl = $data['url'] = $parent->getProductUrl() . $tailUrl;
                     if(!isset($data['image_url'])) {
                         $filePath = 'catalog/product'.$parent->getImage();
@@ -418,12 +419,6 @@ class Product
                 $data["description"] = $product->getData('description');
             }
 
-            //mailchimp product type (magento category)
-//            $categoryIds = $product->getCategoryIds();
-//            if (count($categoryIds)) {
-//                $category = $this->_categoryRepository->get($categoryIds[0]);
-//                $data["type"] = $category->getName();
-//            }
             $categoryName = $this->getProductCategories($product,$magentoStoreId);
             if($categoryName) {
                 $data['type'] = $data['vendor'] = $categoryName;
@@ -442,7 +437,11 @@ class Product
                 }
             }
             if ($this->_childtUrl) {
-                $data["url"] = $this->_childtUrl;
+                if ($product->getTypeId() == \Magento\Catalog\Model\Product\Type::TYPE_SIMPLE ||
+                    $product->getTypeId() == \Magento\Catalog\Model\Product\Type::TYPE_VIRTUAL ||
+                    $product->getTypeId() == "downloadable") {
+                    $data["url"] = $this->_childtUrl;
+                }
                 $this->_childtUrl = null;
             }
             $this->_parentImage = null;
