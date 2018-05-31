@@ -93,17 +93,21 @@ class PromoRules
          */
         foreach($collection as $rule)
         {
-            $ruleId = $rule->getData('related_id'); 
-            $mailchimpRule = $api->ecommerce->promoCodes->getAll($mailchimpStoreId,$ruleId);
-            foreach($mailchimpRule['promo_codes'] as $promoCode)
-            {
-                $this->_helper->ecommerceDeleteAllByIdType($promoCode['id'], \Ebizmarts\MailChimp\Helper\Data::IS_PROMO_CODE);
+            $ruleId = $rule->getData('related_id');
+            try {
+                $mailchimpRule = $api->ecommerce->promoCodes->getAll($mailchimpStoreId, $ruleId);
+                foreach ($mailchimpRule['promo_codes'] as $promoCode) {
+                    $this->_helper->ecommerceDeleteAllByIdType($promoCode['id'], \Ebizmarts\MailChimp\Helper\Data::IS_PROMO_CODE);
+                }
+                $batchArray[$count]['method'] = 'DELETE';
+                $batchArray[$count]['path'] = "/ecommerce/stores/$mailchimpStoreId/promo-rules/$ruleId";
+                $batchArray[$count]['operation_id'] = $this->_batchId . '_' . $ruleId;
+                $count++;
+            } catch(\Mailchimp_Error $e) {
+                $this->_helper->log("The Rule $ruleId is already deleted");
             }
             $this->_helper->ecommerceDeleteAllByIdType($ruleId, \Ebizmarts\MailChimp\Helper\Data::IS_PROMO_RULE);
-            $batchArray[$count]['method'] = 'DELETE';
-            $batchArray[$count]['path'] = "/ecommerce/stores/$mailchimpStoreId/promo-rules/$ruleId";
-            $batchArray[$count]['operation_id'] = $this->_batchId. '_' . $ruleId;
-            $count++;
+
         }
         return $batchArray;
     }
