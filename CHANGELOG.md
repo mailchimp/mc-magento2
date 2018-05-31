@@ -1,7 +1,36 @@
 # Change Log
 
-## [1.0.28](https://github.com/mailchimp/mc-magento2/tree/1.0.28) (2018-03-27)
+## [1.0.29](https://github.com/mailchimp/mc-magento2/tree/1.0.29) (2018-05-31)
 
+[Full Changelog](https://github.com/mailchimp/mc-magento2/compare/1.0.28...1.0.29)
+
+**Implemented enhancements:**
+
+- Add check before renaming 'address\_address1' table column [\#283](https://github.com/mailchimp/mc-magento2/pull/283) ([RobAimes](https://github.com/RobAimes))
+
+**Fixed bugs:**
+
+- No cron\_groups.xml is defined [\#316](https://github.com/mailchimp/mc-magento2/issues/316)
+- Wrong url for a generic product of configurable producs [\#313](https://github.com/mailchimp/mc-magento2/issues/313)
+- No image url when the product and the parent has no image [\#307](https://github.com/mailchimp/mc-magento2/issues/307)
+- web\_hooks error somewhere - first/last name being required [\#302](https://github.com/mailchimp/mc-magento2/issues/302)
+- In the mailchimpstore grid not all the apikeys are taken [\#295](https://github.com/mailchimp/mc-magento2/issues/295)
+- Error getting interest groups [\#293](https://github.com/mailchimp/mc-magento2/issues/293)
+- Multistore with different Mailchimp accounts not saving correctly [\#289](https://github.com/mailchimp/mc-magento2/issues/289)
+- Exception is thrown when Promotion is marked for removal [\#280](https://github.com/mailchimp/mc-magento2/issues/280)
+- Webhook cronjob fails when updating customer [\#278](https://github.com/mailchimp/mc-magento2/issues/278)
+- Cron Ecommerce: cannot create batches data because update existed products in orders or carts [\#277](https://github.com/mailchimp/mc-magento2/issues/277)
+- Cancelled or pending orders added to revenue in mailchimp [\#274](https://github.com/mailchimp/mc-magento2/issues/274)
+- Bad registers are generated in mailchimp\_sync\_ecommerce table [\#267](https://github.com/mailchimp/mc-magento2/issues/267)
+- PHP warning in Helper/Data.php line 340 [\#266](https://github.com/mailchimp/mc-magento2/issues/266)
+- Subscriber fields not updated when Ecommerce Data not enabled [\#258](https://github.com/mailchimp/mc-magento2/issues/258)
+- Error when attempting to edit a customer from the backend [\#240](https://github.com/mailchimp/mc-magento2/issues/240)
+- No Abandoned Cart Data Sent [\#220](https://github.com/mailchimp/mc-magento2/issues/220)
+- Magento 2.2.1: Changes like "unsubscribe" and "delete" to subscribers in Magento backend aren't synched [\#147](https://github.com/mailchimp/mc-magento2/issues/147)
+- Change cron group id to 'mailchimp'. [\#282](https://github.com/mailchimp/mc-magento2/pull/282) ([jhruehl](https://github.com/jhruehl))
+- fix decodeArrayFieldValue error [\#265](https://github.com/mailchimp/mc-magento2/pull/265) ([gundamkid](https://github.com/gundamkid))
+
+## [1.0.28](https://github.com/mailchimp/mc-magento2/tree/1.0.28) (2018-03-27)
 [Full Changelog](https://github.com/mailchimp/mc-magento2/compare/1.0.27...1.0.28)
 
 **Implemented enhancements:**
@@ -14,6 +43,11 @@
 
 **Fixed bugs:**
 
+- The instest groups are not reloaded when the list changes [\#257](https://github.com/mailchimp/mc-magento2/issues/257)
+- The user can select non existing group in admin [\#256](https://github.com/mailchimp/mc-magento2/issues/256)
+- Don't process stores with no mailchimp store [\#255](https://github.com/mailchimp/mc-magento2/issues/255)
+- 2.2 Error Importing Configuration [\#223](https://github.com/mailchimp/mc-magento2/issues/223)
+- Wrong product marked as modified in ecommerce table [\#253](https://github.com/mailchimp/mc-magento2/issues/253)
 - Don't delete the batch\_id when modify a register [\#246](https://github.com/mailchimp/mc-magento2/issues/246)
 - Invalid argument supplied for foreach\(\) [\#243](https://github.com/mailchimp/mc-magento2/issues/243)
 - Missing argument on call to \_updateSyncData\(\) [\#241](https://github.com/mailchimp/mc-magento2/issues/241)
@@ -25,8 +59,8 @@
 - When modify a simple product, the variant is empty [\#202](https://github.com/mailchimp/mc-magento2/issues/202)
 - Abandoned cart email product price has range starting at $0 when using configurable products [\#197](https://github.com/mailchimp/mc-magento2/issues/197)
 - Error due to customer data race condition [\#112](https://github.com/mailchimp/mc-magento2/issues/112)
-- Show "Mailchimp" customer tab when the extension is enabled [\#201](https://github.com/mailchimp/mc-magento2/pull/201) ([t-richards](https://github.com/t-richards))
 - Update default.xml [\#180](https://github.com/mailchimp/mc-magento2/pull/180) ([jhruehl](https://github.com/jhruehl))
+- Show "Mailchimp" customer tab when the extension is enabled [\#201](https://github.com/mailchimp/mc-magento2/pull/201) ([t-richards](https://github.com/t-richards))
 
 ## [1.0.27](https://github.com/mailchimp/mc-magento2/tree/1.0.27) (2018-01-30)
 [Full Changelog](https://github.com/mailchimp/mc-magento2/compare/1.0.26...1.0.27)
