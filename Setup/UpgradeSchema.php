@@ -296,7 +296,7 @@ class UpgradeSchema implements UpgradeSchemaInterface
             );
         }
         if (version_compare($context->getVersion(), '1.0.12') < 0) {
-            if ($connection->tableColumnExists('mailchimp_stores', 'address_address1')) {
+            if ($connection->tableColumnExists($setup->getTable('mailchimp_stores'), 'address_address1')) {
                 $connection->changecolumn(
                     $setup->getTable('mailchimp_stores'),
                     'address_address1',
@@ -309,7 +309,7 @@ class UpgradeSchema implements UpgradeSchemaInterface
                     ]
                 );
             }
-            if ($connection->tableColumnExists('mailchimp_stores', 'address_address2')) {
+            if ($connection->tableColumnExists($setup->getTable('mailchimp_stores'), 'address_address2')) {
                 $connection->changecolumn(
                     $setup->getTable('mailchimp_stores'),
                     'address_address2',
