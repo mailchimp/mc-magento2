@@ -110,11 +110,16 @@ class Ecommerce
 
     public function execute()
     {
+
         $connection = $this->_chimpSyncEcommerce->getResource()->getConnection();
         $tableName = $this->_chimpSyncEcommerce->getResource()->getMainTable();
         $connection->delete($tableName, 'batch_id is null and mailchimp_sync_modified != 1');
 
         foreach ($this->_storeManager->getStores() as $storeId => $val) {
+            if(!$this->_ping($storeId)) {
+                $this->_helper->log('MailChimp is not available');
+                return;
+            }
             $this->_storeManager->setCurrentStore($storeId);
             $listId = $this->_helper->getGeneralList($storeId);
             if ($this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_PATH_ACTIVE, $storeId)) {
@@ -242,5 +247,15 @@ class Ecommerce
         } catch (\Mailchimp_Error $e) {
             $this->_helper->log('MailChimp error when updating syncing flag for store ' . $storeId . ': ' . $e->getMessage());
         }
+    }
+    protected function _ping($storeId)
+    {
+        try {
+            $api = $this->_helper->getApi($storeId);
+            $api->root->info();
+        } catch (\Mailchimp_Error $e) {
+            return false;
+        }
+        return true;
     }
 }
