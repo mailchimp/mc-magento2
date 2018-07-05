@@ -42,7 +42,7 @@ class Subscriber
         \Magento\Customer\Model\Session $customerSession,
         \Magento\Store\Model\StoreManagerInterface $storeManager
     ) {
-    
+
         $this->_helper          = $helper;
         $this->_customer        = $customer;
         $this->_customerSession = $customerSession;
@@ -74,9 +74,9 @@ class Subscriber
          */
         $subscriber->loadByCustomerId($customerId);
         if(!$subscriber->isSubscribed()) {
-            $subscriber->setImportMode(true);
             $storeId = $subscriber->getStoreId();
             if ($this->_helper->isMailChimpEnabled($storeId)) {
+                $subscriber->setImportMode(true);
                 $customer = $this->_customer->getById($customerId);
                 $email = $customer->getEmail();
                 $mergeVars = $this->_helper->getMergeVarsBySubscriber($subscriber, $email);
@@ -105,10 +105,10 @@ class Subscriber
         $subscriber,
         $email
     ) {
-        $subscriber->setImportMode(true);
         $storeId = $this->_storeManager->getStore()->getId();
 
         if ($this->_helper->isMailChimpEnabled($storeId)) {
+            $subscriber->setImportMode(true);
             $api = $this->_api;
             if ($this->_helper->isDoubleOptInEnabled($storeId)) {
                 $status = 'pending';
