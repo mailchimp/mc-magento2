@@ -24,6 +24,9 @@ class Webhook
     const TYPE_UPDATE_EMAIL     = 'upemail';
     const TYPE_PROFILE          = 'profile';
     const BATCH_LIMIT           = 50;
+    const NOT_PROCESSED         = 0;
+    const PROCESSED_OK          = 1;
+    const PROCESSED_WITH_ERROR  = 2;
     /**
      * @var \Ebizmarts\MailChimp\Helper\Data
      */
@@ -70,30 +73,36 @@ class Webhook
          * @var $collection \Ebizmarts\MailChimp\Model\ResourceModel\MailChimpWebhookRequest\Collection
          */
         $collection = $this->_webhookCollection->create();
-        $collection->addFieldToFilter('processed', ['eq'=>0]);
+        $collection->addFieldToFilter('processed', ['eq'=>self::NOT_PROCESSED]);
         $collection->getSelect()->limit(self::BATCH_LIMIT);
         /**
          * @var $item \Ebizmarts\MailChimp\Model\MailChimpWebhookRequest
          */
         foreach ($collection as $item) {
             $data = unserialize($item->getDataRequest());
-            switch ($item->getType()) {
-                case self::TYPE_SUBSCRIBE:
-                    $this->_subscribe($data);
-                    break;
-                case self::TYPE_UNSUBSCRIBE:
-                    $this->_unsubscribe($data);
-                    break;
-                case self::TYPE_CLEANED:
-                    $this->_clean($data);
-                    break;
-                case self::TYPE_UPDATE_EMAIL:
-                    $this->_updateEmail($data);
-                    break;
-                case self::TYPE_PROFILE:
-                    $this->_profile($data);
+            $stores = $this->_helper->getMagentoStoreIdsByListId($data['list_id']);
+            if(count($stores)) {
+                switch ($item->getType()) {
+                    case self::TYPE_SUBSCRIBE:
+                        $this->_subscribe($data);
+                        break;
+                    case self::TYPE_UNSUBSCRIBE:
+                        $this->_unsubscribe($data);
+                        break;
+                    case self::TYPE_CLEANED:
+                        $this->_clean($data);
+                        break;
+                    case self::TYPE_UPDATE_EMAIL:
+                        $this->_updateEmail($data);
+                        break;
+                    case self::TYPE_PROFILE:
+                        $this->_profile($data);
+                }
+                $processed = self::PROCESSED_OK;
+            } else {
+                $processed = self::PROCESSED_WITH_ERROR;
             }
-            $item->setProcessed(1);
+            $item->setProcessed($processed);
             $item->getResource()->save($item);
         }
     }
