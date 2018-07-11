@@ -70,6 +70,7 @@ class ApiKey extends \Magento\Framework\App\Config\Value
 
     public function beforeSave()
     {
+        $active = null;
         $generalData = $this->getData();
         $data = $this->getData('groups');
         $found = 0;
