@@ -226,14 +226,18 @@ class Webhook
                 $stores = $this->_helper->getMagentoStoreIdsByListId($listId);
                 if (count($stores)) {
                     $subscriber->setStoreId($stores[0]);
-                    $api = $this->_helper->getApi($stores[0]);
-                    $member =$api->lists->members->get($listId, md5(strtolower($email)));
-                    if ($member) {
-                        if ($member['status']==\Mailchimp::SUBSCRIBED) {
-                            $this->_subscribeMember($subscriber, \Magento\Newsletter\Model\Subscriber::STATUS_SUBSCRIBED);
-                        } elseif ($member['status']==\Mailchimp::UNSUBSCRIBED) {
-                            $this->_subscribeMember($subscriber, \Magento\Newsletter\Model\Subscriber::STATUS_UNSUBSCRIBED);
+                    try {
+                        $api = $this->_helper->getApi($stores[0]);
+                        $member = $api->lists->members->get($listId, md5(strtolower($email)));
+                        if ($member) {
+                            if ($member['status'] == \Mailchimp::SUBSCRIBED) {
+                                $this->_subscribeMember($subscriber, \Magento\Newsletter\Model\Subscriber::STATUS_SUBSCRIBED);
+                            } elseif ($member['status'] == \Mailchimp::UNSUBSCRIBED) {
+                                $this->_subscribeMember($subscriber, \Magento\Newsletter\Model\Subscriber::STATUS_UNSUBSCRIBED);
+                            }
                         }
+                    } catch (\Mailchimp_Error $e) {
+                        $this->_helper->log($e->getFriendlyMessage());
                     }
                 }
             }

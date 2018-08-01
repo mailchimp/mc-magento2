@@ -489,7 +489,7 @@ class Cart
         try {
             $customers = $api->ecommerce->customers->getByEmail($mailchimpStoreId, $cart->getCustomerEmail());
         } catch (\Mailchimp_Error $e) {
-            $this->_helper->log($e->getMessage());
+            $this->_helper->log($e->getFriendlyMessage());
         }
 
         if (isset($customers['total_items']) && $customers['total_items'] > 0) {

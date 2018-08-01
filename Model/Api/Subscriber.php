@@ -166,7 +166,7 @@ class Subscriber
             $md5HashEmail = md5(strtolower($subscriber->getSubscriberEmail()));
             $api->lists->members->update($listId, $md5HashEmail, null, 'cleaned');
         } catch(\MailChimp_Error $e) {
-            $this->_helper->log($e->getMessage(), $storeId);
+            $this->_helper->log($e->getFriendlyMessage(), $storeId);
             $this->_message->addErrorMessage($e->getMessage());
         } catch (\Exception $e) {
             $this->_helper->log($e->getMessage(), $storeId);

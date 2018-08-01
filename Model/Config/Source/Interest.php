@@ -42,8 +42,8 @@ class Interest  implements \Magento\Framework\Option\ArrayInterface
         if ($helper->getApiKey($storeId)) {
             try {
                 $this->options = $helper->getApi()->lists->interestCategory->getAll($helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_PATH_LIST, $storeId,$scope));
-            } catch (\Exception $e) {
-                $helper->log($e->getMessage());
+            } catch (\Mailchimp_Error $e) {
+                $helper->log($e->getFriendlyMessage());
             }
         }
 
