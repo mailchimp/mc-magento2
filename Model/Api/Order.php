@@ -366,7 +366,7 @@ class Order
         try {
             $customers = $api->ecommerce->customers->getByEmail($mailchimpStoreId, $order->getCustomerEmail());
         } catch (\Mailchimp_Error $e) {
-            $this->_helper->log($e->getMessage());
+            $this->_helper->log($e->getFriendlyMessage());
         }
 
         if (!$isModifiedOrder) {
@@ -391,7 +391,7 @@ class Order
                             $custEmailAddr = $customer['email_address'];
                         }
                     } catch (\Mailchimp_Error $e) {
-                        $this->_helper->log('no customer found');
+                        $this->_helper->log($e->getFriendlyMessage());
                     }
 
                     $data["customer"] = [

@@ -61,6 +61,7 @@ class Get extends Action
                 }
             }
         } catch (\Mailchimp_Error $e) {
+            $this->_helper->log($e->getFriendlyMessage());
             $result = [];
         }
         $resultJson = $this->_resultFactory->create(ResultFactory::TYPE_JSON);

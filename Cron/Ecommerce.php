@@ -200,17 +200,17 @@ class Ecommerce
                     if (!isset($batchResponse['id'])) {
                         $this->_helper->log('error in the call to batch');
                     } else {
-                        $this->_helper->log(var_export($batchResponse, true));
                         $this->_mailChimpSyncBatches->setStoreId($storeId);
                         $this->_mailChimpSyncBatches->setBatchId($batchResponse['id']);
                         $this->_mailChimpSyncBatches->setStatus($batchResponse['status']);
                         $this->_mailChimpSyncBatches->setMailchimpStoreId($mailchimpStoreId);
                         $this->_mailChimpSyncBatches->getResource()->save($this->_mailChimpSyncBatches);
                         $batchId = $batchResponse['id'];
+                        $this->_helper->log("Sent batch $batchId");
                     }
                 }
             } catch (\Mailchimp_Error $e) {
-                $this->_helper->log('MailChimp error ' . $e->getMessage());
+                $this->_helper->log($e->getFriendlyMessage());
             } catch (\Exception $e) {
                 $this->_helper->log("Json encode fails");
                 $this->_helper->log(var_export($batchArray, true));
@@ -241,11 +241,12 @@ class Ecommerce
      */
     protected function apiUpdateSyncFlag($storeId, $mailchimpStoreId)
     {
-        $api = $this->_helper->getApi($storeId);
         try {
+            $api = $this->_helper->getApi($storeId);
             $api->ecommerce->stores->edit($mailchimpStoreId, null, null, null, null, null, null, null, null, null, null, false);
         } catch (\Mailchimp_Error $e) {
-            $this->_helper->log('MailChimp error when updating syncing flag for store ' . $storeId . ': ' . $e->getMessage());
+            $this->_helper->log('MailChimp error when updating syncing flag for store ' . $storeId);
+            $this->_helper->log($e->getFriendlyMessage());
         }
     }
     protected function _ping($storeId)
@@ -254,6 +255,7 @@ class Ecommerce
             $api = $this->_helper->getApi($storeId);
             $api->root->info();
         } catch (\Mailchimp_Error $e) {
+            $this->_helper->log($e->getFriendlyMessage());
             return false;
         }
         return true;

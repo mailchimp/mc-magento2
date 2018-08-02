@@ -107,7 +107,7 @@ class PromoRules
                 $batchArray[$count]['operation_id'] = $this->_batchId . '_' . $ruleId;
                 $count++;
             } catch(\Mailchimp_Error $e) {
-                $this->_helper->log("The Rule $ruleId is already deleted");
+                $this->_helper->log($e->getFriendlyMessage());
             }
             $this->_helper->ecommerceDeleteAllByIdType($ruleId, \Ebizmarts\MailChimp\Helper\Data::IS_PROMO_RULE);
 
@@ -138,10 +138,13 @@ class PromoRules
         $api = $this->_helper->getApi($magentoStoreId);
         foreach($collection as $rule) {
             $ruleId = $rule->getRuleId();
-            $mailchimpRule = $api->ecommerce->promoCodes->getAll($mailchimpStoreId,$ruleId);
-            foreach($mailchimpRule['promo_codes'] as $promoCode)
-            {
-                $this->_helper->ecommerceDeleteAllByIdType($promoCode['id'], \Ebizmarts\MailChimp\Helper\Data::IS_PROMO_CODE);
+            try {
+                $mailchimpRule = $api->ecommerce->promoCodes->getAll($mailchimpStoreId, $ruleId);
+                foreach ($mailchimpRule['promo_codes'] as $promoCode) {
+                    $this->_helper->ecommerceDeleteAllByIdType($promoCode['id'], \Ebizmarts\MailChimp\Helper\Data::IS_PROMO_CODE);
+                }
+            } catch(\Mailchimp_Error $e) {
+                $this->_helper->log($e->getFriendlyMessage());
             }
             $this->_helper->ecommerceDeleteAllByIdType($rule->getRuleId(), \Ebizmarts\MailChimp\Helper\Data::IS_PROMO_RULE);
             $batchArray[$count]['method'] = 'DELETE';

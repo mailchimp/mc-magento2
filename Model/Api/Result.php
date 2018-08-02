@@ -121,7 +121,7 @@ class Result
                 unlink($fileName . '.tar.gz');
             }
         } catch (\Mailchimp_Error $e) {
-            $this->_helper->log($e->getMessage());
+            $this->_helper->log($e->getFriendlyMessage());
             return false;
         } catch (\Exception $e) {
             $this->_helper->log($e->getMessage());

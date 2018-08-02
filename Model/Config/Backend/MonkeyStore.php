@@ -125,8 +125,13 @@ class MonkeyStore extends \Magento\Framework\App\Config\Value
     }
     private function getStore($apiKey,$store)
     {
-        $api = $this->_helper->getApiByApiKey($apiKey);
-        $store = $api->ecommerce->stores->get($store);
-        return $store['list_id'];
+        try {
+            $api = $this->_helper->getApiByApiKey($apiKey);
+            $store = $api->ecommerce->stores->get($store);
+            return $store['list_id'];
+        } catch(\Mailchimp_Error $e) {
+            $this->_helper->log($e->getFriendlyMessage());
+        }
+        return null;
     }
 }

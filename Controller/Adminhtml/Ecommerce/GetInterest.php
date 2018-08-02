@@ -54,7 +54,6 @@ class GetInterest extends Action
         if(array_key_exists('apikey',$param)&&array_key_exists('list',$param)) {
             $apiKey = $param['apikey'];
             $list  = $param['list'];
-            $this->_helper->log("apikey [$apiKey] list [$list]");
             try {
                 $api = $this->_helper->getApiByApiKey($apiKey);
                 $result = $api->lists->interestCategory->getAll($list);
@@ -62,6 +61,7 @@ class GetInterest extends Action
                     $rc = $result['categories'];
                 }
             } catch(\Mailchimp_Error $e) {
+                $this->_helper->log($e->getFriendlyMessage());
                 $error = 1;
             }
         }
