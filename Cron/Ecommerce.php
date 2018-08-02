@@ -200,13 +200,13 @@ class Ecommerce
                     if (!isset($batchResponse['id'])) {
                         $this->_helper->log('error in the call to batch');
                     } else {
-                        $this->_helper->log(var_export($batchResponse, true));
                         $this->_mailChimpSyncBatches->setStoreId($storeId);
                         $this->_mailChimpSyncBatches->setBatchId($batchResponse['id']);
                         $this->_mailChimpSyncBatches->setStatus($batchResponse['status']);
                         $this->_mailChimpSyncBatches->setMailchimpStoreId($mailchimpStoreId);
                         $this->_mailChimpSyncBatches->getResource()->save($this->_mailChimpSyncBatches);
                         $batchId = $batchResponse['id'];
+                        $this->_helper->log("Sent batch $batchId");
                     }
                 }
             } catch (\Mailchimp_Error $e) {
