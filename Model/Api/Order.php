@@ -343,7 +343,7 @@ class Order
             } else {
                 $variant = $item->getProductId();
             }
-            if ($productSyncData->getMailchimpSyncDelta() && $productSyncData->getMailchimpSyncError() == '' && $variant) {
+            if ($productSyncData->getRelatedId() == $item->getProductId() && $productSyncData->getMailchimpSyncError() == '' && $variant) {
                 $itemCount++;
                 $data["lines"][] = [
                     "id" => (string)$itemCount,
