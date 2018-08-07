@@ -264,6 +264,7 @@ class Cart
             if (count($cart->getAllVisibleItems())) {
                 $cartJson = $this->_makeCart($cart, $mailchimpStoreId, $magentoStoreId);
                 if ($cartJson!="") {
+                    $this->_helper->modifyCounter(\Ebizmarts\MailChimp\Helper\Data::QUO_MOD);
                     $allCarts[$this->_counter]['method'] = 'POST';
                     $allCarts[$this->_counter]['path'] = '/ecommerce/stores/' . $mailchimpStoreId . '/carts';
                     $allCarts[$this->_counter]['operation_id'] = $this->_batchId . '_' . $cartId;
@@ -362,6 +363,7 @@ class Cart
 
             $cartJson = $this->_makeCart($cart, $mailchimpStoreId, $magentoStoreId);
             if ($cartJson!="") {
+                $this->_helper->modifyCounter(\Ebizmarts\MailChimp\Helper\Data::ORD_NEW);
                 $allCarts[$this->_counter]['method'] = 'POST';
                 $allCarts[$this->_counter]['path'] = '/ecommerce/stores/' . $mailchimpStoreId . '/carts';
                 $allCarts[$this->_counter]['operation_id'] = $this->_batchId . '_' . $cartId;

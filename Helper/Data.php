@@ -59,6 +59,18 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     const PLATFORM      = 'Magento2';
     const MAXSTORES     = 200;
 
+    const SUB_MOD       = "SubscriberModified";
+    const SUB_NEW       = "SubscriberNew";
+    const PRO_MOD       = "ProductModified";
+    const PRO_NEW       = "ProductNew";
+    const CUS_MOD       = "CustomerModified";
+    const CUS_NEW       = "CustomerNew";
+    const ORD_MOD       = "OrderModified";
+    const ORD_NEW       = "OrderNew";
+    const QUO_MOD       = "QuoteModified";
+    const QUO_NEW       = "QuoteNew";
+
+    protected $counters = [];
     /**
      * @var \Magento\Store\Model\StoreManagerInterface
      */
@@ -1059,5 +1071,21 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
             }
         }
         return $apiKeys;
+    }
+    public function modifyCounter($index, $increment=1)
+    {
+        if(array_key_exists($index,$this->counters)) {
+            $this->counters[$index] = $this->counters[$index] + $increment;
+        } else {
+            $this->counters[$index] = 1;
+        }
+    }
+    public function resetCounters()
+    {
+        $this->counters = [];
+    }
+    public function getCounters()
+    {
+        return $this->counters;
     }
 }
