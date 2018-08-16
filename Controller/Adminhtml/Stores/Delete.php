@@ -29,6 +29,7 @@ class Delete extends \Ebizmarts\MailChimp\Controller\Adminhtml\Stores
                 return $resultRedirect->setPath('mailchimp/stores');
             } catch (\Mailchimp_Error $e) {
                 $this->messageManager->addError(__('Store could not be deleted.'.$e->getMessage()));
+                $this->_helper->log($e->getFriendlyMessage());
                 return $resultRedirect->setPath('mailchimp/stores/edit', ['id'=>$storeId]);
             }
         }
