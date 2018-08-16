@@ -76,7 +76,6 @@ class MonkeyStore extends \Magento\Framework\App\Config\Value
         $data = $this->getData('groups');
         $found = 0;
         $newListId = null;
-        $this->_helper->log($this->getDataByPath(\Ebizmarts\MailChimp\Helper\Data::XML_PATH_ACTIVE));
         if (isset($data['ecommerce']['fields']['active']['value'])) {
             $active = $data['ecommerce']['fields']['active']['value'];
         } elseif ($data['ecommerce']['fields']['active']['inherit']) {
@@ -90,16 +89,15 @@ class MonkeyStore extends \Magento\Framework\App\Config\Value
             if (isset($data['general']['fields']['apikey']['value'])) {
                 $apiKey = $data['general']['fields']['apikey']['value'];
             } else {
-                $apiKey = $this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_PATH_APIKEY, $this->getScopeId());
+                $apiKey = $this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_PATH_APIKEY, $this->getScopeId(), $this->getScope());
             }
             if(isset($data['general']['fields']['monkeylist']['value'])) {
                 $newListId = $data['general']['fields']['monkeylist']['value'];
             } else {
                 $newListId = $this->getStore($apiKey,$this->getValue());
-                $this->_helper->log('list '.$newListId.'Score :'.$this->getScope().' Id '.$this->getScopeId());
                 $this->_helper->saveConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_PATH_LIST,$newListId,$this->getScopeId(),$this->getScope());
             }
-            $this->oldListId = $this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_PATH_LIST, $this->getScopeId());
+            $this->oldListId = $this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_PATH_LIST, $this->getScopeId(),$this->getScope());
 
             $createWebhook = true;
             foreach ($this->_storeManager->getStores() as $storeId => $val) {

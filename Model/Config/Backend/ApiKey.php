@@ -80,8 +80,8 @@ class ApiKey extends \Magento\Framework\App\Config\Value
             $active = $data['ecommerce']['fields']['active']['inherit'];
         }
         if ($active && $this->isValueChanged()) {
-            $mailchimpStore = $this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_MAILCHIMP_STORE, $generalData['scope_id']);
-            $this->resourceConfig->deleteConfig(\Ebizmarts\MailChimp\Helper\Data::XML_MAILCHIMP_STORE, $generalData['scope'], $generalData['scope_id']);
+            $mailchimpStore = $this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_MAILCHIMP_STORE, $this->getScopeId(), $this->getScope());
+            $this->resourceConfig->deleteConfig(\Ebizmarts\MailChimp\Helper\Data::XML_MAILCHIMP_STORE, $this->getScope(), $this->getScopeId());
             foreach ($this->_storeManager->getStores() as $storeId => $val) {
                 if ($this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_MAILCHIMP_STORE, $storeId) == $mailchimpStore) {
                     $found++;

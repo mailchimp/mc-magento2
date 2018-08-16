@@ -28,7 +28,6 @@ class Details implements \Magento\Framework\Option\ArrayInterface
     private $_message;
     private $storeManager;
     private $_error = '';
-    private $storeId;
 
     /**
      * Details constructor.
@@ -45,15 +44,27 @@ class Details implements \Magento\Framework\Option\ArrayInterface
     ) {
         $this->_message = $message;
         $this->_helper  = $helper;
-        $this->storeId = (int) $request->getParam("store", 0);
         $this->storeManager = $storeManager;
+        $storeId = (int) $request->getParam("store", 0);
+        if($request->getParam('website',0)) {
+            $scope = 'website';
+            $storeId = $request->getParam('website',0);
+        }
+        elseif($request->getParam('store',0)) {
+            $scope = 'stores';
+            $storeId = $request->getParam('store',0);
+        }
+        else {
+            $scope = 'default';
+        }
 
-        if ($this->_helper->getApiKey($this->storeId)) {
-            $api = $this->_helper->getApi($this->storeId);
+
+        if ($this->_helper->getApiKey($storeId, $scope)) {
+            $api = $this->_helper->getApi($storeId, $scope);
             try {
                 $this->_options = $api->root->info();
-                $mailchimpStoreId = $this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_MAILCHIMP_STORE,$this->storeId);
-                if ($mailchimpStoreId && $mailchimpStoreId!=-1 && $this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_PATH_ECOMMERCE_ACTIVE,$this->storeId)) {
+                $mailchimpStoreId = $this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_MAILCHIMP_STORE,$storeId, $scope);
+                if ($mailchimpStoreId && $mailchimpStoreId!=-1 && $this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_PATH_ECOMMERCE_ACTIVE,$storeId,$scope)) {
                     $storeInfo = $api->ecommerce->stores->get($mailchimpStoreId);
                     $this->_options['is_syncing'] = $storeInfo['is_syncing'];
                     $this->_options['date_sync'] = $this->getDateSync($mailchimpStoreId);

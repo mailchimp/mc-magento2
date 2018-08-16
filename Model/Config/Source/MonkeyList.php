@@ -28,7 +28,7 @@ class MonkeyList implements \Magento\Framework\Option\ArrayInterface
     ) {
         $storeId = (int) $request->getParam("store", 0);
         if($request->getParam('website',0)) {
-            $scope = 'websites';
+            $scope = 'website';
             $storeId = $request->getParam('website',0);
         }
         elseif($request->getParam('store',0)) {
@@ -39,9 +39,9 @@ class MonkeyList implements \Magento\Framework\Option\ArrayInterface
             $scope = 'default';
         }
 
-        if ($helper->getApiKey($storeId)) {
+        if ($helper->getApiKey($storeId,$scope)) {
             try {
-                $this->options = $helper->getApi($storeId)->lists->getLists($helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_PATH_LIST, $storeId,$scope));
+                $this->options = $helper->getApi($storeId,$scope)->lists->getLists($helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_PATH_LIST, $storeId,$scope));
             } catch (\Mailchimp_Error $e) {
                 $helper->log($e->getFriendlyMessage());
             }

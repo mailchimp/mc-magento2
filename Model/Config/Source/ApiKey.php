@@ -39,7 +39,7 @@ class ApiKey implements \Magento\Framework\Option\ArrayInterface
         $this->helper = $helper;
         $storeId = (int) $request->getParam("store", 0);
         if($request->getParam('website',0)) {
-            $scope = 'websites';
+            $scope = 'website';
             $storeId = $request->getParam('website',0);
         }
         elseif($request->getParam('store',0)) {
