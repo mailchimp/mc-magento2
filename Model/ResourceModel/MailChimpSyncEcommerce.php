@@ -50,10 +50,10 @@ class MailChimpSyncEcommerce extends AbstractDb
         $connection->update($this->getTable('mailchimp_sync_ecommerce'),['mailchimp_sync_modified'=>1],['related_id = ?'=> $id, 'type = ?'=>$type]);
         return $this;
     }
-    public function deleteAllByIdType(\Ebizmarts\MailChimp\Model\MailChimpSyncEcommerce $chimp, $id, $type)
+    public function deleteAllByIdType(\Ebizmarts\MailChimp\Model\MailChimpSyncEcommerce $chimp, $id, $type, $mailchimpStoreId)
     {
         $connection = $this->getConnection();
-        $connection->delete($this->getTable('mailchimp_sync_ecommerce'),['related_id = ?'=> $id, 'type = ?'=>$type]);
+        $connection->delete($this->getTable('mailchimp_sync_ecommerce'),['related_id = ?'=> $id, 'type = ?'=>$type, 'mailchimp_store_id = ?' => $mailchimpStoreId]);
         return $this;
     }
 }
