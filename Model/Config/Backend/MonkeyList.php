@@ -65,18 +65,4 @@ class MonkeyList extends \Magento\Framework\App\Config\Value
         $this->_storeManager    = $storeManager;
         parent::__construct($context, $registry, $config, $cacheTypeList, $resource, $resourceCollection, $data);
     }
-
-//    public function afterSave()
-//    {
-//        $generalData = $this->getData();
-//        $data = $this->getData('groups');
-//        $oldListId = $this->getOldValue();
-//        $this->_registry->register('oldListId', $oldListId);
-//        $apiKey = $this->getDataByPath(\Ebizmarts\MailChimp\Helper\Data::XML_PATH_APIKEY);
-////        if(isset($data['general']['fields']['apikey'])) {
-//        if($apiKey) {
-//            $this->_registry->register('apiKey', $apiKey);
-//        }
-//        return parent::afterSave();
-//    }
 }
