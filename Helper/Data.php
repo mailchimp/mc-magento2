@@ -285,18 +285,18 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
      * @param null $store
      * @return mixed
      */
-    public function getApiKey($store = null)
+    public function getApiKey($store = null, $scope = null)
     {
-        return $this->getConfigValue(self::XML_PATH_APIKEY, $store);
+        return $this->getConfigValue(self::XML_PATH_APIKEY, $store, $scope);
     }
 
     /**
      * @param null $store
      * @return \Mailchimp
      */
-    public function getApi($store = null)
+    public function getApi($store = null, $scope = null)
     {
-        $apiKey = $this->getApiKey($store);
+        $apiKey = $this->getApiKey($store, $scope);
         $this->_api->setApiKey($apiKey);
         $this->_api->setUserAgent('Mailchimp4Magento' . (string)$this->getModuleVersion());
         return $this->_api;
