@@ -77,7 +77,9 @@ class Subscriber
         if($this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_PATH_ACTIVE,$subscriber->getStoreId())) {
             $subscriber->loadByCustomerId($customerId);
             if (!$subscriber->isSubscribed()) {
-                $subscriber->setImportMode(true);
+                if (!$this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_MAGENTO_MAIL,$subscriber->getStoreId())) {
+                    $subscriber->setImportMode(true);
+                }
                 $storeId = $subscriber->getStoreId();
                 if ($this->_helper->isMailChimpEnabled($storeId)) {
                     $customer = $this->_customer->getById($customerId);
@@ -110,7 +112,9 @@ class Subscriber
         $email
     ) {
         if($this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_PATH_ACTIVE,$subscriber->getStoreId())) {
-            $subscriber->setImportMode(true);
+            if (!$this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_MAGENTO_MAIL,$subscriber->getStoreId())) {
+                $subscriber->setImportMode(true);
+            }
             $storeId = $this->_storeManager->getStore()->getId();
 
             if ($this->_helper->isMailChimpEnabled($storeId)) {
