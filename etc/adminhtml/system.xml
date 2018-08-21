@@ -76,6 +76,10 @@
                         <field id="*/*/active">1</field>
                     </depends>
                 </field>
+                <field id="magentoemail" translate="label" type="select" sortOrder="45" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Magento always manage emails</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
                 <field id="webhook_active" translate="label" type="select" sortOrder="50" showInDefault="1">
                     <label>Enable Two Way Sync</label>
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
