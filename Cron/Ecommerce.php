@@ -168,6 +168,7 @@ class Ecommerce
         $countProducts = 0;
         $countOrders = 0;
         $batchArray = [];
+        $this->_helper->resetCounters();
         $results = $this->_apiSubscribers->sendSubscribers($storeId, $listId);
         if ($this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_PATH_ECOMMERCE_ACTIVE, $storeId)) {
             $products = $this->_apiProduct->_sendProducts($storeId);
@@ -206,7 +207,7 @@ class Ecommerce
                         $this->_mailChimpSyncBatches->setMailchimpStoreId($mailchimpStoreId);
                         $this->_mailChimpSyncBatches->getResource()->save($this->_mailChimpSyncBatches);
                         $batchId = $batchResponse['id'];
-                        $this->_helper->log("Sent batch $batchId");
+                        $this->_showResume($batchId);
                     }
                 }
             } catch (\Mailchimp_Error $e) {
@@ -259,5 +260,11 @@ class Ecommerce
             return false;
         }
         return true;
+    }
+    protected function _showResume($batchId)
+    {
+        $this->_helper->log("Sent batch $batchId");
+        $this->_helper->log($this->_helper->getCounters());
+
     }
 }

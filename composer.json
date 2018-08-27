@@ -24,6 +24,6 @@
     "forum": "http://ebizmarts.com/forums/view/6"
   },
   "require" : {
-    "ebizmarts/mailchimp-lib": ">=3.0.26"
+    "ebizmarts/mailchimp-lib": ">=3.0.27"
   }
 }

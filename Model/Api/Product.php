@@ -251,6 +251,7 @@ class Product
             $this->_helper->log("Product " . $product->getId() . " json encode failed");
             return [];
         }
+        $this->_helper->modifyCounter(\Ebizmarts\MailChimp\Helper\Data::PRO_NEW);
         $data = [];
         $data['method'] = "POST";
         $data['path'] = "/ecommerce/stores/" . $mailchimpStoreId . "/products";
@@ -328,6 +329,7 @@ class Product
             $this->_helper->log("Product " . $product->getId() . " json encode failed");
             return [];
         }
+        $this->_helper->modifyCounter(\Ebizmarts\MailChimp\Helper\Data::PRO_MOD);
         $data = [];
         $data['method'] = "PATCH";
         $data['path'] = "/ecommerce/stores/" . $mailchimpStoreId . "/products/".$product->getId();
