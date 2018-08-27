@@ -14,9 +14,6 @@
     <event name="sales_model_service_quote_submit_before">
         <observer name="mailchimp_sales_model_service_quote_submit_before" instance="\Ebizmarts\MailChimp\Observer\Sales\Order\SubmitBefore" />
     </event>
-    <event name="sales_model_service_quote_submit_success">
-        <observer name="mailchimp_sales_model_service_quote_submit_after" instance="\Ebizmarts\MailChimp\Observer\Sales\Order\SubmitAfter" />
-    </event>
     <event name="customer_save_before">
         <observer name="mailchimp_customer_save_before" instance="\Ebizmarts\MailChimp\Observer\Customer\SaveBefore" />
     </event>
