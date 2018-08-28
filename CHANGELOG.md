@@ -1,7 +1,31 @@
 # Change Log
 
-## [1.0.29](https://github.com/mailchimp/mc-magento2/tree/1.0.29) (2018-05-31)
+## [1.0.30](https://github.com/mailchimp/mc-magento2/tree/1.0.30) (2018-08-27)
 
+[Full Changelog](https://github.com/mailchimp/mc-magento2/compare/1.0.29...1.0.30)
+
+**Implemented enhancements:**
+
+- Add an option to choose between send MailChimp or Magento mails [\#372](https://github.com/mailchimp/mc-magento2/issues/372)
+- Log batch totals for each run [\#361](https://github.com/mailchimp/mc-magento2/issues/361)
+-  Add debug information [\#359](https://github.com/mailchimp/mc-magento2/issues/359)
+- High CPU load when API not available [\#325](https://github.com/mailchimp/mc-magento2/issues/325)
+
+**Fixed bugs:**
+
+- MailChimp breaks order processing when it's done through CLI [\#378](https://github.com/mailchimp/mc-magento2/issues/378)
+- Promo rules are not updated [\#370](https://github.com/mailchimp/mc-magento2/issues/370)
+- Error in the configuration when selecting other website than default [\#368](https://github.com/mailchimp/mc-magento2/issues/368)
+- Orders not synced when products in the order not already synced [\#366](https://github.com/mailchimp/mc-magento2/issues/366)
+- Issue with coupons for free shipping [\#355](https://github.com/mailchimp/mc-magento2/issues/355)
+- Error downloading response from error grid when batch not exist [\#351](https://github.com/mailchimp/mc-magento2/issues/351)
+- Unable to set custom Env.php API Credentials  [\#345](https://github.com/mailchimp/mc-magento2/issues/345)
+- Disabled in Admin Panel Mailchimp block Magento default newsletter flow. [\#339](https://github.com/mailchimp/mc-magento2/issues/339)
+- Webhook processing fails when list id does not match any list configured in Magento [\#337](https://github.com/mailchimp/mc-magento2/issues/337)
+- Sending modified products in order or cart [\#335](https://github.com/mailchimp/mc-magento2/issues/335)
+- Base table or view not found Magento 2.2.4 [\#321](https://github.com/mailchimp/mc-magento2/issues/321)
+
+## [1.0.29](https://github.com/mailchimp/mc-magento2/tree/1.0.29) (2018-05-31)
 [Full Changelog](https://github.com/mailchimp/mc-magento2/compare/1.0.28...1.0.29)
 
 **Implemented enhancements:**
@@ -24,7 +48,11 @@
 - Bad registers are generated in mailchimp\_sync\_ecommerce table [\#267](https://github.com/mailchimp/mc-magento2/issues/267)
 - PHP warning in Helper/Data.php line 340 [\#266](https://github.com/mailchimp/mc-magento2/issues/266)
 - Subscriber fields not updated when Ecommerce Data not enabled [\#258](https://github.com/mailchimp/mc-magento2/issues/258)
+- The instest groups are not reloaded when the list changes [\#257](https://github.com/mailchimp/mc-magento2/issues/257)
+- The user can select non existing group in admin [\#256](https://github.com/mailchimp/mc-magento2/issues/256)
+- Don't process stores with no mailchimp store [\#255](https://github.com/mailchimp/mc-magento2/issues/255)
 - Error when attempting to edit a customer from the backend [\#240](https://github.com/mailchimp/mc-magento2/issues/240)
+- 2.2 Error Importing Configuration [\#223](https://github.com/mailchimp/mc-magento2/issues/223)
 - No Abandoned Cart Data Sent [\#220](https://github.com/mailchimp/mc-magento2/issues/220)
 - Magento 2.2.1: Changes like "unsubscribe" and "delete" to subscribers in Magento backend aren't synched [\#147](https://github.com/mailchimp/mc-magento2/issues/147)
 - Change cron group id to 'mailchimp'. [\#282](https://github.com/mailchimp/mc-magento2/pull/282) ([jhruehl](https://github.com/jhruehl))
@@ -43,10 +71,6 @@
 
 **Fixed bugs:**
 
-- The instest groups are not reloaded when the list changes [\#257](https://github.com/mailchimp/mc-magento2/issues/257)
-- The user can select non existing group in admin [\#256](https://github.com/mailchimp/mc-magento2/issues/256)
-- Don't process stores with no mailchimp store [\#255](https://github.com/mailchimp/mc-magento2/issues/255)
-- 2.2 Error Importing Configuration [\#223](https://github.com/mailchimp/mc-magento2/issues/223)
 - Wrong product marked as modified in ecommerce table [\#253](https://github.com/mailchimp/mc-magento2/issues/253)
 - Don't delete the batch\_id when modify a register [\#246](https://github.com/mailchimp/mc-magento2/issues/246)
 - Invalid argument supplied for foreach\(\) [\#243](https://github.com/mailchimp/mc-magento2/issues/243)
