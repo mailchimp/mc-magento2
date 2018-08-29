@@ -218,7 +218,7 @@ class Cart
              * @var $customer \Magento\Customer\Model\Customer
              */
             $customer = $this->_customerFactory->create();
-            $customer->setWebsiteId($magentoStoreId);
+            $customer->setWebsiteId($this->_helper->getWebsiteId($magentoStoreId));
             $customer->loadByEmail($cart->getCustomerEmail());
 
             if ($customer->getEmail() != $cart->getCustomerEmail()) {
@@ -322,7 +322,7 @@ class Cart
                 continue;
             }
             $customer = $this->_customerFactory->create();
-            $customer->setWebsiteId($magentoStoreId);
+            $customer->setWebsiteId($this->_helper->getWebsiteId($magentoStoreId));
             $customer->loadByEmail($cart->getCustomerEmail());
 
             if ($customer->getEmail() != $cart->getCustomerEmail()) {
