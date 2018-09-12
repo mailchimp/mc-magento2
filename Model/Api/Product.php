@@ -356,15 +356,22 @@ class Product
             //this is for a varient product
             $data["sku"] = $product->getSku();
             $today = $this->_helper->getGmtDate("Y-m-d");
-            if($product->getSpecialFromDate() && $product->getSpecialFromDate() <= $today)
-            {
-                if(!$product->getSpecialToDate() || ($product->getSpecialToDate() && $today <= $product->getSpecialToDate())) {
+            try {
+                if ($product->getSpecialFromDate() && $product->getSpecialFromDate() <= $today) {
+                    if (!$product->getSpecialToDate() || ($product->getSpecialToDate() && $today <= $product->getSpecialToDate())) {
+                        $data["price"] = $product->getSpecialPrice();
+                    } else {
+                        $data["price"] = $product->getPrice();
+                    }
+                } else {
+                    $data["price"] = $product->getPrice();
+                }
+            } catch(\Exception $e) {
+                if($product->getSpecialPrice()) {
                     $data["price"] = $product->getSpecialPrice();
                 } else {
                     $data["price"] = $product->getPrice();
                 }
-            } else {
-                $data["price"] = $product->getPrice();
             }
 
             //stock
