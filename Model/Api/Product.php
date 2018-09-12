@@ -344,11 +344,8 @@ class Product
         $data["title"] = $product->getName();
         $data["url"] = $product->getProductUrl();
         if ($product->getImage()) {
-            //mijn aanpassing image url hier
             $filePath = 'catalog/product'.$product->getImage();
             $data["image_url"] = $this->_helper->getBaserUrl($magentoStoreId, \Magento\Framework\UrlInterface::URL_TYPE_MEDIA).$filePath;
-            //$store = $this->_objectManager->get('Magento\Store\Model\StoreManagerInterface')->getStore();
-            //$data["image_url"] = $store->getBaseUrl(\Magento\Framework\UrlInterface::URL_TYPE_MEDIA) . 'catalog/product/cache/small_image/300x400/beff4985b56e3afdbeabfc89641a4582/' . $product->getImage();
         } elseif ($this->_parentImage) {
             $data['image_url'] = $this->_parentImage;
         } else {
