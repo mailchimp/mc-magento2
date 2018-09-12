@@ -173,21 +173,16 @@ class Ecommerce
             $products = $this->_apiProduct->_sendProducts($storeId);
             $countProducts = count($products);
             $results = array_merge($results, $products);
-            
             $customers = $this->_apiCustomer->sendCustomers($storeId);
             $countCustomers = count($customers);
             $results = array_merge($results, $customers);
-            
             $orders = $this->_apiOrder->sendOrders($storeId);
             $countOrders = count($orders);
             $results = array_merge($results, $orders);
-            
             $carts = $this->_apiCart->createBatchJson($storeId);
             $results = array_merge($results, $carts);
-            
             $rules = $this->_apiPromoRules->sendRules($storeId);
             $results = array_merge($results, $rules);
-            
             $coupons = $this->_apiPromoCodes->sendCoupons($storeId);
             $results = array_merge($results, $coupons);
         }
