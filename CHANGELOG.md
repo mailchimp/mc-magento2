@@ -1,11 +1,12 @@
 # Change Log
 
-## [1.0.30](https://github.com/mailchimp/mc-magento2/tree/1.0.30) (2018-08-27)
+## [1.0.30](https://github.com/mailchimp/mc-magento2/tree/1.0.30)
 
 [Full Changelog](https://github.com/mailchimp/mc-magento2/compare/1.0.29...1.0.30)
 
 **Implemented enhancements:**
 
+- Adding extra logging on import parts of the Cronjob [\#393](https://github.com/mailchimp/mc-magento2/issues/393)
 - Add an option to choose between send MailChimp or Magento mails [\#372](https://github.com/mailchimp/mc-magento2/issues/372)
 - Log batch totals for each run [\#361](https://github.com/mailchimp/mc-magento2/issues/361)
 -  Add debug information [\#359](https://github.com/mailchimp/mc-magento2/issues/359)
@@ -13,10 +14,13 @@
 
 **Fixed bugs:**
 
+- Special prices management in Magento Enterprise [\#391](https://github.com/mailchimp/mc-magento2/issues/391)
+- Failed to open stream: No such file or directory [\#388](https://github.com/mailchimp/mc-magento2/issues/388)
 - MailChimp breaks order processing when it's done through CLI [\#378](https://github.com/mailchimp/mc-magento2/issues/378)
 - Promo rules are not updated [\#370](https://github.com/mailchimp/mc-magento2/issues/370)
 - Error in the configuration when selecting other website than default [\#368](https://github.com/mailchimp/mc-magento2/issues/368)
 - Orders not synced when products in the order not already synced [\#366](https://github.com/mailchimp/mc-magento2/issues/366)
+- Wrong website set on customer [\#357](https://github.com/mailchimp/mc-magento2/issues/357)
 - Issue with coupons for free shipping [\#355](https://github.com/mailchimp/mc-magento2/issues/355)
 - Error downloading response from error grid when batch not exist [\#351](https://github.com/mailchimp/mc-magento2/issues/351)
 - Unable to set custom Env.php API Credentials  [\#345](https://github.com/mailchimp/mc-magento2/issues/345)
@@ -24,6 +28,7 @@
 - Webhook processing fails when list id does not match any list configured in Magento [\#337](https://github.com/mailchimp/mc-magento2/issues/337)
 - Sending modified products in order or cart [\#335](https://github.com/mailchimp/mc-magento2/issues/335)
 - Base table or view not found Magento 2.2.4 [\#321](https://github.com/mailchimp/mc-magento2/issues/321)
+- Unknown column 'at\_special\_from\_date\_default.value' in 'on clause' [\#309](https://github.com/mailchimp/mc-magento2/issues/309)
 
 ## [1.0.29](https://github.com/mailchimp/mc-magento2/tree/1.0.29) (2018-05-31)
 [Full Changelog](https://github.com/mailchimp/mc-magento2/compare/1.0.28...1.0.29)
