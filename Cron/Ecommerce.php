@@ -171,19 +171,30 @@ class Ecommerce
         $this->_helper->resetCounters();
         $results = $this->_apiSubscribers->sendSubscribers($storeId, $listId);
         if ($this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_PATH_ECOMMERCE_ACTIVE, $storeId)) {
+            $this->_helper->log('Generate Products payload');
             $products = $this->_apiProduct->_sendProducts($storeId);
             $countProducts = count($products);
             $results = array_merge($results, $products);
+
+            $this->_helper->log('Generate Customers payload');
             $customers = $this->_apiCustomer->sendCustomers($storeId);
             $countCustomers = count($customers);
             $results = array_merge($results, $customers);
+
+            $this->_helper->log('Generate Orders payload');
             $orders = $this->_apiOrder->sendOrders($storeId);
             $countOrders = count($orders);
             $results = array_merge($results, $orders);
+
+            $this->_helper->log('Generate Carts payload');
             $carts = $this->_apiCart->createBatchJson($storeId);
             $results = array_merge($results, $carts);
+
+            $this->_helper->log('Generate Rules payload');
             $rules = $this->_apiPromoRules->sendRules($storeId);
             $results = array_merge($results, $rules);
+
+            $this->_helper->log('Generate Coupons payload');
             $coupons = $this->_apiPromoCodes->sendCoupons($storeId);
             $results = array_merge($results, $coupons);
         }
