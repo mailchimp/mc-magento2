@@ -95,7 +95,6 @@ class Result
             $response = $api->batchOperation->status($batchId);
 
             if (isset($response['status']) && $response['status'] == 'finished') {
-                
                 // get the tar.gz file with the results
                 $fileUrl = urldecode($response['response_body_url']);
                 $fileName = $baseDir . DIRECTORY_SEPARATOR . 'var' . DIRECTORY_SEPARATOR . self::MAILCHIMP_TEMP_DIR . DIRECTORY_SEPARATOR . $batchId;
