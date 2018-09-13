@@ -95,10 +95,6 @@ class Result
             $response = $api->batchOperation->status($batchId);
 
             if (isset($response['status']) && $response['status'] == 'finished') {
-                // Create temporary directory, if that does not exist
-                if (!is_dir($baseDir . DIRECTORY_SEPARATOR . 'var' . DIRECTORY_SEPARATOR . self::MAILCHIMP_TEMP_DIR)) {
-                    mkdir($baseDir . DIRECTORY_SEPARATOR . 'var' . DIRECTORY_SEPARATOR . self::MAILCHIMP_TEMP_DIR);
-                }
                 
                 // get the tar.gz file with the results
                 $fileUrl = urldecode($response['response_body_url']);
