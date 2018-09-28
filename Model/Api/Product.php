@@ -110,7 +110,7 @@ class Product
         $mailchimpStoreId = $this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_MAILCHIMP_STORE, $magentoStoreId);
         $this->_markSpecialPrices($magentoStoreId,$mailchimpStoreId);
         $collection = $this->_getCollection();
-        $collection->setStoreId($magentoStoreId);
+        $collection->addStoreFilter($magentoStoreId);
         $collection->getSelect()->joinLeft(
             ['m4m' => $this->_helper->getTableName('mailchimp_sync_ecommerce')],
             "m4m.related_id = e.entity_id and m4m.type = '".\Ebizmarts\MailChimp\Helper\Data::IS_PRODUCT.
@@ -157,7 +157,7 @@ class Product
          * get the products with current special price that are not synced and mark it as modified
          */
         $collection = $this->_getCollection();
-        $collection->setStoreId($magentoStoreId);
+        $collection->addStoreFilter($magentoStoreId);
         $collection->addAttributeToFilter(
             'special_price',
             ['gt'=>0], 'left'
@@ -184,7 +184,7 @@ class Product
          * get the products that was synced when it have special price and have no more special price
          */
         $collection2 = $this->_getCollection();
-        $collection2->setStoreId($magentoStoreId);
+        $collection2->addStoreFilter($magentoStoreId);
         $collection2->addAttributeToFilter(
             'special_price',
             ['gt'=>0], 'left'
