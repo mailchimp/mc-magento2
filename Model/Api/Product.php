@@ -281,7 +281,7 @@ class Product
                     $variendata["title"] = $data["title"];
                     $variendata["url"] = $data["url"];
                     $variendata["sku"] = $data["sku"];
-                    $variendata["price"] = $data["price"];
+                    $variendata["price"] = (float)$data["price"];
                     $variendata["inventory_quantity"] = $data["inventory_quantity"];
                     $variendata["image_url"] = $data["image_url"];
                     $variendata["backorders"] = $data["backorders"];
@@ -375,6 +375,8 @@ class Product
                     $data["price"] = $product->getPrice();
                 }
             }
+
+            $data["price"] = (float)$data['price'];
 
             //stock
             $stock = $this->_stockRegistry->getStockItem($product->getId(), $magentoStoreId);
