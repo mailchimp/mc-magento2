@@ -506,7 +506,7 @@ class Product
                 $this->_updateProduct($mailchimpStoreId, $product->getId());
             } elseif (!$productSyncData->getMailchimpSyncDelta() ||
                 $productSyncData->getMailchimpSyncDelta() < $this->_helper->getMCMinSyncDateFlag()) {
-                $data = array_merge($data,$this->_buildNewProductRequest($product, $mailchimpStoreId, $magentoStoreId));
+                $data[] = $this->_buildNewProductRequest($product, $mailchimpStoreId, $magentoStoreId);
                 $this->_updateProduct($mailchimpStoreId, $product->getId());
             }
         }
@@ -542,7 +542,7 @@ class Product
                 $this->_updateProduct($mailchimpStoreId, $product->getId());
             } elseif (!$productSyncData->getMailchimpSyncDelta() ||
                 $productSyncData->getMailchimpSyncDelta() < $this->_helper->getMCMinSyncDateFlag()) {
-                $data = array_merge($data, $this->_buildNewProductRequest($product, $mailchimpStoreId, $magentoStoreId));
+                $data[] = $this->_buildNewProductRequest($product, $mailchimpStoreId, $magentoStoreId);
                 $this->_updateProduct($mailchimpStoreId, $product->getId());
             }
         }
