@@ -281,7 +281,7 @@ class Product
                     $variendata["title"] = $data["title"];
                     $variendata["url"] = $data["url"];
                     $variendata["sku"] = $data["sku"];
-                    $variendata["price"] = (float)$data["price"];
+                    $variendata["price"] = $data["price"];
                     $variendata["inventory_quantity"] = $data["inventory_quantity"];
                     $variendata["image_url"] = $data["image_url"];
                     $variendata["backorders"] = $data["backorders"];
@@ -359,7 +359,7 @@ class Product
             $data["sku"] = $product->getSku();
             $today = $this->_helper->getGmtDate("Y-m-d");
             try {
-                if ($product->getSpecialFromDate() && $product->getSpecialFromDate() <= $today) {
+                if ($product->getSpecialFromDate() && $product->getSpecialFromDate() <= $today && (float)$product->getSpecialPrice()) {
                     if (!$product->getSpecialToDate() || ($product->getSpecialToDate() && $today <= $product->getSpecialToDate())) {
                         $data["price"] = $product->getSpecialPrice();
                     } else {
@@ -376,7 +376,7 @@ class Product
                 }
             }
 
-            $data["price"] = (float)$data['price'];
+            $data["price"] = $data['price'];
 
             //stock
             $stock = $this->_stockRegistry->getStockItem($product->getId(), $magentoStoreId);
