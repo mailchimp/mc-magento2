@@ -369,14 +369,12 @@ class Product
                     $data["price"] = $product->getPrice();
                 }
             } catch(\Exception $e) {
-                if($product->getSpecialPrice()) {
+                if((float)$product->getSpecialPrice()) {
                     $data["price"] = $product->getSpecialPrice();
                 } else {
                     $data["price"] = $product->getPrice();
                 }
             }
-
-            $data["price"] = $data['price'];
 
             //stock
             $stock = $this->_stockRegistry->getStockItem($product->getId(), $magentoStoreId);
