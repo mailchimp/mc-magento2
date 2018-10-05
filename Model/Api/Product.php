@@ -359,7 +359,7 @@ class Product
             $data["sku"] = $product->getSku();
             $today = $this->_helper->getGmtDate("Y-m-d");
             try {
-                if ($product->getSpecialFromDate() && $product->getSpecialFromDate() <= $today) {
+                if ($product->getSpecialFromDate() && $product->getSpecialFromDate() <= $today && (float)$product->getSpecialPrice()) {
                     if (!$product->getSpecialToDate() || ($product->getSpecialToDate() && $today <= $product->getSpecialToDate())) {
                         $data["price"] = $product->getSpecialPrice();
                     } else {
@@ -369,7 +369,7 @@ class Product
                     $data["price"] = $product->getPrice();
                 }
             } catch(\Exception $e) {
-                if($product->getSpecialPrice()) {
+                if((float)$product->getSpecialPrice()) {
                     $data["price"] = $product->getSpecialPrice();
                 } else {
                     $data["price"] = $product->getPrice();
