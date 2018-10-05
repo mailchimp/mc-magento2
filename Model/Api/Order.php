@@ -526,8 +526,8 @@ class Order
         //customer orders data
         $orderCollection = $this->_orderCollectionFactory->create();
         $orderCollection->addFieldToFilter('state', [
-            ['neq',\Magento\Sales\Model\Order::STATE_CANCELED],
-            ['neq',\Magento\Sales\Model\Order::STATE_CLOSED]])
+            ['neq' => \Magento\Sales\Model\Order::STATE_CANCELED],
+            ['neq' => \Magento\Sales\Model\Order::STATE_CLOSED]])
             ->addAttributeToFilter('customer_email', ['eq' => $order->getCustomerEmail()]);
 
         $totalOrders = 1;
