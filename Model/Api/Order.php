@@ -530,8 +530,8 @@ class Order
             ['neq' => \Magento\Sales\Model\Order::STATE_CLOSED]])
             ->addAttributeToFilter('customer_email', ['eq' => $order->getCustomerEmail()]);
 
-        $totalOrders = 1;
-        $totalAmountSpent = (int)$order->getGrandTotal();
+        $totalOrders = 0;
+        $totalAmountSpent = 0;
         /**
          * @var $customerOrder \Magento\Sales\Model\Order
          */
