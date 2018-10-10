@@ -49,7 +49,7 @@ class MailchimpMap  extends \Magento\Framework\View\Element\Html\Select
         $api = $this->_helper->getApi($this->_storeManager->getStore()->getId());
         $merge = $api->lists->mergeFields->getAll($this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_PATH_LIST));
         foreach($merge['merge_fields'] as $item) {
-            $ret[$item['tag']] = $item['tag'];
+            $ret[$item['tag']] = $item['tag'].' ('.$item['name'].' : '.$item['type'].')';
         }
         return $ret;
     }
