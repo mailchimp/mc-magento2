@@ -117,11 +117,7 @@ class Subscriber
         if ($mergeVars) {
             $data["merge_fields"] = $mergeVars;
         }
-
-        $subscriberStatus = $this->_getMCStatus($subscriber->getStatus(), $storeId);
-        $data["status_if_new"] = $subscriberStatus;
-        $data["status"] = $subscriberStatus;
-
+        $data["status_if_new"] = $this->_getMCStatus($subscriber->getStatus(), $storeId);
         $interest = $this->_getInterest($subscriber);
         if(count($interest)) {
             $data['interests'] = $interest;
