@@ -18,7 +18,6 @@ class Product
     const PRODUCTIMAGE = 'product_small_image';
     const MAX = 100;
 
-    protected $_parentImage = null;
     protected $_childtUrl   = null;
     /**
      * @var \Ebizmarts\MailChimp\Helper\Data
@@ -348,11 +347,46 @@ class Product
         if ($product->getImage()) {
             $filePath = 'catalog/product'.$product->getImage();
             $data["image_url"] = $this->_helper->getBaserUrl($magentoStoreId, \Magento\Framework\UrlInterface::URL_TYPE_MEDIA).$filePath;
-        } elseif ($this->_parentImage) {
-            $data['image_url'] = $this->_parentImage;
         } else {
             $data['image_url'] = '';
         }
+
+        if ($product->getVisibility() == \Magento\Catalog\Model\Product\Visibility::VISIBILITY_NOT_VISIBLE) {
+            $tailUrl = '';
+            $data["visibility"] = 'false';
+            $parentIds = $this->_configurable->getParentIdsByChild($product->getId());
+            /**
+             * @var $parent \Magento\Catalog\Model\Product
+             */
+            $parent = null;
+            foreach ($parentIds as $id) {
+                $parent = $this->_productRepository->getById($id);
+                if ($parent->getTypeId() == \Magento\ConfigurableProduct\Model\Product\Type\Configurable::TYPE_CODE) {
+                    $options = $parent->getTypeInstance()->getConfigurableAttributesAsArray($parent);
+                    foreach ($options as $option) {
+                        if (strlen($tailUrl)) {
+                            $tailUrl .= '&';
+                        } else {
+                            $tailUrl .= '?';
+                        }
+                        $tailUrl.= $option['attribute_code']."=".$product->getData($option['attribute_code']);
+                    }
+                }
+                if ($tailUrl!='') {
+                    break;
+                }
+            }
+            if ($parent) {
+                $this->_childtUrl = $data['url'] = $parent->getProductUrl() . $tailUrl;
+                if(empty($data['image_url'])) {
+                    $filePath = 'catalog/product'.$parent->getImage();
+                    $data["image_url"] = $this->_helper->getBaserUrl($magentoStoreId, \Magento\Framework\UrlInterface::URL_TYPE_MEDIA).$filePath;
+                }
+            }
+        } else {
+            $data["visibility"] = 'true';
+        }
+
         $data["published_at_foreign"] = "";
         if ($isVarient) {
             //this is for a varient product
@@ -380,41 +414,6 @@ class Product
             $stock = $this->_stockRegistry->getStockItem($product->getId(), $magentoStoreId);
             $data["inventory_quantity"] = (int)$stock->getQty();
             $data["backorders"] = (string)$stock->getBackorders();
-            if ($product->getVisibility() == \Magento\Catalog\Model\Product\Visibility::VISIBILITY_NOT_VISIBLE) {
-                $tailUrl = '';
-                $data["visibility"] = 'false';
-                $parentIds =$this->_configurable->getParentIdsByChild($product->getId());
-                /**
-                 * @var $parent \Magento\Catalog\Model\Product
-                 */
-                $parent = null;
-                foreach ($parentIds as $id) {
-                    $parent = $this->_productRepository->getById($id);
-                    if ($parent->getTypeId() == \Magento\ConfigurableProduct\Model\Product\Type\Configurable::TYPE_CODE) {
-                        $options = $parent->getTypeInstance()->getConfigurableAttributesAsArray($parent);
-                        foreach ($options as $option) {
-                            if (strlen($tailUrl)) {
-                                $tailUrl .= '&';
-                            } else {
-                                $tailUrl .= '?';
-                            }
-                            $tailUrl.= $option['attribute_code']."=".$product->getData($option['attribute_code']);
-                        }
-                    }
-                    if ($tailUrl!='') {
-                        break;
-                    }
-                }
-                if ($parent) {
-                    $this->_childtUrl = $data['url'] = $parent->getProductUrl() . $tailUrl;
-                    if(!isset($data['image_url'])) {
-                        $filePath = 'catalog/product'.$parent->getImage();
-                        $data["image_url"] = $this->_helper->getBaserUrl($magentoStoreId, \Magento\Framework\UrlInterface::URL_TYPE_MEDIA).$filePath;
-                    }
-                }
-            } else {
-                $data["visibility"] = 'true';
-            }
         } else {
             //this is for a root product
             if ($product->getData('description')) {
@@ -428,9 +427,7 @@ class Product
 
             //missing data
             $data["handle"] = "";
-            if (isset($data['image_url'])) {
-                $this->_parentImage = $data['image_url'];
-            }
+
             //variants
             $data["variants"] = [];
             foreach ($variants as $variant) {
@@ -446,7 +443,6 @@ class Product
                 }
                 $this->_childtUrl = null;
             }
-            $this->_parentImage = null;
         }
 
         return $data;
