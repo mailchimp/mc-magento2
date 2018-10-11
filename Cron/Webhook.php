@@ -113,7 +113,7 @@ class Webhook
                 }
             }
         } else {
-            $storeIds = $this->getMagentoStoreIdsByListId($listId);
+            $storeIds = $this->_helper->getMagentoStoreIdsByListId($listId);
             if (count($storeIds) > 0) {
                 foreach($storeIds as $storeId) {
                     $sub = $this->_subscriberFactory->create();
