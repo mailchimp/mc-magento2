@@ -75,7 +75,6 @@ class ResetLocalErrors extends \Magento\Backend\App\Action
                 $this->storeManager->getStore()
             );
         }
-//        $this->helper->log($mailchimpStore);
 
         $resultJson = $this->resultJsonFactory->create();
         try {

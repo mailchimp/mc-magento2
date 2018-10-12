@@ -26,27 +26,48 @@ class Details implements \Magento\Framework\Option\ArrayInterface
      * @var \Magento\Framework\Message\ManagerInterface
      */
     private $_message;
+    private $storeManager;
     private $_error = '';
 
     /**
      * Details constructor.
      * @param \Ebizmarts\MailChimp\Helper\Data $helper
      * @param \Magento\Framework\Message\ManagerInterface $message
+     * @param \Magento\Store\Model\StoreManager $storeManager
+     * @param \Magento\Framework\App\RequestInterface $request
      */
     public function __construct(
         \Ebizmarts\MailChimp\Helper\Data $helper,
-        \Magento\Framework\Message\ManagerInterface $message
+        \Magento\Framework\Message\ManagerInterface $message,
+        \Magento\Store\Model\StoreManager $storeManager,
+        \Magento\Framework\App\RequestInterface $request
     ) {
         $this->_message = $message;
         $this->_helper  = $helper;
-        if ($this->_helper->getApiKey()) {
-            $api = $this->_helper->getApi();
+        $this->storeManager = $storeManager;
+        $storeId = (int) $request->getParam("store", 0);
+        if($request->getParam('website',0)) {
+            $scope = 'website';
+            $storeId = $request->getParam('website',0);
+        }
+        elseif($request->getParam('store',0)) {
+            $scope = 'stores';
+            $storeId = $request->getParam('store',0);
+        }
+        else {
+            $scope = 'default';
+        }
+
+
+        if ($this->_helper->getApiKey($storeId, $scope)) {
+            $api = $this->_helper->getApi($storeId, $scope);
             try {
                 $this->_options = $api->root->info();
-                $mailchimpStoreId = $this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_MAILCHIMP_STORE);
-                if ($mailchimpStoreId && $mailchimpStoreId!=-1 && $this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_PATH_ECOMMERCE_ACTIVE)) {
+                $mailchimpStoreId = $this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_MAILCHIMP_STORE,$storeId, $scope);
+                if ($mailchimpStoreId && $mailchimpStoreId!=-1 && $this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_PATH_ECOMMERCE_ACTIVE,$storeId,$scope)) {
                     $storeInfo = $api->ecommerce->stores->get($mailchimpStoreId);
                     $this->_options['is_syncing'] = $storeInfo['is_syncing'];
+                    $this->_options['date_sync'] = $this->getDateSync($mailchimpStoreId);
                     $this->_options['store_exists'] = true;
                     $totalCustomers = $api->ecommerce->customers->getAll($mailchimpStoreId, 'total_items');
                     $this->_options['total_customers'] = $totalCustomers['total_items'];
@@ -60,6 +81,7 @@ class Details implements \Magento\Framework\Option\ArrayInterface
                     $this->_options['store_exists'] = false;
                 }
             } catch (\Mailchimp_Error $e) {
+                $this->_helper->log($e->getFriendlyMessage());
                 $this->_error = $e->getMessage();
                 $this->_options['store_exists'] = false;
             }
@@ -90,17 +112,17 @@ class Details implements \Magento\Framework\Option\ArrayInterface
                     ]);
                     if ($this->_options['is_syncing']) {
                         $ret = array_merge($ret, [
-                           ['label'=> __('This account is currently syncing'), 'value'=>'']
+                            ['label'=> __('This account is currently syncing'), 'value'=>'']
                         ]);
                     } else {
                         $ret = array_merge($ret, [
-                            ['label'=> __('Synced since'), 'value'=>'']
+                            ['label'=> __('Account Synced since'), 'value'=>$this->_options['date_sync']]
                         ]);
                     }
                 } else {
                     $ret = array_merge($ret, [
-                         ['label'=>'This MailChimp account is not connected to Magento.','value'=>'']
-                        ]);
+                        ['label'=>'This MailChimp account is not connected to Magento.','value'=>'']
+                    ]);
                 }
             }
         } elseif (!$this->_options) {
@@ -111,5 +133,9 @@ class Details implements \Magento\Framework\Option\ArrayInterface
             $ret = [['label' => 'Important', 'value' => __($this->_options)]];
         }
         return $ret;
+    }
+    private function getDateSync($mailchimpStoreId)
+    {
+        return $this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_PATH_IS_SYNC."/$mailchimpStoreId", 0, "default");
     }
 }

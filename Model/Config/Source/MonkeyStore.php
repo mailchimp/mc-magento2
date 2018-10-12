@@ -20,18 +20,29 @@ class MonkeyStore implements \Magento\Framework\Option\ArrayInterface
     /**
      * MonkeyStore constructor.
      * @param \Ebizmarts\MailChimp\Helper\Data $helper
-     * @param \Magento\Store\Model\StoreManagerInterface $storeManager
+     * @param \Magento\Framework\App\RequestInterface $request
      */
     public function __construct(
         \Ebizmarts\MailChimp\Helper\Data $helper,
-        \Magento\Store\Model\StoreManagerInterface $storeManager
+        \Magento\Framework\App\RequestInterface $request
     ) {
-    
-        if ($helper->getApiKey($storeManager->getStore()->getId())) {
+        $storeId = (int) $request->getParam("store", 0);
+        if($request->getParam('website',0)) {
+            $scope = 'website';
+            $storeId = $request->getParam('website',0);
+        }
+        elseif($request->getParam('store',0)) {
+            $scope = 'stores';
+            $storeId = $request->getParam('store',0);
+        }
+        else {
+            $scope = 'default';
+        }
+        if ($helper->getApiKey($storeId, $scope)) {
             try {
-                $this->options = $helper->getApi()->ecommerce->stores->get(null, null, null, \Ebizmarts\MailChimp\Helper\Data::MAXSTORES);
-            } catch (\Exception $e) {
-                $helper->log($e->getMessage());
+                $this->options = $helper->getApi($storeId,$scope)->ecommerce->stores->get(null, null, null, \Ebizmarts\MailChimp\Helper\Data::MAXSTORES);
+            } catch (\Mailchimp_Error $e) {
+                $helper->log($e->getFriendlyMessage());
             }
         }
     }
@@ -42,7 +53,16 @@ class MonkeyStore implements \Magento\Framework\Option\ArrayInterface
             $rc[] = ['value' => -1, 'label' => 'Select one Mailchimp Store'];
             foreach ($this->options['stores'] as $store) {
                 if ($store['platform'] == \Ebizmarts\MailChimp\Helper\Data::PLATFORM) {
-                    $rc[] = ['value'=> $store['id'], 'label' => $store['name']];
+                    if($store['list_id']=='') {
+                        continue;
+                    }
+                    if(isset($store['connected_site'])) {
+                        $label = $store['name'];
+                    } else {
+                        $label = $store['name'].' (Warning: not connected)';
+                    }
+
+                    $rc[] = ['value'=> $store['id'], 'label' => $label];
                 }
             }
         } else {

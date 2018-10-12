@@ -1,10 +1,33 @@
+
+<h3>Labels applied by the team</h3>
+
+| Label        | Description           |
+| ------------- |-------------|
+| ![bug](https://s3.amazonaws.com/ebizmartsgithubimages/bug.png) | Bug report contains sufficient information to reproduce. Will be solved for associated Milestone.|
+| ![enhancement](https://s3.amazonaws.com/ebizmartsgithubimages/enhancement.png) | Improvement accepted. Will be added for associated Milestone.|
+| ![done](https://s3.amazonaws.com/ebizmartsgithubimages/done.png) | Issue has been solved and will be applied in the associated Milestone. |
+| ![duplicate](https://s3.amazonaws.com/ebizmartsgithubimages/duplicate.png) | Issue has been already reported and will be closed with no further action. |
+| ![wrong issue format](https://s3.amazonaws.com/ebizmartsgithubimages/wrongissueformat.png) | Issue has not been created according to requirements at the [Issue reporting guidelines](https://github.com/mailchimp/mc-magento2/wiki/Issue-reporting-guidelines). Will be closed until requirements are met. |
+| ![feature request](https://s3.amazonaws.com/ebizmartsgithubimages/featurerequest.png) | Feature request to be considered by the team. After approval will be labeled as enhancement. |
+| ![could not replicate](https://s3.amazonaws.com/ebizmartsgithubimages/couldnotreplicate.png) | The team was not able to replicate issue. It will be closed until missing information is given. |
+| ![contact support](https://s3.amazonaws.com/ebizmartsgithubimages/contactsupport.png) | Contact our support team at mailchimp@ebizmarts-desk.zendesk.com. Issue will be closed with no further action. |
+| ![low priority](https://s3.amazonaws.com/ebizmartsgithubimages/lowpriority.png) | Issue is considered as low priority by the team. |
+| ![priority](https://s3.amazonaws.com/ebizmartsgithubimages/priority.png) | Issue is considered as high priority by the team. |
+| ![conflict](https://s3.amazonaws.com/ebizmartsgithubimages/conflict.png) | Issue reports a conflict with other third party extension. |
+| ![need feedback](https://s3.amazonaws.com/ebizmartsgithubimages/needfeedback.png) | Feedback is required to continue working on the issue. If there is no answer after a week it will be closed. |
+| ![blocked](https://s3.amazonaws.com/ebizmartsgithubimages/blocked.png) | Issue can not be solved due to external causes. |
+| ![read documentation](https://s3.amazonaws.com/ebizmartsgithubimages/readdocumentation.png) | Issue will be closed. Available documentation: [MailChimp For Magento doc](https://kb.mailchimp.com/integrations/e-commerce/connect-or-disconnect-mailchimp-for-magento-2)|
+
+
+
+
 # Issue reporting guidelines
 
 To maintain an effective bugfix workflow and make sure issues will be solved in a timely manner we kindly ask reporters to follow some simple guidelines.
 
 Before creating an issue, please do the following:
 
-* Check the [documentation](http://kb.mailchimp.com/integrations/e-commerce/connect-or-disconnect-mailchimp-for-magento) to make sure the behavior you are reporting is really a bug, not a feature.
+* Check the [documentation](https://kb.mailchimp.com/integrations/e-commerce/connect-or-disconnect-mailchimp-for-magento-2) to make sure the behavior you are reporting is really a bug, not a feature.
 * Check the existing [issues](https://github.com/mailchimp/mc-magento2/issues) to make sure you are not duplicating somebody’s work.
 * Make sure, that information you are about to report is a technical issue, please refer to the [Community Forums](http://ebizmarts.com/mailchimp-for-magento-support)  for technical questions.
 
@@ -64,3 +87,7 @@ Example:
 ### Additional information
 
 Additional information is often requested when the bug report is processed, you can save time by providing Magento and browser logs, screenshots, any other artifacts related to the issue at your own judgement.
+
+## Pull requests
+
+Before creating a pull request please make sure to follow this [guidelines](https://github.com/mailchimp/mc-magento2/wiki/Pull-Request-guideliness) or it will be rejected.

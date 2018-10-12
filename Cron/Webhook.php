@@ -24,6 +24,9 @@ class Webhook
     const TYPE_UPDATE_EMAIL     = 'upemail';
     const TYPE_PROFILE          = 'profile';
     const BATCH_LIMIT           = 50;
+    const NOT_PROCESSED         = 0;
+    const PROCESSED_OK          = 1;
+    const PROCESSED_WITH_ERROR  = 2;
     /**
      * @var \Ebizmarts\MailChimp\Helper\Data
      */
@@ -70,30 +73,36 @@ class Webhook
          * @var $collection \Ebizmarts\MailChimp\Model\ResourceModel\MailChimpWebhookRequest\Collection
          */
         $collection = $this->_webhookCollection->create();
-        $collection->addFieldToFilter('processed', ['eq'=>0]);
+        $collection->addFieldToFilter('processed', ['eq'=>self::NOT_PROCESSED]);
         $collection->getSelect()->limit(self::BATCH_LIMIT);
         /**
          * @var $item \Ebizmarts\MailChimp\Model\MailChimpWebhookRequest
          */
         foreach ($collection as $item) {
             $data = unserialize($item->getDataRequest());
-            switch ($item->getType()) {
-                case self::TYPE_SUBSCRIBE:
-                    $this->_subscribe($data);
-                    break;
-                case self::TYPE_UNSUBSCRIBE:
-                    $this->_unsubscribe($data);
-                    break;
-                case self::TYPE_CLEANED:
-                    $this->_clean($data);
-                    break;
-                case self::TYPE_UPDATE_EMAIL:
-                    $this->_updateEmail($data);
-                    break;
-                case self::TYPE_PROFILE:
-                    $this->_profile($data);
+            $stores = $this->_helper->getMagentoStoreIdsByListId($data['list_id']);
+            if(count($stores)) {
+                switch ($item->getType()) {
+                    case self::TYPE_SUBSCRIBE:
+                        $this->_subscribe($data);
+                        break;
+                    case self::TYPE_UNSUBSCRIBE:
+                        $this->_unsubscribe($data);
+                        break;
+                    case self::TYPE_CLEANED:
+                        $this->_clean($data);
+                        break;
+                    case self::TYPE_UPDATE_EMAIL:
+                        $this->_updateEmail($data);
+                        break;
+                    case self::TYPE_PROFILE:
+                        $this->_profile($data);
+                }
+                $processed = self::PROCESSED_OK;
+            } else {
+                $processed = self::PROCESSED_WITH_ERROR;
             }
-            $item->setProcessed(1);
+            $item->setProcessed($processed);
             $item->getResource()->save($item);
         }
     }
@@ -208,8 +217,14 @@ class Webhook
                 /**
                  * @todo change the merge vars
                  */
-                $customer->setFirstname($fname);
-                $customer->setLastname($lname);
+                $fname = trim($fname);
+                $lname = trim($lname);
+                if ($fname != "") {
+                    $customer->setFirstname($fname);
+                }
+                if ($lname != "") {
+                    $customer->setLastname($lname);
+                }
                 $customer->getResource()->save($customer);
             }
         } else {
@@ -220,15 +235,19 @@ class Webhook
 
                 $stores = $this->_helper->getMagentoStoreIdsByListId($listId);
                 if (count($stores)) {
-                    $subscriber->setStreId($stores[0]);
-                    $api = $this->_helper->getApi($stores[0]);
-                    $member =$api->lists->members->get($listId, md5(strtolower($email)));
-                    if ($member) {
-                        if ($member['status']==\Mailchimp::SUBSCRIBED) {
-                            $this->_subscribeMember($subscriber, \Magento\Newsletter\Model\Subscriber::STATUS_SUBSCRIBED);
-                        } elseif ($member['status']==\Mailchimp::UNSUBSCRIBED) {
-                            $this->_subscribeMember($subscriber, \Magento\Newsletter\Model\Subscriber::STATUS_UNSUBSCRIBED);
+                    $subscriber->setStoreId($stores[0]);
+                    try {
+                        $api = $this->_helper->getApi($stores[0]);
+                        $member = $api->lists->members->get($listId, md5(strtolower($email)));
+                        if ($member) {
+                            if ($member['status'] == \Mailchimp::SUBSCRIBED) {
+                                $this->_subscribeMember($subscriber, \Magento\Newsletter\Model\Subscriber::STATUS_SUBSCRIBED);
+                            } elseif ($member['status'] == \Mailchimp::UNSUBSCRIBED) {
+                                $this->_subscribeMember($subscriber, \Magento\Newsletter\Model\Subscriber::STATUS_UNSUBSCRIBED);
+                            }
                         }
+                    } catch (\Mailchimp_Error $e) {
+                        $this->_helper->log($e->getFriendlyMessage());
                     }
                 }
             }

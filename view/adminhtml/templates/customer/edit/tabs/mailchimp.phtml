@@ -1,0 +1,79 @@
+<?php
+/**
+ * @var $block \Ebizmarts\MailChimp\Block\Adminhtml\Customer\Edit\Tabs\View\Customer
+ */
+$interest = $block->getInterest();
+?>
+<div class="fieldset-wrapper">
+    <div class="fieldset-wrapper-title">
+        <span class="title"><?php /* @escapeNotVerified */ echo __('MailChimp Information') ?></span>
+    </div>
+    <div class="admin__fieldset-wrapper-content">
+    <fieldset class="admin__fieldset">
+    <?php foreach($interest as $i): ?>
+        <div class="admin__field">
+            <label class="admin__field-label" for="<?php echo $i['interest']['id'] ?>">
+                <span><?php echo $i['interest']['title'] ?></span>
+            </label>
+            <div class="admin__field-control control">
+                <div class="fields">
+                    <?php switch($i['interest']['type']):
+                        case 'checkboxes': ?>
+                            <ul class="admin_field_field field" style="list-style: none">
+                                <?php foreach($i['category'] as $c): ?>
+                                    <li class="field no-label">
+                                        <input
+                                               name="customer[interestgroup][<?php echo $i['interest']['id'] ?>][<?php echo $c['id']?>]"
+                                               type="checkbox"
+                                               data-form-part="customer_form"
+                                               value="<?php echo $c['id'] ?>"
+                                               id="<?php echo 'mailchimp_group_'.$c['id'] ?>"
+                                               title="<?php echo $c['name'] ?>"
+                                            <?php if($c['checked']) { echo 'checked';} ?>
+                                        />
+                                        <label class="field label"><?php echo $c['name']?></label>
+                                    </li>
+                                <?php endforeach; ?>
+                            </ul>
+                            <?php       break;
+                        case 'dropdown': ?>
+                            <div class="field no-label">
+                                <select class="admin_field_field field"
+                                        data-form-part="customer_form"
+                                        name="customer[interestgroup][<?php echo $i['interest']['id'] ?>]"
+                                        id="<?php echo 'mailchimp_group_'.$i['interest']['id'] ?>"
+                                        title="<?php echo $i['interest']['title'] ?>">
+                                    <option value=""></option>
+                                    <?php foreach($i['category'] as $c): ?>
+                                        <option value="<?php echo $c['id']?>" <?php if($c['checked']) { echo 'selected'; } ?>><?php echo $c['name'] ?></option>
+                                    <?php endforeach; ?>
+                                </select>
+
+                            </div>
+                            <?php       break;
+                        case 'radio': ?>
+                            <ul class="admin_field_field field">
+                                <?php foreach($i['category'] as $c): ?>
+                                    <li class="field no-label" style="list-style: none">
+                                        <input class=""
+                                               name="customer[interestgroup][<?php echo $i['interest']['id'] ?>]"
+                                               type="radio"
+                                               data-form-part="customer_form"
+                                               value="<?php echo $c['id'] ?>"
+                                               id="<?php echo 'mailchimp_group_'.$c['id'] ?>"
+                                               title="<?php echo $c['name'] ?>"
+                                            <?php if($c['checked']) { echo 'checked';} ?>
+                                        />
+                                        <label class="field label"><?php echo $c['name']?></label>
+                                    </li>
+                                <?php endforeach; ?>
+                            </ul>
+                            <?php       break; ?>
+                        <?php endswitch; ?>
+                </div>
+            </div>
+        </div>
+    <?php endforeach; ?>
+</fieldset>
+    </div>
+</div>

@@ -18,7 +18,9 @@ define(
             "options": {
               "storeUrl": "",
               "detailsUrl": "",
-              "storeGridUrl": ""
+              "storeGridUrl": "",
+              "createWebhookUrl": "",
+              "getInterestUrl": ""
             },
 
             _init: function () {
@@ -33,14 +35,35 @@ define(
                 });
                 $('#mailchimp_general_monkeystore').change(function () {
                     self._loadDetails();
+                    // self._loadInterest();
                 });
                 $('#row_mailchimp_general_monkeystore').find('.note').append(' <a href="'+self.options.storeGridUrl+'">here</a>');
                 if ($('#mailchimp_general_monkeystore option').length>1) {
                     $('#row_mailchimp_general_monkeystore .note').hide();
                 }
-                //$('#mailchimp_general_monkeylist').prop('disabled', true);
+                $('#mailchimp_general_webhook_create').click(function() {
+                    var apiKey = $('#mailchimp_general_apikey').find(':selected').val();
+                    var listId = $('#mailchimp_general_monkeylist').find(':selected').val();
+                    self._createWebhook(apiKey, listId);
+                });
             },
-
+            _createWebhook: function(apiKey, listId) {
+                var createWebhookUrl = this.options.createWebhookUrl;
+                $.ajax({
+                    url: createWebhookUrl,
+                    data: {'form_key': window.FORM_KEY,'apikey': apiKey, 'listId': listId},
+                    type: 'GET',
+                    dataType: 'json',
+                    showLoader: true
+                }).done(function(data) {
+                    if(data.valid==0) {
+                        alert('Error: can\'t create WebHook. Your WebHook is already created or your web is private');
+                    }
+                    else if(data.valid==1) {
+                        alert('WebHook created');
+                    }
+                });
+            },
             _loadStores: function (apiKey) {
                 var self = this;
                 var storeUrl = this.options.storeUrl;
@@ -59,7 +82,7 @@ define(
                 $.ajax({
                         url: storeUrl,
                         data: {'form_key':  window.FORM_KEY, 'apikey': apiKey},
-                        type: 'POST',
+                        type: 'GET',
                         dataType: 'json',
                         showLoader: true
                     }).done(function (data) {
@@ -122,6 +145,7 @@ define(
             },
             _loadDetails: function () {
                 var detailsUrl = this.options.detailsUrl;
+                var interestUrl = this.options.getInterestUrl;
                 var selectedApiKey = $('#mailchimp_general_apikey').find(':selected').val();
                 var selectedStore = $('#mailchimp_general_monkeystore').find(':selected').val();
                 $('#mailchimp_general_account_details_ul').empty();
@@ -129,7 +153,7 @@ define(
                 $.ajax({
                         url: detailsUrl,
                         data: {'form_key':  window.FORM_KEY, 'apikey': selectedApiKey, "store": selectedStore},
-                        type: 'POST',
+                        type: 'GET',
                         dataType: 'json',
                         showLoader: true
                     }).done(function (data) {
@@ -143,10 +167,33 @@ define(
                         text: data.list_name,
                         selected: "selected"
                     }));
+                    var selectedList = data.list_id;
+                    $('#mailchimp_general_interest').empty();
+                    $.ajax({
+                        url: interestUrl,
+                        data: {'form_key': window.FORM_KEY, 'apikey': selectedApiKey, "list": selectedList},
+                        type: 'GET',
+                        dataType: 'json',
+                        showLoader: true
+                    }).done(function (data) {
+                        if(data.error == 0) {
+                            if(data.data.length) {
+                                $.each(data.data, function(i,item){
+                                    $('#mailchimp_general_interest').append($('<option>', {
+                                        value: item.id,
+                                        text: item.title
+                                    }));
+                                });
+                            } else {
+                                $('#mailchimp_general_interest').append($('<optgroup>', {
+                                    label: '---No Data---'
+                                }));
+
+                            }
+                        }
+                    });
                 });
-
             }
-
         });
         return $.mage.configmonkeyapikey;
     }

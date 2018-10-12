@@ -55,6 +55,7 @@ class ConfigObserver implements ObserverInterface
         $mustDelete = true;
         foreach ($this->_storeManager->getStores() as $storeId => $val) {
             $listId = $this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_PATH_LIST, $storeId);
+            $this->_helper->deleteConfig(\Ebizmarts\MailChimp\Helper\Data::XML_MAILCHIMP_JS_URL,$storeId,'stores');
             if ($listId == $oldListId) {
                 $mustDelete = false;
             }
@@ -62,6 +63,7 @@ class ConfigObserver implements ObserverInterface
         if ($mustDelete) {
             $this->_helper->deleteWebHook($apiKey, $oldListId);
         }
+
         $this->_registry->unregister('oldListId');
         $this->_registry->unregister('apiKey');
     }

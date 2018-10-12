@@ -1,0 +1,27 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Ebizmarts_MailChimp
+ *
+ * @category    Ebizmarts
+ * @package     Ebizmarts_MailChimp
+ * @author      Ebizmarts Team <info@ebizmarts.com>
+ * @copyright   Ebizmarts (http://ebizmarts.com)
+ * @license     http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ */
+-->
+<page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" layout="admin-2columns-left"
+      xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
+    <body>
+        <referenceContainer name="content">
+            <referenceBlock name="customer_form">
+                <block class="Ebizmarts\MailChimp\Block\Adminhtml\Customer\Edit\Tabs\Mailchimp" name="customer_edit_tab_mailchimp" template="tab/view.phtml" ifconfig="mailchimp/general/active">
+                    <arguments>
+                        <argument name="sort_order" xsi:type="number">50</argument>
+                    </arguments>
+                    <block class="Ebizmarts\MailChimp\Block\Adminhtml\Customer\Edit\Tabs\View\Customer" name="mailchimp"  template="customer/edit/tabs/mailchimp.phtml" />
+                </block>
+            </referenceBlock>
+        </referenceContainer>
+    </body>
+</page>

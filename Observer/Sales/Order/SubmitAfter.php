@@ -55,20 +55,24 @@ class SubmitAfter implements \Magento\Framework\Event\ObserverInterface
 
     public function execute(\Magento\Framework\Event\Observer $observer)
     {
-        $this->_cookieManager->deleteCookie(
-            'mailchimp_campaign_id',
-            $this->_cookieMetadataFactory
-                ->createCookieMetadata()
-                ->setPath($this->_sessionManager->getCookiePath())
-                ->setDomain($this->_sessionManager->getCookieDomain())
-        );
-        $this->_cookieManager->deleteCookie(
-            'mailchimp_landing_page',
-            $this->_cookieMetadataFactory
-                ->createCookieMetadata()
-                ->setPath($this->_sessionManager->getCookiePath())
-                ->setDomain($this->_sessionManager->getCookieDomain())
-        );
+        try {
+            $this->_cookieManager->deleteCookie(
+                'mailchimp_campaign_id',
+                $this->_cookieMetadataFactory
+                    ->createCookieMetadata()
+                    ->setPath($this->_sessionManager->getCookiePath())
+                    ->setDomain($this->_sessionManager->getCookieDomain())
+            );
+            $this->_cookieManager->deleteCookie(
+                'mailchimp_landing_page',
+                $this->_cookieMetadataFactory
+                    ->createCookieMetadata()
+                    ->setPath($this->_sessionManager->getCookiePath())
+                    ->setDomain($this->_sessionManager->getCookieDomain())
+            );
+        } catch(\Exception $e) {
+            $this->_helper->log($e->getMessage());
+        }
 
         return $this;
     }

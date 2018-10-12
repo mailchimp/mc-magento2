@@ -42,6 +42,7 @@ class Save extends \Ebizmarts\MailChimp\Controller\Adminhtml\Stores
                 }
             } catch (\Mailchimp_Error $e) {
                 $this->messageManager->addErrorMessage(__('Store could not be saved.'.$e->getMessage()));
+                $this->_helper->log($e->getFriendlyMessage());
                 return $resultRedirect->setPath('mailchimp/stores/edit', ['id'=>$storeId]);
             }
         }
@@ -89,6 +90,7 @@ class Save extends \Ebizmarts\MailChimp\Controller\Adminhtml\Stores
         } else {
             $date = $this->_helper->getDateMicrotime();
             $mailchimpStoreId = md5($name. '_' . $date);
+            $is_sync = true;
             $ret =$api->ecommerce->stores->add(
                 $mailchimpStoreId,
                 $formData['list_id'],

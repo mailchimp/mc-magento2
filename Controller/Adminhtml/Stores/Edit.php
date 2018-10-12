@@ -13,8 +13,14 @@
 
 namespace Ebizmarts\MailChimp\Controller\Adminhtml\Stores;
 
+use Ebizmarts\MailChimp\Model\MailChimpStoresFactory;
+use Magento\Backend\App\Action\Context;
+use Magento\Framework\Registry;
+use Magento\Framework\View\Result\PageFactory;
+
 class Edit extends \Ebizmarts\MailChimp\Controller\Adminhtml\Stores
 {
+
     public function execute()
     {
         $storeId = $this->getRequest()->getParam('id');
@@ -32,8 +38,14 @@ class Edit extends \Ebizmarts\MailChimp\Controller\Adminhtml\Stores
 
         // Restore previously entered form data from session
         $data = $this->_session->getStoreData(true);
+        if(isset($data['name'])) {
+            $data['name'] = preg_replace('/ \(Warning: not connected\)/', '', $data['name']);
+        }
         if (!empty($data)) {
             $model->setData($data);
+        }
+        if(isset($model['name'])) {
+            $model['name'] = preg_replace('/ \(Warning: not connected\)/', '', $model['name']);
         }
         $this->_coreRegistry->register('mailchimp_stores', $model);
 

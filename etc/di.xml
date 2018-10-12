@@ -46,7 +46,7 @@
     <type name="Magento\Framework\View\Element\UiComponent\DataProvider\CollectionFactory">
         <arguments>
             <argument name="collections" xsi:type="array">
-                <item name="mailchimp_stores_grid_data_source" xsi:type="string">Ebizmarts\MailChimp\Model\ResourceModel\MailChimpStores\Collection</item>
+                <item name="mailchimp_stores_grid_data_source" xsi:type="string">Ebizmarts\MailChimp\Model\ResourceModel\MailChimpStores\Grid\Collection</item>
             </argument>
         </arguments>
     </type>
@@ -55,5 +55,15 @@
     </type>
     <type name="Magento\Customer\Model\AccountManagement">
         <plugin name="abandoned-checkout-save-quote" type="Ebizmarts\MailChimp\Model\Plugin\AccountManagement" sortOrder="10"/>
+    </type>
+    <virtualType name="Magento\Sales\Model\ResourceModel\Order\Grid" type="Magento\Sales\Model\ResourceModel\Grid">
+        <arguments>
+            <argument name="columns" xsi:type="array">
+                <item name="mailchimp_flag" xsi:type="string">sales_order.mailchimp_flag</item>
+            </argument>
+        </arguments>
+    </virtualType>
+    <type name="Magento\SalesRule\Model\Coupon">
+        <plugin name="mailchimp-coupon" type="Ebizmarts\MailChimp\Model\Plugin\Coupon" sortOrder="10"/>
     </type>
 </config>

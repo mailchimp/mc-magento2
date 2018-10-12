@@ -13,6 +13,7 @@
 
 namespace Ebizmarts\MailChimp\Model\Api;
 
+use Magento\Directory\Model\CountryFactory;
 use Magento\Framework\Exception\State\ExpiredException;
 use Symfony\Component\Config\Definition\Exception\Exception;
 
@@ -32,13 +33,9 @@ class Customer
      */
     protected $_orderCollection;
     /**
-     * @var \Magento\Framework\Stdlib\DateTime\DateTime
+     * @var CountryFactory
      */
-    protected $_date;
-    /**
-     * @var \Magento\Directory\Api\CountryInformationAcquirerInterface
-     */
-    protected $_countryInformation;
+    protected $_countryFactory;
     /**
      * @var \Magento\Customer\Model\CustomerFactory
      */
@@ -56,28 +53,25 @@ class Customer
      * @param \Magento\Customer\Model\CustomerFactory $customerFactory
      * @param \Magento\Customer\Model\ResourceModel\Customer\CollectionFactory $collection
      * @param \Magento\Sales\Model\ResourceModel\Order\CollectionFactory $orderCollection
-     * @param \Magento\Directory\Api\CountryInformationAcquirerInterface $countryInformation
+     * @param CountryFactory $countryFactory
      * @param \Magento\Customer\Model\Address $address
-     * @param \Magento\Framework\Stdlib\DateTime\DateTime $date
      */
     public function __construct(
         \Ebizmarts\MailChimp\Helper\Data $helper,
         \Magento\Customer\Model\CustomerFactory $customerFactory,
         \Magento\Customer\Model\ResourceModel\Customer\CollectionFactory $collection,
         \Magento\Sales\Model\ResourceModel\Order\CollectionFactory $orderCollection,
-        \Magento\Directory\Api\CountryInformationAcquirerInterface $countryInformation,
-        \Magento\Customer\Model\Address $address,
-        \Magento\Framework\Stdlib\DateTime\DateTime $date
+        \Magento\Directory\Model\CountryFactory $countryFactory,
+        \Magento\Customer\Model\Address $address
     ) {
     
         $this->_helper              = $helper;
         $this->_collection          = $collection;
         $this->_orderCollection     = $orderCollection;
-        $this->_date                = $date;
-        $this->_batchId             = \Ebizmarts\MailChimp\Helper\Data::IS_CUSTOMER. '_' . $this->_date->gmtTimestamp();
-        $this->_countryInformation  = $countryInformation;
+        $this->_batchId             = \Ebizmarts\MailChimp\Helper\Data::IS_CUSTOMER. '_' . $this->_helper->getGmtTimeStamp();
         $this->_address             = $address;
         $this->_customerFactory     = $customerFactory;
+        $this->_countryFactory      = $countryFactory;
     }
     public function sendCustomers($storeId)
     {
@@ -85,7 +79,7 @@ class Customer
         $collection = $this->_collection->create();
         $collection->addFieldToFilter('store_id', ['eq'=>$storeId]);
         $collection->getSelect()->joinLeft(
-            ['m4m' => 'mailchimp_sync_ecommerce'],
+            ['m4m' => $this->_helper->getTableName('mailchimp_sync_ecommerce')],
             "m4m.related_id = e.entity_id and m4m.type = '".\Ebizmarts\MailChimp\Helper\Data::IS_CUSTOMER.
             "' and m4m.mailchimp_store_id = '".$mailchimpStoreId."'",
             ['m4m.*']
@@ -112,13 +106,18 @@ class Customer
                 $this->_helper->log('Customer: '.$customer->getId().' json encode failed');
             }
             if (!empty($customerJson)) {
+                if($item->getMailchimpSyncModified() == 1) {
+                    $this->_helper->modifyCounter(\Ebizmarts\MailChimp\Helper\Data::CUS_MOD);
+                } else {
+                    $this->_helper->modifyCounter(\Ebizmarts\MailChimp\Helper\Data::CUS_NEW);
+                }
                 $customerArray[$counter]['method'] = "PUT";
                 $customerArray[$counter]['path'] = "/ecommerce/stores/" . $mailchimpStoreId . "/customers/" . $customer->getId();
                 $customerArray[$counter]['operation_id'] = $this->_batchId . '_' . $customer->getId();
                 $customerArray[$counter]['body'] = $customerJson;
 
                 //update customers delta
-                $this->_updateCustomer($mailchimpStoreId, $customer->getId(), $this->_date->gmtDate(), '', 0);
+                $this->_updateCustomer($mailchimpStoreId, $customer->getId());
             }
             $counter++;
         }
@@ -180,32 +179,19 @@ class Customer
             if ($address->getPostcode()) {
                 $customerAddress["postal_code"] = $address->getPostcode();
             }
-            if ($address->getCountry()) {
-                $country = $this->_countryInformation->getCountryInfo($address->getCountryId());
-                $countryName = $country->getFullNameLocale();
-                $customerAddress["country"] = $countryName;
-                $customerAddress["country_code"] = $country->getTwoLetterAbbreviation();
+            if ($address->getCountryId()) {
+                /**
+                 * @var $country \Magento\Directory\Model\Country
+                 */
+                $country = $this->_countryFactory->create()->loadByCode($address->getCountryId());
+                $customerAddress["country"] = $country->getName();
+                $customerAddress["country_code"] = $address->getCountryId();
             }
             if (count($customerAddress)) {
                 $data["address"] = $customerAddress;
             }
-            //company
-//                if ($address->getCompany()) {
-//                    $data["company"] = $address->getCompany();
-//                }
-//                break;
-//            }
-//        }
         }
         return $data;
-    }
-
-    /**
-     * @param \Magento\Customer\Model\Customer $customer
-     */
-    public function getMergeVars(\Magento\Customer\Model\Customer $customer)
-    {
-        return [];
     }
 
     /**
@@ -235,15 +221,15 @@ class Customer
         }
         return $optin;
     }
-    protected function _updateCustomer($storeId, $entityId, $sync_delta, $sync_error, $sync_modified)
+    protected function _updateCustomer($storeId, $entityId, $sync_delta = null, $sync_error = null, $sync_modified = null)
     {
         $this->_helper->saveEcommerceData(
             $storeId,
             $entityId,
+            \Ebizmarts\MailChimp\Helper\Data::IS_CUSTOMER,
             $sync_delta,
             $sync_error,
-            $sync_modified,
-            \Ebizmarts\MailChimp\Helper\Data::IS_CUSTOMER
+            $sync_modified
         );
     }
 }

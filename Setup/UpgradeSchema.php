@@ -15,19 +15,46 @@ namespace Ebizmarts\MailChimp\Setup;
 use Magento\Framework\Setup\UpgradeSchemaInterface;
 use Magento\Framework\Setup\SchemaSetupInterface;
 use Magento\Framework\Setup\ModuleContextInterface;
+use Magento\Framework\App\ResourceConnection;
+use Magento\Framework\App\DeploymentConfig;
 
 class UpgradeSchema implements UpgradeSchemaInterface
 {
+    /**
+     * @var ResourceConnection
+     */
+    protected $_resource;
+    /**
+     * @var DeploymentConfig
+     */
+    protected $_deploymentConfig;
+    public function __construct(ResourceConnection $resource,DeploymentConfig $deploymentConfig)
+    {
+        $this->_resource = $resource;
+        $this->_deploymentConfig = $deploymentConfig;
+    }
+
     /**
      * {@inheritdoc}
      */
     public function upgrade(SchemaSetupInterface $setup, ModuleContextInterface $context)
     {
-        $installer = $setup;
-        $installer->startSetup();
+        $connection = $this->_resource->getConnectionByName('default');
+        if ($this->_deploymentConfig->get(\Magento\Framework\Config\ConfigOptionsListConstants::CONFIG_PATH_DB_CONNECTIONS . '/checkout')) {
+            $checkoutConnection = $this->_resource->getConnectionByName('checkout');
+        }
+        else {
+            $checkoutConnection = $connection;
+        }
+        if ($this->_deploymentConfig->get(\Magento\Framework\Config\ConfigOptionsListConstants::CONFIG_PATH_DB_CONNECTIONS . '/sales')) {
+            $salesConnection = $this->_resource->getConnectionByName('sales');
+        }
+        else {
+            $salesConnection = $connection;
+        }
         if (version_compare($context->getVersion(), '1.0.5') < 0) {
-            $table = $installer->getConnection()
-                ->newTable($installer->getTable('mailchimp_stores'))
+            $table = $connection
+                ->newTable($setup->getTable('mailchimp_stores'))
                 ->addColumn(
                     'id',
                     \Magento\Framework\DB\Ddl\Table::TYPE_INTEGER,
@@ -176,11 +203,11 @@ class UpgradeSchema implements UpgradeSchemaInterface
                     'store country code'
                 );
 
-            $installer->getConnection()->createTable($table);
+            $connection->createTable($table);
         }
         if (version_compare($context->getVersion(), '1.0.7') < 0) {
-            $installer->getConnection()->addColumn(
-                $installer->getTable('quote'),
+            $checkoutConnection->addColumn(
+                $setup->getTable('quote'),
                 'mailchimp_campaign_id',
                 [
                     'type' => \Magento\Framework\DB\Ddl\Table::TYPE_TEXT,
@@ -190,8 +217,8 @@ class UpgradeSchema implements UpgradeSchemaInterface
                 ]
             );
 
-            $installer->getConnection()->addColumn(
-                $installer->getTable('sales_order'),
+            $salesConnection->addColumn(
+                $setup->getTable('sales_order'),
                 'mailchimp_campaign_id',
                 [
                     'type' => \Magento\Framework\DB\Ddl\Table::TYPE_TEXT,
@@ -200,8 +227,8 @@ class UpgradeSchema implements UpgradeSchemaInterface
                     'comment' => 'Campaign'
                 ]
             );
-            $installer->getConnection()->addColumn(
-                $installer->getTable('quote'),
+            $checkoutConnection->addColumn(
+                $setup->getTable('quote'),
                 'mailchimp_landing_page',
                 [
                     'type' => \Magento\Framework\DB\Ddl\Table::TYPE_TEXT,
@@ -211,8 +238,8 @@ class UpgradeSchema implements UpgradeSchemaInterface
                 ]
             );
 
-            $installer->getConnection()->addColumn(
-                $installer->getTable('sales_order'),
+            $salesConnection->addColumn(
+                $setup->getTable('sales_order'),
                 'mailchimp_landing_page',
                 [
                     'type' => \Magento\Framework\DB\Ddl\Table::TYPE_TEXT,
@@ -223,8 +250,8 @@ class UpgradeSchema implements UpgradeSchemaInterface
             );
         }
         if (version_compare($context->getVersion(), '1.0.8') < 0) {
-            $installer->getConnection()->addColumn(
-                $installer->getTable('mailchimp_errors'),
+            $connection->addColumn(
+                $setup->getTable('mailchimp_errors'),
                 'original_id',
                 [
                     'type' => \Magento\Framework\DB\Ddl\Table::TYPE_INTEGER,
@@ -233,8 +260,8 @@ class UpgradeSchema implements UpgradeSchemaInterface
                     'comment' => 'Associated object ID'
                 ]
             );
-            $installer->getConnection()->addColumn(
-                $installer->getTable('mailchimp_errors'),
+            $connection->addColumn(
+                $setup->getTable('mailchimp_errors'),
                 'batch_id',
                 [
                     'type' => \Magento\Framework\DB\Ddl\Table::TYPE_TEXT,
@@ -245,8 +272,8 @@ class UpgradeSchema implements UpgradeSchemaInterface
             );
         }
         if (version_compare($context->getVersion(), '1.0.10') < 0) {
-            $installer->getConnection()->addColumn(
-                $installer->getTable('mailchimp_errors'),
+            $connection->addColumn(
+                $setup->getTable('mailchimp_errors'),
                 'store_id',
                 [
                     'type' => \Magento\Framework\DB\Ddl\Table::TYPE_INTEGER,
@@ -257,8 +284,8 @@ class UpgradeSchema implements UpgradeSchemaInterface
             );
         }
         if (version_compare($context->getVersion(), '1.0.11') < 0) {
-            $installer->getConnection()->addColumn(
-                $installer->getTable('mailchimp_stores'),
+            $connection->addColumn(
+                $setup->getTable('mailchimp_stores'),
                 'domain',
                 [
                     'type' => \Magento\Framework\DB\Ddl\Table::TYPE_TEXT,
@@ -269,32 +296,36 @@ class UpgradeSchema implements UpgradeSchemaInterface
             );
         }
         if (version_compare($context->getVersion(), '1.0.12') < 0) {
-            $installer->getConnection()->changecolumn(
-                $installer->getTable('mailchimp_stores'),
-                'address_address1',
-                'address_address_one',
-                [
-                    'type' => \Magento\Framework\DB\Ddl\Table::TYPE_TEXT,
-                    'length' => 255,
-                    'default' => null,
-                    'comment' => 'first street address'
-                ]
-            );
-            $installer->getConnection()->changecolumn(
-                $installer->getTable('mailchimp_stores'),
-                'address_address2',
-                'address_address_two',
-                [
-                    'type' => \Magento\Framework\DB\Ddl\Table::TYPE_TEXT,
-                    'length' => 255,
-                    'default' => null,
-                    'comment' => 'second street address'
-                ]
-            );
+            if ($connection->tableColumnExists($setup->getTable('mailchimp_stores'), 'address_address1')) {
+                $connection->changecolumn(
+                    $setup->getTable('mailchimp_stores'),
+                    'address_address1',
+                    'address_address_one',
+                    [
+                        'type' => \Magento\Framework\DB\Ddl\Table::TYPE_TEXT,
+                        'length' => 255,
+                        'default' => null,
+                        'comment' => 'first street address'
+                    ]
+                );
+            }
+            if ($connection->tableColumnExists($setup->getTable('mailchimp_stores'), 'address_address2')) {
+                $connection->changecolumn(
+                    $setup->getTable('mailchimp_stores'),
+                    'address_address2',
+                    'address_address_two',
+                    [
+                        'type' => \Magento\Framework\DB\Ddl\Table::TYPE_TEXT,
+                        'length' => 255,
+                        'default' => null,
+                        'comment' => 'second street address'
+                    ]
+                );
+            }
         }
         if (version_compare($context->getVersion(), '1.0.13') < 0) {
-            $installer->getConnection()->addColumn(
-                $installer->getTable('mailchimp_stores'),
+            $connection->addColumn(
+                $setup->getTable('mailchimp_stores'),
                 'mc_account_name',
                 [
                     'type' => \Magento\Framework\DB\Ddl\Table::TYPE_TEXT,
@@ -303,8 +334,8 @@ class UpgradeSchema implements UpgradeSchemaInterface
                     'comment' => 'MC account name'
                 ]
             );
-            $installer->getConnection()->addColumn(
-                $installer->getTable('mailchimp_stores'),
+            $connection->addColumn(
+                $setup->getTable('mailchimp_stores'),
                 'list_name',
                 [
                     'type' => \Magento\Framework\DB\Ddl\Table::TYPE_TEXT,
@@ -315,8 +346,8 @@ class UpgradeSchema implements UpgradeSchemaInterface
             );
         }
         if (version_compare($context->getVersion(), '1.0.14') < 0) {
-            $installer->getConnection()->addColumn(
-                $installer->getTable('mailchimp_sync_ecommerce'),
+            $connection->addColumn(
+                $setup->getTable('mailchimp_sync_ecommerce'),
                 'batch_id',
                 [
                     'type' => \Magento\Framework\DB\Ddl\Table::TYPE_TEXT,
@@ -327,8 +358,8 @@ class UpgradeSchema implements UpgradeSchemaInterface
             );
         }
         if (version_compare($context->getVersion(), '1.0.15') < 0) {
-            $table = $installer->getConnection()
-                ->newTable($installer->getTable('mailchimp_webhook_request'))
+            $table = $connection
+                ->newTable($setup->getTable('mailchimp_webhook_request'))
                 ->addColumn(
                     'id',
                     \Magento\Framework\DB\Ddl\Table::TYPE_INTEGER,
@@ -364,8 +395,84 @@ class UpgradeSchema implements UpgradeSchemaInterface
                     [],
                     'Already processed'
                 );
-            $installer->getConnection()->createTable($table);
+            $connection->createTable($table);
         }
-        $installer->endSetup();
+        if (version_compare($context->getVersion(), '1.0.24') < 0) {
+            $salesConnection->addColumn(
+                $setup->getTable('sales_order_grid'),
+                'mailchimp_flag',
+                [
+                    'type' => \Magento\Framework\DB\Ddl\Table::TYPE_BOOLEAN,
+                    'default' => 0,
+                    'comment' => 'Retrieved from Mailchimp'
+                ]
+            );
+            $salesConnection->addColumn(
+                $setup->getTable('sales_order'),
+                'mailchimp_flag',
+                [
+                    'type' => \Magento\Framework\DB\Ddl\Table::TYPE_BOOLEAN,
+                    'default' => 0,
+                    'comment' => 'Retrieved from Mailchimp'
+                ]
+            );
+        }
+        if (version_compare($context->getVersion(), '1.0.25') < 0) {
+            $connection->addIndex(
+                $setup->getTable('mailchimp_sync_ecommerce'),
+                $connection->getIndexName($setup->getTable('mailchimp_sync_ecommerce'),'related_id','index'),
+                'related_id'
+            );
+            $connection->addColumn(
+                $setup->getTable('mailchimp_sync_ecommerce'),
+                'deleted_related_id',
+                [
+                    'type' => \Magento\Framework\DB\Ddl\Table::TYPE_INTEGER,
+                    'length' => 11,
+                    'default' => null,
+                    'comment' => 'Id related to deleted item'
+                ]
+            );
+        }
+        if (version_compare($context->getVersion(),'1.0.26') < 0) {
+            $table = $connection
+                ->newTable($setup->getTable('mailchimp_interest_group'))
+                ->addColumn(
+                    'id',
+                    \Magento\Framework\DB\Ddl\Table::TYPE_INTEGER,
+                    null,
+                    ['identity' => true, 'unsigned' => true, 'nullable' => false, 'primary' => true],
+                    'Id'
+                )
+                ->addColumn(
+                    'subscriber_id',
+                    \Magento\Framework\DB\Ddl\Table::TYPE_INTEGER,
+                    10,
+                    ['unsigned' => true, 'nullable' => false],
+                    'subscriber id'
+                )
+                ->addColumn(
+                    'store_id',
+                    \Magento\Framework\DB\Ddl\Table::TYPE_SMALLINT,
+                    5,
+                    ['unsigned' => true, 'nullable' => false],
+                    'subscriber id'
+                )
+                ->addColumn(
+                    'updated_at',
+                    \Magento\Framework\DB\Ddl\Table::TYPE_DATETIME,
+                    null,
+                    [],
+                    'date of the request'
+                )
+                ->addColumn(
+                    'groupdata',
+                    \Magento\Framework\DB\Ddl\Table::TYPE_TEXT,
+                    4096,
+                    ['unsigned' => true, 'nullable' => false],
+                    'data'
+                );
+            $connection->createTable($table);
+        }
     }
 }

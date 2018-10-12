@@ -6,4 +6,13 @@
     <event name="admin_system_config_changed_section_mailchimp">
         <observer name="mailchimp_admin_system_config_changed_section_mailchimp" instance="Ebizmarts\MailChimp\Observer\ConfigObserver"/>
     </event>
+    <event name="salesrule_rule_save_after">
+        <observer name="mailchimp_salesrule_rule_save_after" instance="\Ebizmarts\MailChimp\Observer\SalesRule\Rule\SaveAfter"/>
+    </event>
+    <event name="salesrule_rule_delete_after">
+        <observer name="mailchimp_salesrule_rule_delete_after" instance="\Ebizmarts\MailChimp\Observer\SalesRule\Rule\DeleteAfter"/>
+    </event>
+    <event name="adminhtml_customer_save_after">
+        <observer name="mailchimp_adminhtml_customer_save_after" instance="\Ebizmarts\MailChimp\Observer\Adminhtml\Customer\SaveAfter" />
+    </event>
 </config>

@@ -43,6 +43,10 @@ class Loadquote extends Action
      * @var \Magento\Customer\Model\Url
      */
     protected $_customerUrl;
+    /**
+     * @var \Magento\Checkout\Model\Session
+     */
+    protected $_checkoutSession;
 
     /**
      * Loadquote constructor.
@@ -50,9 +54,9 @@ class Loadquote extends Action
      * @param PageFactory $pageFactory
      * @param \Magento\Quote\Model\QuoteFactory $quote
      * @param \Magento\Customer\Model\Session $customerSession
+     * @param \Magento\Checkout\Model\Session $checkoutSession
      * @param \Ebizmarts\MailChimp\Helper\Data $helper
      * @param \Magento\Framework\Url $urlHelper
-     * @param \Magento\Framework\Message\ManagerInterface $message
      * @param \Magento\Customer\Model\Url $customerUrl
      */
     public function __construct(
@@ -60,6 +64,7 @@ class Loadquote extends Action
         PageFactory $pageFactory,
         \Magento\Quote\Model\QuoteFactory $quote,
         \Magento\Customer\Model\Session $customerSession,
+        \Magento\Checkout\Model\Session $checkoutSession,
         \Ebizmarts\MailChimp\Helper\Data $helper,
         \Magento\Framework\Url $urlHelper,
         \Magento\Customer\Model\Url $customerUrl
@@ -72,6 +77,7 @@ class Loadquote extends Action
         $this->_urlHelper       = $urlHelper;
         $this->_message         = $context->getMessageManager();
         $this->_customerUrl     = $customerUrl;
+        $this->_checkoutSession = $checkoutSession;
         parent::__construct($context);
     }
 
@@ -113,9 +119,8 @@ class Loadquote extends Action
                     $url = $this->_urlHelper->getUrl(
                         $this->_helper->getConfigValue(
                             \Ebizmarts\MailChimp\Helper\Data::XML_ABANDONEDCART_PAGE,
-                            $magentoStoreId,
+                            $magentoStoreId),
                             ['mc_cid'=> $params['mc_cid']]
-                        )
                     );
                 } else {
                     $url = $this->_urlHelper->getUrl(
@@ -128,7 +133,7 @@ class Loadquote extends Action
                 $quote->setData('mailchimp_abandonedcart_flag', true);
                 $quote->getResource()->save($quote);
                 if (!$quote->getCustomerId()) {
-                    $this->_customerSession->setQuoteId($quote->getId());
+                    $this->_checkoutSession->setQuoteId($quote->getId());
                     $this->_redirect($url);
                 } else {
                     if ($this->_customerSession->isLoggedIn()) {

@@ -18,20 +18,32 @@ class MonkeyList implements \Magento\Framework\Option\ArrayInterface
     private $options = null;
 
     /**
-     * MonkeyStore constructor.
+     * MonkeyList constructor.
      * @param \Ebizmarts\MailChimp\Helper\Data $helper
-     * @param \Magento\Store\Model\StoreManagerInterface $storeManager
+     * @param \Magento\Framework\App\RequestInterface $request
      */
     public function __construct(
         \Ebizmarts\MailChimp\Helper\Data $helper,
-        \Magento\Store\Model\StoreManagerInterface $storeManager
+        \Magento\Framework\App\RequestInterface $request
     ) {
-    
-        if ($helper->getApiKey($storeManager->getStore()->getId())) {
+        $storeId = (int) $request->getParam("store", 0);
+        if($request->getParam('website',0)) {
+            $scope = 'website';
+            $storeId = $request->getParam('website',0);
+        }
+        elseif($request->getParam('store',0)) {
+            $scope = 'stores';
+            $storeId = $request->getParam('store',0);
+        }
+        else {
+            $scope = 'default';
+        }
+
+        if ($helper->getApiKey($storeId,$scope)) {
             try {
-                $this->options = $helper->getApi()->lists->getLists($helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_PATH_LIST, $storeManager->getStore()->getId()));
-            } catch (\Exception $e) {
-                $helper->log($e->getMessage());
+                $this->options = $helper->getApi($storeId,$scope)->lists->getLists($helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_PATH_LIST, $storeId,$scope));
+            } catch (\Mailchimp_Error $e) {
+                $helper->log($e->getFriendlyMessage());
             }
         }
     }
