@@ -122,9 +122,19 @@ class Webhook
                 }
             }
         } else {
-            $sub = $this->_subscriberFactory->create();
-            $sub->setSubscriberEmail($email);
-            $this->_subscribeMember($sub, \Magento\Newsletter\Model\Subscriber::STATUS_SUBSCRIBED);
+            $storeIds = $this->_helper->getMagentoStoreIdsByListId($listId);
+            if (count($storeIds) > 0) {
+                foreach($storeIds as $storeId) {
+                    $sub = $this->_subscriberFactory->create();
+                    $sub->setStoreId($storeId);
+                    $sub->setSubscriberEmail($email);
+                    $this->_subscribeMember($sub, \Magento\Newsletter\Model\Subscriber::STATUS_SUBSCRIBED);
+                }
+            } else {
+                $sub = $this->_subscriberFactory->create();
+                $sub->setSubscriberEmail($email);
+                $this->_subscribeMember($sub, \Magento\Newsletter\Model\Subscriber::STATUS_SUBSCRIBED);
+            }
         }
     }
     protected function _unsubscribe($data)
