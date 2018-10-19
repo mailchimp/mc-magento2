@@ -143,7 +143,6 @@ class Cart
         $convertedCarts->getSelect()->where("m4m.mailchimp_sync_deleted is null and m4m.related_id is not null");
         // limit the collection
         $convertedCarts->getSelect()->limit(self::BATCH_LIMIT);
-        $this->_helper->log((string)$convertedCarts->getSelect());
         /**
          * @var $cart \Magento\Quote\Model\Quote
          */
