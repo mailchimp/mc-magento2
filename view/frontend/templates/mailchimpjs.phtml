@@ -1,4 +1,4 @@
 <?php
-    $url = $this->getJsUrl();
+    $url = $block->escapeHtml($this->getJsUrl());
 ?>
 <script type="text/javascript" src="<?php echo $url;?>" async></script>
