@@ -340,23 +340,18 @@ class Product
     ) {
 
         $data = [];
-        $parent = null;
 
         //data applied for both root and varient products
         $data["id"] = $product->getId();
         $data["title"] = $product->getName();
         $data["url"] = $product->getProductUrl();
-        if ($product->getImage()&&$product->getImage()!='no_selection') {
+        if ($product->getImage()) {
             $filePath = 'catalog/product'.$product->getImage();
             $data["image_url"] = $this->_helper->getBaserUrl($magentoStoreId, \Magento\Framework\UrlInterface::URL_TYPE_MEDIA).$filePath;
         } elseif ($this->_parentImage) {
             $data['image_url'] = $this->_parentImage;
         } else {
-            $parent = $this->_getParent($product->getId());
-            if($parent&&$parent->getImage()&&$parent->getImage()!='no_selection') {
-                $filePath = 'catalog/product'.$parent->getImage();
-                $data["image_url"] = $this->_helper->getBaserUrl($magentoStoreId, \Magento\Framework\UrlInterface::URL_TYPE_MEDIA).$filePath;
-            }
+            $data['image_url'] = '';
         }
         $data["published_at_foreign"] = "";
         if ($isVarient) {
@@ -388,23 +383,31 @@ class Product
             if ($product->getVisibility() == \Magento\Catalog\Model\Product\Visibility::VISIBILITY_NOT_VISIBLE) {
                 $tailUrl = '';
                 $data["visibility"] = 'false';
-                if(!$parent) {
-                    $parent = $this->_getParent($product->getId());
-                }
-                if($parent) {
-                    $options = $parent->getTypeInstance()->getConfigurableAttributesAsArray($parent);
-                    foreach ($options as $option) {
-                        if (strlen($tailUrl)) {
-                            $tailUrl .= '&';
-                        } else {
-                            $tailUrl .= '?';
+                $parentIds =$this->_configurable->getParentIdsByChild($product->getId());
+                /**
+                 * @var $parent \Magento\Catalog\Model\Product
+                 */
+                $parent = null;
+                foreach ($parentIds as $id) {
+                    $parent = $this->_productRepository->getById($id);
+                    if ($parent->getTypeId() == \Magento\ConfigurableProduct\Model\Product\Type\Configurable::TYPE_CODE) {
+                        $options = $parent->getTypeInstance()->getConfigurableAttributesAsArray($parent);
+                        foreach ($options as $option) {
+                            if (strlen($tailUrl)) {
+                                $tailUrl .= '&';
+                            } else {
+                                $tailUrl .= '?';
+                            }
+                            $tailUrl.= $option['attribute_code']."=".$product->getData($option['attribute_code']);
                         }
-                        $tailUrl .= $option['attribute_code'] . "=" . $product->getData($option['attribute_code']);
+                    }
+                    if ($tailUrl!='') {
+                        break;
                     }
                 }
                 if ($parent) {
                     $this->_childtUrl = $data['url'] = $parent->getProductUrl() . $tailUrl;
-                    if(!isset($data['image_url'])||$data['image_url']=='') {
+                    if(!isset($data['image_url'])) {
                         $filePath = 'catalog/product'.$parent->getImage();
                         $data["image_url"] = $this->_helper->getBaserUrl($magentoStoreId, \Magento\Framework\UrlInterface::URL_TYPE_MEDIA).$filePath;
                     }
@@ -447,21 +450,6 @@ class Product
         }
 
         return $data;
-    }
-
-    protected function _getParent($productId)
-    {
-        $parentIds =$this->_configurable->getParentIdsByChild($productId);
-        $parent = null;
-        foreach ($parentIds as $id) {
-            $parent = $this->_productRepository->getById($id);
-            if ($parent->getTypeId() == \Magento\ConfigurableProduct\Model\Product\Type\Configurable::TYPE_CODE) {
-                break;
-            } else {
-                $parent = null;
-            }
-        }
-        return $parent;
     }
 
     /**
