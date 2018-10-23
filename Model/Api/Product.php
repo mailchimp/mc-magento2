@@ -404,7 +404,7 @@ class Product
                 }
                 if ($parent) {
                     $this->_childtUrl = $data['url'] = $parent->getProductUrl() . $tailUrl;
-                    if(!isset($data['image_url'])||$data['image_url']=='') {
+                    if(!empty($data['image_url'])) {
                         $filePath = 'catalog/product'.$parent->getImage();
                         $data["image_url"] = $this->_helper->getBaserUrl($magentoStoreId, \Magento\Framework\UrlInterface::URL_TYPE_MEDIA).$filePath;
                     }
@@ -425,7 +425,7 @@ class Product
 
             //missing data
             $data["handle"] = "";
-            if (isset($data['image_url'])) {
+            if (!empty($data['image_url'])) {
                 $this->_parentImage = $data['image_url'];
             }
             //variants
