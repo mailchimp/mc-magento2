@@ -401,10 +401,8 @@ class Product
                         }
                         $tailUrl .= $option['attribute_code'] . "=" . $product->getData($option['attribute_code']);
                     }
-                }
-                if ($parent) {
                     $this->_childtUrl = $data['url'] = $parent->getProductUrl() . $tailUrl;
-                    if(!empty($data['image_url'])) {
+                    if(empty($data['image_url'])) {
                         $filePath = 'catalog/product'.$parent->getImage();
                         $data["image_url"] = $this->_helper->getBaserUrl($magentoStoreId, \Magento\Framework\UrlInterface::URL_TYPE_MEDIA).$filePath;
                     }
