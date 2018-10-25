@@ -349,7 +349,7 @@ class Order
                 $itemCount++;
                 $data["lines"][] = [
                     "id" => (string)$itemCount,
-                    "product_id" => $variant,
+                    "product_id" => $item->getProductId(),
                     "product_variant_id" => $variant,
                     "quantity" => (int)$item->getQtyOrdered(),
                     "price" => $item->getPrice(),
