@@ -124,7 +124,7 @@ class Product
             /**
              * @var $product \Magento\Catalog\Model\Product
              */
-            $product = $this->_productRepository->get($item->getSku());
+            $product = $this->_productRepository->getById($item->getId());
             if ($item->getMailchimpSyncModified() && $item->getMailchimpSyncDelta() &&
                 $item->getMailchimpSyncDelta() > $this->_helper->getMCMinSyncDateFlag()) {
                 $batchArray = array_merge($this->_buildOldProductRequest($product,$this->_batchId,$mailchimpStoreId, $magentoStoreId),$batchArray);
@@ -361,7 +361,7 @@ class Product
         $data["published_at_foreign"] = "";
         if ($isVarient) {
             //this is for a varient product
-            $data["sku"] = $product->getSku();
+            $data["sku"] = $product->getSku() ? $product->getSku() : '';
             $today = $this->_helper->getGmtDate("Y-m-d");
             try {
                 if ($product->getSpecialFromDate() && $product->getSpecialFromDate() <= $today && (float)$product->getSpecialPrice()) {
