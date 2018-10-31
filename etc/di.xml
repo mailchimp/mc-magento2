@@ -34,6 +34,7 @@
         <arguments>
             <argument name="collections" xsi:type="array">
                 <item name="mailchimp_errors_grid_data_source" xsi:type="string">Ebizmarts\MailChimp\Model\ResourceModel\MailChimpErrors\Collection</item>
+                <item name="mailchimp_stores_grid_data_source" xsi:type="string">Ebizmarts\MailChimp\Model\ResourceModel\MailChimpStores\Grid\Collection</item>
             </argument>
         </arguments>
     </type>
@@ -43,13 +44,6 @@
             <argument name="resourceModel" xsi:type="string">Ebizmarts\MailChimp\Model\ResourceModel\MailChimpStores</argument>
         </arguments>
     </virtualType>
-    <type name="Magento\Framework\View\Element\UiComponent\DataProvider\CollectionFactory">
-        <arguments>
-            <argument name="collections" xsi:type="array">
-                <item name="mailchimp_stores_grid_data_source" xsi:type="string">Ebizmarts\MailChimp\Model\ResourceModel\MailChimpStores\Grid\Collection</item>
-            </argument>
-        </arguments>
-    </type>
     <type name="Magento\Newsletter\Model\Subscriber">
         <plugin name="mailchimp-subscriber" type="Ebizmarts\MailChimp\Model\Plugin\Subscriber" sortOrder="10"/>
     </type>
