@@ -127,8 +127,10 @@ class Subscriber
     }
     protected function _getInterest(\Magento\Newsletter\Model\Subscriber $subscriber)
     {
+        $this->_helper->log(__METHOD__);
         $rc = [];
         $interest = $this->_helper->getSubscriberInterest($subscriber->getSubscriberId(),$subscriber->getStoreId(),$this->_interest);
+        $this->_helper->log($interest);
         foreach($interest as $i) {
             foreach($i['category'] as $key=>$value) {
                 $rc[$value['id']] = $value['checked'];

@@ -27,22 +27,29 @@ class SaveAfter implements \Magento\Framework\Event\ObserverInterface
      * @var \Ebizmarts\MailChimp\Model\MailChimpInterestGroupFactory
      */
     protected $interestGroupFactory;
+    /**
+     * @var \Magento\Framework\Serialize\Serializer\Json
+     */
+    protected $serlializer;
 
     /**
      * SaveAfter constructor.
      * @param \Ebizmarts\MailChimp\Helper\Data $helper
      * @param \Magento\Newsletter\Model\SubscriberFactory $subscriberFactory
      * @param \Ebizmarts\MailChimp\Model\MailChimpInterestGroupFactory $interestGroupFactory
+     * @param \Magento\Framework\Serialize\Serializer\Json $serializer
      */
     public function __construct(
         \Ebizmarts\MailChimp\Helper\Data $helper,
         \Magento\Newsletter\Model\SubscriberFactory $subscriberFactory,
-        \Ebizmarts\MailChimp\Model\MailChimpInterestGroupFactory $interestGroupFactory
+        \Ebizmarts\MailChimp\Model\MailChimpInterestGroupFactory $interestGroupFactory,
+        \Magento\Framework\Serialize\Serializer\Json $serializer
     )
     {
         $this->helper               = $helper;
         $this->subscriberFactory    = $subscriberFactory;
         $this->interestGroupFactory = $interestGroupFactory;
+        $this->serlializer          = $serializer;
     }
 
     public function execute(\Magento\Framework\Event\Observer $observer)
@@ -68,7 +75,7 @@ class SaveAfter implements \Magento\Framework\Event\ObserverInterface
                 $subscriber->loadByEmail($customer->getEmail());
                 if ($subscriber->getEmail() == $customer->getEmail()) {
                     $interestGroup->getBySubscriberIdStoreId($subscriber->getSubscriberId(), $subscriber->getStoreId());
-                    $interestGroup->setGroupdata(serialize($params));
+                    $interestGroup->setGroupdata($this->serlializer->serialize($params));
                     $interestGroup->setSubscriberId($subscriber->getSubscriberId());
                     $interestGroup->setStoreId($subscriber->getStoreId());
                     $interestGroup->setUpdatedAt($this->helper->getGmtDate());
@@ -78,7 +85,7 @@ class SaveAfter implements \Magento\Framework\Event\ObserverInterface
                     $this->subscriberFactory->create()->subscribe($customer->getEmail());
                     $subscriber->loadByEmail($customer->getEmail());
                     $interestGroup->getBySubscriberIdStoreId($subscriber->getSubscriberId(), $subscriber->getStoreId());
-                    $interestGroup->setGroupdata(serialize($params));
+                    $interestGroup->setGroupdata($this->serlializer->serialize($params));
                     $interestGroup->setSubscriberId($subscriber->getSubscriberId());
                     $interestGroup->setStoreId($subscriber->getStoreId());
                     $interestGroup->setUpdatedAt($this->helper->getGmtDate());

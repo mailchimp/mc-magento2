@@ -30,19 +30,23 @@ class Webhook
     /**
      * @var \Ebizmarts\MailChimp\Helper\Data
      */
-    private $_helper;
+    protected $_helper;
     /**
      * @var \Magento\Newsletter\Model\SubscriberFactory
      */
-    private $_subscriberFactory;
+    protected $_subscriberFactory;
     /**
      * @var \Ebizmarts\MailChimp\Model\ResourceModel\MailChimpWebhookRequest\CollectionFactory
      */
-    private $_webhookCollection;
+    protected $_webhookCollection;
     /**
      * @var \Magento\Customer\Model\CustomerFactory
      */
-    private $_customer;
+    protected $_customer;
+    /**
+     * @var \Magento\Framework\Serialize\Serializer\Json
+     */
+    protected $_serializer;
 
     /**
      * Webhook constructor.
@@ -50,18 +54,21 @@ class Webhook
      * @param \Magento\Newsletter\Model\SubscriberFactory $subscriberFactory
      * @param \Ebizmarts\MailChimp\Model\ResourceModel\MailChimpWebhookRequest\CollectionFactory $webhookCollection
      * @param \Magento\Customer\Model\CustomerFactory $customer
+     * @param \Magento\Framework\Serialize\Serializer\Json $serializer
      */
     public function __construct(
         \Ebizmarts\MailChimp\Helper\Data $helper,
         \Magento\Newsletter\Model\SubscriberFactory $subscriberFactory,
         \Ebizmarts\MailChimp\Model\ResourceModel\MailChimpWebhookRequest\CollectionFactory $webhookCollection,
-        \Magento\Customer\Model\CustomerFactory $customer
+        \Magento\Customer\Model\CustomerFactory $customer,
+        \Magento\Framework\Serialize\Serializer\Json $serializer
     ) {
     
         $this->_helper              = $helper;
         $this->_subscriberFactory   = $subscriberFactory;
         $this->_webhookCollection   = $webhookCollection;
         $this->_customer            = $customer;
+        $this->_serializer          = $serializer;
     }
     public function execute()
     {
@@ -79,7 +86,7 @@ class Webhook
          * @var $item \Ebizmarts\MailChimp\Model\MailChimpWebhookRequest
          */
         foreach ($collection as $item) {
-            $data = unserialize($item->getDataRequest());
+            $data = $this->_serializer->unserialize($item->getDataRequest());
             $stores = $this->_helper->getMagentoStoreIdsByListId($data['list_id']);
             if(count($stores)) {
                 switch ($item->getType()) {

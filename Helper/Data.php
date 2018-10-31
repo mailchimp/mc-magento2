@@ -182,6 +182,10 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
      * @var \Magento\Framework\Stdlib\DateTime\DateTime
      */
     protected $_date;
+    /**
+     * @var \Magento\Framework\Serialize\Serializer\Json
+     */
+    protected $_serializer;
 
 
     private $customerAtt    = null;
@@ -214,6 +218,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
      * @param \Magento\Directory\Api\CountryInformationAcquirerInterface $countryInformation
      * @param \Magento\Framework\App\ResourceConnection $resource
      * @param \Ebizmarts\MailChimp\Model\MailChimpInterestGroupFactory $interestGroupFactory
+     * @param \Magento\Framework\Serialize\Serializer\Json $serializer
      * @param \Magento\Framework\Stdlib\DateTime\DateTime $date
      */
     public function __construct(
@@ -242,6 +247,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         \Magento\Directory\Api\CountryInformationAcquirerInterface $countryInformation,
         \Magento\Framework\App\ResourceConnection $resource,
         \Ebizmarts\MailChimp\Model\MailChimpInterestGroupFactory $interestGroupFactory,
+        \Magento\Framework\Serialize\Serializer\Json $serializer,
         \Magento\Framework\Stdlib\DateTime\DateTime $date
     ) {
 
@@ -272,6 +278,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         $this->_customerFactory         = $customerFactory;
         $this->_countryInformation      = $countryInformation;
         $this->_interestGroupFactory    = $interestGroupFactory;
+        $this->_serializer              = $serializer;
         $this->_date                    = $date;
         parent::__construct($context);
     }
@@ -349,7 +356,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         if(!$this->_mapFields) {
             $customerAtt = $this->getCustomerAtts();
             $data = $this->getConfigValue(self::XML_MERGEVARS, $storeId);
-            $data = unserialize($data);
+            $data = $this->_serializer->unserialize($data);
             if(is_array($data)) {
                 foreach ($data as $customerFieldId => $mailchimpName) {
                     $this->_mapFields[] = [
@@ -1022,7 +1029,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
 
         $interestGroup = $this->_interestGroupFactory->create();
         $interestGroup->getBySubscriberIdStoreId($subscriberId,$storeId);
-        $groups = unserialize($interestGroup->getGroupdata());
+        $groups = $this->_serializer->unserialize($interestGroup->getGroupdata());
         if(isset($groups['group'])) {
             foreach ($groups['group'] as $key => $value) {
                 if (isset($interest[$key])) {
@@ -1049,7 +1056,6 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
                 }
             }
         }
-        $this->log($interest);
         return $interest;
     }
     public function getGmtDate($format = null)
