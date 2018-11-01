@@ -143,7 +143,7 @@ class Cart
             ['m4m.*']
         );
         // be sure that the quotes are already in mailchimp and not deleted
-        $convertedCarts->getSelect()->where("m4m.mailchimp_sync_deleted = 0");
+        $convertedCarts->getSelect()->where("m4m.mailchimp_sync_deleted is null and m4m.related_id is not null");
         // limit the collection
         $convertedCarts->getSelect()->limit(self::BATCH_LIMIT);
         /**
@@ -466,7 +466,7 @@ class Cart
             //id can not be 0 so we add 1 to $itemCount before setting the id.
             $itemCount++;
             $line['id'] = (string)$itemCount;
-            $line['product_id'] = $variantId;
+            $line['product_id'] = $item->getProductId();
             $line['product_variant_id'] = $variantId;
             $line['quantity'] = (int)$item->getQty();
             $line['price'] = $item->getPrice();

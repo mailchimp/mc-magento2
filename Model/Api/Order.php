@@ -360,7 +360,7 @@ class Order
                 $itemCount++;
                 $data["lines"][] = [
                     "id" => (string)$itemCount,
-                    "product_id" => $variant,
+                    "product_id" => $item->getProductId(),
                     "product_variant_id" => $variant,
                     "quantity" => (int)$item->getQtyOrdered(),
                     "price" => $item->getPrice(),
@@ -537,12 +537,12 @@ class Order
         //customer orders data
         $orderCollection = $this->_orderCollectionFactory->create();
         $orderCollection->addFieldToFilter('state', [
-            ['neq',\Magento\Sales\Model\Order::STATE_CANCELED],
-            ['neq',\Magento\Sales\Model\Order::STATE_CLOSED]])
+            ['neq' => \Magento\Sales\Model\Order::STATE_CANCELED],
+            ['neq' => \Magento\Sales\Model\Order::STATE_CLOSED]])
             ->addAttributeToFilter('customer_email', ['eq' => $order->getCustomerEmail()]);
 
-        $totalOrders = 1;
-        $totalAmountSpent = (int)$order->getGrandTotal();
+        $totalOrders = 0;
+        $totalAmountSpent = 0;
         /**
          * @var $customerOrder \Magento\Sales\Model\Order
          */
