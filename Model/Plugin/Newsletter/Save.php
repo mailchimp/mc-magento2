@@ -35,6 +35,10 @@ class Save
      * @var \Ebizmarts\MailChimp\Model\MailChimpInterestGroupFactory
      */
     protected $interestGroupFactory;
+    /**
+     * @var \Magento\Framework\Serialize\Serializer\Json
+     */
+    protected $serializer;
 
     /**
      * Save constructor.
@@ -43,13 +47,15 @@ class Save
      * @param \Magento\Newsletter\Model\SubscriberFactory $subscriberFactory
      * @param \Ebizmarts\MailChimp\Model\MailChimpInterestGroupFactory $interestGroupFactory
      * @param \Magento\Framework\App\Request\Http $request
+     * @param \Magento\Framework\Serialize\Serializer\Json $serializer
      */
     public function __construct(
         \Ebizmarts\MailChimp\Helper\Data $helper,
         \Magento\Customer\Model\Session $customerSession,
         \Magento\Newsletter\Model\SubscriberFactory $subscriberFactory,
         \Ebizmarts\MailChimp\Model\MailChimpInterestGroupFactory $interestGroupFactory,
-        \Magento\Framework\App\Request\Http $request
+        \Magento\Framework\App\Request\Http $request,
+        \Magento\Framework\Serialize\Serializer\Json $serializer
     )
     {
         $this->helper               = $helper;
@@ -57,6 +63,7 @@ class Save
         $this->subscriberFactory    = $subscriberFactory;
         $this->request              = $request;
         $this->interestGroupFactory = $interestGroupFactory;
+        $this->serializer           = $serializer;
     }
     public function afterExecute()
     {
@@ -75,7 +82,7 @@ class Save
             $subscriber->loadByCustomerId($this->customerSession->getCustomerId());
             if($subscriber->getEmail()==$email) {
                 $interestGroup->getBySubscriberIdStoreId($subscriber->getSubscriberId(),$subscriber->getStoreId());
-                $interestGroup->setGroupdata(serialize($params));
+                $interestGroup->setGroupdata($this->serializer->serialize($params));
                 $interestGroup->setSubscriberId($subscriber->getSubscriberId());
                 $interestGroup->setStoreId($subscriber->getStoreId());
                 $interestGroup->setUpdatedAt($this->helper->getGmtDate());
@@ -86,7 +93,7 @@ class Save
                 $this->subscriberFactory->create()->subscribe($email);
                 $subscriber->loadByEmail($email);
                 $interestGroup->getBySubscriberIdStoreId($subscriber->getSubscriberId(),$subscriber->getStoreId());
-                $interestGroup->setGroupdata(serialize($params));
+                $interestGroup->setGroupdata($this->serializer->serialize($params));
                 $interestGroup->setSubscriberId($subscriber->getSubscriberId());
                 $interestGroup->setStoreId($subscriber->getStoreId());
                 $interestGroup->setUpdatedAt($this->helper->getGmtDate());

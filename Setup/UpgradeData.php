@@ -28,19 +28,40 @@ class UpgradeData implements UpgradeDataInterface
      * @var DeploymentConfig
      */
     protected $_deploymentConfig;
+    /**
+     * @var \Magento\Framework\Serialize\Serializer\Json
+     */
+    protected $_serializer;
+    /**
+     * @var \Ebizmarts\MailChimp\Model\ResourceModel\MailChimpInterestGroup\CollectionFactory
+     */
+    protected $_insterestGroupCollectionFactory;
+    /**
+     * @var \Ebizmarts\MailChimp\Model\ResourceModel\MailChimpWebhookRequest\CollectionFactory
+     */
+    protected $_webhookCollectionFactory;
 
     /**
      * UpgradeData constructor.
      * @param ResourceConnection $resource
      * @param DeploymentConfig $deploymentConfig
+     * @param \Magento\Framework\Serialize\Serializer\Json $serializer
+     * @param \Ebizmarts\MailChimp\Model\ResourceModel\MailChimpInterestGroup\CollectionFactory $interestGroupCollectionFactory
+     * @param \Ebizmarts\MailChimp\Model\ResourceModel\MailChimpWebhookRequest\CollectionFactory $webhookCollectionFactory
      */
     public function __construct(
         ResourceConnection $resource,
-        DeploymentConfig $deploymentConfig
+        DeploymentConfig $deploymentConfig,
+        \Magento\Framework\Serialize\Serializer\Json $serializer,
+        \Ebizmarts\MailChimp\Model\ResourceModel\MailChimpInterestGroup\CollectionFactory $interestGroupCollectionFactory,
+        \Ebizmarts\MailChimp\Model\ResourceModel\MailChimpWebhookRequest\CollectionFactory $webhookCollectionFactory
     )
     {
-        $this->_resource = $resource;
-        $this->_deploymentConfig = $deploymentConfig;
+        $this->_resource            = $resource;
+        $this->_deploymentConfig    = $deploymentConfig;
+        $this->_serializer          = $serializer;
+        $this->_insterestGroupCollectionFactory = $interestGroupCollectionFactory;
+        $this->_webhookCollectionFactory        = $webhookCollectionFactory;
     }
 
     /**
@@ -71,6 +92,69 @@ class UpgradeData implements UpgradeDataInterface
             $salesConnection->query($query);
             $setup->endSetup();
 
+        }
+        if (version_compare($context->getVersion(), '1.0.31') < 0)
+        {
+            // must convert all the serialized data in the db
+            // convert the data in core_config_data
+            $setup->startSetup();
+            $connection = $this->_resource->getConnectionByName('default');
+            $table = $setup->getTable('core_config_data');
+            $select = $connection->select()->from($table)->where('path = ?',\Ebizmarts\MailChimp\Helper\Data::XML_MERGEVARS);
+            $rows = $connection->fetchAll($select);
+            foreach ($rows as $row) {
+                $value = $row['value'];
+                $uvalue = unserialize($value);
+                $row['value'] = $this->_serializer->serialize($uvalue);
+                $where = ['config_id =?'=> $row['config_id']];
+                $connection->update($table,$row,$where);
+            }
+
+            // convert table mailchimp_interest_group
+            /**
+             * @var \Ebizmarts\MailChimp\Model\ResourceModel\MailChimpInterestGroup $item
+             */
+            $lastId = 0;
+            $done = false;
+            while(!$done) {
+                $collection = $this->_insterestGroupCollectionFactory->create();
+                $collection->addFieldToFilter('id',['gt' => $lastId]);
+                $collection->getSelect()->limit(500);
+                if (!$collection->getSize()) {
+                    $done = true;
+                } else {
+                    foreach ($collection as $item) {
+                        $group = $item->getGroupdata();
+                        $ugroup = unserialize($group);
+                        $item->setGroupdata($this->_serializer->serialize($ugroup));
+                        $item->getResource()->save($item);
+                        $lastId = $item->getId();
+                    }
+                }
+            }
+            // convert table mailchimp_webhook_request
+            /**
+             * @var \Ebizmarts\MailChimp\Model\ResourceModel\MailChimpWebhookRequest $webhookItem
+             */
+            $lastId = 0;
+            $done = false;
+            while(!$done) {
+                $webhookCollection = $this->_webhookCollectionFactory->create();
+                $webhookCollection->addFieldToFilter('processed', ['neq' => 1]);
+                $webhookCollection->addFieldToFilter('id',['gt' => $lastId]);
+                $webhookCollection->getSelect()->limit(500);
+                if (!$webhookCollection->getSize()) {
+                    $done = true;
+                } else {
+                    foreach ($webhookCollection as $webhookItem) {
+                        $dt = $webhookItem->getDataRequest();
+                        $udt = unserialize($dt);
+                        $webhookItem->setDataRequest($this->_serializer->serialize($udt));
+                        $webhookItem->getResource()->save($webhookItem);
+                        $lastId = $item->getId();
+                    }
+                }
+            }
         }
     }
 }
