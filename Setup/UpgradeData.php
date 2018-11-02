@@ -29,21 +29,9 @@ class UpgradeData implements UpgradeDataInterface
      */
     protected $_deploymentConfig;
     /**
-     * @var \Ebizmarts\MailChimp\Helper\Data
-     */
-    protected $_helper;
-    /**
      * @var \Magento\Framework\Serialize\Serializer\Json
      */
     protected $_serializer;
-    /**
-     * @var \Magento\Store\Model\StoreManager
-     */
-    protected $_storeManager;
-    /**
-     * @var \Magento\Framework\App\Config\ScopeConfigInterface
-     */
-    protected $_scopeConfig;
     /**
      * @var \Ebizmarts\MailChimp\Model\ResourceModel\MailChimpInterestGroup\CollectionFactory
      */
@@ -58,9 +46,6 @@ class UpgradeData implements UpgradeDataInterface
      * @param ResourceConnection $resource
      * @param DeploymentConfig $deploymentConfig
      * @param \Magento\Framework\Serialize\Serializer\Json $serializer
-     * @param \Ebizmarts\MailChimp\Helper\Data $helper
-     * @param \Magento\Store\Model\StoreManager $storeManager
-     * @param \Magento\Framework\App\Config\ScopeConfigInterface $scopeConfig
      * @param \Ebizmarts\MailChimp\Model\ResourceModel\MailChimpInterestGroup\CollectionFactory $interestGroupCollectionFactory
      * @param \Ebizmarts\MailChimp\Model\ResourceModel\MailChimpWebhookRequest\CollectionFactory $webhookCollectionFactory
      */
@@ -68,19 +53,13 @@ class UpgradeData implements UpgradeDataInterface
         ResourceConnection $resource,
         DeploymentConfig $deploymentConfig,
         \Magento\Framework\Serialize\Serializer\Json $serializer,
-        \Ebizmarts\MailChimp\Helper\Data $helper,
-        \Magento\Store\Model\StoreManager $storeManager,
-        \Magento\Framework\App\Config\ScopeConfigInterface $scopeConfig,
         \Ebizmarts\MailChimp\Model\ResourceModel\MailChimpInterestGroup\CollectionFactory $interestGroupCollectionFactory,
         \Ebizmarts\MailChimp\Model\ResourceModel\MailChimpWebhookRequest\CollectionFactory $webhookCollectionFactory
     )
     {
         $this->_resource            = $resource;
         $this->_deploymentConfig    = $deploymentConfig;
-        $this->_helper              = $helper;
         $this->_serializer          = $serializer;
-        $this->_storeManager        = $storeManager;
-        $this->_scopeConfig         = $scopeConfig;
         $this->_insterestGroupCollectionFactory = $interestGroupCollectionFactory;
         $this->_webhookCollectionFactory        = $webhookCollectionFactory;
     }
