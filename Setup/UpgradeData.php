@@ -40,6 +40,10 @@ class UpgradeData implements UpgradeDataInterface
      * @var \Ebizmarts\MailChimp\Model\ResourceModel\MailChimpWebhookRequest\CollectionFactory
      */
     protected $_webhookCollectionFactory;
+    /**
+     * @var \Ebizmarts\MailChimp\Helper\Data
+     */
+    protected $_helper;
 
     /**
      * UpgradeData constructor.
@@ -48,13 +52,15 @@ class UpgradeData implements UpgradeDataInterface
      * @param \Magento\Framework\Serialize\Serializer\Json $serializer
      * @param \Ebizmarts\MailChimp\Model\ResourceModel\MailChimpInterestGroup\CollectionFactory $interestGroupCollectionFactory
      * @param \Ebizmarts\MailChimp\Model\ResourceModel\MailChimpWebhookRequest\CollectionFactory $webhookCollectionFactory
+     * @param \Ebizmarts\MailChimp\Helper\Data $helper
      */
     public function __construct(
         ResourceConnection $resource,
         DeploymentConfig $deploymentConfig,
         \Magento\Framework\Serialize\Serializer\Json $serializer,
         \Ebizmarts\MailChimp\Model\ResourceModel\MailChimpInterestGroup\CollectionFactory $interestGroupCollectionFactory,
-        \Ebizmarts\MailChimp\Model\ResourceModel\MailChimpWebhookRequest\CollectionFactory $webhookCollectionFactory
+        \Ebizmarts\MailChimp\Model\ResourceModel\MailChimpWebhookRequest\CollectionFactory $webhookCollectionFactory,
+        \Ebizmarts\MailChimp\Helper\Data $helper
     )
     {
         $this->_resource            = $resource;
@@ -62,6 +68,7 @@ class UpgradeData implements UpgradeDataInterface
         $this->_serializer          = $serializer;
         $this->_insterestGroupCollectionFactory = $interestGroupCollectionFactory;
         $this->_webhookCollectionFactory        = $webhookCollectionFactory;
+        $this->_helper              = $helper;
     }
 
     /**
@@ -103,11 +110,15 @@ class UpgradeData implements UpgradeDataInterface
             $select = $connection->select()->from($table)->where('path = ?',\Ebizmarts\MailChimp\Helper\Data::XML_MERGEVARS);
             $rows = $connection->fetchAll($select);
             foreach ($rows as $row) {
-                $value = $row['value'];
-                $uvalue = unserialize($value);
-                $row['value'] = $this->_serializer->serialize($uvalue);
-                $where = ['config_id =?'=> $row['config_id']];
-                $connection->update($table,$row,$where);
+                try {
+                    $value = $row['value'];
+                    $uvalue = unserialize($value);
+                    $row['value'] = $this->_serializer->serialize($uvalue);
+                    $where = ['config_id =?' => $row['config_id']];
+                    $connection->update($table, $row, $where);
+                } catch(\Exception $e) {
+                    $this->_helper->log($e->getMessage());
+                }
             }
 
             // convert table mailchimp_interest_group
@@ -124,10 +135,14 @@ class UpgradeData implements UpgradeDataInterface
                     $done = true;
                 } else {
                     foreach ($collection as $item) {
-                        $group = $item->getGroupdata();
-                        $ugroup = unserialize($group);
-                        $item->setGroupdata($this->_serializer->serialize($ugroup));
-                        $item->getResource()->save($item);
+                        try {
+                            $group = $item->getGroupdata();
+                            $ugroup = unserialize($group);
+                            $item->setGroupdata($this->_serializer->serialize($ugroup));
+                            $item->getResource()->save($item);
+                        } catch(\Exception $e) {
+                            $this->_helper->log($e->getMessage());
+                        }
                         $lastId = $item->getId();
                     }
                 }
@@ -147,10 +162,14 @@ class UpgradeData implements UpgradeDataInterface
                     $done = true;
                 } else {
                     foreach ($webhookCollection as $webhookItem) {
-                        $dt = $webhookItem->getDataRequest();
-                        $udt = unserialize($dt);
-                        $webhookItem->setDataRequest($this->_serializer->serialize($udt));
-                        $webhookItem->getResource()->save($webhookItem);
+                        try {
+                            $dt = $webhookItem->getDataRequest();
+                            $udt = unserialize($dt);
+                            $webhookItem->setDataRequest($this->_serializer->serialize($udt));
+                            $webhookItem->getResource()->save($webhookItem);
+                        } catch(\Exception $e) {
+                            $this->_helper->log($e->getMessage());
+                        }
                         $lastId = $item->getId();
                     }
                 }
