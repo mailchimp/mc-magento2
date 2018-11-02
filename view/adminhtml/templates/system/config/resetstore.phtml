@@ -26,7 +26,7 @@
 
 <div class="actions actions-reset-store">
     <div id="validation_result" class="message-validation hidden"></div>
-    <button onclick="javascript:resetStore(); return false;" class="action-reset-store" type="button" id="<?php echo $block->getHtmlId() ?>">
+    <button onclick="javascript:resetStore(); return false;" class="action-reset-store" type="button" id="<?php echo $block->escapeHtml($block->getHtmlId()) ?>">
         <span><?php echo $block->escapeHtml($block->getButtonLabel()) ?></span>
     </button>
 </div>

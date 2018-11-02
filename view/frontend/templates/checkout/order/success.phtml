@@ -6,13 +6,13 @@ $interest = $block->getInterest();
 //echo $interest;
 ?>
 <p>
-    <?php echo $block->getMessageBefore() ?>
-<form class="form" action="<?php echo $block->getFormUrl() ?>" method="get" id="mailchimp-groups">
+    <?php echo $block->escapeHtml($block->getMessageBefore()) ?>
+<form class="form" action="<?php echo $block->escapeHtml($block->getFormUrl()) ?>" method="get" id="mailchimp-groups">
     <fieldset class="fieldset">
             <?php foreach($interest as $i): ?>
                 <div class="field">
-                    <label class="label" for="<?php echo $i['interest']['id'] ?>">
-                        <span><?php echo $i['interest']['title'] ?></span>
+                    <label class="label" for="<?php echo $block->escapeHtml($i['interest']['id']) ?>">
+                        <span><?php echo $block->escapeHtml($i['interest']['title']) ?></span>
                     </label>
                     <div class="control">
                         <div class="fields">
@@ -22,14 +22,14 @@ $interest = $block->getInterest();
                                     <?php foreach($i['category'] as $c): ?>
                                         <li class="field no-label">
                                             <input class=""
-                                                   name="group[<?php echo $i['interest']['id'] ?>][<?php echo $c['id']?>]"
+                                                   name="group[<?php echo $block->escapeHtml($i['interest']['id']) ?>][<?php echo $block->escapeHtml($c['id'])?>]"
                                                    type="checkbox"
-                                                   value="<?php echo $c['id'] ?>"
-                                                   id="<?php echo 'mailchimp_group_'.$c['id'] ?>"
-                                                   title="<?php echo $c['name'] ?>"
+                                                   value="<?php echo $block->escapeHtml($c['id']) ?>"
+                                                   id="<?php echo 'mailchimp_group_'.$block->escapeHtml($c['id']) ?>"
+                                                   title="<?php echo $block->escapeHtml($c['name']) ?>"
                                                    <?php if($c['checked']) { echo 'checked';} ?>
                                             />
-                                            <label class="field label"><?php echo $c['name']?></label>
+                                            <label class="field label"><?php echo $block->escapeHtml($c['name'])?></label>
                                         </li>
                                     <?php endforeach; ?>
                                     </ul>
@@ -37,12 +37,12 @@ $interest = $block->getInterest();
                                 case 'dropdown': ?>
                                     <div class="field no-label">
                                         <select class="field"
-                                                name="group[<?php echo $i['interest']['id'] ?>]"
-                                                id="<?php echo 'mailchimp_group_'.$i['interest']['id'] ?>"
-                                                title="<?php echo $i['interest']['title'] ?>">
+                                                name="group[<?php echo $block->escapeHtml($i['interest']['id']) ?>]"
+                                                id="<?php echo 'mailchimp_group_'.$block->escapeHtml($i['interest']['id']) ?>"
+                                                title="<?php echo $block->escapeHtml($i['interest']['title']) ?>">
                                             <option value=""></option>
                                             <?php foreach($i['category'] as $c): ?>
-                                                <option value="<?php echo $c['id']?>" <?php if($c['checked']) { echo 'selected'; } ?>><?php echo $c['name'] ?></option>
+                                                <option value="<?php echo $block->escapeHtml($c['id'])?>" <?php if($c['checked']) { echo 'selected'; } ?>><?php echo $block->escapeHtml($c['name']) ?></option>
                                             <?php endforeach; ?>
                                         </select>
 
@@ -53,14 +53,14 @@ $interest = $block->getInterest();
                                         <?php foreach($i['category'] as $c): ?>
                                             <li class="field no-label" style="list-style: none">
                                                 <input class=""
-                                                       name="group[<?php echo $i['interest']['id'] ?>]"
+                                                       name="group[<?php echo $block->escapeHtml($i['interest']['id']) ?>]"
                                                        type="radio"
-                                                       value="<?php echo $c['id'] ?>"
-                                                       id="<?php echo 'mailchimp_group_'.$c['id'] ?>"
-                                                       title="<?php echo $c['name'] ?>"
+                                                       value="<?php echo $block->escapeHtml($c['id']) ?>"
+                                                       id="<?php echo 'mailchimp_group_'.$block->escapeHtml($c['id']) ?>"
+                                                       title="<?php echo $block->escapeHtml($c['name']) ?>"
                                                     <?php if($c['checked']) { echo 'checked';} ?>
                                                 />
-                                                <label class="field label"><?php echo $c['name']?></label>
+                                                <label class="field label"><?php echo $block->escapeHtml($c['name'])?></label>
                                             </li>
                                         <?php endforeach; ?>
                                     </ul>
@@ -76,11 +76,11 @@ $interest = $block->getInterest();
             <button type="submit"
                     class="action primary"
                     title="<?php echo $block->escapeHtml(__('Subscribe to more detailed newsletters')) ?>">
-                <span><?php /* @escapeNotVerified */ echo __('Subscribe to more detailed newsletters') ?></span>
+                <span><?php echo $block->escapeHtml(__('Subscribe to more detailed newsletters')) ?></span>
             </button>
         </div>
     </div>
 </form>
-<?php echo $block->getMessageAfter() ?>
+<?php echo $block->escapeHtml($block->getMessageAfter()) ?>
 
 </p>

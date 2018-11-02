@@ -129,14 +129,17 @@ class Cart
     {
         $allCarts = [];
         $convertedCarts = $this->_getQuoteCollection();
+        $connection = $convertedCarts->getConnection();
         // get only the converted quotes
         $convertedCarts->addFieldToFilter('store_id', ['eq' => $magentoStoreId]);
         $convertedCarts->addFieldToFilter('is_active', ['eq' => 0]);
         //join with mailchimp_ecommerce_sync_data table to filter by sync data.
         $convertedCarts->getSelect()->joinLeft(
             ['m4m' => $this->_helper->getTableName('mailchimp_sync_ecommerce')],
-            "m4m.related_id = main_table.entity_id and m4m.type = '".\Ebizmarts\MailChimp\Helper\Data::IS_QUOTE."'
-            AND m4m.mailchimp_store_id = '" . $mailchimpStoreId . "'",
+            $connection->quoteInto(
+                'm4m.related_id = main_table.entity_id and m4m.type = ?',
+                \Ebizmarts\MailChimp\Helper\Data::IS_QUOTE
+            ) . ' AND ' . $connection->quoteInto('m4m.mailchimp_store_id = ?', $mailchimpStoreId),
             ['m4m.*']
         );
         // be sure that the quotes are already in mailchimp and not deleted
@@ -186,6 +189,7 @@ class Cart
     {
         $allCarts = [];
         $modifiedCarts = $this->_getQuoteCollection();
+        $connection = $modifiedCarts->getConnection();
         // select carts with no orders
         $modifiedCarts->addFieldToFilter('is_active', ['eq'=>1]);
         // select carts for the current Magento store id
@@ -193,8 +197,10 @@ class Cart
         //join with mailchimp_ecommerce_sync_data table to filter by sync data.
         $modifiedCarts->getSelect()->joinLeft(
             ['m4m' => $this->_helper->getTableName('mailchimp_sync_ecommerce')],
-            "m4m.related_id = main_table.entity_id and m4m.type = '".\Ebizmarts\MailChimp\Helper\Data::IS_QUOTE."'
-            AND m4m.mailchimp_store_id = '" . $mailchimpStoreId . "'",
+            $connection->quoteInto(
+                'm4m.related_id = main_table.entity_id and m4m.type = ?',
+                \Ebizmarts\MailChimp\Helper\Data::IS_QUOTE
+            ) . ' AND ' . $connection->quoteInto('m4m.mailchimp_store_id = ?', $mailchimpStoreId),
             ['m4m.*']
         );
         // be sure that the quotes are already in mailchimp and not deleted
@@ -287,6 +293,7 @@ class Cart
     {
         $allCarts = [];
         $newCarts = $this->_getQuoteCollection();
+        $connection = $newCarts->getConnection();
         $newCarts->addFieldToFilter('is_active', ['eq'=>1]);
         $newCarts->addFieldToFilter('customer_email', ['notnull'=>true]);
         $newCarts->addFieldToFilter('items_count', ['gt'=>0]);
@@ -299,8 +306,10 @@ class Cart
         //join with mailchimp_ecommerce_sync_data table to filter by sync data.
         $newCarts->getSelect()->joinLeft(
             ['m4m' => $this->_helper->getTableName('mailchimp_sync_ecommerce')],
-            "m4m.related_id = main_table.entity_id and m4m.type = '" . \Ebizmarts\MailChimp\Helper\Data::IS_QUOTE . "'
-            AND m4m.mailchimp_store_id = '" . $mailchimpStoreId . "'",
+            $connection->quoteInto(
+                'm4m.related_id = main_table.entity_id and m4m.type = ?',
+                \Ebizmarts\MailChimp\Helper\Data::IS_QUOTE
+            ) . ' AND ' . $connection->quoteInto('m4m.mailchimp_store_id = ?', $mailchimpStoreId),
             ['m4m.*']
         );
         // be sure that the quotes are already in mailchimp and not deleted
@@ -389,13 +398,16 @@ class Cart
     protected function _getAllCartsByEmail($email, $mailchimpStoreId, $magentoStoreId)
     {
         $allCartsForEmail = $this->_getQuoteCollection();
+        $connection = $allCartsForEmail->getConnection();
         $allCartsForEmail->addFieldToFilter('is_active', ['eq' => 1]);
         $allCartsForEmail->addFieldToFilter('store_id', ['eq' => $magentoStoreId]);
         $allCartsForEmail->addFieldToFilter('customer_email', ['eq' => $email]);
         $allCartsForEmail->getSelect()->joinLeft(
             ['m4m' => $this->_helper->getTableName('mailchimp_sync_ecommerce')],
-            "m4m.related_id = main_table.entity_id and m4m.type = '".\Ebizmarts\MailChimp\Helper\Data::IS_QUOTE."'
-            AND m4m.mailchimp_store_id = '" . $mailchimpStoreId . "'",
+            $connection->quoteInto(
+                'm4m.related_id = main_table.entity_id and m4m.type = ?',
+                \Ebizmarts\MailChimp\Helper\Data::IS_QUOTE
+            ) . ' AND ' . $connection->quoteInto('m4m.mailchimp_store_id = ?', $mailchimpStoreId),
             ['m4m.*']
         );
         // be sure that the quotes are already in mailchimp and not deleted
