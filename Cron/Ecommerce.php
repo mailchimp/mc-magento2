@@ -169,7 +169,9 @@ class Ecommerce
         $countOrders = 0;
         $batchArray = [];
         $this->_helper->resetCounters();
-        $results = $this->_apiSubscribers->sendSubscribers($storeId, $listId);
+        if ($listId) {
+            $results = $this->_apiSubscribers->sendSubscribers($storeId, $listId);
+        }
         if ($this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_PATH_ECOMMERCE_ACTIVE, $storeId)) {
             $this->_helper->log('Generate Products payload');
             $products = $this->_apiProduct->_sendProducts($storeId);
