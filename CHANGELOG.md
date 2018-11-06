@@ -1,7 +1,33 @@
 # Change Log
 
-## [1.0.30](https://github.com/mailchimp/mc-magento2/tree/1.0.30)
+## [1.0.31](https://github.com/mailchimp/mc-magento2/tree/1.0.31)
 
+[Full Changelog](https://github.com/mailchimp/mc-magento2/compare/1.0.30...1.0.31)
+
+**Implemented enhancements:**
+
+- Add a combo in the Customer Fields Mapping with the MailChimp defined tags [\#423](https://github.com/mailchimp/mc-magento2/issues/423)
+
+**Fixed bugs:**
+
+- Error of serialization when processing webhook data [\#455](https://github.com/mailchimp/mc-magento2/issues/455)
+- Don't use serialize function directly [\#451](https://github.com/mailchimp/mc-magento2/issues/451)
+- Error when a product has SKU = null [\#448](https://github.com/mailchimp/mc-magento2/issues/448)
+- Send the product id in the order when is a configurable [\#445](https://github.com/mailchimp/mc-magento2/issues/445)
+- main.CRITICAL: API Key Missing for Api Call: https://usxx.api.mailchimp.com/3.0/lists//merge-fields - Your request did not include an API key. [\#442](https://github.com/mailchimp/mc-magento2/issues/442)
+- Wrong parent id in the cart [\#432](https://github.com/mailchimp/mc-magento2/issues/432)
+- Abandoned cart email queue in Mailchimp dashboard not getting reset on placing the order [\#431](https://github.com/mailchimp/mc-magento2/issues/431)
+- Collissions with mailchimp cookies [\#429](https://github.com/mailchimp/mc-magento2/issues/429)
+- Subscriber which was added in MailChimp doesn't have storeId in Magento2 [\#427](https://github.com/mailchimp/mc-magento2/issues/427)
+- Product Image does not show on abandoned cart email template / order details  [\#425](https://github.com/mailchimp/mc-magento2/issues/425)
+- Total orders\_count and total\_spent sent incorrectly in order [\#420](https://github.com/mailchimp/mc-magento2/issues/420)
+- NULL price when special price is not set, but special price dates are set  [\#416](https://github.com/mailchimp/mc-magento2/issues/416)
+- field \[operations.item:2\] : Schema describes object, array found instead [\#409](https://github.com/mailchimp/mc-magento2/issues/409)
+- Empty data in the batch json for custom products types [\#406](https://github.com/mailchimp/mc-magento2/issues/406)
+- After syncing data with MailChimp the wrong products are show for my stores [\#404](https://github.com/mailchimp/mc-magento2/issues/404)
+- Fix unique type validation in di.xml [\#450](https://github.com/mailchimp/mc-magento2/pull/450) ([ihor-sviziev](https://github.com/ihor-sviziev))
+
+## [1.0.30](https://github.com/mailchimp/mc-magento2/tree/1.0.30) (2018-09-18)
 [Full Changelog](https://github.com/mailchimp/mc-magento2/compare/1.0.29...1.0.30)
 
 **Implemented enhancements:**
@@ -14,9 +40,10 @@
 
 **Fixed bugs:**
 
+- MailChimp breaks order processing when it's done through CLI [\#378](https://github.com/mailchimp/mc-magento2/issues/378)
+- Disabled in Admin Panel Mailchimp block Magento default newsletter flow. [\#339](https://github.com/mailchimp/mc-magento2/issues/339)
 - Special prices management in Magento Enterprise [\#391](https://github.com/mailchimp/mc-magento2/issues/391)
 - Failed to open stream: No such file or directory [\#388](https://github.com/mailchimp/mc-magento2/issues/388)
-- MailChimp breaks order processing when it's done through CLI [\#378](https://github.com/mailchimp/mc-magento2/issues/378)
 - Promo rules are not updated [\#370](https://github.com/mailchimp/mc-magento2/issues/370)
 - Error in the configuration when selecting other website than default [\#368](https://github.com/mailchimp/mc-magento2/issues/368)
 - Orders not synced when products in the order not already synced [\#366](https://github.com/mailchimp/mc-magento2/issues/366)
@@ -24,7 +51,6 @@
 - Issue with coupons for free shipping [\#355](https://github.com/mailchimp/mc-magento2/issues/355)
 - Error downloading response from error grid when batch not exist [\#351](https://github.com/mailchimp/mc-magento2/issues/351)
 - Unable to set custom Env.php API Credentials  [\#345](https://github.com/mailchimp/mc-magento2/issues/345)
-- Disabled in Admin Panel Mailchimp block Magento default newsletter flow. [\#339](https://github.com/mailchimp/mc-magento2/issues/339)
 - Webhook processing fails when list id does not match any list configured in Magento [\#337](https://github.com/mailchimp/mc-magento2/issues/337)
 - Sending modified products in order or cart [\#335](https://github.com/mailchimp/mc-magento2/issues/335)
 - Base table or view not found Magento 2.2.4 [\#321](https://github.com/mailchimp/mc-magento2/issues/321)
@@ -35,7 +61,7 @@
 
 **Implemented enhancements:**
 
-- Add check before renaming 'address\_address1' table column [\#283](https://github.com/mailchimp/mc-magento2/pull/283) ([RobAimes](https://github.com/RobAimes))
+- Add check before renaming 'address\_address1' table column [\#283](https://github.com/mailchimp/mc-magento2/pull/283) ([rob-aimes](https://github.com/rob-aimes))
 
 **Fixed bugs:**
 
