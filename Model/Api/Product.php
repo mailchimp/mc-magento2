@@ -512,11 +512,17 @@ class Product
             }
             if ($productSyncData->getMailchimpSyncModified() &&
                 $productSyncData->getMailchimpSyncDelta() > $this->_helper->getMCMinSyncDateFlag()) {
-                $data = array_merge($data, $this->_buildOldProductRequest($product, $batchId, $mailchimpStoreId, $magentoStoreId));
+                $newData = $this->_buildOldProductRequest($product, $batchId, $mailchimpStoreId, $magentoStoreId);
+                if (count($newData)) {
+                    $data = array_merge($data, $newData);
+                }
                 $this->_updateProduct($mailchimpStoreId, $product->getId());
             } elseif (!$productSyncData->getMailchimpSyncDelta() ||
                 $productSyncData->getMailchimpSyncDelta() < $this->_helper->getMCMinSyncDateFlag()) {
-                $data[] = $this->_buildNewProductRequest($product, $mailchimpStoreId, $magentoStoreId);
+                $newData = $this->_buildNewProductRequest($product, $mailchimpStoreId, $magentoStoreId);
+                if (count($newData)) {
+                    $data[] = $newData;
+                }
                 $this->_updateProduct($mailchimpStoreId, $product->getId());
             }
         }
@@ -548,11 +554,17 @@ class Product
 
             if ($productSyncData->getMailchimpSyncModified() &&
                 $productSyncData->getMailchimpSyncDelta() > $this->_helper->getMCMinSyncDateFlag()) {
-                $data = array_merge($data,$this->_buildOldProductRequest($product, $batchId, $mailchimpStoreId, $magentoStoreId));
+                $newData = $this->_buildOldProductRequest($product, $batchId, $mailchimpStoreId, $magentoStoreId);
+                if (count($newData)) {
+                    $data = array_merge($data, $newData);
+                }
                 $this->_updateProduct($mailchimpStoreId, $product->getId());
             } elseif (!$productSyncData->getMailchimpSyncDelta() ||
                 $productSyncData->getMailchimpSyncDelta() < $this->_helper->getMCMinSyncDateFlag()) {
-                $data[] = $this->_buildNewProductRequest($product, $mailchimpStoreId, $magentoStoreId);
+                $newData = $this->_buildNewProductRequest($product, $mailchimpStoreId, $magentoStoreId);
+                if (count($newData)) {
+                    $data[] = $newData;
+                }
                 $this->_updateProduct($mailchimpStoreId, $product->getId());
             }
         }
