@@ -66,11 +66,11 @@ class Result
         foreach ($collection as $item) {
             try {
                 $files = $this->getBatchResponse($item->getBatchId(), $storeId);
-                if (is_array($files)&&count($files)) {
+                if (is_array($files) && count($files)) {
                     $this->processEachResponseFile($files, $item->getBatchId(), $mailchimpStoreId, $storeId);
                     $item->setStatus('completed');
                     $item->getResource()->save($item);
-                } elseif($files === false) {
+                } elseif ($files === false) {
                     $item->setStatus('canceled');
                     $item->getResource()->save($item);
                     continue;

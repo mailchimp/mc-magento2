@@ -54,7 +54,7 @@ class Get extends Action
             foreach ($lists['lists'] as $list) {
                 $result[] = ['id' => $list['id'], 'name' => $list['name']];
             }
-        } catch(\Mailchimp_Error $e) {
+        } catch (\Mailchimp_Error $e) {
             $this->_helper->log($e->getFriendlyMessage());
         }
         $resultJson = $this->_resultFactory->create(ResultFactory::TYPE_JSON);

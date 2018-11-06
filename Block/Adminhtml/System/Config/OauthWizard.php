@@ -31,7 +31,8 @@ class OauthWizard extends \Magento\Config\Block\System\Config\Form\Field
             'button_url'   => $this->authorizeRequestUrl(),
             'html_id' => $element->getHtmlId(),
         ]);
-        return parent::_toHtml();;
+        return parent::_toHtml();
+        ;
     }
     public function authorizeRequestUrl()
     {

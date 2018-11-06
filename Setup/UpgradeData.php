@@ -61,8 +61,8 @@ class UpgradeData implements UpgradeDataInterface
         \Ebizmarts\MailChimp\Model\ResourceModel\MailChimpInterestGroup\CollectionFactory $interestGroupCollectionFactory,
         \Ebizmarts\MailChimp\Model\ResourceModel\MailChimpWebhookRequest\CollectionFactory $webhookCollectionFactory,
         \Ebizmarts\MailChimp\Helper\Data $helper
-    )
-    {
+    ) {
+    
         $this->_resource            = $resource;
         $this->_deploymentConfig    = $deploymentConfig;
         $this->_serializer          = $serializer;
@@ -77,14 +77,12 @@ class UpgradeData implements UpgradeDataInterface
      */
     public function upgrade(ModuleDataSetupInterface $setup, ModuleContextInterface $context)
     {
-        if (version_compare($context->getVersion(), '1.0.24') < 0)
-        {
+        if (version_compare($context->getVersion(), '1.0.24') < 0) {
             $setup->startSetup();
             $connection = $this->_resource->getConnectionByName('default');
             if ($this->_deploymentConfig->get(\Magento\Framework\Config\ConfigOptionsListConstants::CONFIG_PATH_DB_CONNECTIONS . '/sales')) {
                     $salesConnection = $this->_resource->getConnectionByName('sales');
-            }
-            else {
+            } else {
                     $salesConnection = $connection;
             }
             $table = $setup->getTable('sales_order');
@@ -92,22 +90,20 @@ class UpgradeData implements UpgradeDataInterface
                 ->from(
                     false,
                     ['mailchimp_flag' => new \Zend_Db_Expr('IF(mailchimp_abandonedcart_flag OR mailchimp_campaign_id OR mailchimp_landing_page, 1, 0)')]
-                )->join(['O'=>$table],'O.entity_id = G.entity_id',[]);
+                )->join(['O'=>$table], 'O.entity_id = G.entity_id', []);
 
             $query = $salesConnection->updateFromSelect($select, ['G' => $setup->getTable('sales_order_grid')]);
 
             $salesConnection->query($query);
             $setup->endSetup();
-
         }
-        if (version_compare($context->getVersion(), '1.0.31') < 0)
-        {
-            // must convert all the serialized data in the db
+        if (version_compare($context->getVersion(), '1.0.31') < 0) {
+        // must convert all the serialized data in the db
             // convert the data in core_config_data
             $setup->startSetup();
             $connection = $this->_resource->getConnectionByName('default');
             $table = $setup->getTable('core_config_data');
-            $select = $connection->select()->from($table)->where('path = ?',\Ebizmarts\MailChimp\Helper\Data::XML_MERGEVARS);
+            $select = $connection->select()->from($table)->where('path = ?', \Ebizmarts\MailChimp\Helper\Data::XML_MERGEVARS);
             $rows = $connection->fetchAll($select);
             foreach ($rows as $row) {
                 try {
@@ -116,7 +112,7 @@ class UpgradeData implements UpgradeDataInterface
                     $row['value'] = $this->_serializer->serialize($uvalue);
                     $where = ['config_id =?' => $row['config_id']];
                     $connection->update($table, $row, $where);
-                } catch(\Exception $e) {
+                } catch (\Exception $e) {
                     $this->_helper->log($e->getMessage());
                 }
             }
@@ -127,9 +123,9 @@ class UpgradeData implements UpgradeDataInterface
              */
             $lastId = 0;
             $done = false;
-            while(!$done) {
+            while (!$done) {
                 $collection = $this->_insterestGroupCollectionFactory->create();
-                $collection->addFieldToFilter('id',['gt' => $lastId]);
+                $collection->addFieldToFilter('id', ['gt' => $lastId]);
                 $collection->getSelect()->limit(500);
                 if (!$collection->getSize()) {
                     $done = true;
@@ -140,7 +136,7 @@ class UpgradeData implements UpgradeDataInterface
                             $ugroup = unserialize($group);
                             $item->setGroupdata($this->_serializer->serialize($ugroup));
                             $item->getResource()->save($item);
-                        } catch(\Exception $e) {
+                        } catch (\Exception $e) {
                             $this->_helper->log($e->getMessage());
                         }
                         $lastId = $item->getId();
@@ -153,10 +149,10 @@ class UpgradeData implements UpgradeDataInterface
              */
             $lastId = 0;
             $done = false;
-            while(!$done) {
+            while (!$done) {
                 $webhookCollection = $this->_webhookCollectionFactory->create();
                 $webhookCollection->addFieldToFilter('processed', ['neq' => 1]);
-                $webhookCollection->addFieldToFilter('id',['gt' => $lastId]);
+                $webhookCollection->addFieldToFilter('id', ['gt' => $lastId]);
                 $webhookCollection->getSelect()->limit(500);
                 if (!$webhookCollection->getSize()) {
                     $done = true;
@@ -167,7 +163,7 @@ class UpgradeData implements UpgradeDataInterface
                             $udt = unserialize($dt);
                             $webhookItem->setDataRequest($this->_serializer->serialize($udt));
                             $webhookItem->getResource()->save($webhookItem);
-                        } catch(\Exception $e) {
+                        } catch (\Exception $e) {
                             $this->_helper->log($e->getMessage());
                         }
                         $lastId = $item->getId();

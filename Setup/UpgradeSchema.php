@@ -28,7 +28,7 @@ class UpgradeSchema implements UpgradeSchemaInterface
      * @var DeploymentConfig
      */
     protected $_deploymentConfig;
-    public function __construct(ResourceConnection $resource,DeploymentConfig $deploymentConfig)
+    public function __construct(ResourceConnection $resource, DeploymentConfig $deploymentConfig)
     {
         $this->_resource = $resource;
         $this->_deploymentConfig = $deploymentConfig;
@@ -42,14 +42,12 @@ class UpgradeSchema implements UpgradeSchemaInterface
         $connection = $this->_resource->getConnectionByName('default');
         if ($this->_deploymentConfig->get(\Magento\Framework\Config\ConfigOptionsListConstants::CONFIG_PATH_DB_CONNECTIONS . '/checkout')) {
             $checkoutConnection = $this->_resource->getConnectionByName('checkout');
-        }
-        else {
+        } else {
             $checkoutConnection = $connection;
         }
         if ($this->_deploymentConfig->get(\Magento\Framework\Config\ConfigOptionsListConstants::CONFIG_PATH_DB_CONNECTIONS . '/sales')) {
             $salesConnection = $this->_resource->getConnectionByName('sales');
-        }
-        else {
+        } else {
             $salesConnection = $connection;
         }
         if (version_compare($context->getVersion(), '1.0.5') < 0) {
@@ -420,7 +418,7 @@ class UpgradeSchema implements UpgradeSchemaInterface
         if (version_compare($context->getVersion(), '1.0.25') < 0) {
             $connection->addIndex(
                 $setup->getTable('mailchimp_sync_ecommerce'),
-                $connection->getIndexName($setup->getTable('mailchimp_sync_ecommerce'),'related_id','index'),
+                $connection->getIndexName($setup->getTable('mailchimp_sync_ecommerce'), 'related_id', 'index'),
                 'related_id'
             );
             $connection->addColumn(
@@ -434,7 +432,7 @@ class UpgradeSchema implements UpgradeSchemaInterface
                 ]
             );
         }
-        if (version_compare($context->getVersion(),'1.0.26') < 0) {
+        if (version_compare($context->getVersion(), '1.0.26') < 0) {
             $table = $connection
                 ->newTable($setup->getTable('mailchimp_interest_group'))
                 ->addColumn(

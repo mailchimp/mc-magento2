@@ -91,13 +91,13 @@ class MonkeyStore extends \Magento\Framework\App\Config\Value
             } else {
                 $apiKey = $this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_PATH_APIKEY, $this->getScopeId(), $this->getScope());
             }
-            if(isset($data['general']['fields']['monkeylist']['value'])) {
+            if (isset($data['general']['fields']['monkeylist']['value'])) {
                 $newListId = $data['general']['fields']['monkeylist']['value'];
             } else {
-                $newListId = $this->getStore($apiKey,$this->getValue());
-                $this->_helper->saveConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_PATH_LIST,$newListId,$this->getScopeId(),$this->getScope());
+                $newListId = $this->getStore($apiKey, $this->getValue());
+                $this->_helper->saveConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_PATH_LIST, $newListId, $this->getScopeId(), $this->getScope());
             }
-            $this->oldListId = $this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_PATH_LIST, $this->getScopeId(),$this->getScope());
+            $this->oldListId = $this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_PATH_LIST, $this->getScopeId(), $this->getScope());
 
             $createWebhook = true;
             foreach ($this->_storeManager->getStores() as $storeId => $val) {
@@ -121,13 +121,13 @@ class MonkeyStore extends \Magento\Framework\App\Config\Value
         }
         return parent::beforeSave();
     }
-    private function getStore($apiKey,$store)
+    private function getStore($apiKey, $store)
     {
         try {
             $api = $this->_helper->getApiByApiKey($apiKey);
             $store = $api->ecommerce->stores->get($store);
             return $store['list_id'];
-        } catch(\Mailchimp_Error $e) {
+        } catch (\Mailchimp_Error $e) {
             $this->_helper->log($e->getFriendlyMessage());
         }
         return null;

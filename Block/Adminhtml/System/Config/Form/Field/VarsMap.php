@@ -13,7 +13,7 @@
 
 namespace Ebizmarts\MailChimp\Block\Adminhtml\System\Config\Form\Field;
 
-class VarsMap  extends \Magento\Framework\View\Element\Html\Select
+class VarsMap extends \Magento\Framework\View\Element\Html\Select
 {
     /**
      * @var \Magento\Customer\Model\ResourceModel\Attribute\CollectionFactory
@@ -28,9 +28,9 @@ class VarsMap  extends \Magento\Framework\View\Element\Html\Select
     public function __construct(
         \Magento\Framework\View\Element\Context $context,
         \Magento\Customer\Model\ResourceModel\Attribute\CollectionFactory $attCollection,
-        array $data=[]
-    )
-    {
+        array $data = []
+    ) {
+    
         parent::__construct($context, $data);
         $this->_attCollection = $attCollection;
     }
@@ -42,7 +42,7 @@ class VarsMap  extends \Magento\Framework\View\Element\Html\Select
         /**
          * @var $item \Magento\Customer\Model\Attribute
          */
-        foreach($collection as $item) {
+        foreach ($collection as $item) {
             $ret[$item->getId()] = $item->getFrontendLabel();
         }
 

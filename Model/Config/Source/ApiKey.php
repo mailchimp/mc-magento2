@@ -38,15 +38,13 @@ class ApiKey implements \Magento\Framework\Option\ArrayInterface
         $this->storeManager = $storeManager;
         $this->helper = $helper;
         $storeId = (int) $request->getParam("store", 0);
-        if($request->getParam('website',0)) {
+        if ($request->getParam('website', 0)) {
             $scope = 'website';
-            $storeId = $request->getParam('website',0);
-        }
-        elseif($request->getParam('store',0)) {
+            $storeId = $request->getParam('website', 0);
+        } elseif ($request->getParam('store', 0)) {
             $scope = 'stores';
-            $storeId = $request->getParam('store',0);
-        }
-        else {
+            $storeId = $request->getParam('store', 0);
+        } else {
             $scope = 'default';
         }
         $apiKeys = $helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_PATH_APIKEY_LIST, $storeId, $scope);
@@ -69,7 +67,8 @@ class ApiKey implements \Magento\Framework\Option\ArrayInterface
         }
         return $rc;
     }
-    public function getAllApiKeys() {
+    public function getAllApiKeys()
+    {
         $this->options = $this->helper->getAllApiKeys();
     }
 }

@@ -54,6 +54,5 @@ class SaveBefore implements \Magento\Framework\Event\ObserverInterface
         $subscriber = $observer->getSubscriber();
 
         $this->_subscriberApi->update($subscriber);
-
     }
 }

@@ -32,12 +32,12 @@ class SubmitBefore implements \Magento\Framework\Event\ObserverInterface
         foreach ($this->attributes as $attribute) {
             if ($quote->hasData($attribute)) {
                 $order->setData($attribute, $quote->getData($attribute));
-                if($quote->getData($attribute)) {
+                if ($quote->getData($attribute)) {
                     $flag = 1;
                 }
             }
         }
-        $order->setData('mailchimp_flag',$flag);
+        $order->setData('mailchimp_flag', $flag);
         return $this;
     }
 }

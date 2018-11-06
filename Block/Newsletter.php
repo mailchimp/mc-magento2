@@ -13,7 +13,6 @@
 
 namespace Ebizmarts\MailChimp\Block;
 
-
 class Newsletter extends \Magento\Framework\View\Element\Template
 {
     /**
@@ -43,8 +42,8 @@ class Newsletter extends \Magento\Framework\View\Element\Template
         \Magento\Newsletter\Model\SubscriberFactory $subscriberFactory,
         \Ebizmarts\MailChimp\Helper\Data $helper,
         array $data
-    )
-    {
+    ) {
+    
         parent::__construct($context, $data);
         $this->_helper  = $helper;
         $this->subscriberFactory = $subscriberFactory;
@@ -56,11 +55,10 @@ class Newsletter extends \Magento\Framework\View\Element\Template
         $subscriber = $this->subscriberFactory->create();
         $subscriber->loadByCustomerId($this->customerSession->getCustomerId());
 //        $subscriber = $this->getSubscriptionObject();
-        return $this->_helper->getSubscriberInterest($subscriber->getSubscriberId(),$subscriber->getStoreId());
+        return $this->_helper->getSubscriberInterest($subscriber->getSubscriberId(), $subscriber->getStoreId());
     }
     public function getFormUrl()
     {
         return  $this->getUrl('mailchimp/accountmanage/save');
     }
-
 }

@@ -56,8 +56,8 @@ class Save
         \Ebizmarts\MailChimp\Model\MailChimpInterestGroupFactory $interestGroupFactory,
         \Magento\Framework\App\Request\Http $request,
         \Magento\Framework\Serialize\Serializer\Json $serializer
-    )
-    {
+    ) {
+    
         $this->helper               = $helper;
         $this->customerSession      = $customerSession;
         $this->subscriberFactory    = $subscriberFactory;
@@ -80,8 +80,8 @@ class Save
 
         try {
             $subscriber->loadByCustomerId($this->customerSession->getCustomerId());
-            if($subscriber->getEmail()==$email) {
-                $interestGroup->getBySubscriberIdStoreId($subscriber->getSubscriberId(),$subscriber->getStoreId());
+            if ($subscriber->getEmail()==$email) {
+                $interestGroup->getBySubscriberIdStoreId($subscriber->getSubscriberId(), $subscriber->getStoreId());
                 $interestGroup->setGroupdata($this->serializer->serialize($params));
                 $interestGroup->setSubscriberId($subscriber->getSubscriberId());
                 $interestGroup->setStoreId($subscriber->getStoreId());
@@ -92,20 +92,25 @@ class Save
             } else {
                 $this->subscriberFactory->create()->subscribe($email);
                 $subscriber->loadByEmail($email);
-                $interestGroup->getBySubscriberIdStoreId($subscriber->getSubscriberId(),$subscriber->getStoreId());
+                $interestGroup->getBySubscriberIdStoreId($subscriber->getSubscriberId(), $subscriber->getStoreId());
                 $interestGroup->setGroupdata($this->serializer->serialize($params));
                 $interestGroup->setSubscriberId($subscriber->getSubscriberId());
                 $interestGroup->setStoreId($subscriber->getStoreId());
                 $interestGroup->setUpdatedAt($this->helper->getGmtDate());
                 $interestGroup->getResource()->save($interestGroup);
             }
-
-        } catch(\Exception $e) {
+        } catch (\Exception $e) {
         }
     }
-    protected function _updateSubscriber($listId, $entityId, $sync_delta = null, $sync_error=null, $sync_modified=null)
+    protected function _updateSubscriber($listId, $entityId, $sync_delta = null, $sync_error = null, $sync_modified = null)
     {
-        $this->helper->saveEcommerceData($listId, $entityId, \Ebizmarts\MailChimp\Helper\Data::IS_SUBSCRIBER,
-            $sync_delta, $sync_error, $sync_modified);
+        $this->helper->saveEcommerceData(
+            $listId,
+            $entityId,
+            \Ebizmarts\MailChimp\Helper\Data::IS_SUBSCRIBER,
+            $sync_delta,
+            $sync_error,
+            $sync_modified
+        );
     }
 }

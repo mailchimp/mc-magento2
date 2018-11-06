@@ -42,8 +42,9 @@ class Customer extends \Magento\Backend\Block\Template
         \Ebizmarts\MailChimp\Helper\Data $helper,
         \Magento\Newsletter\Model\SubscriberFactory $subscriberFactory,
         \Magento\Framework\Registry $registry,
-        array $data)
-    {
+        array $data
+    ) {
+    
         parent::__construct($context, $data);
         $this->helper               = $helper;
         $this->subscriberFactory    = $subscriberFactory;
@@ -55,6 +56,6 @@ class Customer extends \Magento\Backend\Block\Template
         $subscriber = $this->subscriberFactory->create();
         $customerId = $this->registry->registry(\Magento\Customer\Controller\RegistryConstants::CURRENT_CUSTOMER_ID);
         $subscriber->loadByCustomerId($customerId);
-        return $this->helper->getSubscriberInterest($subscriber->getSubscriberId(),$subscriber->getStoreId());
+        return $this->helper->getSubscriberInterest($subscriber->getSubscriberId(), $subscriber->getStoreId());
     }
 }

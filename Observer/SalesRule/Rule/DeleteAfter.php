@@ -43,6 +43,6 @@ class DeleteAfter implements \Magento\Framework\Event\ObserverInterface
     {
         $rule = $observer->getEvent()->getRule();
         $ruleId = $rule->getRuleId();
-        $this->_helper->markEcommerceAsDeleted($ruleId,\Ebizmarts\MailChimp\Helper\Data::IS_PROMO_RULE);
+        $this->_helper->markEcommerceAsDeleted($ruleId, \Ebizmarts\MailChimp\Helper\Data::IS_PROMO_RULE);
     }
 }

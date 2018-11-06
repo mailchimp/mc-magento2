@@ -29,6 +29,6 @@ class Coupon
     }
     public function afterAfterDelete(\Magento\SalesRule\Model\Coupon $coupon)
     {
-        $this->_helper->markEcommerceAsDeleted($coupon->getCouponId(),\Ebizmarts\MailChimp\Helper\Data::IS_PROMO_CODE,$coupon->getRuleId());
+        $this->_helper->markEcommerceAsDeleted($coupon->getCouponId(), \Ebizmarts\MailChimp\Helper\Data::IS_PROMO_CODE, $coupon->getRuleId());
     }
 }
