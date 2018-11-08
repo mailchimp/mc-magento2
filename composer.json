@@ -24,6 +24,7 @@
     "forum": "http://ebizmarts.com/forums/view/6"
   },
   "require" : {
+    "magento/framework": "101.0.*",
     "ebizmarts/mailchimp-lib": ">=3.0.27"
   }
 }
