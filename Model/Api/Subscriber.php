@@ -45,8 +45,8 @@ class Subscriber
         \Magento\Newsletter\Model\ResourceModel\Subscriber\CollectionFactory $subscriberCollection,
         \Magento\Newsletter\Model\SubscriberFactory $subscriberFactory,
         \Magento\Framework\Message\ManagerInterface $message
-    )
-    {
+    ) {
+    
         $this->_helper                  = $helper;
         $this->_subscriberCollection    = $subscriberCollection;
         $this->_message                 = $message;
@@ -59,8 +59,8 @@ class Subscriber
 //        $listId = $this->_helper->getGeneralList($storeId);
         $this->_interest = $this->_helper->getInterest($storeId);
         $collection = $this->_subscriberCollection->create();
-        $collection->addFieldToFilter('subscriber_status', array('eq' => 1))
-            ->addFieldToFilter('store_id', array('eq' => $storeId));
+        $collection->addFieldToFilter('subscriber_status', ['eq' => 1])
+            ->addFieldToFilter('store_id', ['eq' => $storeId]);
         $collection->getSelect()->joinLeft(
             ['m4m' => $this->_helper->getTableName('mailchimp_sync_ecommerce')],
             "m4m.related_id = main_table.subscriber_id and m4m.type = '".\Ebizmarts\MailChimp\Helper\Data::IS_SUBSCRIBER.
@@ -71,7 +71,7 @@ class Subscriber
             "OR (m4m.mailchimp_sync_delta > '".$this->_helper->getMCMinSyncDateFlag().
             "' and m4m.mailchimp_sync_modified = 1)");
         $collection->getSelect()->limit(self::BATCH_LIMIT);
-        $subscriberArray = array();
+        $subscriberArray = [];
         $date = $this->_helper->getDateMicrotime();
         $batchId = \Ebizmarts\MailChimp\Helper\Data::IS_SUBSCRIBER . '_' . $date;
         $counter = 0;
@@ -91,10 +91,10 @@ class Subscriber
                 $this->_helper->log($errorMessage, $storeId);
             }
             if (!empty($subscriberJson)) {
-                if($subscriber->getMailchimpSyncModified()==1) {
+                if ($subscriber->getMailchimpSyncModified()==1) {
                     $this->_helper->modifyCounter(\Ebizmarts\MailChimp\Helper\Data::SUB_MOD);
                 } else {
-                    $this->_helper->modifyCounter( \Ebizmarts\MailChimp\Helper\Data::SUB_NEW);
+                    $this->_helper->modifyCounter(\Ebizmarts\MailChimp\Helper\Data::SUB_NEW);
                 }
                 $subscriberArray[$counter]['method'] = "PUT";
                 $subscriberArray[$counter]['path'] = "/lists/" . $listId . "/members/" . $md5HashEmail;
@@ -111,7 +111,7 @@ class Subscriber
     protected function _buildSubscriberData(\Magento\Newsletter\Model\Subscriber $subscriber)
     {
         $storeId = $subscriber->getStoreId();
-        $data = array();
+        $data = [];
         $data["email_address"] = $subscriber->getSubscriberEmail();
         $mergeVars = $this->_helper->getMergeVarsBySubscriber($subscriber);
         if ($mergeVars) {
@@ -119,7 +119,7 @@ class Subscriber
         }
         $data["status_if_new"] = $this->_getMCStatus($subscriber->getStatus(), $storeId);
         $interest = $this->_getInterest($subscriber);
-        if(count($interest)) {
+        if (count($interest)) {
             $data['interests'] = $interest;
         }
 
@@ -128,9 +128,9 @@ class Subscriber
     protected function _getInterest(\Magento\Newsletter\Model\Subscriber $subscriber)
     {
         $rc = [];
-        $interest = $this->_helper->getSubscriberInterest($subscriber->getSubscriberId(),$subscriber->getStoreId(),$this->_interest);
-        foreach($interest as $i) {
-            foreach($i['category'] as $key=>$value) {
+        $interest = $this->_helper->getSubscriberInterest($subscriber->getSubscriberId(), $subscriber->getStoreId(), $this->_interest);
+        foreach ($interest as $i) {
+            foreach ($i['category'] as $key => $value) {
                 $rc[$value['id']] = $value['checked'];
             }
         }
@@ -138,7 +138,6 @@ class Subscriber
     }
     protected function _getInterestFromMailchimp($listId)
     {
-
     }
     /**
      * Get status to send confirmation if Need to Confirm enabled on Magento
@@ -170,7 +169,7 @@ class Subscriber
         try {
             $md5HashEmail = md5(strtolower($subscriber->getSubscriberEmail()));
             $api->lists->members->update($listId, $md5HashEmail, null, 'cleaned');
-        } catch(\MailChimp_Error $e) {
+        } catch (\MailChimp_Error $e) {
             $this->_helper->log($e->getFriendlyMessage(), $storeId);
             $this->_message->addErrorMessage($e->getMessage());
         } catch (\Exception $e) {
@@ -181,11 +180,17 @@ class Subscriber
     {
         $storeId = $subscriber->getStoreId();
         $listId = $this->_helper->getGeneralList($storeId);
-        $this->_updateSubscriber($listId, $subscriber->getId(),$this->_helper->getGmtDate(),'',1 );
+        $this->_updateSubscriber($listId, $subscriber->getId(), $this->_helper->getGmtDate(), '', 1);
     }
-    protected function _updateSubscriber($listId, $entityId, $sync_delta = null, $sync_error=null, $sync_modified=null)
+    protected function _updateSubscriber($listId, $entityId, $sync_delta = null, $sync_error = null, $sync_modified = null)
     {
-        $this->_helper->saveEcommerceData($listId, $entityId, \Ebizmarts\MailChimp\Helper\Data::IS_SUBSCRIBER,
-            $sync_delta, $sync_error, $sync_modified);
+        $this->_helper->saveEcommerceData(
+            $listId,
+            $entityId,
+            \Ebizmarts\MailChimp\Helper\Data::IS_SUBSCRIBER,
+            $sync_delta,
+            $sync_error,
+            $sync_modified
+        );
     }
 }

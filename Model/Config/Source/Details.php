@@ -46,15 +46,13 @@ class Details implements \Magento\Framework\Option\ArrayInterface
         $this->_helper  = $helper;
         $this->storeManager = $storeManager;
         $storeId = (int) $request->getParam("store", 0);
-        if($request->getParam('website',0)) {
+        if ($request->getParam('website', 0)) {
             $scope = 'website';
-            $storeId = $request->getParam('website',0);
-        }
-        elseif($request->getParam('store',0)) {
+            $storeId = $request->getParam('website', 0);
+        } elseif ($request->getParam('store', 0)) {
             $scope = 'stores';
-            $storeId = $request->getParam('store',0);
-        }
-        else {
+            $storeId = $request->getParam('store', 0);
+        } else {
             $scope = 'default';
         }
 
@@ -63,8 +61,8 @@ class Details implements \Magento\Framework\Option\ArrayInterface
             $api = $this->_helper->getApi($storeId, $scope);
             try {
                 $this->_options = $api->root->info();
-                $mailchimpStoreId = $this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_MAILCHIMP_STORE,$storeId, $scope);
-                if ($mailchimpStoreId && $mailchimpStoreId!=-1 && $this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_PATH_ECOMMERCE_ACTIVE,$storeId,$scope)) {
+                $mailchimpStoreId = $this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_MAILCHIMP_STORE, $storeId, $scope);
+                if ($mailchimpStoreId && $mailchimpStoreId!=-1 && $this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_PATH_ECOMMERCE_ACTIVE, $storeId, $scope)) {
                     $storeInfo = $api->ecommerce->stores->get($mailchimpStoreId);
                     $this->_options['is_syncing'] = $storeInfo['is_syncing'];
                     $this->_options['date_sync'] = $this->getDateSync($mailchimpStoreId);

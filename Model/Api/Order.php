@@ -164,7 +164,7 @@ class Order
                 //create missing products first
                 try {
                     $productData = $this->_apiProduct->sendModifiedProduct($order, $mailchimpStoreId, $magentoStoreId);
-                } catch(\Exception $e) {
+                } catch (\Exception $e) {
                     $error = $e->getMessage();
                     $this->_updateOrder($mailchimpStoreId, $orderId, $this->_helper->getGmtDate(), $error, 0);
                     continue;
@@ -233,7 +233,7 @@ class Order
                 //create missing products first
                 try {
                     $productData = $this->_apiProduct->sendModifiedProduct($order, $mailchimpStoreId, $magentoStoreId);
-                } catch(\Exception $e) {
+                } catch (\Exception $e) {
                     $error = $e->getMessage();
                     $this->_updateOrder($mailchimpStoreId, $orderId, $this->_helper->getGmtDate(), $error, 0);
                     continue;
@@ -647,7 +647,7 @@ class Order
 //        return $this->_api;
 //    }
 
-    protected function _updateOrder($storeId, $entityId, $sync_delta = null, $sync_error=null, $sync_modified=null)
+    protected function _updateOrder($storeId, $entityId, $sync_delta = null, $sync_error = null, $sync_modified = null)
     {
         $this->_helper->saveEcommerceData(
             $storeId,

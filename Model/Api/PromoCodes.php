@@ -60,8 +60,8 @@ class PromoCodes
         \Ebizmarts\MailChimp\Model\MailChimpSyncEcommerceFactory $chimpSyncEcommerce,
         \Ebizmarts\MailChimp\Model\Api\PromoRules $promoRules,
         \Ebizmarts\MailChimp\Model\ResourceModel\MailChimpSyncEcommerce\CollectionFactory $syncCollection
-    )
-    {
+    ) {
+    
         $this->_helper              = $helper;
         $this->_couponCollection    = $couponCollection;
         $this->_ruleCollection      = $ruleCollection;
@@ -85,16 +85,15 @@ class PromoCodes
         $batchArray = [];
         $websiteId = $this->_helper->getWebsiteId($magentoStoreId);
         $collection = $this->_syncCollection->create();
-        $collection->addFieldToFilter('mailchimp_store_id',['eq'=>$mailchimpStoreId])
-            ->addFieldToFilter('type',['eq'=>\Ebizmarts\MailChimp\Helper\Data::IS_PROMO_CODE])
-            ->addFieldToFilter('mailchimp_sync_deleted',['eq'=>1]);
+        $collection->addFieldToFilter('mailchimp_store_id', ['eq'=>$mailchimpStoreId])
+            ->addFieldToFilter('type', ['eq'=>\Ebizmarts\MailChimp\Helper\Data::IS_PROMO_CODE])
+            ->addFieldToFilter('mailchimp_sync_deleted', ['eq'=>1]);
         $collection->getSelect()->limit(self::MAX);
         $counter = 0;
         /**
          * @var $syncCoupon \Ebizmarts\MailChimp\Model\MailChimpSyncEcommerce
          */
-        foreach($collection as $coupon)
-        {
+        foreach ($collection as $coupon) {
             $couponId = $coupon->getRelatedId();
             $ruleId = $coupon->getDeletedRelatedId();
             $batchArray[$counter]['method'] = 'DELETE';
@@ -116,11 +115,11 @@ class PromoCodes
         $ruleCollection = $this->_ruleCollection->create();
         $ruleCollection->addWebsiteFilter($websiteId);
         $rulesId = [];
-        foreach($ruleCollection as $rule) {
+        foreach ($ruleCollection as $rule) {
             $rulesId[] = $rule->getRuleId();
         }
-        if(count($rulesId)) {
-            $inRoules = implode(',',$rulesId);
+        if (count($rulesId)) {
+            $inRoules = implode(',', $rulesId);
             $collection = $this->_couponCollection->create();
             $collection->getSelect()->joinLeft(
                 ['m4m' => $this->_helper->getTableName('mailchimp_sync_ecommerce')],
@@ -187,20 +186,19 @@ class PromoCodes
         $data = [];
         $data['id'] = $item->getCouponId();
         $data['code'] = $item->getCode();
-        $data['redemption_url'] = $this->_getRedemptionUrl($item->getCode(),$magentoStoreId);
+        $data['redemption_url'] = $this->_getRedemptionUrl($item->getCode(), $magentoStoreId);
         $data['usage_count'] = (int)$item->getTimesUsed();
 
         return $data;
     }
-    protected function _getRedemptionUrl($code,$magentoStoreId)
+    protected function _getRedemptionUrl($code, $magentoStoreId)
     {
         $token = md5(rand(0, 9999999));
-        $url = $this->_helper->getRedemptionUrl($magentoStoreId,$code,$token);
+        $url = $this->_helper->getRedemptionUrl($magentoStoreId, $code, $token);
         $this->_token = $token;
         return $url;
-
     }
-    protected function _updateSyncData($storeId, $entityId, $sync_delta=null, $sync_error = null, $sync_modified = null, $sync_deleted = null)
+    protected function _updateSyncData($storeId, $entityId, $sync_delta = null, $sync_error = null, $sync_modified = null, $sync_deleted = null)
     {
         $this->_helper->saveEcommerceData(
             $storeId,

@@ -46,8 +46,8 @@ class CreateWebhook extends \Magento\Backend\App\Action
         \Magento\Store\Model\StoreManagerInterface $storeManagerInterface,
         \Ebizmarts\MailChimp\Helper\Data $helper,
         \Magento\Config\Model\ResourceModel\Config $config
-    )
-    {
+    ) {
+    
         parent::__construct($context);
         $this->resultJsonFactory    = $resultJsonFactory;
         $this->helper               = $helper;
@@ -62,7 +62,7 @@ class CreateWebhook extends \Magento\Backend\App\Action
         $apiKey = $params['apikey'];
         $listId = $params['listId'];
         $return = $this->helper->createWebHook($apiKey, $listId);
-        if(isset($return['message'])) {
+        if (isset($return['message'])) {
             $valid = 0;
             $message = $return['message'];
         }
@@ -72,11 +72,9 @@ class CreateWebhook extends \Magento\Backend\App\Action
             'valid' => (int)$valid,
             'message' => $message,
         ]);
-
     }
     protected function _isAllowed()
     {
         return $this->_authorization->isAllowed('Ebizmarts_MailChimp::config_mailchimp');
     }
-
 }

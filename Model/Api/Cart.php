@@ -249,7 +249,7 @@ class Cart
             // send the products that not already sent
             try {
                 $productData = $this->_apiProduct->sendQuoteModifiedProduct($cart, $mailchimpStoreId, $magentoStoreId);
-            } catch(\Exception $e) {
+            } catch (\Exception $e) {
                 $error = $e->getMessage();
                 $this->_updateQuote($mailchimpStoreId, $cartId);
                 continue;
@@ -344,14 +344,14 @@ class Cart
 
             // don't send the carts for guest customers who are registered
             if (!$cart->getCustomerId() && $customer->getEmail()==$cart->getCustomerEmail()) {
-                $this->_updateQuote($mailchimpStoreId, $cartId, $this->_helper->getGmtDate(), null , 0);
+                $this->_updateQuote($mailchimpStoreId, $cartId, $this->_helper->getGmtDate(), null, 0);
                 continue;
             }
 
             // send the products that not already sent
             try {
                 $productData = $this->_apiProduct->sendQuoteModifiedProduct($cart, $mailchimpStoreId, $magentoStoreId);
-            } catch(\Exception $e) {
+            } catch (\Exception $e) {
                 $error = $e->getMessage();
                 $this->_updateQuote($mailchimpStoreId, $cartId, $this->_helper->getGmtDate(), $error, 0);
                 continue;
@@ -419,7 +419,7 @@ class Cart
             $oneCart['campaign_id'] = $campaignId;
         }
 
-        $oneCart['checkout_url'] = $this->_getCheckoutUrl($cart,$magentoStoreId);
+        $oneCart['checkout_url'] = $this->_getCheckoutUrl($cart, $magentoStoreId);
         $oneCart['currency_code'] = $cart->getQuoteCurrencyCode();
         $oneCart['order_total'] = $cart->getGrandTotal();
         $oneCart['tax_total'] = 0;
@@ -482,7 +482,7 @@ class Cart
     protected function _getCheckoutUrl(\Magento\Quote\Model\Quote $cart, $storeId)
     {
         $token = md5(rand(0, 9999999));
-        $url = $this->_helper->getCartUrl($storeId,$cart->getId(),$token);
+        $url = $this->_helper->getCartUrl($storeId, $cart->getId(), $token);
         $this->_token = $token;
         return $url;
     }
@@ -562,8 +562,6 @@ class Cart
                 $country = $this->_countryFactory->create()->loadByCode($billingAddress->getCountryId());
                 $address['shipping_address']['country'] = $country->getName();
                 $address['shipping_address']['country_code'] = $billingAddress->getCountryId();
-
-
             }
 
             if (count($address)) {
@@ -603,7 +601,7 @@ class Cart
      * @param $sync_modified
      * @param $sync_deleted
      */
-    protected function _updateQuote($storeId, $entityId, $sync_delta =null, $sync_error = null, $sync_modified = null, $sync_deleted = null)
+    protected function _updateQuote($storeId, $entityId, $sync_delta = null, $sync_error = null, $sync_modified = null, $sync_deleted = null)
     {
         $this->_helper->saveEcommerceData(
             $storeId,

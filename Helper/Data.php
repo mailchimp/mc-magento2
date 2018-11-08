@@ -324,24 +324,23 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     private function getCustomerAtts()
     {
         $ret = [];
-        if(!$this->customerAtt) {
+        if (!$this->customerAtt) {
             $collection = $this->_attCollection->create();
             /**
              * @var $item \Magento\Customer\Model\Attribute
              */
             foreach ($collection as $item) {
                 try {
-                    if($item->usesSource()) {
+                    if ($item->usesSource()) {
                         $options = $item->getSource()->getAllOptions();
                     } else {
                         $options = [];
                     }
-
-                } catch(\Exception $e) {
+                } catch (\Exception $e) {
                     $options = [];
                 }
                 $isDate = ($item->getBackendModel()=='Magento\Eav\Model\Entity\Attribute\Backend\Datetime') ? 1:0;
-                $isAddress = ($item->getBackendModel()=='Magento\Customer\Model\Customer\Attribute\Backend\Billing'||
+                $isAddress = ($item->getBackendModel()=='Magento\Customer\Model\Customer\Attribute\Backend\Billing' ||
                     $item->getBackendModel()=='Magento\Customer\Model\Customer\Attribute\Backend\Shipping') ? 1:0;
                 $ret[$item->getId()] = ['attCode' => $item->getAttributeCode(), 'isDate' =>$isDate, 'isAddress' => $isAddress, 'options'=>$options] ;
             }
@@ -349,15 +348,14 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
             $this->customerAtt = $ret;
         }
         return $this->customerAtt;
-
     }
     public function getMapFields($storeId = null)
     {
-        if(!$this->_mapFields) {
+        if (!$this->_mapFields) {
             $customerAtt = $this->getCustomerAtts();
             $data = $this->getConfigValue(self::XML_MERGEVARS, $storeId);
             $data = $this->_serializer->unserialize($data);
-            if(is_array($data)) {
+            if (is_array($data)) {
                 foreach ($data as $customerFieldId => $mailchimpName) {
                     $this->_mapFields[] = [
                         'mailchimp' => strtoupper($mailchimpName),
@@ -394,10 +392,9 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
      */
     public function getConfigValue($path, $storeId = null, $scope = null)
     {
-        if($scope) {
+        if ($scope) {
             $value = $this->_scopeConfig->getValue($path, $scope, $storeId);
-        }
-        else {
+        } else {
             $value = $this->_scopeConfig->getValue($path, \Magento\Store\Model\ScopeInterface::SCOPE_STORES, $storeId);
         }
         return $value;
@@ -409,10 +406,9 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
 
     public function saveConfigValue($path, $value, $storeId = null, $scope = null)
     {
-        if($scope) {
+        if ($scope) {
             $this->_config->saveConfig($path, $value, $scope, $storeId);
-        }
-        else {
+        } else {
             $this->_config->saveConfig($path, $value, \Magento\Store\Model\ScopeInterface::SCOPE_STORES, $storeId);
         }
         $this->_cacheTypeList->cleanType('config');
@@ -422,7 +418,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         $ret = $this->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_PATH_IS_SYNC, $storeId);
         return !$ret;
     }
-    public function getCartUrl($storeId,$cartId,$token)
+    public function getCartUrl($storeId, $cartId, $token)
     {
         $rc = $this->_storeManager->getStore($storeId)->getUrl(
             'mailchimp/cart/loadquote',
@@ -435,7 +431,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         );
         return $rc;
     }
-    public function getRedemptionUrl($storeId,$couponId,$token)
+    public function getRedemptionUrl($storeId, $couponId, $token)
     {
         $rc = $this->_storeManager->getStore($storeId)->getUrl(
             'mailchimp/cart/loadcoupon',
@@ -506,7 +502,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
 //            $storeId = $this->getConfigValue(self::XML_MAILCHIMP_STORE);
             $this->getApi()->ecommerce->stores->delete($mailchimpStore);
             $this->markAllBatchesAs($mailchimpStore, 'canceled');
-        } catch(\Mailchimp_Error $e) {
+        } catch (\Mailchimp_Error $e) {
             $this->log($e->getFriendlyMessage());
         } catch (Exception $e) {
             $this->log($e->getMessage());
@@ -522,7 +518,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     {
         $connection = $this->_mailChimpSyncE->getResource()->getConnection();
         $tableName = $this->_mailChimpSyncE->getResource()->getMainTable();
-        $connection->update($tableName,['mailchimp_sync_modified' => 1,'batch_id' => null],"type = '".$type."' and related_id = $registerId");
+        $connection->update($tableName, ['mailchimp_sync_modified' => 1,'batch_id' => null], "type = '".$type."' and related_id = $registerId");
     }
     public function getMCStoreName($storeId)
     {
@@ -546,8 +542,8 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
             try {
                 $this->getApi()->ecommerce->stores->add($mailchimpStoreId, $listId, $name, $currencyCode, self::PLATFORM);
                 return $mailchimpStoreId;
-            } catch(\Mailchimp_Error $e) {
-              $this->log($e->getFriendlyMessage());
+            } catch (\Mailchimp_Error $e) {
+                $this->log($e->getFriendlyMessage());
             } catch (Exception $e) {
                 return null;
             }
@@ -573,7 +569,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     {
         $mergeVars = [];
         $mapFields = $this->getMapFields($storeId);
-        if(is_array($mapFields)) {
+        if (is_array($mapFields)) {
             foreach ($mapFields as $map) {
                 $value = $customer->getData($map['customer_field']);
                 if ($value) {
@@ -606,7 +602,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
      */
     private function _getAddressValues(\Magento\Customer\Model\Address\AbstractAddress $address)
     {
-        $addressData = array();
+        $addressData = [];
         if ($address) {
             $street = $address->getStreet();
             if (count($street) > 1) {
@@ -634,12 +630,12 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         return $addressData;
     }
 
-    public function getMergeVarsBySubscriber(\Magento\Newsletter\Model\Subscriber $subscriber, $email=null)
+    public function getMergeVarsBySubscriber(\Magento\Newsletter\Model\Subscriber $subscriber, $email = null)
     {
         $mergeVars = [];
         $storeId = $subscriber->getStoreId();
         $webSiteId = $this->getWebsiteId($subscriber->getStoreId());
-        if(!$email) {
+        if (!$email) {
             $email = $subscriber->getEmail();
         }
         try {
@@ -650,9 +646,9 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
             $customer->setWebsiteId($webSiteId);
             $customer->loadByEmail($email);
             if ($customer->getData('email') == $email) {
-                $mergeVars = $this->getMergeVars($customer,$storeId);
+                $mergeVars = $this->getMergeVars($customer, $storeId);
             }
-        }catch(\Exception $e) {
+        } catch (\Exception $e) {
             $this->log($e->getMessage());
         }
         return $mergeVars;
@@ -665,7 +661,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
      */
     public function getMergeVarsByCustomer(\Magento\Customer\Model\Customer $customer, $email)
     {
-        return $this->getMergeVars($customer,$customer->getStoreId());
+        return $this->getMergeVars($customer, $customer->getStoreId());
     }
 
 
@@ -717,11 +713,11 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     {
         $this->resetErrors();
     }
-    public function saveEcommerceData($storeId, $entityId, $type, $date = null, $error = null , $modified = null, $deleted = null, $token = null)
+    public function saveEcommerceData($storeId, $entityId, $type, $date = null, $error = null, $modified = null, $deleted = null, $token = null)
     {
 
         $chimpSyncEcommerce = $this->getChimpSyncEcommerce($storeId, $entityId, $type);
-        if($chimpSyncEcommerce->getRelatedId()==$entityId||!$chimpSyncEcommerce->getRelatedId()&&$modified!=1) {
+        if ($chimpSyncEcommerce->getRelatedId()==$entityId || !$chimpSyncEcommerce->getRelatedId() && $modified!=1) {
             $chimpSyncEcommerce->setMailchimpStoreId($storeId);
             $chimpSyncEcommerce->setType($type);
             $chimpSyncEcommerce->setRelatedId($entityId);
@@ -749,11 +745,11 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
 
     public function markEcommerceAsModified($relatedId, $type)
     {
-        $this->_mailChimpSyncE->markAllAsModified($relatedId,$type);
+        $this->_mailChimpSyncE->markAllAsModified($relatedId, $type);
     }
     public function markEcommerceAsDeleted($relatedId, $type, $relatedDeletedId = null)
     {
-        $this->_mailChimpSyncE->markAllAsDeleted($relatedId,$type, $relatedDeletedId);
+        $this->_mailChimpSyncE->markAllAsDeleted($relatedId, $type, $relatedDeletedId);
     }
     public function ecommerceDeleteAllByIdType($id, $type, $mailchimpStoreId)
     {
@@ -785,10 +781,10 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
 
             try {
                 $apiStores = $this->_api->ecommerce->stores->get(null, null, null, self::MAXSTORES);
-            } catch(\Mailchimp_Error $mailchimpError) {
+            } catch (\Mailchimp_Error $mailchimpError) {
                 $this->log($mailchimpError->getFriendlyMessage());
                 continue;
-            } catch(\Mailchimp_HttpError $mailchimpError) {
+            } catch (\Mailchimp_HttpError $mailchimpError) {
                 $this->log($mailchimpError->getMessage());
                 continue;
             }
@@ -797,7 +793,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
                 if ($store['platform']!=self::PLATFORM) {
                     continue;
                 }
-                if(isset($store['connected_site'])) {
+                if (isset($store['connected_site'])) {
                     $name = $store['name'];
                 } else {
                     $name = $store['name'].' (Warning: not connected)';
@@ -858,7 +854,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
                         $storeId
                     );
                 }
-            } catch(\Mailchimp_Error $e) {
+            } catch (\Mailchimp_Error $e) {
                 $this->log($e->getFriendlyMessage());
             }
         }
@@ -921,7 +917,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
                     }
                 }
             }
-        } catch(\Mailchimp_Error $e) {
+        } catch (\Mailchimp_Error $e) {
             $this->log($e->getFriendlyMessage());
         }
     }
@@ -992,8 +988,8 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     public function getInterest($storeId)
     {
         $rc = [];
-        $interest = $this->getConfigValue(self::XML_INTEREST,$storeId);
-        if($interest!='') {
+        $interest = $this->getConfigValue(self::XML_INTEREST, $storeId);
+        if ($interest!='') {
             $interest = explode(",", $interest);
         } else {
             $interest = [];
@@ -1013,14 +1009,14 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
                     $rc[$mi['category_id']]['category'][$mi['display_order']] = ['id' => $mi['id'], 'name' => $mi['name'], 'checked' => false];
                 }
             }
-        } catch(\Mailchimp_Error $e) {
+        } catch (\Mailchimp_Error $e) {
             $this->log($e->getFriendlyMessage());
         }
         return $rc;
     }
     public function getSubscriberInterest($subscriberId, $storeId, $interest = null)
     {
-        if(!$interest) {
+        if (!$interest) {
             $interest = $this->getInterest($storeId);
         }
         /**
@@ -1028,9 +1024,9 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
          */
 
         $interestGroup = $this->_interestGroupFactory->create();
-        $interestGroup->getBySubscriberIdStoreId($subscriberId,$storeId);
+        $interestGroup->getBySubscriberIdStoreId($subscriberId, $storeId);
         $groups = $this->_serializer->unserialize($interestGroup->getGroupdata());
-        if(isset($groups['group'])) {
+        if (isset($groups['group'])) {
             foreach ($groups['group'] as $key => $value) {
                 if (isset($interest[$key])) {
                     if (is_array($value)) {
@@ -1051,7 +1047,6 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
                                 $interest[$key]['category'][$gkey]['checked'] = false;
                             }
                         }
-
                     }
                 }
             }
@@ -1066,22 +1061,23 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     {
         return $this->_date->gmtTimestamp();
     }
-    public function getAllApiKeys() {
+    public function getAllApiKeys()
+    {
         $apiKeys = [];
         foreach ($this->_storeManager->getStores() as $storeId => $val) {
             $apiKey = $this->getConfigValue(self::XML_PATH_APIKEY_LIST, $storeId);
-            $tempApiKeys = explode("\n",$apiKey);
+            $tempApiKeys = explode("\n", $apiKey);
             foreach ($tempApiKeys as $tempAkiKey) {
-                if(!in_array($tempAkiKey,$apiKeys)) {
+                if (!in_array($tempAkiKey, $apiKeys)) {
                     $apiKeys[] = $tempAkiKey;
                 }
             }
         }
         return $apiKeys;
     }
-    public function modifyCounter($index, $increment=1)
+    public function modifyCounter($index, $increment = 1)
     {
-        if(array_key_exists($index,$this->counters)) {
+        if (array_key_exists($index, $this->counters)) {
             $this->counters[$index] = $this->counters[$index] + $increment;
         } else {
             $this->counters[$index] = 1;

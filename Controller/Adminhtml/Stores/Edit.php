@@ -38,13 +38,13 @@ class Edit extends \Ebizmarts\MailChimp\Controller\Adminhtml\Stores
 
         // Restore previously entered form data from session
         $data = $this->_session->getStoreData(true);
-        if(isset($data['name'])) {
+        if (isset($data['name'])) {
             $data['name'] = preg_replace('/ \(Warning: not connected\)/', '', $data['name']);
         }
         if (!empty($data)) {
             $model->setData($data);
         }
-        if(isset($model['name'])) {
+        if (isset($model['name'])) {
             $model['name'] = preg_replace('/ \(Warning: not connected\)/', '', $model['name']);
         }
         $this->_coreRegistry->register('mailchimp_stores', $model);

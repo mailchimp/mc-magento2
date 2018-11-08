@@ -37,8 +37,8 @@ class VarsMap extends \Magento\Framework\App\Helper\AbstractHelper
         \Magento\Framework\Math\Random $mathRandom,
         \Ebizmarts\MailChimp\Helper\Data $helper,
         \Magento\Framework\Serialize\Serializer\Json $serializer
-    )
-    {
+    ) {
+    
         $this->_helper      = $helper;
         $this->mathRandom   = $mathRandom;
         $this->serialize    = $serializer;

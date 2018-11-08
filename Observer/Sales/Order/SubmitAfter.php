@@ -70,7 +70,7 @@ class SubmitAfter implements \Magento\Framework\Event\ObserverInterface
                     ->setPath($this->_sessionManager->getCookiePath())
                     ->setDomain($this->_sessionManager->getCookieDomain())
             );
-        } catch(\Exception $e) {
+        } catch (\Exception $e) {
             $this->_helper->log($e->getMessage());
         }
 

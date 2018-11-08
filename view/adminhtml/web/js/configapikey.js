@@ -41,13 +41,13 @@ define(
                 if ($('#mailchimp_general_monkeystore option').length>1) {
                     $('#row_mailchimp_general_monkeystore .note').hide();
                 }
-                $('#mailchimp_general_webhook_create').click(function() {
+                $('#mailchimp_general_webhook_create').click(function () {
                     var apiKey = $('#mailchimp_general_apikey').find(':selected').val();
                     var listId = $('#mailchimp_general_monkeylist').find(':selected').val();
                     self._createWebhook(apiKey, listId);
                 });
             },
-            _createWebhook: function(apiKey, listId) {
+            _createWebhook: function (apiKey, listId) {
                 var createWebhookUrl = this.options.createWebhookUrl;
                 $.ajax({
                     url: createWebhookUrl,
@@ -55,11 +55,10 @@ define(
                     type: 'GET',
                     dataType: 'json',
                     showLoader: true
-                }).done(function(data) {
-                    if(data.valid==0) {
+                }).done(function (data) {
+                    if (data.valid==0) {
                         alert('Error: can\'t create WebHook. Your WebHook is already created or your web is private');
-                    }
-                    else if(data.valid==1) {
+                    } else if (data.valid==1) {
                         alert('WebHook created');
                     }
                 });
@@ -176,9 +175,9 @@ define(
                         dataType: 'json',
                         showLoader: true
                     }).done(function (data) {
-                        if(data.error == 0) {
-                            if(data.data.length) {
-                                $.each(data.data, function(i,item){
+                        if (data.error == 0) {
+                            if (data.data.length) {
+                                $.each(data.data, function (i,item) {
                                     $('#mailchimp_general_interest').append($('<option>', {
                                         value: item.id,
                                         text: item.title
@@ -188,7 +187,6 @@ define(
                                 $('#mailchimp_general_interest').append($('<optgroup>', {
                                     label: '---No Data---'
                                 }));
-
                             }
                         }
                     });

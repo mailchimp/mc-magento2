@@ -40,20 +40,23 @@ class MailChimpSyncEcommerce extends AbstractDb
     public function markAllAsDeleted(\Ebizmarts\MailChimp\Model\MailChimpSyncEcommerce $chimp, $id, $type, $relatedDeletedId)
     {
         $connection = $this->getConnection();
-        $connection->update($this->getTable('mailchimp_sync_ecommerce'),['mailchimp_sync_deleted'=>1, 'deleted_related_id'=> $relatedDeletedId],
-            ['related_id = ?'=> $id,'type = ?'=>$type]);
+        $connection->update(
+            $this->getTable('mailchimp_sync_ecommerce'),
+            ['mailchimp_sync_deleted'=>1, 'deleted_related_id'=> $relatedDeletedId],
+            ['related_id = ?'=> $id,'type = ?'=>$type]
+        );
         return $this;
     }
     public function markAllAsModified(\Ebizmarts\MailChimp\Model\MailChimpSyncEcommerce $chimp, $id, $type)
     {
         $connection = $this->getConnection();
-        $connection->update($this->getTable('mailchimp_sync_ecommerce'),['mailchimp_sync_modified'=>1],['related_id = ?'=> $id, 'type = ?'=>$type]);
+        $connection->update($this->getTable('mailchimp_sync_ecommerce'), ['mailchimp_sync_modified'=>1], ['related_id = ?'=> $id, 'type = ?'=>$type]);
         return $this;
     }
     public function deleteAllByIdType(\Ebizmarts\MailChimp\Model\MailChimpSyncEcommerce $chimp, $id, $type, $mailchimpStoreId)
     {
         $connection = $this->getConnection();
-        $connection->delete($this->getTable('mailchimp_sync_ecommerce'),['related_id = ?'=> $id, 'type = ?'=>$type, 'mailchimp_store_id = ?' => $mailchimpStoreId]);
+        $connection->delete($this->getTable('mailchimp_sync_ecommerce'), ['related_id = ?'=> $id, 'type = ?'=>$type, 'mailchimp_store_id = ?' => $mailchimpStoreId]);
         return $this;
     }
 }

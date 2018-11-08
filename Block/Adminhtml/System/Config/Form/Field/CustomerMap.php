@@ -13,7 +13,7 @@
 
 namespace Ebizmarts\MailChimp\Block\Adminhtml\System\Config\Form\Field;
 
-class CustomerMap  extends \Magento\Config\Block\System\Config\Form\Field\FieldArray\AbstractFieldArray
+class CustomerMap extends \Magento\Config\Block\System\Config\Form\Field\FieldArray\AbstractFieldArray
 {
     /**
      * @var VarsMap

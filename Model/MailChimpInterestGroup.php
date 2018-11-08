@@ -24,7 +24,5 @@ class MailChimpInterestGroup extends \Magento\Framework\Model\AbstractModel
     {
         $this->getResource()->getBySubscriberIdStoreId($this, $subscriberId, $storeId);
         return $this;
-
     }
-
 }

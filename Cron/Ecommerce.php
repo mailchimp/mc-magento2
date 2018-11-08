@@ -116,7 +116,7 @@ class Ecommerce
         $connection->delete($tableName, 'batch_id is null and mailchimp_sync_modified != 1');
 
         foreach ($this->_storeManager->getStores() as $storeId => $val) {
-            if(!$this->_ping($storeId)) {
+            if (!$this->_ping($storeId)) {
                 $this->_helper->log('MailChimp is not available');
                 return;
             }
@@ -157,8 +157,6 @@ class Ecommerce
                 $this->updateSyncFlagData($val['storeid'], $mailchimpStoreId);
             }
         }
-
-
     }
 
     protected function _processStore($storeId, $mailchimpStoreId, $listId)
@@ -276,6 +274,5 @@ class Ecommerce
     {
         $this->_helper->log("Sent batch $batchId");
         $this->_helper->log($this->_helper->getCounters());
-
     }
 }

@@ -13,7 +13,7 @@
 
 namespace Ebizmarts\MailChimp\Model\Config\Backend;
 
-class VarsMap  extends \Magento\Framework\App\Config\Value
+class VarsMap extends \Magento\Framework\App\Config\Value
 {
     /**
      * @var \Ebizmarts\MailChimp\Helper\VarsMap
@@ -45,9 +45,9 @@ class VarsMap  extends \Magento\Framework\App\Config\Value
         \Ebizmarts\MailChimp\Helper\Data $helper,
         \Magento\Framework\Model\ResourceModel\AbstractResource $resource = null,
         \Magento\Framework\Data\Collection\AbstractDb $resourceCollection = null,
-        array $data=[]
-    )
-    {
+        array $data = []
+    ) {
+    
         $this->_varsHelper = $varsMap;
         $this->_helper      = $helper;
         parent::__construct($context, $registry, $config, $cacheTypeList, $resource, $resourceCollection, $data);
@@ -67,10 +67,9 @@ class VarsMap  extends \Magento\Framework\App\Config\Value
     public function beforeSave()
     {
         $value = $this->getValue();
-        if(is_array($value)) {
+        if (is_array($value)) {
             $value = $this->_varsHelper->makeStorableArrayFieldValue($value);
         }
         $this->setValue($value);
     }
-
 }

@@ -106,7 +106,7 @@ class Customer
                 $this->_helper->log('Customer: '.$customer->getId().' json encode failed');
             }
             if (!empty($customerJson)) {
-                if($item->getMailchimpSyncModified() == 1) {
+                if ($item->getMailchimpSyncModified() == 1) {
                     $this->_helper->modifyCounter(\Ebizmarts\MailChimp\Helper\Data::CUS_MOD);
                 } else {
                     $this->_helper->modifyCounter(\Ebizmarts\MailChimp\Helper\Data::CUS_NEW);

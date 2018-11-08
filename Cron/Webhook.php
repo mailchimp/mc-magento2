@@ -110,7 +110,7 @@ class Webhook
                 } else {
                     $processed = self::PROCESSED_WITH_ERROR;
                 }
-            } catch(\Exception $e) {
+            } catch (\Exception $e) {
                 $processed = self::PROCESSED_WITH_ERROR;
             }
             $item->setProcessed($processed);
@@ -135,7 +135,7 @@ class Webhook
         } else {
             $storeIds = $this->_helper->getMagentoStoreIdsByListId($listId);
             if (count($storeIds) > 0) {
-                foreach($storeIds as $storeId) {
+                foreach ($storeIds as $storeId) {
                     $sub = $this->_subscriberFactory->create();
                     $sub->setStoreId($storeId);
                     $sub->setSubscriberEmail($email);

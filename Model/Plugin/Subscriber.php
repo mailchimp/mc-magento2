@@ -54,7 +54,7 @@ class Subscriber
         $subscriber,
         $customerId
     ) {
-        if($this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_PATH_ACTIVE,$subscriber->getStoreId())) {
+        if ($this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_PATH_ACTIVE, $subscriber->getStoreId())) {
             $subscriber->loadByCustomerId($customerId);
             $api = $this->_api;
             try {
@@ -74,10 +74,10 @@ class Subscriber
         /**
          * @var $subscriber \Magento\Newsletter\Model\Subscriber
          */
-        if($this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_PATH_ACTIVE,$subscriber->getStoreId())) {
+        if ($this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_PATH_ACTIVE, $subscriber->getStoreId())) {
             $subscriber->loadByCustomerId($customerId);
             if (!$subscriber->isSubscribed()) {
-                if (!$this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_MAGENTO_MAIL,$subscriber->getStoreId())) {
+                if (!$this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_MAGENTO_MAIL, $subscriber->getStoreId())) {
                     $subscriber->setImportMode(true);
                 }
                 $storeId = $subscriber->getStoreId();
@@ -111,8 +111,8 @@ class Subscriber
         $subscriber,
         $email
     ) {
-        if($this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_PATH_ACTIVE,$subscriber->getStoreId())) {
-            if (!$this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_MAGENTO_MAIL,$subscriber->getStoreId())) {
+        if ($this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_PATH_ACTIVE, $subscriber->getStoreId())) {
+            if (!$this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_MAGENTO_MAIL, $subscriber->getStoreId())) {
                 $subscriber->setImportMode(true);
             }
             $storeId = $this->_storeManager->getStore()->getId();
@@ -138,9 +138,9 @@ class Subscriber
 
     public function beforeUnsubscribe(
         \Magento\Newsletter\Model\Subscriber $subscriber
-    )
-    {
-        if($this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_PATH_ACTIVE,$subscriber->getStoreId())) {
+    ) {
+    
+        if ($this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_PATH_ACTIVE, $subscriber->getStoreId())) {
             $api = $this->_helper->getApi();
             try {
                 $md5HashEmail = md5(strtolower($subscriber->getSubscriberEmail()));
@@ -153,9 +153,9 @@ class Subscriber
     }
     public function afterDelete(
         \Magento\Newsletter\Model\Subscriber $subscriber
-    )
-    {
-        if($this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_PATH_ACTIVE,$subscriber->getStoreId())) {
+    ) {
+    
+        if ($this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_PATH_ACTIVE, $subscriber->getStoreId())) {
             $api = $this->_helper->getApi();
             if ($subscriber->isSubscribed()) {
                 try {

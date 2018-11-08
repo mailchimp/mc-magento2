@@ -44,8 +44,8 @@ class SaveAfter implements \Magento\Framework\Event\ObserverInterface
         \Magento\Newsletter\Model\SubscriberFactory $subscriberFactory,
         \Ebizmarts\MailChimp\Model\MailChimpInterestGroupFactory $interestGroupFactory,
         \Magento\Framework\Serialize\Serializer\Json $serializer
-    )
-    {
+    ) {
+    
         $this->helper               = $helper;
         $this->subscriberFactory    = $subscriberFactory;
         $this->interestGroupFactory = $interestGroupFactory;
@@ -58,8 +58,7 @@ class SaveAfter implements \Magento\Framework\Event\ObserverInterface
         $request  = $observer->getEvent()->getRequest();
         $allParams = $request->getParams();
         $subscriber = $this->subscriberFactory->create();
-        if(isset($allParams['customer']['interestgroup'])) {
-
+        if (isset($allParams['customer']['interestgroup'])) {
             $params = ['group' => $allParams['customer']['interestgroup']];
             foreach ($params['group'] as $index => $ig) {
                 if (is_array($ig)) {
@@ -80,7 +79,7 @@ class SaveAfter implements \Magento\Framework\Event\ObserverInterface
                     $interestGroup->setStoreId($subscriber->getStoreId());
                     $interestGroup->setUpdatedAt($this->helper->getGmtDate());
                     $interestGroup->getResource()->save($interestGroup);
-                    $this->helper->markRegisterAsModified($subscriber->getId(),\Ebizmarts\MailChimp\Helper\Data::IS_SUBSCRIBER);
+                    $this->helper->markRegisterAsModified($subscriber->getId(), \Ebizmarts\MailChimp\Helper\Data::IS_SUBSCRIBER);
                 } else {
                     $this->subscriberFactory->create()->subscribe($customer->getEmail());
                     $subscriber->loadByEmail($customer->getEmail());
@@ -91,17 +90,14 @@ class SaveAfter implements \Magento\Framework\Event\ObserverInterface
                     $interestGroup->setUpdatedAt($this->helper->getGmtDate());
                     $interestGroup->getResource()->save($interestGroup);
                 }
-
             } catch (\Exception $e) {
-
             }
-        }
-        else {
+        } else {
             $subscriber->loadByEmail($customer->getEmail());
             if ($subscriber->getEmail() == $customer->getEmail()) {
-                $this->helper->markRegisterAsModified($subscriber->getId(),\Ebizmarts\MailChimp\Helper\Data::IS_SUBSCRIBER);
+                $this->helper->markRegisterAsModified($subscriber->getId(), \Ebizmarts\MailChimp\Helper\Data::IS_SUBSCRIBER);
             }
         }
-        $this->helper->markRegisterAsModified($customer->getId(),\Ebizmarts\MailChimp\Helper\Data::IS_CUSTOMER);
+        $this->helper->markRegisterAsModified($customer->getId(), \Ebizmarts\MailChimp\Helper\Data::IS_CUSTOMER);
     }
 }

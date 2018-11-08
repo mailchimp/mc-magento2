@@ -27,20 +27,18 @@ class MonkeyStore implements \Magento\Framework\Option\ArrayInterface
         \Magento\Framework\App\RequestInterface $request
     ) {
         $storeId = (int) $request->getParam("store", 0);
-        if($request->getParam('website',0)) {
+        if ($request->getParam('website', 0)) {
             $scope = 'website';
-            $storeId = $request->getParam('website',0);
-        }
-        elseif($request->getParam('store',0)) {
+            $storeId = $request->getParam('website', 0);
+        } elseif ($request->getParam('store', 0)) {
             $scope = 'stores';
-            $storeId = $request->getParam('store',0);
-        }
-        else {
+            $storeId = $request->getParam('store', 0);
+        } else {
             $scope = 'default';
         }
         if ($helper->getApiKey($storeId, $scope)) {
             try {
-                $this->options = $helper->getApi($storeId,$scope)->ecommerce->stores->get(null, null, null, \Ebizmarts\MailChimp\Helper\Data::MAXSTORES);
+                $this->options = $helper->getApi($storeId, $scope)->ecommerce->stores->get(null, null, null, \Ebizmarts\MailChimp\Helper\Data::MAXSTORES);
             } catch (\Mailchimp_Error $e) {
                 $helper->log($e->getFriendlyMessage());
             }
@@ -53,10 +51,10 @@ class MonkeyStore implements \Magento\Framework\Option\ArrayInterface
             $rc[] = ['value' => -1, 'label' => 'Select one Mailchimp Store'];
             foreach ($this->options['stores'] as $store) {
                 if ($store['platform'] == \Ebizmarts\MailChimp\Helper\Data::PLATFORM) {
-                    if($store['list_id']=='') {
+                    if ($store['list_id']=='') {
                         continue;
                     }
-                    if(isset($store['connected_site'])) {
+                    if (isset($store['connected_site'])) {
                         $label = $store['name'];
                     } else {
                         $label = $store['name'].' (Warning: not connected)';

@@ -41,6 +41,5 @@ class SaveBefore implements \Magento\Framework\Event\ObserverInterface
         $storeId  = $customer->getStoreId();
         $mailchimpStoreId = $this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_MAILCHIMP_STORE, $storeId);
         $this->_helper->saveEcommerceData($mailchimpStoreId, $customer->getId(), \Ebizmarts\MailChimp\Helper\Data::IS_CUSTOMER, null, null, 1);
-
     }
 }
