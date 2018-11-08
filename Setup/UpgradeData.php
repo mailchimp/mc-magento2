@@ -166,7 +166,7 @@ class UpgradeData implements UpgradeDataInterface
                         } catch (\Exception $e) {
                             $this->_helper->log($e->getMessage());
                         }
-                        $lastId = $item->getId();
+                        $lastId = $webhookItem->getId();
                     }
                 }
             }
