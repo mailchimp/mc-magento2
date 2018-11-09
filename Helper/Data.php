@@ -1091,4 +1091,20 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     {
         return $this->counters;
     }
+    public function serialize($data)
+    {
+        $result = json_encode($data);
+        if (false === $result) {
+            throw new \InvalidArgumentException('Unable to serialize value.');
+        }
+        return $result;
+    }
+    public function unserialize($string)
+    {
+        $result = json_decode($string, true);
+        if (json_last_error() !== JSON_ERROR_NONE) {
+            throw new \InvalidArgumentException('Unable to unserialize value.');
+        }
+        return $result;
+    }
 }

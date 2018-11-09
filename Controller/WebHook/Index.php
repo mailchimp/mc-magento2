@@ -33,10 +33,6 @@ class Index extends Action
      * @var \Ebizmarts\MailChimp\Model\MailChimpWebhookRequestFactory
      */
     protected $_chimpWebhookRequestFactory;
-    /**
-     * @var \Magento\Framework\Serialize\Serializer\Json
-     */
-    protected $serializer;
     private $_remoteAddress;
 
     /**
@@ -45,14 +41,12 @@ class Index extends Action
      * @param \Ebizmarts\MailChimp\Helper\Data $helper
      * @param \Ebizmarts\MailChimp\Model\MailChimpWebhookRequestFactory $chimpWebhookRequestFactory
      * @param \Magento\Framework\HTTP\PhpEnvironment\RemoteAddress $remoteAddress
-     * @param \Magento\Framework\Serialize\Serializer\Json $serializer
      */
     public function __construct(
         Context $context,
         \Ebizmarts\MailChimp\Helper\Data $helper,
         \Ebizmarts\MailChimp\Model\MailChimpWebhookRequestFactory $chimpWebhookRequestFactory,
-        \Magento\Framework\HTTP\PhpEnvironment\RemoteAddress $remoteAddress,
-        \Magento\Framework\Serialize\Serializer\Json $serializer
+        \Magento\Framework\HTTP\PhpEnvironment\RemoteAddress $remoteAddress
     ) {
     
         parent::__construct($context);
@@ -60,7 +54,6 @@ class Index extends Action
         $this->_helper                      = $helper;
         $this->_chimpWebhookRequestFactory  = $chimpWebhookRequestFactory;
         $this->_remoteAddress               = $remoteAddress;
-        $this->serializer                   = $serializer;
     }
 
     public function execute()
@@ -84,7 +77,7 @@ class Index extends Action
                 $chimpRequest = $this->_chimpWebhookRequestFactory->create();
                 $chimpRequest->setType($request['type']);
                 $chimpRequest->setFiredAt($request['fired_at']);
-                $chimpRequest->setDataRequest($this->serializer->serialize($request['data']));
+                $chimpRequest->setDataRequest($this->_helper->serialize($request['data']));
                 $chimpRequest->setProcessed(false);
                 $chimpRequest->getResource()->save($chimpRequest);
             }

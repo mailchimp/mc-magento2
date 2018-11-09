@@ -43,10 +43,6 @@ class Webhook
      * @var \Magento\Customer\Model\CustomerFactory
      */
     protected $_customer;
-    /**
-     * @var \Magento\Framework\Serialize\Serializer\Json
-     */
-    protected $_serializer;
 
     /**
      * Webhook constructor.
@@ -54,21 +50,18 @@ class Webhook
      * @param \Magento\Newsletter\Model\SubscriberFactory $subscriberFactory
      * @param \Ebizmarts\MailChimp\Model\ResourceModel\MailChimpWebhookRequest\CollectionFactory $webhookCollection
      * @param \Magento\Customer\Model\CustomerFactory $customer
-     * @param \Magento\Framework\Serialize\Serializer\Json $serializer
      */
     public function __construct(
         \Ebizmarts\MailChimp\Helper\Data $helper,
         \Magento\Newsletter\Model\SubscriberFactory $subscriberFactory,
         \Ebizmarts\MailChimp\Model\ResourceModel\MailChimpWebhookRequest\CollectionFactory $webhookCollection,
-        \Magento\Customer\Model\CustomerFactory $customer,
-        \Magento\Framework\Serialize\Serializer\Json $serializer
+        \Magento\Customer\Model\CustomerFactory $customer
     ) {
     
         $this->_helper              = $helper;
         $this->_subscriberFactory   = $subscriberFactory;
         $this->_webhookCollection   = $webhookCollection;
         $this->_customer            = $customer;
-        $this->_serializer          = $serializer;
     }
     public function execute()
     {
@@ -87,7 +80,7 @@ class Webhook
          */
         foreach ($collection as $item) {
             try {
-                $data = $this->_serializer->unserialize($item->getDataRequest());
+                $data = $this->_helper->unserialize($item->getDataRequest());
                 $stores = $this->_helper->getMagentoStoreIdsByListId($data['list_id']);
                 if (count($stores)) {
                     switch ($item->getType()) {

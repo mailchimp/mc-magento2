@@ -19,10 +19,6 @@ class VarsMap extends \Magento\Framework\App\Helper\AbstractHelper
      * @var Data
      */
     protected $_helper;
-    /**
-     * @var \Magento\Framework\Serialize\Serializer\Json
-     */
-    protected $serialize;
     protected $mathRandom;
 
     /**
@@ -30,18 +26,15 @@ class VarsMap extends \Magento\Framework\App\Helper\AbstractHelper
      * @param \Magento\Framework\App\Helper\Context $context
      * @param \Magento\Framework\Math\Random $mathRandom
      * @param Data $helper
-     * @param \Magento\Framework\Serialize\Serializer\Json $serializer
      */
     public function __construct(
         \Magento\Framework\App\Helper\Context $context,
         \Magento\Framework\Math\Random $mathRandom,
-        \Ebizmarts\MailChimp\Helper\Data $helper,
-        \Magento\Framework\Serialize\Serializer\Json $serializer
+        \Ebizmarts\MailChimp\Helper\Data $helper
     ) {
     
         $this->_helper      = $helper;
         $this->mathRandom   = $mathRandom;
-        $this->serialize    = $serializer;
         parent::__construct($context);
     }
     public function makeArrayFieldValue($value)
@@ -103,7 +96,7 @@ class VarsMap extends \Magento\Framework\App\Helper\AbstractHelper
                     $data[$customerFiledId] = $mailchimpName;
                 }
             }
-            return $this->serialize->serialize($data);
+            return $this->_helper->serialize($data);
         } else {
             return '';
         }
@@ -111,7 +104,7 @@ class VarsMap extends \Magento\Framework\App\Helper\AbstractHelper
     protected function unserializeValue($value)
     {
         if (is_string($value) && !empty($value)) {
-            return $this->serialize->unserialize($value);
+            return $this->_helper->unserialize($value);
         } else {
             return [];
         }
