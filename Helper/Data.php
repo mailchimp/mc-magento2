@@ -182,6 +182,10 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
      * @var \Magento\Framework\Stdlib\DateTime\DateTime
      */
     protected $_date;
+    /**
+     * @var \Magento\Framework\Serialize\Serializer\Json
+     */
+    protected $_serializer;
 
 
     private $customerAtt    = null;
@@ -214,6 +218,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
      * @param \Magento\Directory\Api\CountryInformationAcquirerInterface $countryInformation
      * @param \Magento\Framework\App\ResourceConnection $resource
      * @param \Ebizmarts\MailChimp\Model\MailChimpInterestGroupFactory $interestGroupFactory
+     * @param \Magento\Framework\Serialize\Serializer\Json $serializer
      * @param \Magento\Framework\Stdlib\DateTime\DateTime $date
      */
     public function __construct(
@@ -242,6 +247,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         \Magento\Directory\Api\CountryInformationAcquirerInterface $countryInformation,
         \Magento\Framework\App\ResourceConnection $resource,
         \Ebizmarts\MailChimp\Model\MailChimpInterestGroupFactory $interestGroupFactory,
+        \Magento\Framework\Serialize\Serializer\Json $serializer,
         \Magento\Framework\Stdlib\DateTime\DateTime $date
     ) {
 
@@ -272,6 +278,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         $this->_customerFactory         = $customerFactory;
         $this->_countryInformation      = $countryInformation;
         $this->_interestGroupFactory    = $interestGroupFactory;
+        $this->_serializer              = $serializer;
         $this->_date                    = $date;
         parent::__construct($context);
     }
@@ -1086,18 +1093,10 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     }
     public function serialize($data)
     {
-        $result = json_encode($data);
-        if (false === $result) {
-            throw new \InvalidArgumentException('Unable to serialize value.');
-        }
-        return $result;
+        return $this->_serializer->serialize($data);
     }
     public function unserialize($string)
     {
-        $result = json_decode($string, true);
-        if (json_last_error() !== JSON_ERROR_NONE) {
-            throw new \InvalidArgumentException('Unable to unserialize value.');
-        }
-        return $result;
+        return $this->_serializer->unserialize($string);
     }
 }

@@ -90,7 +90,7 @@ class UpgradeData implements UpgradeDataInterface
             $salesConnection->query($query);
             $setup->endSetup();
         }
-        if (version_compare($context->getVersion(), '1.1.32') < 0) {
+        if (version_compare($context->getVersion(), '1.2.32') < 0) {
         // must convert all the serialized data in the db
             // convert the data in core_config_data
             $setup->startSetup();
