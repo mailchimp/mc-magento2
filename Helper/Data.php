@@ -347,17 +347,21 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         if (!$this->_mapFields) {
             $customerAtt = $this->getCustomerAtts();
             $data = $this->getConfigValue(self::XML_MERGEVARS, $storeId);
-            $data = $this->unserialize($data);
-            if (is_array($data)) {
-                foreach ($data as $customerFieldId => $mailchimpName) {
-                    $this->_mapFields[] = [
-                        'mailchimp' => strtoupper($mailchimpName),
-                        'customer_field' => $customerAtt[$customerFieldId]['attCode'],
-                        'isDate' => $customerAtt[$customerFieldId]['isDate'],
-                        'isAddress' => $customerAtt[$customerFieldId]['isAddress'],
-                        'options' => $customerAtt[$customerFieldId]['options']
-                    ];
+            try {
+                $data = $this->unserialize($data);
+                if (is_array($data)) {
+                    foreach ($data as $customerFieldId => $mailchimpName) {
+                        $this->_mapFields[] = [
+                            'mailchimp' => strtoupper($mailchimpName),
+                            'customer_field' => $customerAtt[$customerFieldId]['attCode'],
+                            'isDate' => $customerAtt[$customerFieldId]['isDate'],
+                            'isAddress' => $customerAtt[$customerFieldId]['isAddress'],
+                            'options' => $customerAtt[$customerFieldId]['options']
+                        ];
+                    }
                 }
+            } catch (\Exception $e) {
+                $this->log($e->getMessage());
             }
         }
         return $this->_mapFields;
@@ -1018,30 +1022,37 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
 
         $interestGroup = $this->_interestGroupFactory->create();
         $interestGroup->getBySubscriberIdStoreId($subscriberId, $storeId);
-        $groups = $this->unserialize($interestGroup->getGroupdata());
-        if (isset($groups['group'])) {
-            foreach ($groups['group'] as $key => $value) {
-                if (isset($interest[$key])) {
-                    if (is_array($value)) {
-                        foreach ($value as $groupId) {
-                            foreach ($interest[$key]['category'] as $gkey => $gvalue) {
-                                if ($gvalue['id'] == $groupId) {
-                                    $interest[$key]['category'][$gkey]['checked'] = true;
-                                } elseif (!isset($interest[$key]['category'][$gkey]['checked'])) {
-                                    $interest[$key]['category'][$gkey]['checked'] = false;
+        $serialized = $interestGroup->getGroupdata();
+        if($serialized) {
+            try {
+                $groups = $this->unserialize($serialized);
+                if (isset($groups['group'])) {
+                    foreach ($groups['group'] as $key => $value) {
+                        if (isset($interest[$key])) {
+                            if (is_array($value)) {
+                                foreach ($value as $groupId) {
+                                    foreach ($interest[$key]['category'] as $gkey => $gvalue) {
+                                        if ($gvalue['id'] == $groupId) {
+                                            $interest[$key]['category'][$gkey]['checked'] = true;
+                                        } elseif (!isset($interest[$key]['category'][$gkey]['checked'])) {
+                                            $interest[$key]['category'][$gkey]['checked'] = false;
+                                        }
+                                    }
                                 }
-                            }
-                        }
-                    } else {
-                        foreach ($interest[$key]['category'] as $gkey => $gvalue) {
-                            if ($gvalue['id'] == $value) {
-                                $interest[$key]['category'][$gkey]['checked'] = true;
                             } else {
-                                $interest[$key]['category'][$gkey]['checked'] = false;
+                                foreach ($interest[$key]['category'] as $gkey => $gvalue) {
+                                    if ($gvalue['id'] == $value) {
+                                        $interest[$key]['category'][$gkey]['checked'] = true;
+                                    } else {
+                                        $interest[$key]['category'][$gkey]['checked'] = false;
+                                    }
+                                }
                             }
                         }
                     }
                 }
+            } catch (\Exception $e) {
+                $this->log($e->getMessage());
             }
         }
         return $interest;
