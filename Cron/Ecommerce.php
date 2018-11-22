@@ -188,13 +188,15 @@ class Ecommerce
             $carts = $this->_apiCart->createBatchJson($storeId);
             $results = array_merge($results, $carts);
 
-            $this->_helper->log('Generate Rules payload');
-            $rules = $this->_apiPromoRules->sendRules($storeId);
-            $results = array_merge($results, $rules);
+            if ($this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_SEND_PROMO, $storeId)) {
+                $this->_helper->log('Generate Rules payload');
+                $rules = $this->_apiPromoRules->sendRules($storeId);
+                $results = array_merge($results, $rules);
 
-            $this->_helper->log('Generate Coupons payload');
-            $coupons = $this->_apiPromoCodes->sendCoupons($storeId);
-            $results = array_merge($results, $coupons);
+                $this->_helper->log('Generate Coupons payload');
+                $coupons = $this->_apiPromoCodes->sendCoupons($storeId);
+                $results = array_merge($results, $coupons);
+            }
         }
 
         if (!empty($results)) {

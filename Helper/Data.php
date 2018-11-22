@@ -44,6 +44,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     const XML_INTEREST_SUCCESS_HTML_BEFORE  = 'mailchimp/general/interest_success_html_before';
     const XML_INTEREST_SUCCESS_HTML_AFTER   = 'mailchimp/general/interest_success_html_after';
     const XML_MAGENTO_MAIL           = 'mailchimp/general/magentoemail';
+    const XML_SEND_PROMO             = 'mailchimp/ecommerce/send_promo';
 
 
     const ORDER_STATE_OK             = 'complete';
