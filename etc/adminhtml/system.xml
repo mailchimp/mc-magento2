@@ -156,17 +156,24 @@
             </group>
             <group id="ecommerce" translate="label" type="text" sortOrder="110" showInDefault="1" showInWebsite="1" showInStore="1">
                 <label>Ecommerce Configuration</label>
-                <field id="active" translate="label" type="select" showInDefault="1" showInWebsite="1" showInStore="1">
+                <field id="active" translate="label" type="select" sortOrder="112" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Enabled</label>
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
                 </field>
-                <field id="customer_optin" translate="label" type="select" showInDefault="1" showInWebsite="1" showInStore="1">
+                <field id="customer_optin" translate="label" type="select" sortOrder="114" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Subscribe all customers to the newsletter</label>
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
                 </field>
-                <field id="firstdate" translate="label" type="date" showInDefault="1" showInWebsite="1" showInStore="1">
+                <field id="firstdate" translate="label" type="date" showInDefault="1" sortOrder="116" showInWebsite="1" showInStore="1">
                     <label>First Date</label>
                     <frontend_model>Ebizmarts\MailChimp\Block\Adminhtml\System\Config\Date</frontend_model>
+                    <depends>
+                        <field id="*/*/active">1</field>
+                    </depends>
+                </field>
+                <field id="send_promo" translate="label" type="select" sortOrder="118" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Send Promo Rules and Promo Codes</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
                     <depends>
                         <field id="*/*/active">1</field>
                     </depends>
