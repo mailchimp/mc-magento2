@@ -354,7 +354,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         if (!$this->_mapFields) {
             $customerAtt = $this->getCustomerAtts();
             $data = $this->getConfigValue(self::XML_MERGEVARS, $storeId);
-            $data = $this->_serializer->unserialize($data);
+            $data = $this->_serializer->unserialize($data ?? '{}');
             if (is_array($data)) {
                 foreach ($data as $customerFieldId => $mailchimpName) {
                     $this->_mapFields[] = [
@@ -1025,7 +1025,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
 
         $interestGroup = $this->_interestGroupFactory->create();
         $interestGroup->getBySubscriberIdStoreId($subscriberId, $storeId);
-        $groups = $this->_serializer->unserialize($interestGroup->getGroupdata());
+        $groups = $this->_serializer->unserialize($interestGroup->getGroupdata() ?? '{}');
         if (isset($groups['group'])) {
             foreach ($groups['group'] as $key => $value) {
                 if (isset($interest[$key])) {
