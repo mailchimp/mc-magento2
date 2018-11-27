@@ -1,32 +1,8 @@
-<script type="text/javascript">
-    //<![CDATA[
-    function reseterrors() {
-        jQuery.ajax({
-            url: '<?php echo $this->getAjaxCheckUrl() ?>',
-            data: {form_key: window.FORM_KEY},
-            type: 'POST',
-            success: function(data){
-                if(data.valid==0) {
-                    alert('Error: '+data.message);
-                }
-                else if(data.valid==1) {
-                    alert('Errors cleaned');
-                }
-            }
-        }).done(function(a) {
-            console.log(a);
-        });
-    }
-    //]]>
-</script>
-
-
-<?php //echo  __($block->escapeHtml('Reset errors')); ?>
-
-
+<div id="monkey_errorconfirmation" style="display:none;" data-mage-init='{"mailchimpconfirmation":{}}'>
+</div>
 <div class="actions actions-reset-errors">
     <div id="validation_result" class="message-validation hidden"></div>
-    <button onclick="javascript:reseterrors(); return false;" class="action-reset-errors" type="button" id="<?php echo $block->getHtmlId() ?>">
+    <button onclick="mailchimpdeleteconfirmation('<?php echo $this->getAjaxCheckUrl() ?>')" class="action-reset-errors" type="button" id="<?php echo $block->getHtmlId() ?>">
         <span><?php echo $block->escapeHtml($block->getButtonLabel()) ?></span>
     </button>
 </div>
