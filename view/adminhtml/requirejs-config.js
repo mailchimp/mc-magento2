@@ -12,7 +12,8 @@ var config = {
     "map": {
         "*": {
             monkeyapikey: 'Ebizmarts_MailChimp/js/apikey',
-            configmonkeyapikey: 'Ebizmarts_MailChimp/js/configapikey'
+            configmonkeyapikey: 'Ebizmarts_MailChimp/js/configapikey',
+            mailchimpconfirmation: 'Ebizmarts_MailChimp/js/mailchimpconfirmation'
         }
     }
 };
