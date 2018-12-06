@@ -209,11 +209,6 @@ class Cart
         foreach ($modifiedCarts as $cart) {
             $this->_token = null;
             $cartId = $cart->getEntityId();
-            $allCarts[$this->_counter]['method'] = 'DELETE';
-            $allCarts[$this->_counter]['path'] = '/ecommerce/stores/' . $mailchimpStoreId . '/carts/' . $cartId;
-            $allCarts[$this->_counter]['operation_id'] = $this->_batchId . '_' . $cartId;
-            $allCarts[$this->_counter]['body'] = '';
-            $this->_counter += 1;
             /**
              * @var $customer \Magento\Customer\Model\Customer
              */
@@ -265,8 +260,8 @@ class Cart
                 $cartJson = $this->_makeCart($cart, $mailchimpStoreId, $magentoStoreId);
                 if ($cartJson!="") {
                     $this->_helper->modifyCounter(\Ebizmarts\MailChimp\Helper\Data::QUO_MOD);
-                    $allCarts[$this->_counter]['method'] = 'POST';
-                    $allCarts[$this->_counter]['path'] = '/ecommerce/stores/' . $mailchimpStoreId . '/carts';
+                    $allCarts[$this->_counter]['method'] = 'PATCH';
+                    $allCarts[$this->_counter]['path'] = '/ecommerce/stores/' . $mailchimpStoreId . '/carts/'.$cartId;
                     $allCarts[$this->_counter]['operation_id'] = $this->_batchId . '_' . $cartId;
                     $allCarts[$this->_counter]['body'] = $cartJson;
                     $this->_counter += 1;
