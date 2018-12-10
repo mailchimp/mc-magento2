@@ -75,6 +75,9 @@ class Success extends \Magento\Framework\App\Action\Action
         try {
             $subscriber->loadByEmail($order->getCustomerEmail());
             if ($subscriber->getEmail()==$order->getCustomerEmail()) {
+                if($subscriber->getStatus()==\Magento\Newsletter\Model\Subscriber::STATUS_UNSUBSCRIBED) {
+                    $subscriber->subscribe($subscriber->getEmail());
+                }
                 $interestGroup->getBySubscriberIdStoreId($subscriber->getSubscriberId(), $subscriber->getStoreId());
                 $interestGroup->setGroupdata($this->_helper->serialize($params));
                 $interestGroup->setSubscriberId($subscriber->getSubscriberId());
