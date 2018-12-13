@@ -488,7 +488,17 @@ class UpgradeSchema implements UpgradeSchemaInterface
                 $connection->getIndexName($setup->getTable('mailchimp_sync_ecommerce'), 'mailchimp_store_id', 'index'),
                 'mailchimp_store_id'
             );
+            $connection->changecolumn(
+                $setup->getTable('mailchimp_stores'),
+                'timezone',
+                'timezone',
+                [
+                    'type' => \Magento\Framework\DB\Ddl\Table::TYPE_TEXT,
+                    'length' => 32,
+                    'nullable' => false,
+                    'comment' => 'store timezone'
+                ]
+            );
         }
-
     }
 }
