@@ -20,6 +20,7 @@ class Product
 
     protected $_parentImage = null;
     protected $_childtUrl   = null;
+    protected $productPrice = null;
     /**
      * @var \Ebizmarts\MailChimp\Helper\Data
      */
@@ -165,18 +166,18 @@ class Product
         )->addAttributeToFilter(
             'special_from_date',
             ['or' => [ 0 => ['date' => true,
-            'to' => date('Y-m-d', time()).' 23:59:59'],
-            1 => ['is' => new \Zend_Db_Expr(
-                'null'
-            )],]],
+                'to' => date('Y-m-d', time()).' 23:59:59'],
+                1 => ['is' => new \Zend_Db_Expr(
+                    'null'
+                )],]],
             'left'
         )->addAttributeToFilter(
             'special_to_date',
             ['or' => [ 0 => ['date' => true,
-            'from' => date('Y-m-d', time()).' 00:00:00'],
-            1 => ['is' => new \Zend_Db_Expr(
-                'null'
-            )],]],
+                'from' => date('Y-m-d', time()).' 00:00:00'],
+                1 => ['is' => new \Zend_Db_Expr(
+                    'null'
+                )],]],
             'left'
         );
         $collection->getSelect()->joinLeft(
@@ -199,7 +200,7 @@ class Product
         )->addAttributeToFilter(
             'special_to_date',
             ['or' => [ 0 => ['date' => true,
-            'to' => date('Y-m-d', time()).' 00:00:00'],
+                'to' => date('Y-m-d', time()).' 00:00:00'],
             ]],
             'left'
         );
@@ -263,6 +264,7 @@ class Product
         $data['path'] = "/ecommerce/stores/" . $mailchimpStoreId . "/products";
         $data['operation_id'] = $this->_batchId . '_' . $product->getId();
         $data['body'] = $body;
+        $this->productPrice = null;
         return $data;
     }
     protected function _buildOldProductRequest(
@@ -342,6 +344,7 @@ class Product
         $data['operation_id'] = $this->_batchId . '_' . $product->getId();
         $data['body'] = $body;
         $operations[] = $data;
+        $this->productPrice = null;
         return $operations;
     }
     protected function _buildProductData(
@@ -374,23 +377,10 @@ class Product
         if ($isVarient) {
             //this is for a varient product
             $data["sku"] = $product->getSku() ? $product->getSku() : '';
-            $today = $this->_helper->getGmtDate("Y-m-d");
-            try {
-                if ($product->getSpecialFromDate() && $product->getSpecialFromDate() <= $today && (float)$product->getSpecialPrice()) {
-                    if (!$product->getSpecialToDate() || ($product->getSpecialToDate() && $today <= $product->getSpecialToDate())) {
-                        $data["price"] = $product->getSpecialPrice();
-                    } else {
-                        $data["price"] = $product->getPrice();
-                    }
-                } else {
-                    $data["price"] = $product->getPrice();
-                }
-            } catch (\Exception $e) {
-                if ((float)$product->getSpecialPrice()) {
-                    $data["price"] = $product->getSpecialPrice();
-                } else {
-                    $data["price"] = $product->getPrice();
-                }
+            if ($this->productPrice) {
+                $data['price'] = $this->productPrice;
+            } else {
+                $data['price'] = $this->_getProductPrice($product);
             }
 
             //stock
@@ -440,8 +430,27 @@ class Product
             }
             //variants
             $data["variants"] = [];
+            // put the min price of the simples as the price of the parent
+            foreach ($variants as $variant) {
+                if ($variant && $variant->getId() != $product->getId()) {
+                    $variantPrice = $this->_getProductPrice($variant);
+                    if ($this->productPrice) {
+                        if ($variantPrice < $this->productPrice) {
+                            $this->productPrice = $variantPrice;
+                        }
+                    } else {
+                        $this->productPrice = $variantPrice;
+                    }
+                }
+            }
+            /**
+             * @var $variant \Magento\Catalog\Model\Product
+             */
             foreach ($variants as $variant) {
                 if ($variant) {
+                    if($variant->getId() != $product->getId()) {
+                        $this->productPrice = null;
+                    }
                     $data["variants"][] = $this->_buildProductData($variant, $magentoStoreId);
                 }
             }
@@ -517,9 +526,9 @@ class Product
                 \Ebizmarts\MailChimp\Helper\Data::IS_PRODUCT
             );
             if ($product->getId()!=$item->getProductId() || (
-                $product->getTypeId() != \Magento\Catalog\Model\Product\Type::TYPE_SIMPLE &&
-                $product->getTypeId() != \Magento\Catalog\Model\Product\Type::TYPE_VIRTUAL &&
-                $product->getTypeId() != "downloadable")) {
+                    $product->getTypeId() != \Magento\Catalog\Model\Product\Type::TYPE_SIMPLE &&
+                    $product->getTypeId() != \Magento\Catalog\Model\Product\Type::TYPE_VIRTUAL &&
+                    $product->getTypeId() != "downloadable")) {
                 continue;
             }
             if ($productSyncData->getMailchimpSyncModified() &&
@@ -552,9 +561,9 @@ class Product
                 \Ebizmarts\MailChimp\Helper\Data::IS_PRODUCT
             );
             if ($product->getId()!=$item->getProductId() || (
-                $product->getTypeId() != \Magento\Catalog\Model\Product\Type::TYPE_SIMPLE &&
-                $product->getTypeId() != \Magento\Catalog\Model\Product\Type::TYPE_VIRTUAL &&
-                $product->getTypeId() != "downloadable")) {
+                    $product->getTypeId() != \Magento\Catalog\Model\Product\Type::TYPE_SIMPLE &&
+                    $product->getTypeId() != \Magento\Catalog\Model\Product\Type::TYPE_VIRTUAL &&
+                    $product->getTypeId() != "downloadable")) {
                 continue;
             }
 
@@ -569,6 +578,30 @@ class Product
             }
         }
         return $data;
+    }
+
+    protected function _getProductPrice(\Magento\Catalog\Model\Product $product)
+    {
+        $price = 0;
+        $today = $this->_helper->getGmtDate("Y-m-d");
+        try {
+            if ($product->getSpecialFromDate() && $product->getSpecialFromDate() <= $today && (float)$product->getSpecialPrice()) {
+                if (!$product->getSpecialToDate() || ($product->getSpecialToDate() && $today <= $product->getSpecialToDate())) {
+                    $price = $product->getSpecialPrice();
+                } else {
+                    $price = $product->getPrice();
+                }
+            } else {
+                $price = $product->getPrice();
+            }
+        } catch (\Exception $e) {
+            if ((float)$product->getSpecialPrice()) {
+                $price = $product->getSpecialPrice();
+            } else {
+                $price = $product->getPrice();
+            }
+        }
+        return $price;
     }
     /**
      * @param $storeId
