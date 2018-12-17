@@ -59,17 +59,23 @@ class Subscriber
 //        $listId = $this->_helper->getGeneralList($storeId);
         $this->_interest = $this->_helper->getInterest($storeId);
         $collection = $this->_subscriberCollection->create();
+        $connection = $collection->getConnection();
         $collection->addFieldToFilter('subscriber_status', ['eq' => 1])
             ->addFieldToFilter('store_id', ['eq' => $storeId]);
         $collection->getSelect()->joinLeft(
             ['m4m' => $this->_helper->getTableName('mailchimp_sync_ecommerce')],
-            "m4m.related_id = main_table.subscriber_id and m4m.type = '".\Ebizmarts\MailChimp\Helper\Data::IS_SUBSCRIBER.
-            "' and m4m.mailchimp_store_id = '".$listId."'",
+            $connection->quoteInto(
+                'm4m.related_id = main_table.subscriber_id and m4m.type = ?',
+                \Ebizmarts\MailChimp\Helper\Data::IS_SUBSCRIBER
+            ) . ' AND ' . $connection->quoteInto('m4m.mailchimp_store_id = ?', $listId),
             ['m4m.*']
         );
-        $collection->getSelect()->where("m4m.mailchimp_sync_delta IS null ".
-            "OR (m4m.mailchimp_sync_delta > '".$this->_helper->getMCMinSyncDateFlag().
-            "' and m4m.mailchimp_sync_modified = 1)");
+        $collection->getSelect()->where(
+            'm4m.mailchimp_sync_delta IS null OR (' . $connection->quoteInto(
+                'm4m.mailchimp_sync_delta > ?',
+                $this->_helper->getMCMinSyncDateFlag()
+            ) . ' and m4m.mailchimp_sync_modified = 1)'
+        ) .
         $collection->getSelect()->limit(self::BATCH_LIMIT);
         $subscriberArray = [];
         $date = $this->_helper->getDateMicrotime();

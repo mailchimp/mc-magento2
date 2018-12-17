@@ -140,17 +140,25 @@ class Order
         $batchArray = [];
         $mailchimpStoreId = $this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_MAILCHIMP_STORE, $magentoStoreId);
         $modifiedOrders = $this->_getCollection();
+        $connection = $modifiedOrders->getConnection();
         // select orders for the current Magento store id
         $modifiedOrders->addFieldToFilter('store_id', ['eq' => $magentoStoreId]);
         //join with mailchimp_ecommerce_sync_data table to filter by sync data.
         $modifiedOrders->getSelect()->joinLeft(
             ['m4m' => $this->_helper->getTableName('mailchimp_sync_ecommerce')],
-            "m4m.related_id = main_table.entity_id and m4m.type = '".\Ebizmarts\MailChimp\Helper\Data::IS_ORDER.
-            "' and m4m.mailchimp_store_id = '".$mailchimpStoreId."'",
+            $connection->quoteInto(
+                'm4m.related_id = main_table.entity_id and m4m.type = ?',
+                \Ebizmarts\MailChimp\Helper\Data::IS_ORDER
+            ) . ' AND ' . $connection->quoteInto('m4m.mailchimp_store_id = ?', $mailchimpStoreId),
             ['m4m.*']
         );
         // be sure that the order are already in mailchimp and not deleted
-        $modifiedOrders->getSelect()->where("m4m.mailchimp_sync_modified = 1 AND m4m.mailchimp_store_id = '".$mailchimpStoreId."'");
+        $modifiedOrders->getSelect()->where(
+            'm4m.mailchimp_sync_modified = 1 AND ' . $connection->quoteInto(
+                'm4m.mailchimp_store_id = ?',
+                $mailchimpStoreId
+            )
+        );
         // limit the collection
         $modifiedOrders->getSelect()->limit(self::BATCH_LIMIT);
         /**
@@ -205,6 +213,7 @@ class Order
         $batchArray = [];
         $mailchimpStoreId = $this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_MAILCHIMP_STORE, $magentoStoreId);
         $newOrders = $this->_getCollection();
+        $connection = $newOrders->getConnection();
         // select carts for the current Magento store id
         $newOrders->addFieldToFilter('store_id', ['eq' => $magentoStoreId]);
         // filter by first date if exists.
@@ -213,8 +222,10 @@ class Order
         }
         $newOrders->getSelect()->joinLeft(
             ['m4m' => $this->_helper->getTableName('mailchimp_sync_ecommerce')],
-            "m4m.related_id = main_table.entity_id and m4m.type = '".\Ebizmarts\MailChimp\Helper\Data::IS_ORDER.
-            "' and m4m.mailchimp_store_id = '".$mailchimpStoreId."'",
+            $connection->quoteInto(
+                'm4m.related_id = main_table.entity_id and m4m.type = ?',
+                \Ebizmarts\MailChimp\Helper\Data::IS_ORDER
+            ) . ' AND ' . $connection->quoteInto('m4m.mailchimp_store_id = ?', $mailchimpStoreId),
             ['m4m.*']
         );
         // be sure that the quote are not in mailchimp

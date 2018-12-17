@@ -113,25 +113,27 @@ class PromoCodes
          * @var $ruleCollection \Magento\SalesRule\Model\ResourceModel\Rule\Collection
          */
         $ruleCollection = $this->_ruleCollection->create();
+        $connection = $ruleCollection->getConnection();
         $ruleCollection->addWebsiteFilter($websiteId);
         $rulesId = [];
         foreach ($ruleCollection as $rule) {
             $rulesId[] = $rule->getRuleId();
         }
         if (count($rulesId)) {
-            $inRoules = implode(',', $rulesId);
             $collection = $this->_couponCollection->create();
             $collection->getSelect()->joinLeft(
                 ['m4m' => $this->_helper->getTableName('mailchimp_sync_ecommerce')],
-                "m4m.related_id = main_table.coupon_id and m4m.type = '" . \Ebizmarts\MailChimp\Helper\Data::IS_PROMO_CODE .
-                "' and m4m.mailchimp_store_id = '" . $mailchimpStoreId . "'",
+                $connection->quoteInto(
+                    'm4m.related_id = main_table.coupon_id and m4m.type = ?',
+                    \Ebizmarts\MailChimp\Helper\Data::IS_PROMO_CODE
+                ) . ' AND ' . $connection->quoteInto('m4m.mailchimp_store_id = ?', $mailchimpStoreId),
                 ['m4m.*']
             );
             $collection->getSelect()->joinLeft(
                 ['rules' => $this->_helper->getTableName('salesrule')],
                 'main_table.rule_id = rules.rule_id'
             );
-            $collection->getSelect()->where("m4m.mailchimp_sync_delta IS null and (rules.use_auto_generation = 1 and main_table.is_primary is null or rules.use_auto_generation = 0 and main_table.is_primary = 1) and main_table.rule_id in ($inRoules)");
+            $collection->getSelect()->where('m4m.mailchimp_sync_delta IS null and (rules.use_auto_generation = 1 and main_table.is_primary is null or rules.use_auto_generation = 0 and main_table.is_primary = 1) and '. $connection->quoteInto('main_table.rule_id in (?)', $rulesId));
             $collection->getSelect()->limit(self::MAX);
             $counter = 0;
             /**

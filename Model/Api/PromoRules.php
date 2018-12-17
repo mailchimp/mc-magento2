@@ -120,11 +120,14 @@ class PromoRules
          * @var $collection \Magento\SalesRule\Model\ResourceModel\Rule\Collection
          */
         $collection = $this->_collection->create();
+        $connection = $collection->getConnection();
         $collection->addWebsiteFilter($websiteId);
         $collection->getSelect()->joinLeft(
             ['m4m' => $this->_helper->getTableName('mailchimp_sync_ecommerce')],
-            "m4m.related_id = main_table.rule_id and m4m.type = '".\Ebizmarts\MailChimp\Helper\Data::IS_PROMO_RULE.
-            "' and m4m.mailchimp_store_id = '".$mailchimpStoreId."'",
+            $connection->quoteInto(
+                'm4m.related_id = main_table.rule_id and m4m.type = ?',
+                \Ebizmarts\MailChimp\Helper\Data::IS_PROMO_RULE
+            ) . ' AND ' . $connection->quoteInto('m4m.mailchimp_store_id = ?', $mailchimpStoreId),
             ['m4m.*']
         );
         $collection->getSelect()->where("m4m.mailchimp_sync_modified = 1");
