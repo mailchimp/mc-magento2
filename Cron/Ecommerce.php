@@ -116,13 +116,13 @@ class Ecommerce
         $connection->delete($tableName, 'batch_id is null and mailchimp_sync_modified != 1');
 
         foreach ($this->_storeManager->getStores() as $storeId => $val) {
-            if (!$this->_ping($storeId)) {
-                $this->_helper->log('MailChimp is not available');
-                return;
-            }
-            $this->_storeManager->setCurrentStore($storeId);
-            $listId = $this->_helper->getGeneralList($storeId);
             if ($this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_PATH_ACTIVE, $storeId)) {
+                if (!$this->_ping($storeId)) {
+                    $this->_helper->log('MailChimp is not available');
+                    return;
+                }
+                $this->_storeManager->setCurrentStore($storeId);
+                $listId = $this->_helper->getGeneralList($storeId);
                 $mailchimpStoreId = $this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_MAILCHIMP_STORE, $storeId);
                 if ($mailchimpStoreId != -1 && $mailchimpStoreId != '') {
                     $this->_apiResult->processResponses($storeId, true, $mailchimpStoreId);
