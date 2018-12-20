@@ -18,16 +18,23 @@ class SaveAfter implements \Magento\Framework\Event\ObserverInterface
      * @var \Ebizmarts\MailChimp\Helper\Data
      */
     protected $helper;
+    /**
+     * @var \Magento\ConfigurableProduct\Model\ResourceModel\Product\Type\Configurable
+     */
+    protected $configurable;
 
     /**
      * SaveAfter constructor.
      * @param \Ebizmarts\MailChimp\Helper\Data $helper
+     * @param \Magento\ConfigurableProduct\Model\ResourceModel\Product\Type\Configurable $configurable
      */
     public function __construct(
-        \Ebizmarts\MailChimp\Helper\Data $helper
+        \Ebizmarts\MailChimp\Helper\Data $helper,
+        \Magento\ConfigurableProduct\Model\ResourceModel\Product\Type\Configurable $configurable
     ) {
-    
+
         $this->helper               = $helper;
+        $this->configurable         = $configurable;
     }
 
     public function execute(\Magento\Framework\Event\Observer $observer)
@@ -37,6 +44,16 @@ class SaveAfter implements \Magento\Framework\Event\ObserverInterface
          */
         $product = $observer->getProduct();
         $mailchimpStore = $this->helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_MAILCHIMP_STORE, $product->getStoreId());
+        if($product->getTypeId() == \Magento\Catalog\Model\Product\Type::TYPE_SIMPLE) {
+            $parents = $this->configurable->getParentIdsByChild($product->getId());
+            if(is_array($parents)) {
+                foreach ($parents as $parentid) {
+                    $this->_updateProduct($parentid);
+                }
+            } elseif($parents) {
+                $this->_updateProduct($parents);
+            }
+        }
         $this->_updateProduct($product->getId());
     }
     protected function _updateProduct($entityId)
