@@ -79,6 +79,9 @@
                 <field id="magentoemail" translate="label" type="select" sortOrder="45" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Magento always manage emails</label>
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <depends>
+                        <field id="*/*/active">1</field>
+                    </depends>
                 </field>
                 <field id="webhook_active" translate="label" type="select" sortOrder="50" showInDefault="1">
                     <label>Enable Two Way Sync</label>
@@ -163,6 +166,9 @@
                 <field id="customer_optin" translate="label" type="select" sortOrder="114" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Subscribe all customers to the newsletter</label>
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <depends>
+                        <field id="*/*/active">1</field>
+                    </depends>
                 </field>
                 <field id="firstdate" translate="label" type="date" showInDefault="1" sortOrder="116" showInWebsite="1" showInStore="1">
                     <label>First Date</label>
@@ -173,6 +179,13 @@
                 </field>
                 <field id="send_promo" translate="label" type="select" sortOrder="118" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Send Promo Rules and Promo Codes</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <depends>
+                        <field id="*/*/active">1</field>
+                    </depends>
+                </field>
+                <field id="including_taxes" translate="label" type="select" sortOrder="120" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Prices including taxes</label>
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
                     <depends>
                         <field id="*/*/active">1</field>
