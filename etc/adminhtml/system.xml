@@ -187,6 +187,7 @@
                 <field id="including_taxes" translate="label" type="select" sortOrder="120" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Prices including taxes</label>
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <comment><![CDATA[You must configure Price Display Settings in Sales/Tax to "including taxes"]]></comment>
                     <depends>
                         <field id="*/*/active">1</field>
                     </depends>
