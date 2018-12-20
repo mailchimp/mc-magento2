@@ -591,13 +591,10 @@ class Product
     protected function _getProductPrice(\Magento\Catalog\Model\Product $product)
     {
         if ($this->includingTaxes) {
-            $this->_helper->log('Including taxes');
             $price = $this->taxHelper->getTaxPrice($product, $product->getFinalPrice(), true);
         } else {
-            $this->_helper->log('Excluding taxes');
             $price = $this->taxHelper->getTaxPrice($product, $product->getFinalPrice(), false);
         }
-        $this->_helper->log($price);
         return $price;
     }
     /**
