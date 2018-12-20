@@ -58,6 +58,10 @@ class Product
      */
     protected $_configurable;
     /**
+     * @var \Magento\Catalog\Helper\Data
+     */
+    protected $taxHelper;
+    /**
      * @var \Magento\Catalog\Model\Product\Option
      */
     protected $_option;
@@ -65,6 +69,7 @@ class Product
      * @var \Magento\Catalog\Model\ResourceModel\Category\CollectionFactory
      */
     protected $_categoryCollection;
+    protected $includingTaxes;
 
     /**
      * Product constructor.
@@ -77,6 +82,7 @@ class Product
      * @param \Ebizmarts\MailChimp\Model\MailChimpSyncEcommerceFactory $chimpSyncEcommerce
      * @param \Magento\ConfigurableProduct\Model\Product\Type\Configurable $configurable
      * @param \Magento\Catalog\Model\ResourceModel\Category\CollectionFactory $categoryCollection
+     * @param \Magento\Catalog\Helper\Data $taxHelper
      * @param \Magento\Catalog\Model\Product\Option $option
      */
     public function __construct(
@@ -89,6 +95,7 @@ class Product
         \Ebizmarts\MailChimp\Model\MailChimpSyncEcommerceFactory $chimpSyncEcommerce,
         \Magento\ConfigurableProduct\Model\Product\Type\Configurable $configurable,
         \Magento\Catalog\Model\ResourceModel\Category\CollectionFactory $categoryCollection,
+        \Magento\Catalog\Helper\Data $taxHelper,
         \Magento\Catalog\Model\Product\Option $option
     ) {
 
@@ -102,6 +109,7 @@ class Product
         $this->_configurable        = $configurable;
         $this->_option              = $option;
         $this->_categoryCollection  = $categoryCollection;
+        $this->taxHelper            = $taxHelper;
         $this->_batchId             = \Ebizmarts\MailChimp\Helper\Data::IS_PRODUCT. '_' . $this->_helper->getGmtTimeStamp();
     }
     public function _sendProducts($magentoStoreId)
@@ -109,6 +117,7 @@ class Product
         $batchArray = [];
         $counter = 0;
         $mailchimpStoreId = $this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_MAILCHIMP_STORE, $magentoStoreId);
+        $this->includingTaxes = $this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_INCLUDING_TAXES, $magentoStoreId);
         $this->_markSpecialPrices($magentoStoreId, $mailchimpStoreId);
         $collection = $this->_getCollection();
         $collection->addStoreFilter($magentoStoreId);
@@ -579,28 +588,16 @@ class Product
         }
         return $data;
     }
-
     protected function _getProductPrice(\Magento\Catalog\Model\Product $product)
     {
-        $price = 0;
-        $today = $this->_helper->getGmtDate("Y-m-d");
-        try {
-            if ($product->getSpecialFromDate() && $product->getSpecialFromDate() <= $today && (float)$product->getSpecialPrice()) {
-                if (!$product->getSpecialToDate() || ($product->getSpecialToDate() && $today <= $product->getSpecialToDate())) {
-                    $price = $product->getSpecialPrice();
-                } else {
-                    $price = $product->getPrice();
-                }
-            } else {
-                $price = $product->getPrice();
-            }
-        } catch (\Exception $e) {
-            if ((float)$product->getSpecialPrice()) {
-                $price = $product->getSpecialPrice();
-            } else {
-                $price = $product->getPrice();
-            }
+        if ($this->includingTaxes) {
+            $this->_helper->log('Including taxes');
+            $price = $this->taxHelper->getTaxPrice($product, $product->getFinalPrice(), true);
+        } else {
+            $this->_helper->log('Excluding taxes');
+            $price = $this->taxHelper->getTaxPrice($product, $product->getFinalPrice(), false);
         }
+        $this->_helper->log($price);
         return $price;
     }
     /**
