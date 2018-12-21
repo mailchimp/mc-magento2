@@ -522,9 +522,11 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     }
     public function markRegisterAsModified($registerId, $type)
     {
-        $connection = $this->_mailChimpSyncE->getResource()->getConnection();
-        $tableName = $this->_mailChimpSyncE->getResource()->getMainTable();
-        $connection->update($tableName, ['mailchimp_sync_modified' => 1,'batch_id' => null], "type = '".$type."' and related_id = $registerId");
+        if(!empty($registerId)) {
+            $connection = $this->_mailChimpSyncE->getResource()->getConnection();
+            $tableName = $this->_mailChimpSyncE->getResource()->getMainTable();
+            $connection->update($tableName, ['mailchimp_sync_modified' => 1, 'batch_id' => null], "type = '" . $type . "' and related_id = $registerId");
+        }
     }
     public function getMCStoreName($storeId)
     {
@@ -721,31 +723,32 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     }
     public function saveEcommerceData($storeId, $entityId, $type, $date = null, $error = null, $modified = null, $deleted = null, $token = null)
     {
-
-        $chimpSyncEcommerce = $this->getChimpSyncEcommerce($storeId, $entityId, $type);
-        if ($chimpSyncEcommerce->getRelatedId()==$entityId || !$chimpSyncEcommerce->getRelatedId() && $modified!=1) {
-            $chimpSyncEcommerce->setMailchimpStoreId($storeId);
-            $chimpSyncEcommerce->setType($type);
-            $chimpSyncEcommerce->setRelatedId($entityId);
-            if ($modified) {
-                $chimpSyncEcommerce->setMailchimpSyncModified($modified);
+        if(!empty($entityId)) {
+            $chimpSyncEcommerce = $this->getChimpSyncEcommerce($storeId, $entityId, $type);
+            if ($chimpSyncEcommerce->getRelatedId() == $entityId || !$chimpSyncEcommerce->getRelatedId() && $modified != 1) {
+                $chimpSyncEcommerce->setMailchimpStoreId($storeId);
+                $chimpSyncEcommerce->setType($type);
+                $chimpSyncEcommerce->setRelatedId($entityId);
+                if ($modified) {
+                    $chimpSyncEcommerce->setMailchimpSyncModified($modified);
+                }
+                if ($date) {
+                    $chimpSyncEcommerce->setMailchimpSyncDelta($date);
+                } elseif ($modified != 1) {
+                    $chimpSyncEcommerce->setBatchId(null);
+                }
+                if ($error) {
+                    $chimpSyncEcommerce->setMailchimpSyncError($error);
+                }
+                if ($deleted) {
+                    $chimpSyncEcommerce->setMailchimpSyncDeleted($deleted);
+                    $chimpSyncEcommerce->setMailchimpSyncModified(0);
+                }
+                if ($token) {
+                    $chimpSyncEcommerce->setMailchimpToken($token);
+                }
+                $chimpSyncEcommerce->getResource()->save($chimpSyncEcommerce);
             }
-            if ($date) {
-                $chimpSyncEcommerce->setMailchimpSyncDelta($date);
-            } elseif ($modified != 1) {
-                $chimpSyncEcommerce->setBatchId(null);
-            }
-            if ($error) {
-                $chimpSyncEcommerce->setMailchimpSyncError($error);
-            }
-            if ($deleted) {
-                $chimpSyncEcommerce->setMailchimpSyncDeleted($deleted);
-                $chimpSyncEcommerce->setMailchimpSyncModified(0);
-            }
-            if ($token) {
-                $chimpSyncEcommerce->setMailchimpToken($token);
-            }
-            $chimpSyncEcommerce->getResource()->save($chimpSyncEcommerce);
         }
     }
 
