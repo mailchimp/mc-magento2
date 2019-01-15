@@ -55,7 +55,6 @@ class SubmitAfter implements \Magento\Framework\Event\ObserverInterface
 
     public function execute(\Magento\Framework\Event\Observer $observer)
     {
-        $this->_helper->log(__METHOD__);
         try {
             $this->_cookieManager->deleteCookie(
                 'mailchimp_campaign_id',
