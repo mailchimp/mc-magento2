@@ -18,26 +18,42 @@ define(
         $.widget('mage.campaigncatcher', {
             _init: function () {
                 $(document).ready(function () {
-                    var urlparams = location.search.substr(1).split('&');
-                    var params = new Array();
+                    var path = location;
+                    var urlparams = null;
+                    var isGet = path.search.search('&');
                     var mc_cid = null;
                     var isMailchimp = false;
-                    for (var i = 0; i < urlparams.length; i++) {
-                        var param = urlparams[i].split('=');
-                        var key = param[0];
-                        var val = param[1];
-                        if (key && val) {
-                            params[key] = val;
-                        }
+                    if(isGet > 0) {
+                        urlparams = path.search.substr(1).split('&');
+                        for (var i = 0; i < urlparams.length; i++) {
+                            var param = urlparams[i].split('=');
+                            var key = param[0];
+                            var val = param[1];
 
-                        if (key=='utm_source') {
+                           if (key=='utm_source') {
+                                var reg = /^mailchimp$/;
+                                if (reg.exec(val)) {
+                                    isMailchimp = true;
+                                }
+                            } else {
+                                if (key=='mc_cid') {
+                                    mc_cid = val;
+                                }
+                            }
+                        }
+                    } else {
+                        urlparams = path.pathname.split('/');
+                        var utmIndex = $.inArray('utm_source', urlparams);
+                        var mccidIndex = $.inArray('mc_cid', urlparams);
+                        if (utmIndex != -1) {
+                            var value = urlparams[utmIndex + 1];
                             var reg = /^mailchimp$/;
-                            if (reg.exec(val)) {
+                            if (reg.exec(value)) {
                                 isMailchimp = true;
                             }
                         } else {
-                            if (key=='mc_cid') {
-                                mc_cid = val;
+                            if (mccidIndex != -1) {
+                                mc_cid = urlparams[mccidIndex + 1];
                             }
                         }
                     }
