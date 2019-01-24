@@ -2,7 +2,7 @@
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Backend:etc/menu.xsd">
     <menu>
         <add id="Ebizmarts_MailChimp::mailchimp_menu"
-             title="MailChimp"
+             title="Mailchimp"
              module="Ebizmarts_MailChimp"
              sortOrder="110"
              dependsOnModule="Ebizmarts_MailChimp"
@@ -17,7 +17,7 @@
              action="adminhtml/system_config/edit/section/mailchimp"
         />
         <add id="Ebizmarts_MailChimp::store_menu"
-             title="MailChimp Stores"
+             title="Mailchimp Stores"
              module="Ebizmarts_MailChimp"
              sortOrder="20"
              resource="Ebizmarts_MailChimp::stores_grid"
