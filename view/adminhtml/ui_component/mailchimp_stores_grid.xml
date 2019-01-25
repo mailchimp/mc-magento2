@@ -10,7 +10,7 @@
         <item name="buttons" xsi:type="array">
             <item name="add" xsi:type="array">
                 <item name="name" xsi:type="string">add</item>
-                <item name="label" xsi:type="string" translate="true">Create New MailChimp Store</item>
+                <item name="label" xsi:type="string" translate="true">Create New Mailchimp Store</item>
                 <item name="class" xsi:type="string">primary</item>
                 <item name="url" xsi:type="string">mailchimp/stores/edit</item>
             </item>

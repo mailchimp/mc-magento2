@@ -13,11 +13,11 @@
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Config:etc/system_file.xsd">
     <system>
         <tab id="mailchimp" translate="label" sortOrder="450">
-            <label>MailChimp</label>
+            <label>Mailchimp</label>
         </tab>
         <section id="mailchimp" translate="label" type="text" sortOrder="100" showInDefault="1" showInWebsite="1" showInStore="1">
             <class>separator-top</class>
-            <label>MailChimp</label>
+            <label>Mailchimp</label>
             <tab>mailchimp</tab>
             <resource>Ebizmarts_MailChimp::config_mailchimp</resource>
             <group id="hint" translate="label" type="text" sortOrder="0" showInDefault="1" showInWebsite="1" showInStore="1">
@@ -86,7 +86,7 @@
                 <field id="webhook_active" translate="label" type="select" sortOrder="50" showInDefault="1">
                     <label>Enable Two Way Sync</label>
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
-                    <comment><![CDATA[If this is set to "No", the synchronization will be from Magento's newsletter to MailChimp only]]></comment>
+                    <comment><![CDATA[If this is set to "No", the synchronization will be from Magento's newsletter to Mailchimp only]]></comment>
                     <depends>
                         <field id="*/*/active">1</field>
                     </depends>
@@ -129,7 +129,7 @@
                     <label>Available Groups</label>
                     <source_model>Ebizmarts\MailChimp\Model\Config\Source\Interest</source_model>
                     <can_be_empty>1</can_be_empty>
-                    <comment><![CDATA[If you <a href="https://kb.mailchimp.com/lists/groups/create-a-new-list-group" target="_blank">set up groups in MailChimp</a>, include them in your checkout page so customers can choose the type of email marketing they want to receive.]]></comment>
+                    <comment><![CDATA[If you <a href="https://kb.mailchimp.com/lists/groups/create-a-new-list-group" target="_blank">set up groups in Mailchimp</a>, include them in your checkout page so customers can choose the type of email marketing they want to receive.]]></comment>
                     <depends>
                         <field id="*/*/active">1</field>
                     </depends>
@@ -188,6 +188,7 @@
                     <label>Prices including taxes</label>
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
                     <comment><![CDATA[You must configure Price Display Settings in Sales/Tax to "including taxes"]]></comment>
+
                     <depends>
                         <field id="*/*/active">1</field>
                     </depends>
