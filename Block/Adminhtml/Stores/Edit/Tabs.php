@@ -27,7 +27,7 @@ class Tabs extends WidgetTabs
         parent::_construct();
         $this->setId('stores_edit_tabs');
         $this->setDestElementId('edit_form');
-        $this->setTitle(__('MailChimp Store Information'));
+        $this->setTitle(__('Mailchimp Store Information'));
     }
 
     /**
