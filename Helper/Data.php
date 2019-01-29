@@ -73,6 +73,8 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     const QUO_MOD       = "QuoteModified";
     const QUO_NEW       = "QuoteNew";
 
+    const MAX_MERGEFIELDS = 100;
+
     protected $counters = [];
     /**
      * @var \Magento\Store\Model\StoreManagerInterface
