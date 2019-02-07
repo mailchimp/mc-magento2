@@ -2,7 +2,7 @@
 
 ## [1.1.33](https://github.com/mailchimp/mc-magento2/tree/1.1.33)
 
-[Full Changelog](https://github.com/mailchimp/mc-magento2/compare/1.1.32...1.1.33)
+[Full Changelog](https://github.com/mailchimp/mc-magento2/compare/1.1.32...1.1.33) 
 
 **Implemented enhancements:**
 
