@@ -1,5 +1,35 @@
 # Change Log
 
+## [1.1.33](https://github.com/mailchimp/mc-magento2/tree/1.1.33)
+
+[Full Changelog](https://github.com/mailchimp/mc-magento2/compare/1.1.32...1.1.33) 
+
+**Implemented enhancements:**
+
+- Change all mentions from MailChimp to Mailchimp and change the menu icon to the new one [\#565](https://github.com/mailchimp/mc-magento2/issues/565)
+- Add possibility to send the product's price including taxes [\#532](https://github.com/mailchimp/mc-magento2/issues/532)
+- Sync performance in large stores [\#502](https://github.com/mailchimp/mc-magento2/issues/502)
+- Clean the table mailchimp\_webhook\_request [\#486](https://github.com/mailchimp/mc-magento2/issues/486)
+- Add option to not send Promo Codes and Promo Rules [\#481](https://github.com/mailchimp/mc-magento2/issues/481)
+- Ask for confirmation when removing mailchimp store [\#480](https://github.com/mailchimp/mc-magento2/issues/480)
+- add magento 2.3 compatibility [\#494](https://github.com/mailchimp/mc-magento2/pull/494) ([gonzaloebiz](https://github.com/gonzaloebiz))
+
+**Fixed bugs:**
+
+- Spelling error in order status sent to mailchimp [\#574](https://github.com/mailchimp/mc-magento2/issues/574)
+- Error during sync: "A campaign with the provided ID does not exist in the account for this list." [\#561](https://github.com/mailchimp/mc-magento2/issues/561)
+- No campaign assigned to orders [\#554](https://github.com/mailchimp/mc-magento2/issues/554)
+- Missing Customer Fields Mapping [\#553](https://github.com/mailchimp/mc-magento2/issues/553)
+- Customers generate entries in the mailchimp\_sycn\_ecommerce with related\_id = null [\#541](https://github.com/mailchimp/mc-magento2/issues/541)
+- Re sync the parent product when modifiy a child one [\#537](https://github.com/mailchimp/mc-magento2/issues/537)
+- Could not resolve host: xx.api.mailchimp.com [\#523](https://github.com/mailchimp/mc-magento2/issues/523)
+- Incorrect price in configurable product [\#513](https://github.com/mailchimp/mc-magento2/issues/513)
+- No timezone saved when create a new Mailchimp store [\#512](https://github.com/mailchimp/mc-magento2/issues/512)
+- Cart not updated in a Abandoned Cart Series [\#498](https://github.com/mailchimp/mc-magento2/issues/498)
+- "Unable to unserialize value " when run the ecommerce cron process [\#473](https://github.com/mailchimp/mc-magento2/issues/473)
+- multi-site Customer Fields Mapping not syncing correctly [\#471](https://github.com/mailchimp/mc-magento2/issues/471)
+- Previously unsubscribed guest/customer is not resubscribed when selecting groups on success page [\#365](https://github.com/mailchimp/mc-magento2/issues/365)
+
 ## [1.0.31](https://github.com/mailchimp/mc-magento2/tree/1.0.31)
 
 [Full Changelog](https://github.com/mailchimp/mc-magento2/compare/1.0.30...1.0.31)
