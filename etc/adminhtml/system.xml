@@ -229,6 +229,11 @@
                         <field id="*/*/active">1</field>
                     </depends>
                 </field>
+                <field id="save_email_in_quote" translate="label comment" sortOrder="50" type="select" showInDefault="1" showInWebsite="1" showInStore="1" canRestore="1">
+                    <label>Save Email to the Quote before place Order</label>
+                    <comment>Select No to prevent saving customer Email to the quote before Order was placed</comment>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
             </group>
         </section>
     </system>

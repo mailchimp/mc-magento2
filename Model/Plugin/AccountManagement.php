@@ -27,22 +27,30 @@ class AccountManagement
      * @var \Magento\Quote\Model\QuoteFactory
      */
     protected $_quote;
+    /**
+     * @var \Magento\Store\Model\StoreManagerInterface
+     */
+    private $storeManager;
 
     /**
      * AccountManagement constructor.
-     * @param \Ebizmarts\MailChimp\Helper\Data $helper
-     * @param \Magento\Checkout\Model\Session $customerSession
-     * @param \Magento\Quote\Model\QuoteFactory $quote
+     *
+     * @param \Ebizmarts\MailChimp\Helper\Data           $helper
+     * @param \Magento\Checkout\Model\Session            $checkoutSession
+     * @param \Magento\Quote\Model\QuoteFactory          $quote
+     * @param \Magento\Store\Model\StoreManagerInterface $storeManager
      */
     public function __construct(
         \Ebizmarts\MailChimp\Helper\Data $helper,
         \Magento\Checkout\Model\Session $checkoutSession,
-        \Magento\Quote\Model\QuoteFactory $quote
+        \Magento\Quote\Model\QuoteFactory $quote,
+        \Magento\Store\Model\StoreManagerInterface $storeManager
     ) {
-    
-        $this->_helper  = $helper;
-        $this->_quote   = $quote;
-        $this->_session = $checkoutSession;
+
+        $this->_helper      = $helper;
+        $this->_quote       = $quote;
+        $this->_session     = $checkoutSession;
+        $this->storeManager = $storeManager;
     }
 
     /**
@@ -57,9 +65,9 @@ class AccountManagement
         $customerEmail,
         $websiteId = null
     ) {
-    
+
         $ret = $proceed($customerEmail,$websiteId);
-        if ($this->_session) {
+        if ($this->_session && $this->_helper->isEmailSavingEnabled($this->storeManager->getStore()->getId())) {
             $quoteId = $this->_session->getQuoteId();
             if ($quoteId) {
                 $quote = $this->_quote->create();
@@ -69,6 +77,6 @@ class AccountManagement
                 $quote->getResource()->save($quote);
             }
         }
-        return$ret;
+        return $ret;
     }
 }
