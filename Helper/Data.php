@@ -629,7 +629,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
             if ($address->getRegion()) {
                 $addressData["state"] = $address->getRegion();
             }
-            else{
+            else {
                 $addressData["state"] = "";
             }
 
