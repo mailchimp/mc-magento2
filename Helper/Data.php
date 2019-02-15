@@ -622,7 +622,9 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
             if ($address->getRegion()) {
                 $addressData["state"] = $address->getRegion();
             }
-            else $addressData["state"] = "";
+            else {
+                $addressData["state"] = "";
+            }
 
             if ($address->getPostcode()) {
                 $addressData["zip"] = $address->getPostcode();
