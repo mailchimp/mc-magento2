@@ -23,5 +23,8 @@
         <job name="ebizmarts_clean_webhooks" instance="Ebizmarts\MailChimp\Cron\WebhookClean" method="execute">
             <schedule>0 * * * *</schedule>
         </job>
+        <job name="ebizmarts_clean_batches" instance="Ebizmarts\MailChimp\Cron\BatchesClean" method="execute">
+            <schedule>* * * * *</schedule>
+        </job>
     </group>
 </config>
