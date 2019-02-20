@@ -69,6 +69,7 @@ class Result
                 if (is_array($files) && count($files)) {
                     $this->processEachResponseFile($files, $item->getBatchId(), $mailchimpStoreId, $storeId);
                     $item->setStatus('completed');
+                    $item->setModifiedDate( $this->_helper->getGmtDate() );
                     $item->getResource()->save($item);
                 } elseif ($files === false) {
                     $item->setStatus('canceled');
