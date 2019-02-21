@@ -219,7 +219,7 @@ class Ecommerce
                         $this->_mailChimpSyncBatches->setModifiedDate($this->_helper->getGmtDate());
                         $this->_mailChimpSyncBatches->getResource()->save($this->_mailChimpSyncBatches);
                         $batchId = $batchResponse['id'];
-                        $this->_showResume($batchId);
+                        $this->_showResume($batchId, $storeId);
                     }
                 }
             } catch (\Mailchimp_Error $e) {
@@ -228,6 +228,8 @@ class Ecommerce
                 $this->_helper->log("Json encode fails");
                 $this->_helper->log(var_export($batchArray, true));
             }
+        } else {
+            $this->_helper->log("Nothing to sync for store $storeId");
         }
         $countTotal = $countCustomers + $countProducts + $countOrders;
         $syncing = $this->_helper->getMCMinSyncing($storeId);
@@ -273,9 +275,9 @@ class Ecommerce
         }
         return true;
     }
-    protected function _showResume($batchId)
+    protected function _showResume($batchId, $storeId)
     {
-        $this->_helper->log("Sent batch $batchId");
+        $this->_helper->log("Sent batch $batchId for store $storeId");
         $this->_helper->log($this->_helper->getCounters());
     }
 }
