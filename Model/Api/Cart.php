@@ -483,34 +483,11 @@ class Cart
     }
     protected function _getCustomer(\Magento\Quote\Model\Quote $cart, $mailchimpStoreId, $magentoStoreId)
     {
-        $api = $this->_helper->getApi($magentoStoreId);
-        $customers = [];
-        try {
-            $customers = $api->ecommerce->customers->getByEmail($mailchimpStoreId, $cart->getCustomerEmail());
-        } catch (\Mailchimp_Error $e) {
-            $this->_helper->log($e->getFriendlyMessage());
-        }
-
-        if (isset($customers['total_items']) && $customers['total_items'] > 0) {
-            $customer = [
-                'id' => $customers['customers'][0]['id']
-            ];
-        } else {
-            if (!$cart->getCustomerId()) {
-                $date = $this->_helper->getDateMicrotime();
-                $customer = [
-                    "id" => "GUEST-" . $date,
-                    "email_address" => $cart->getCustomerEmail(),
-                    "opt_in_status" => false
-                ];
-            } else {
-                $customer = [
-                    "id" => $cart->getCustomerId(),
-                    "email_address" => $cart->getCustomerEmail(),
-                    "opt_in_status" => $this->_apiCustomer->getOptin($magentoStoreId)
-                ];
-            }
-        }
+        $customer = [
+            'id' => md5($cart->getCustomerEmail()),
+            'email_address' => $cart->getCustomerEmail(),
+            'opt_in_status' => $this->_apiCustomer->getOptin($magentoStoreId)
+        ];
 
         $firstName = $cart->getCustomerFirstname();
         if ($firstName) {

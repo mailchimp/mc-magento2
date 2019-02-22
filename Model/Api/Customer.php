@@ -132,7 +132,7 @@ class Customer
     {
         $point = 0;
         $data = [];
-        $data["id"] = $customer->getId();
+        $data["id"] = md5($customer->getEmail());
         $data["email_address"] = $customer->getEmail() ? $customer->getEmail() : '';
         $data["first_name"] = $customer->getFirstname() ? $customer->getFirstname() : '';
         $data["last_name"] = $customer->getLastname() ? $customer->getLastname() : '';
@@ -194,23 +194,6 @@ class Customer
         return $data;
     }
 
-    /**
-     * @param $guestId
-     * @param $order
-     * @return \Magento\Customer\Api\Data\CustomerInterface
-     */
-    public function createGuestCustomer($guestId, $order)
-    {
-        $guestCustomer = $this->_customerFactory->create();
-        $guestCustomer->setId($guestId);
-        foreach ($order->getData() as $key => $value) {
-            $keyArray = explode('_', $key);
-            if ($value && isset($keyArray[0]) && $keyArray[0] == 'customer') {
-                $guestCustomer->{'set' . ucfirst($keyArray[1])}($value);
-            }
-        }
-        return $guestCustomer;
-    }
 
     public function getOptin($storeId = 0)
     {
