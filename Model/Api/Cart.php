@@ -483,7 +483,6 @@ class Cart
     }
     protected function _getCustomer(\Magento\Quote\Model\Quote $cart, $mailchimpStoreId, $magentoStoreId)
     {
-        $api = $this->_helper->getApi($magentoStoreId);
         $customer = [
             'id' => md5($cart->getCustomerEmail()),
             'email_address' => $cart->getCustomerEmail(),
