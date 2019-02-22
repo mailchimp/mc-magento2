@@ -386,6 +386,12 @@ class Order
             $data["customer"]["last_name"] = $order->getCustomerLastname();
         }
         $billingAddress = $order->getBillingAddress();
+
+        if ($order->getCustomerIsGuest()) {
+            $data["customer"]["first_name"] = $billingAddress->getFirstname();
+            $data["customer"]["last_name"] = $billingAddress->getLastname();
+        }
+
         $street = $billingAddress->getStreet();
         $address = [];
 
