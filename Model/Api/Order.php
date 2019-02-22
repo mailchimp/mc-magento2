@@ -363,55 +363,11 @@ class Order
         }
 
         //customer data
-        $api = $this->_helper->getApi();
-        $customers = [];
-        try {
-            $customers = $api->ecommerce->customers->getByEmail($mailchimpStoreId, $order->getCustomerEmail());
-        } catch (\Mailchimp_Error $e) {
-            $this->_helper->log($e->getFriendlyMessage());
-        }
-
-        if (!$isModifiedOrder) {
-            if (isset($customers['total_items']) && $customers['total_items'] > 0) {
-                $id = $customers['customers'][0]['id'];
-                $data['customer'] = [
-                    'id' => $id
-                ];
-            } else {
-                if ((bool)$order->getCustomerIsGuest()) {
-                    $guestId = "GUEST-" . $this->_helper->getDateMicrotime();
-                    $data["customer"] = [
-                        "id" => $guestId,
-                        "email_address" => $order->getCustomerEmail(),
-                        "opt_in_status" => false
-                    ];
-                } else {
-                    $custEmailAddr = null;
-                    try {
-                        $customer = $api->ecommerce->customers->get($mailchimpStoreId, $order->getCustomerId(), 'email_address');
-                        if (isset($customer['email_address'])) {
-                            $custEmailAddr = $customer['email_address'];
-                        }
-                    } catch (\Mailchimp_Error $e) {
-                        $this->_helper->log($e->getFriendlyMessage());
-                    }
-
-                    $data["customer"] = [
-                        "id" => ($order->getCustomerId()) ? $order->getCustomerId() : $guestId = "CUSTOMER-" . $this->_helper->getDateMicrotime(),
-                        "email_address" => ($custEmailAddr) ? $custEmailAddr : $order->getCustomerEmail(),
-                        "opt_in_status" => $this->_apiCustomer->getOptin($magentoStoreId)
-                    ];
-                }
-            }
-        } else {
-            if (isset($customers['customers'][0]['id'])) {
-                $id = $customers['customers'][0]['id'];
-                $data['customer'] = [
-                    'id' => $id
-                ];
-            }
-        }
-//        $store = Mage::getModel('core/store')->load($magentoStoreId);
+        $data['customer'] = [
+            'id' => md5($order->getCustomerEmail()),
+            'email_address' => $order->getCustomerEmail(),
+            'opt_in_status' => $this->_apiCustomer->getOptin($magentoStoreId)
+        ];
 
         $data['order_url'] = $this->_urlHelper->getUrl(
             'sales/order/view/',
