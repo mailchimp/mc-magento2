@@ -512,6 +512,17 @@ class UpgradeSchema implements UpgradeSchemaInterface
                 ]
             );
 
+            $salesConnection->addColumn(
+                $setup->getTable('mailchimp_sync_ecommerce'),
+                'mailchimp_sent',
+                [
+                    'type' => \Magento\Framework\DB\Ddl\Table::TYPE_SMALLINT,
+                    'length' => 1,
+                    'default' => 0,
+                    'comment' => 'Sent to Mailchimp'
+                ]
+            );
+
         }
     }
 }
