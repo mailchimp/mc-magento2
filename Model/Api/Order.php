@@ -582,33 +582,6 @@ class Order
         return $mailChimpStatus;
     }
 
-//    public function update($order, $magentoStoreId)
-//    {
-//        if (Mage::helper('mailchimp')->isEcomSyncDataEnabled('stores', $magentoStoreId)) {
-//            $mailchimpStoreId = Mage::helper('mailchimp')->getMCStoreId('stores', $magentoStoreId);
-//            $orderSyncData = Mage::helper('mailchimp')->getEcommerceSyncDataItem($order->getId(), Ebizmarts_MailChimp_Model_Config::IS_ORDER, $mailchimpStoreId);
-//            if ($orderSyncData->getMailchimpSyncDelta() > Mage::helper('mailchimp')->getMCMinSyncDateFlag('stores', $magentoStoreId)) {
-//                $orderSyncData->setData("mailchimp_sync_error", "")
-//                    ->setData("mailchimp_sync_modified", 1)
-//                    ->save();
-//            }
-//        }
-//    }
-
-//    /**
-//     * Get Api Object
-//     *
-//     * @param $magentoStoreId
-//     * @return Ebizmarts_Mailchimp|null
-//     */
-//    protected function _getApi($magentoStoreId)
-//    {
-//        if (!$this->_api) {
-//            $this->_api = Mage::helper('mailchimp')->getApi('stores', $magentoStoreId);
-//        }
-//
-//        return $this->_api;
-//    }
 
     protected function _updateOrder($storeId, $entityId, $sync_delta = null, $sync_error = null, $sync_modified = null)
     {
@@ -618,7 +591,10 @@ class Order
             \Ebizmarts\MailChimp\Helper\Data::IS_ORDER,
             $sync_delta,
             $sync_error,
-            $sync_modified
+            $sync_modified,
+            null,
+            null,
+            \Ebizmarts\MailChimp\Helper\Data::WAITINGSYNC
         );
     }
 }
