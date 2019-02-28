@@ -251,14 +251,15 @@ class Order
                     $batchArray[$this->_counter]['path'] = '/ecommerce/stores/' . $mailchimpStoreId . '/orders';
                     $batchArray[$this->_counter]['operation_id'] = $this->_batchId . '_' . $orderId;
                     $batchArray[$this->_counter]['body'] = $orderJson;
+                    //update order delta
+                    $this->_updateOrder($mailchimpStoreId, $orderId);
+                    $this->_counter++;
                 } else {
                     $error = __('Something went wrong when retreiving product information.');
+                    $this->_helper->log($error);
 //                    $this->_updateOrder($mailchimpStoreId, $orderId, $this->_date->gmtDate(), $error, 0);
                 }
 
-                //update order delta
-                $this->_updateOrder($mailchimpStoreId, $orderId);
-                $this->_counter++;
             } catch (Exception $e) {
                 $this->_helper->log($e->getMessage());
             }
@@ -581,34 +582,6 @@ class Order
         return $mailChimpStatus;
     }
 
-//    public function update($order, $magentoStoreId)
-//    {
-//        if (Mage::helper('mailchimp')->isEcomSyncDataEnabled('stores', $magentoStoreId)) {
-//            $mailchimpStoreId = Mage::helper('mailchimp')->getMCStoreId('stores', $magentoStoreId);
-//            $orderSyncData = Mage::helper('mailchimp')->getEcommerceSyncDataItem($order->getId(), Ebizmarts_MailChimp_Model_Config::IS_ORDER, $mailchimpStoreId);
-//            if ($orderSyncData->getMailchimpSyncDelta() > Mage::helper('mailchimp')->getMCMinSyncDateFlag('stores', $magentoStoreId)) {
-//                $orderSyncData->setData("mailchimp_sync_error", "")
-//                    ->setData("mailchimp_sync_modified", 1)
-//                    ->save();
-//            }
-//        }
-//    }
-
-//    /**
-//     * Get Api Object
-//     *
-//     * @param $magentoStoreId
-//     * @return Ebizmarts_Mailchimp|null
-//     */
-//    protected function _getApi($magentoStoreId)
-//    {
-//        if (!$this->_api) {
-//            $this->_api = Mage::helper('mailchimp')->getApi('stores', $magentoStoreId);
-//        }
-//
-//        return $this->_api;
-//    }
-
     protected function _updateOrder($storeId, $entityId, $sync_delta = null, $sync_error = null, $sync_modified = null)
     {
         $this->_helper->saveEcommerceData(
@@ -617,7 +590,10 @@ class Order
             \Ebizmarts\MailChimp\Helper\Data::IS_ORDER,
             $sync_delta,
             $sync_error,
-            $sync_modified
+            $sync_modified,
+            null,
+            null,
+            \Ebizmarts\MailChimp\Helper\Data::WAITINGSYNC
         );
     }
 }
