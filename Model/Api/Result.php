@@ -139,15 +139,16 @@ class Result
             $items = json_decode(file_get_contents($file));
             if ($items!==false) {
                 foreach ($items as $item) {
+                    $line = explode('_', $item->operation_id);
+                    $type = $line[0];
+                    $id = $line[2];
                     if ($item->status_code != 200) {
-                        $line = explode('_', $item->operation_id);
-                        $type = $line[0];
-                        $id = $line[2];
-
-
                         //parse error
                         $response = json_decode($item->response);
                         if (preg_match('/already exists/', $response->detail)) {
+                            $chimpSync = $this->_helper->getChimpSyncEcommerce($mailchimpStoreId, $id, $type);
+                            $chimpSync->setData('mailchimp_sent', \Ebizmarts\MailChimp\Helper\Data::SYNCED);
+                            $chimpSync->getResource()->save($chimpSync);
                             continue;
                         }
                         $mailchimpErrors = $this->_chimpErrors->create();
@@ -170,6 +171,7 @@ class Result
                          */
                         $chimpSync = $this->_helper->getChimpSyncEcommerce($mailchimpStoreId, $id, $type);
                         $chimpSync->setData("mailchimp_sync_error", $error);
+                        $chimpSync->setData('mailchimp_sent', \Ebizmarts\MailChimp\Helper\Data::SYNCERROR);
                         $chimpSync->getResource()->save($chimpSync);
                         $mailchimpErrors->setType($response->type);
                         $mailchimpErrors->setTitle($response->title);
@@ -183,6 +185,10 @@ class Result
                         $mailchimpErrors->setBatchId($batchId);
                         $mailchimpErrors->setStoreId($storeId);
                         $mailchimpErrors->getResource()->save($mailchimpErrors);
+                    } else {
+                        $chimpSync = $this->_helper->getChimpSyncEcommerce($mailchimpStoreId, $id, $type);
+                        $chimpSync->setData('mailchimp_sent', \Ebizmarts\MailChimp\Helper\Data::SYNCED);
+                        $chimpSync->getResource()->save($chimpSync);
                     }
                 }
             } else {
