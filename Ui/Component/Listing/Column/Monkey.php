@@ -91,7 +91,6 @@ class Monkey extends Column
 
     public function prepareDataSource(array $dataSource)
     {
-        $this->_helper->log(__METHOD__);
         if (isset($dataSource['data']['items'])) {
             foreach ($dataSource['data']['items'] as & $item) {
                 $status = $item['mailchimp_flag'];
