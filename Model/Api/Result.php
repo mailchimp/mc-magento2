@@ -146,6 +146,9 @@ class Result
                         //parse error
                         $response = json_decode($item->response);
                         if (preg_match('/already exists/', $response->detail)) {
+                            $chimpSync = $this->_helper->getChimpSyncEcommerce($mailchimpStoreId, $id, $type);
+                            $chimpSync->setData('mailchimp_sent', \Ebizmarts\MailChimp\Helper\Data::SYNCED);
+                            $chimpSync->getResource()->save($chimpSync);
                             continue;
                         }
                         $mailchimpErrors = $this->_chimpErrors->create();
