@@ -73,6 +73,13 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     const QUO_MOD       = "QuoteModified";
     const QUO_NEW       = "QuoteNew";
 
+    const SYNCED        = 1;
+    const NEEDTORESYNC  = 2;
+    const WAITINGSYNC   = 3;
+    const SYNCERROR     = 4;
+
+    const NEVERSYNC     = 6;
+
     const MAX_MERGEFIELDS = 100;
 
     protected $counters = [];
@@ -727,7 +734,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     {
         $this->resetErrors();
     }
-    public function saveEcommerceData($storeId, $entityId, $type, $date = null, $error = null, $modified = null, $deleted = null, $token = null)
+    public function saveEcommerceData($storeId, $entityId, $type, $date = null, $error = null, $modified = null, $deleted = null, $token = null, $sent = null)
     {
         if(!empty($entityId)) {
             $chimpSyncEcommerce = $this->getChimpSyncEcommerce($storeId, $entityId, $type);
@@ -752,6 +759,9 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
                 }
                 if ($token) {
                     $chimpSyncEcommerce->setMailchimpToken($token);
+                }
+                if ($sent) {
+                    $chimpSyncEcommerce->setMailchimpSent($sent);
                 }
                 $chimpSyncEcommerce->getResource()->save($chimpSyncEcommerce);
             }
