@@ -251,14 +251,15 @@ class Order
                     $batchArray[$this->_counter]['path'] = '/ecommerce/stores/' . $mailchimpStoreId . '/orders';
                     $batchArray[$this->_counter]['operation_id'] = $this->_batchId . '_' . $orderId;
                     $batchArray[$this->_counter]['body'] = $orderJson;
+                    //update order delta
+                    $this->_updateOrder($mailchimpStoreId, $orderId);
+                    $this->_counter++;
                 } else {
                     $error = __('Something went wrong when retreiving product information.');
+                    $this->_helper->log($error);
 //                    $this->_updateOrder($mailchimpStoreId, $orderId, $this->_date->gmtDate(), $error, 0);
                 }
 
-                //update order delta
-                $this->_updateOrder($mailchimpStoreId, $orderId);
-                $this->_counter++;
             } catch (Exception $e) {
                 $this->_helper->log($e->getMessage());
             }
