@@ -8,5 +8,12 @@
                 <sortable>false</sortable>
             </settings>
         </column>
+        <column name="mailchimp_sync">
+            <settings>
+                <label translate="true">Mailchimp Sync</label>
+                <bodyTmpl>ui/grid/cells/html</bodyTmpl>
+                <sortable>false</sortable>
+            </settings>
+        </column>
     </columns>
 </listing>
