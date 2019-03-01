@@ -590,7 +590,11 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
                         }
                         $value = date($format, strtotime($value));
                     } elseif ($map['isAddress']) {
-                        $value = $this->_getAddressValues($customer->getPrimaryAddress($map['customer_field']));
+                        $customerAddress = $customer->getPrimaryAddress($map['customer_field']);
+                        $value = [];
+                        if ($customerAddress !== false) {
+                            $value = $this->_getAddressValues($customerAddress);
+                        }
                     } elseif (count($map['options'])) {
                         foreach ($map['options'] as $option) {
                             if ($option['value'] == $value) {
