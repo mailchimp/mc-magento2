@@ -791,9 +791,6 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         $chimp = $this->_mailChimpSyncEcommerce->create();
         return $chimp->getByStoreIdType($storeId, $id, $type);
     }
-    public function getScope()
-    {
-    }
     public function loadStores()
     {
         
