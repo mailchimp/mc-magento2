@@ -101,13 +101,16 @@ class Cart
         if (!$this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_ABANDONEDCART_ACTIVE, $magentoStoreId)) {
             return $allCarts;
         }
+        $mailchimpStoreId = $this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_MAILCHIMP_STORE, $magentoStoreId);
 
         $this->_firstDate = $this->_helper->getConfigValue(
             \Ebizmarts\MailChimp\Helper\Data::XML_ABANDONEDCART_FIRSTDATE,
             $magentoStoreId
         );
+        if (!$this->_firstDate) {
+            $this->_firstDate = $this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_PATH_IS_SYNC . "/$mailchimpStoreId", 0, 'default');
+        }
         $this->_counter = 0;
-        $mailchimpStoreId = $this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_MAILCHIMP_STORE, $magentoStoreId);
 
         $date = $this->_helper->getDateMicrotime();
         $this->_batchId =  \Ebizmarts\MailChimp\Helper\Data::IS_QUOTE.'_'.$date;
