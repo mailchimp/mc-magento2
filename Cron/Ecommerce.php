@@ -183,11 +183,13 @@ class Ecommerce
             $orders = $this->_apiOrder->sendOrders($storeId);
             $countOrders = count($orders);
             $results = array_merge($results, $orders);
-
-            $this->_helper->log('Generate Carts payload');
-            $carts = $this->_apiCart->createBatchJson($storeId);
-            $results = array_merge($results, $carts);
-
+            if ($this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_PATH_IS_SYNC, $storeId)) {
+                $this->_helper->log('Generate Carts payload');
+                $carts = $this->_apiCart->createBatchJson($storeId);
+                $results = array_merge($results, $carts);
+            } else {
+                $this->_helper->log('No Carts will be synced until the store is completely synced');
+            }
             if ($this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_SEND_PROMO, $storeId)) {
                 $this->_helper->log('Generate Rules payload');
                 $rules = $this->_apiPromoRules->sendRules($storeId);
