@@ -38,6 +38,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     const XML_ABANDONEDCART_FIRSTDATE   = 'mailchimp/abandonedcart/firstdate';
     const XML_ABANDONEDCART_PAGE     = 'mailchimp/abandonedcart/page';
     const XML_PATH_IS_SYNC           = 'mailchimp/general/issync';
+    const XML_ABANDONEDCART_EMAIL    = 'mailchimp/abandonedcart/save_email_in_quote';
     const XML_MERGEVARS              = 'mailchimp/general/map_fields';
     const XML_INTEREST               = 'mailchimp/general/interest';
     const XML_INTEREST_IN_SUCCESS    = 'mailchimp/general/interest_in_success';
@@ -1133,5 +1134,13 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
             throw new \InvalidArgumentException('Unable to unserialize value.');
         }
         return $result;
+    }
+    public function isEmailSavingEnabled($storeId)
+    {
+        return $this->_scopeConfig->isSetFlag(
+            self::XML_ABANDONEDCART_EMAIL,
+            \Magento\Store\Model\ScopeInterface::SCOPE_STORES,
+            $storeId
+        );
     }
 }
