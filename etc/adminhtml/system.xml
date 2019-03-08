@@ -28,6 +28,7 @@
                 <field id="active" translate="label" type="select" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Enabled</label>
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <comment><![CDATA[By enabling this extension, you agree to <a href="https://mailchimp.com/legal/additional-terms/" target="_blank">Mailchimp's additional terms</a>.]]></comment>
                 </field>
                 <field id="oauth_wizard" translate="label" sortOrder="12" showInDefault="1" showInStore="1" showInWebsite="1">
                     <attribute type="button_label">Get API credentials</attribute>
