@@ -27,22 +27,30 @@ class AccountManagement
      * @var \Magento\Quote\Model\QuoteFactory
      */
     protected $_quote;
+    /**
+     * @var \Magento\Store\Model\StoreManagerInterface
+     */
+    protected $_storeManager;
+
 
     /**
      * AccountManagement constructor.
      * @param \Ebizmarts\MailChimp\Helper\Data $helper
-     * @param \Magento\Checkout\Model\Session $customerSession
+     * @param \Magento\Checkout\Model\Session $checkoutSession
      * @param \Magento\Quote\Model\QuoteFactory $quote
+     * @param \Magento\Store\Model\StoreManagerInterface $storeManager
      */
     public function __construct(
         \Ebizmarts\MailChimp\Helper\Data $helper,
         \Magento\Checkout\Model\Session $checkoutSession,
-        \Magento\Quote\Model\QuoteFactory $quote
+        \Magento\Quote\Model\QuoteFactory $quote,
+        \Magento\Store\Model\StoreManagerInterface $storeManager
     ) {
     
         $this->_helper  = $helper;
         $this->_quote   = $quote;
         $this->_session = $checkoutSession;
+        $this->_storeManager = $storeManager;
     }
 
     /**
@@ -59,7 +67,7 @@ class AccountManagement
     ) {
     
         $ret = $proceed($customerEmail,$websiteId);
-        if ($this->_session) {
+        if ($this->_session  && $this->_helper->isEmailSavingEnabled($this->_storeManager->getStore()->getId())) {
             $quoteId = $this->_session->getQuoteId();
             if ($quoteId) {
                 $quote = $this->_quote->create();
