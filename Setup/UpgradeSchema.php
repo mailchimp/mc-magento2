@@ -501,7 +501,7 @@ class UpgradeSchema implements UpgradeSchemaInterface
             );
         }
 
-        if (version_compare($context->getVersion(),'1.3.34') < 0) {
+        if (version_compare($context->getVersion(),'102.3.34') < 0) {
             $connection->addColumn(
                 $setup->getTable('mailchimp_sync_batches'),
                 'modified_date',
