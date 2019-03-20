@@ -1,5 +1,29 @@
 # Change Log
 
+## [100.1.34](https://github.com/mailchimp/mc-magento2/tree/HEAD)
+
+[Full Changelog](https://github.com/mailchimp/mc-magento2/compare/1.1.33...100.1.34)
+
+**Implemented enhancements:**
+
+- Add link to Terms of service [\#641](https://github.com/mailchimp/mc-magento2/issues/641)
+- Delete the Cart register in the sync\_commerce table when confirm the order [\#626](https://github.com/mailchimp/mc-magento2/issues/626)
+- Add some other logs [\#602](https://github.com/mailchimp/mc-magento2/issues/602)
+- Clean the maichimp\_sync\_batches table [\#598](https://github.com/mailchimp/mc-magento2/issues/598)
+- Avoid getByEmail calls when sending Orders and Carts to Mailchimp [\#468](https://github.com/mailchimp/mc-magento2/issues/468)
+- Put a column in the order grid to show if the order was synced [\#140](https://github.com/mailchimp/mc-magento2/issues/140)
+
+**Fixed bugs:**
+
+- Change the version numeration to meet the magento marketplace requirements [\#649](https://github.com/mailchimp/mc-magento2/issues/649)
+- Save the email in the quote only with the agreement from the customer [\#645](https://github.com/mailchimp/mc-magento2/issues/645)
+- Not send the carts until the store is completely synced [\#636](https://github.com/mailchimp/mc-magento2/issues/636)
+- Defer the load of the mailchimp js [\#630](https://github.com/mailchimp/mc-magento2/issues/630)
+- No first and lastname when the order is from a guest [\#609](https://github.com/mailchimp/mc-magento2/issues/609)
+- Subscriber not sent if country state is empty. [\#593](https://github.com/mailchimp/mc-magento2/issues/593)
+- Ecommerce cronjob stuck on customers with no address \(error occurs\) [\#400](https://github.com/mailchimp/mc-magento2/issues/400)
+
+
 ## [1.1.33](https://github.com/mailchimp/mc-magento2/tree/1.1.33)
 
 [Full Changelog](https://github.com/mailchimp/mc-magento2/compare/1.1.32...1.1.33) 
