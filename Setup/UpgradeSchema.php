@@ -511,7 +511,7 @@ class UpgradeSchema implements UpgradeSchemaInterface
                     'comment' => 'modified date'
                 ]
             );
-            $salesConnection->addColumn(
+            $connection->addColumn(
                 $setup->getTable('mailchimp_sync_ecommerce'),
                 'mailchimp_sent',
                 [
