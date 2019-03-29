@@ -512,7 +512,7 @@ class UpgradeSchema implements UpgradeSchemaInterface
                 ]
             );
 
-            $salesConnection->addColumn(
+            $connection->addColumn(
                 $setup->getTable('mailchimp_sync_ecommerce'),
                 'mailchimp_sent',
                 [
