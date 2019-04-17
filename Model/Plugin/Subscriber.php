@@ -117,19 +117,21 @@ class Subscriber
             }
             $storeId = $this->_storeManager->getStore()->getId();
 
-            if ($this->_helper->isMailChimpEnabled($storeId)) {
-                $api = $this->_api;
-                if ($this->_helper->isDoubleOptInEnabled($storeId)) {
-                    $status = 'pending';
-                } else {
-                    $status = 'subscribed';
-                }
-                $mergeVars = $this->_helper->getMergeVarsBySubscriber($subscriber, $email);
-                try {
-                    $md5HashEmail = md5(strtolower($email));
-                    $return = $api->lists->members->addOrUpdate($this->_helper->getDefaultList(), $md5HashEmail, null, $status, $mergeVars, null, null, null, null, $email, $status);
-                } catch (\Mailchimp_Error $e) {
-                    $this->_helper->log($e->getFriendlyMessage());
+            if (!$this->_helper->isUseMagentoEmailsEnabled($storeId)) {
+                if ($this->_helper->isMailChimpEnabled($storeId)) {
+                    $api = $this->_api;
+                    if ($this->_helper->isDoubleOptInEnabled($storeId)) {
+                        $status = 'pending';
+                    } else {
+                        $status = 'subscribed';
+                    }
+                    $mergeVars = $this->_helper->getMergeVarsBySubscriber($subscriber, $email);
+                    try {
+                        $md5HashEmail = md5(strtolower($email));
+                        $return = $api->lists->members->addOrUpdate($this->_helper->getDefaultList(), $md5HashEmail, null, $status, $mergeVars, null, null, null, null, $email, $status);
+                    } catch (\Mailchimp_Error $e) {
+                        $this->_helper->log($e->getFriendlyMessage());
+                    }
                 }
             }
         }
