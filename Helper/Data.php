@@ -1142,4 +1142,14 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
             $storeId
         );
     }
+
+    /**
+     *
+     * @param $scopeId
+     * @return bool | returns true if useMagentoEmails is enabled
+     */
+    public function isUseMagentoEmailsEnabled($scopeId)
+    {
+        return $this->getConfigValue(self::XML_MAGENTO_MAIL, $scopeId);
+    }
 }
