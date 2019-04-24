@@ -69,4 +69,7 @@
     <type name="Magento\Sales\Model\Order\ShipmentRepository">
         <plugin name="mailchimp_save_shipment" type="Ebizmarts\MailChimp\Model\Plugin\Ship" sortOrder="10"/>
     </type>
+    <type name="Magento\Sales\Model\Order\InvoiceRepository">
+        <plugin name="mailchimp_save_invoice" type="Ebizmarts\MailChimp\Model\Plugin\Invoice" sortOrder="10"/>
+    </type>
 </config>
