@@ -72,4 +72,7 @@
     <type name="Magento\Sales\Model\Order\InvoiceRepository">
         <plugin name="mailchimp_save_invoice" type="Ebizmarts\MailChimp\Model\Plugin\Invoice" sortOrder="10"/>
     </type>
+    <type name="Magento\Sales\Model\Order\CreditmemoRepository">
+        <plugin name="mailchimp_save_creditmemo" type="Ebizmarts\MailChimp\Model\Plugin\Creditmemo" sortOrder="10"/>
+    </type>
 </config>
