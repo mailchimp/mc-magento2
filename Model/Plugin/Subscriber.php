@@ -93,16 +93,16 @@ class Subscriber
         $customerId
     ) {
 
-            $storeId = $this->getStoreIdFromSubscriber($subscriber);
-            if ($this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_PATH_ACTIVE, $storeId)) {
-                $subscriber->loadByCustomerId($customerId);
-                if (!$subscriber->isSubscribed()) {
-                    if (!$this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_MAGENTO_MAIL, $storeId)) {
-                        $subscriber->setImportMode(true);
-                    }
+        $storeId = $this->getStoreIdFromSubscriber($subscriber);
+        if ($this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_PATH_ACTIVE, $storeId)) {
+            $subscriber->loadByCustomerId($customerId);
+            if (!$subscriber->isSubscribed()) {
+                if (!$this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_MAGENTO_MAIL, $storeId)) {
+                    $subscriber->setImportMode(true);
+                }
 
-                    if (!$this->_helper->isUseMagentoEmailsEnabled($storeId)) {
-                        if ($this->_helper->isMailChimpEnabled($storeId)) {
+                if (!$this->_helper->isUseMagentoEmailsEnabled($storeId)) {
+                    if ($this->_helper->isMailChimpEnabled($storeId)) {
                         $customer = $this->_customer->getById($customerId);
                         $email = $customer->getEmail();
                         $mergeVars = $this->_helper->getMergeVarsBySubscriber($subscriber, $email);
@@ -122,7 +122,6 @@ class Subscriber
                         } catch (\Mailchimp_Error $e) {
                             $this->_helper->log($e->getFriendlyMessage());
                         }
-                    
                     }
                 }
             }
