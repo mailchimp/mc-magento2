@@ -114,14 +114,15 @@ class Subscriber
                             $status = 'pending';
                         } else {
                             $status = 'subscribed';
-                    }
-                    try {
-                        $emailHash = md5(strtolower($customer->getEmail()));
-                        if (!$subscriber->getMailchimpId()) {
-                            $return = $api->lists->members->addOrUpdate($this->_helper->getDefaultList($storeId), $emailHash, null, $status, $mergeVars, null, null, null, null, $email, $status);
                         }
-                    } catch (\Mailchimp_Error $e) {
-                        $this->_helper->log($e->getFriendlyMessage());
+                        try {
+                            $emailHash = md5(strtolower($customer->getEmail()));
+                            if (!$subscriber->getMailchimpId()) {
+                                $return = $api->lists->members->addOrUpdate($this->_helper->getDefaultList($storeId), $emailHash, null, $status, $mergeVars, null, null, null, null, $email, $status);
+                            }
+                        } catch (\Mailchimp_Error $e) {
+                            $this->_helper->log($e->getFriendlyMessage());
+                        }
                     }
                 }
             }
