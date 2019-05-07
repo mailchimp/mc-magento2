@@ -365,7 +365,7 @@ class Order
 
         //customer data
         $data['customer'] = [
-            'id' => md5($order->getCustomerEmail()),
+            'id' => md5(strtolower($order->getCustomerEmail())),
             'email_address' => $order->getCustomerEmail(),
             'opt_in_status' => $this->_apiCustomer->getOptin($magentoStoreId)
         ];
