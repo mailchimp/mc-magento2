@@ -132,7 +132,7 @@ class Customer
     {
         $point = 0;
         $data = [];
-        $data["id"] = md5($customer->getEmail());
+        $data["id"] = md5(strtolower($customer->getEmail()));
         $data["email_address"] = $customer->getEmail() ? $customer->getEmail() : '';
         $data["first_name"] = $customer->getFirstname() ? $customer->getFirstname() : '';
         $data["last_name"] = $customer->getLastname() ? $customer->getLastname() : '';
