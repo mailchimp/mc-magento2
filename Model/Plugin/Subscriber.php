@@ -108,6 +108,11 @@ class Subscriber
                     $api = $this->_helper->getApi($storeId);
                     $isSubscribeOwnEmail = $this->_customerSession->isLoggedIn()
                         && $this->_customerSession->getCustomerDataObject()->getEmail() == $subscriber->getSubscriberEmail();
+
+                    if ($subscriber->getSubscriberEmail() && $subscriber->getStatus() == \Magento\Newsletter\Model\Subscriber::STATUS_UNSUBSCRIBED && $this->_helper->isDoubleOptInEnabled($storeId)) {
+                        $isSubscribeOwnEmail = false;
+                    }
+
                     if ($this->_helper->isDoubleOptInEnabled($storeId) && !$isSubscribeOwnEmail) {
                         $status = 'pending';
                     } else {
