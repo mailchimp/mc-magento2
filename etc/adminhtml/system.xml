@@ -126,6 +126,13 @@
                         <field id="*/*/active">1</field>
                     </depends>
                 </field>
+                <field id="resync_customers" translate="button_label" type="button" sortOrder="85" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <button_label>Resync Customers</button_label>
+                    <frontend_model>Ebizmarts\MailChimp\Block\Adminhtml\System\Config\ResyncCustomer</frontend_model>
+                    <depends>
+                        <field id="*/*/active">1</field>
+                    </depends>
+                </field>
                 <field id="interest" translate="label" type="multiselect" sortOrder="90" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Available Groups</label>
                     <source_model>Ebizmarts\MailChimp\Model\Config\Source\Interest</source_model>
