@@ -9,9 +9,10 @@
  */
 define(
     [
-        'jquery'
+        'jquery',
+        'Magento_Ui/js/modal/alert'
     ],
-    function ($) {
+    function ($, alert) {
         "use strict";
 
         $.widget('mage.configmonkeyapikey', {
@@ -20,7 +21,8 @@ define(
               "detailsUrl": "",
               "storeGridUrl": "",
               "createWebhookUrl": "",
-              "getInterestUrl": ""
+                "getInterestUrl": "",
+                "resyncCustomerUrl": ""
             },
 
             _init: function () {
@@ -46,6 +48,26 @@ define(
                     var listId = $('#mailchimp_general_monkeylist').find(':selected').val();
                     self._createWebhook(apiKey, listId);
                 });
+                $('#mailchimp_general_resync_customers').click(function () {
+                    var mailchimpStoreId = $('#mailchimp_general_monkeystore').find(':selected').val();
+                    self._resyncCustomer(mailchimpStoreId);
+                });
+            },
+            _resyncCustomer: function(mailchimpStoreId) {
+                var resyncCustomerUrl = this.options.resyncCustomerUrl;
+                $.ajax({
+                    url: resyncCustomerUrl,
+                    data: {'form_key': window.FORM_KEY,'mailchimpStoreId': mailchimpStoreId},
+                    type: 'GET',
+                    dataType: 'json',
+                    showLoader: true
+                }).done(function (data) {
+                    if (data.valid==0) {
+                        alert({content:'Error: can\'t resync your customers'});
+                    } else if (data.valid==1) {
+                        alert({content:'All customers marked for resync'});
+                    }
+                });
             },
             _createWebhook: function (apiKey, listId) {
                 var createWebhookUrl = this.options.createWebhookUrl;
@@ -57,9 +79,9 @@ define(
                     showLoader: true
                 }).done(function (data) {
                     if (data.valid==0) {
-                        alert('Error: can\'t create WebHook. Your WebHook is already created or your web is private');
+                        alert({content:'Error: can\'t create WebHook. Your WebHook is already created or your web is private'});
                     } else if (data.valid==1) {
-                        alert('WebHook created');
+                        alert({content:'WebHook created'});
                     }
                 });
             },
