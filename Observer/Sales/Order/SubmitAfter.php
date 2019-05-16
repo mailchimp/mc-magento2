@@ -70,18 +70,6 @@ class SubmitAfter implements \Magento\Framework\Event\ObserverInterface
                     ->setPath($this->_sessionManager->getCookiePath())
                     ->setDomain($this->_sessionManager->getCookieDomain())
             );
-            /**
-             * @var $quote \Magento\Quote\Model\Quote
-             */
-            $quote = $observer->getQuote();
-            $mailchimpStoreId = $this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_MAILCHIMP_STORE,$quote->getStoreId());
-            /**
-             * @var $sync \Ebizmarts\MailChimp\Model\MailChimpSyncEcommerce
-             */
-            $sync = $this->_helper->getChimpSyncEcommerce($mailchimpStoreId,$quote->getId(),\Ebizmarts\MailChimp\Helper\Data::IS_QUOTE);
-            if ($sync) {
-                $sync->getResource()->delete($sync);
-            }
         } catch (\Exception $e) {
             $this->_helper->log($e->getMessage());
         }
