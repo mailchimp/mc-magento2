@@ -109,7 +109,7 @@ class Monkey extends Column
                                 $text = __('Synced');
                                 break;
                             case \Ebizmarts\MailChimp\Helper\Data::WAITINGSYNC:
-                                if () {
+                                if ($syncData->getMailchimpSyncError()) {
                                     $url = $this->_assetRepository->getUrlWithParams('Ebizmarts_MailChimp::images/never.png', $params);
                                     $text = __('With error');
                                 } else {
