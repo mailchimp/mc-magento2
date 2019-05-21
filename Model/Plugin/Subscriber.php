@@ -70,12 +70,14 @@ class Subscriber
         $storeId = $this->getStoreIdFromSubscriber($subscriber);
         if ($this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_PATH_ACTIVE, $storeId)) {
             $subscriber->loadByCustomerId($customerId);
-            $api = $this->_helper->getApi($storeId);
-            try {
-                $md5HashEmail = md5(strtolower($subscriber->getSubscriberEmail()));
-                $api->lists->members->update($this->_helper->getDefaultList($storeId), $md5HashEmail, null, 'unsubscribed');
-            } catch (\Mailchimp_Error $e) {
-                $this->_helper->log($e->getFriendlyMessage());
+            if ($subscriber->isSubscribed()) {
+                $api = $this->_helper->getApi($storeId);
+                try {
+                    $md5HashEmail = md5(strtolower($subscriber->getSubscriberEmail()));
+                    $api->lists->members->update($this->_helper->getDefaultList($storeId), $md5HashEmail, null, 'unsubscribed');
+                } catch (\Mailchimp_Error $e) {
+                    $this->_helper->log($e->getFriendlyMessage());
+                }
             }
         }
         return [$customerId];
@@ -114,9 +116,7 @@ class Subscriber
                     }
                     try {
                         $emailHash = md5(strtolower($customer->getEmail()));
-                        if (!$subscriber->getMailchimpId()) {
-                            $return = $api->lists->members->addOrUpdate($this->_helper->getDefaultList($storeId), $emailHash, null, $status, $mergeVars, null, null, null, null, $email, $status);
-                        }
+                        $api->lists->members->addOrUpdate($this->_helper->getDefaultList($storeId), $emailHash, null, $status, $mergeVars, null, null, null, null, $email, $status);
                     } catch (\Mailchimp_Error $e) {
                         $this->_helper->log($e->getFriendlyMessage());
                     }
