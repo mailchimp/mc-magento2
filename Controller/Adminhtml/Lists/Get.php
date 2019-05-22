@@ -28,25 +28,32 @@ class Get extends Action
      * @var ResultFactory
      */
     protected $_resultFactory;
+    /**
+     * @var \Magento\Framework\Encryption\Encryptor
+     */
+    protected $encryptor;
 
     /**
      * Get constructor.
      * @param Context $context
      * @param \Ebizmarts\MailChimp\Helper\Data $helper
+     * @param \Magento\Framework\Encryption\Encryptor $encryptor
      */
     public function __construct(
         Context $context,
-        \Ebizmarts\MailChimp\Helper\Data $helper
+        \Ebizmarts\MailChimp\Helper\Data $helper,
+        \Magento\Framework\Encryption\Encryptor $encryptor
     ) {
     
         parent::__construct($context);
         $this->_resultFactory       = $context->getResultFactory();
         $this->_helper                  = $helper;
+        $this->encryptor                = $encryptor;
     }
     public function execute()
     {
         $param = $this->getRequest()->getParams();
-        $apiKey = $param['apikey'];
+        $apiKey = $this->encryptor->decrypt($param['apikey']);
         $result = [];
         try {
             $api = $this->_helper->getApiByApiKey($apiKey);
