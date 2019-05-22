@@ -25,7 +25,7 @@ define(
                     // remove all items in list combo
                     $('#stores_list_id').empty();
                     // get the selected apikey
-                    var apiKey = $('#stores_apikey').find(':selected').text();
+                    var apiKey = $('#stores_apikey').find(':selected').val();
                     // get the list for this apikey via ajax
                     //var apiUrl = this.options.apikeyUrl;
                     $.ajax({
