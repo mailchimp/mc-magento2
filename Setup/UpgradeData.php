@@ -171,7 +171,7 @@ class UpgradeData implements UpgradeDataInterface
                 }
             }
         }
-        if (version_compare($context->getVersion(), '102.2.35') < 0) {
+        if (version_compare($context->getVersion(), '102.3.35') < 0) {
             $configCollection = $this->configFactory->create();
             $configCollection->addFieldToFilter('path', ['eq' => \Ebizmarts\MailChimp\Helper\Data::XML_PATH_APIKEY]);
             /**

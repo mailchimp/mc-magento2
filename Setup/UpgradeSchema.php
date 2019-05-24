@@ -522,7 +522,7 @@ class UpgradeSchema implements UpgradeSchemaInterface
                 ]
             );
         }
-        if (version_compare($context->getVersion(),'102.2.35') < 0) {
+        if (version_compare($context->getVersion(),'102.3.35') < 0) {
             $connection->changeColumn(
                 $setup->getTable('mailchimp_stores'),
                 'apikey',
