@@ -319,8 +319,8 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
      */
     public function getApiKey($store = null, $scope = null)
     {
-        return $this->getConfigValue(self::XML_PATH_APIKEY, $store, $scope);
-    }
+        $apiKey =$this->getConfigValue(self::XML_PATH_APIKEY, $store, $scope);
+        return $this->_encryptor->decrypt($apiKey);    }
 
     /**
      * @param null $store
@@ -389,13 +389,20 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     {
         return 'm/d/Y';
     }
+
     /**
      * @param $apiKey
+     * @param bool $encrypted
      * @return \Mailchimp
+     * @throws \Magento\Framework\Exception\LocalizedException
      */
-    public function getApiByApiKey($apiKey)
+    public function getApiByApiKey($apiKey,$encrypted=false)
     {
-        $this->_api->setApiKey($apiKey);
+        if ($encrypted) {
+            $this->_api->setApiKey($this->_encryptor->decrypt($apiKey));
+        } else {
+            $this->_api->setApiKey($apiKey);
+        }
         $this->_api->setUserAgent('Mailchimp4Magento' . (string)$this->getModuleVersion());
         return $this->_api;
     }
@@ -826,7 +833,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
                     $name = $store['name'].' (Warning: not connected)';
                 }
                 $mstore = $this->_mailChimpStoresFactory->create();
-                $mstore->setApikey(trim($apiKey));
+                $mstore->setApikey($this->_encryptor->encrypt(trim($apiKey)));
                 $mstore->setStoreid($store['id']);
                 $mstore->setListId($store['list_id']);
                 $mstore->setName($name);
@@ -1099,12 +1106,9 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     {
         $apiKeys = [];
         foreach ($this->_storeManager->getStores() as $storeId => $val) {
-            $apiKey = $this->getConfigValue(self::XML_PATH_APIKEY_LIST, $storeId);
-            $tempApiKeys = explode("\n", $apiKey);
-            foreach ($tempApiKeys as $tempAkiKey) {
-                if (!in_array($tempAkiKey, $apiKeys)) {
-                    $apiKeys[] = $tempAkiKey;
-                }
+            $apiKey = $this->getApiKey($storeId);
+            if (!in_array($apiKey, $apiKeys)) {
+                $apiKeys[] = $apiKey;
             }
         }
         return $apiKeys;
@@ -1147,5 +1151,12 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         $tableName = $this->_mailChimpSyncE->getResource()->getMainTable();
         $connection->update($tableName, ['mailchimp_sync_modified' => 1], "type = '" . self::IS_CUSTOMER . "' and mailchimp_store_id = '$mailchimpStore'");
 
+    }
+    public function decrypt($value) {
+        return $this->_encryptor->decrypt($value);
+    }
+    public function encrypt($value)
+    {
+        return $this->_encryptor->encrypt($value);
     }
 }
