@@ -176,6 +176,9 @@ class UpgradeData implements UpgradeDataInterface
         if (version_compare($context->getVersion(), '101.2.35') < 0) {
             $configCollection = $this->configFactory->create();
             $configCollection->addFieldToFilter('path', ['eq' => \Ebizmarts\MailChimp\Helper\Data::XML_PATH_APIKEY]);
+            /**
+             * @var $config \Magento\Config\Model\ResourceModel\Config
+             */
             foreach($configCollection as $config) {
                 try {
                     $config->setValue($this->_helper->encrypt($config->getvalue()));
@@ -184,8 +187,11 @@ class UpgradeData implements UpgradeDataInterface
                     $this->_helper->log($e->getMessage());
                 }
             }
+            $configCollection = $this->configFactory->create();
+            $configCollection->addFieldToFilter('path', ['eq' => \Ebizmarts\MailChimp\Helper\Data::XML_PATH_APIKEY_LIST]);
+            foreach($configCollection as $config) {
+                $config->getResource()->delete($config);
+            }
         }
-
-
-        }
+   }
 }
