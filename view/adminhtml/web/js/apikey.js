@@ -30,7 +30,7 @@ define(
                     //var apiUrl = this.options.apikeyUrl;
                     $.ajax({
                             url: apiUrl,
-                            data: {'form_key':  window.FORM_KEY, 'apikey': apiKey},
+                            data: {'form_key':  window.FORM_KEY, 'apikey': apiKey, 'encrypt': 1},
                             type: 'POST',
                             dataType: 'json',
                             showLoader: true
