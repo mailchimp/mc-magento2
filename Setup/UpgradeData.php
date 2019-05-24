@@ -40,6 +40,10 @@ class UpgradeData implements UpgradeDataInterface
      * @var \Ebizmarts\MailChimp\Helper\Data
      */
     protected $_helper;
+    /**
+     * @var \Magento\Config\Model\ResourceModel\Config\Data\CollectionFactory
+     */
+    protected $configFactory;
 
     /**
      * UpgradeData constructor.
@@ -47,6 +51,7 @@ class UpgradeData implements UpgradeDataInterface
      * @param DeploymentConfig $deploymentConfig
      * @param \Ebizmarts\MailChimp\Model\ResourceModel\MailChimpInterestGroup\CollectionFactory $interestGroupCollectionFactory
      * @param \Ebizmarts\MailChimp\Model\ResourceModel\MailChimpWebhookRequest\CollectionFactory $webhookCollectionFactory
+     * @param \Magento\Config\Model\ResourceModel\Config\Data\CollectionFactory $configFactory
      * @param \Ebizmarts\MailChimp\Helper\Data $helper
      */
     public function __construct(
@@ -54,6 +59,7 @@ class UpgradeData implements UpgradeDataInterface
         DeploymentConfig $deploymentConfig,
         \Ebizmarts\MailChimp\Model\ResourceModel\MailChimpInterestGroup\CollectionFactory $interestGroupCollectionFactory,
         \Ebizmarts\MailChimp\Model\ResourceModel\MailChimpWebhookRequest\CollectionFactory $webhookCollectionFactory,
+        \Magento\Config\Model\ResourceModel\Config\Data\CollectionFactory $configFactory,
         \Ebizmarts\MailChimp\Helper\Data $helper
     ) {
     
@@ -61,6 +67,7 @@ class UpgradeData implements UpgradeDataInterface
         $this->_deploymentConfig    = $deploymentConfig;
         $this->_insterestGroupCollectionFactory = $interestGroupCollectionFactory;
         $this->_webhookCollectionFactory        = $webhookCollectionFactory;
+        $this->configFactory                    = $configFactory;
         $this->_helper              = $helper;
     }
 
@@ -164,5 +171,26 @@ class UpgradeData implements UpgradeDataInterface
                 }
             }
         }
+        if (version_compare($context->getVersion(), '100.1.35') < 0) {
+            $configCollection = $this->configFactory->create();
+            $configCollection->addFieldToFilter('path', ['eq' => \Ebizmarts\MailChimp\Helper\Data::XML_PATH_APIKEY]);
+            /**
+             * @var $config \Magento\Config\Model\ResourceModel\Config
+             */
+            foreach($configCollection as $config) {
+                try {
+                    $config->setValue($this->_helper->encrypt($config->getvalue()));
+                    $config->getResource()->save($config);
+                } catch(\Exception $e) {
+                    $this->_helper->log($e->getMessage());
+                }
+            }
+            $configCollection = $this->configFactory->create();
+            $configCollection->addFieldToFilter('path', ['eq' => \Ebizmarts\MailChimp\Helper\Data::XML_PATH_APIKEY_LIST]);
+            foreach($configCollection as $config) {
+                $config->getResource()->delete($config);
+            }
+        }
+
     }
 }
