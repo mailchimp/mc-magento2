@@ -89,7 +89,7 @@ class MonkeyStore extends \Magento\Framework\App\Config\Value
             if (isset($data['general']['fields']['apikey']['value'])) {
                 $apiKey = $data['general']['fields']['apikey']['value'];
             } else {
-                $apiKey = $this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_PATH_APIKEY, $this->getScopeId(), $this->getScope());
+                $apiKey = $this->_helper->getApiKey($this->getScopeId(), $this->getScope());
             }
             if (isset($data['general']['fields']['monkeylist']['value'])) {
                 $newListId = $data['general']['fields']['monkeylist']['value'];

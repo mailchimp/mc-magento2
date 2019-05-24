@@ -16,7 +16,7 @@ define(
 
         $.widget('mage.monkeyapikey', {
             "options": {
-              "apikeyUrl": ""
+                "apikeyUrl": ""
             },
 
             _init: function () {
@@ -25,16 +25,16 @@ define(
                     // remove all items in list combo
                     $('#stores_list_id').empty();
                     // get the selected apikey
-                    var apiKey = $('#stores_apikey').find(':selected').text();
+                    var apiKey = $('#stores_apikey').find(':selected').val();
                     // get the list for this apikey via ajax
                     //var apiUrl = this.options.apikeyUrl;
                     $.ajax({
-                            url: apiUrl,
-                            data: {'form_key':  window.FORM_KEY, 'apikey': apiKey},
-                            type: 'POST',
-                            dataType: 'json',
-                            showLoader: true
-                        }).done(function (data) {
+                        url: apiUrl,
+                        data: {'form_key':  window.FORM_KEY, 'apikey': apiKey, 'encrypt': 1},
+                        type: 'POST',
+                        dataType: 'json',
+                        showLoader: true
+                    }).done(function (data) {
                         $.each(data, function (i, item) {
                             $('#stores_list_id').append($('<option>', {
                                 value: item.id,

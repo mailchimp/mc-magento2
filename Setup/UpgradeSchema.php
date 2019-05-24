@@ -522,6 +522,17 @@ class UpgradeSchema implements UpgradeSchemaInterface
                 ]
             );
         }
+        if (version_compare($context->getVersion(),'102.3.35') < 0) {
+            $connection->changeColumn(
+                $setup->getTable('mailchimp_stores'),
+                'apikey',
+                'apikey',
+                [
+                    'type' => \Magento\Framework\DB\Ddl\Table::TYPE_TEXT,
+                    'length' => 128
+                ]
+            );
+        }
 
     }
 }
