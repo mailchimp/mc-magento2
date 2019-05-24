@@ -25,12 +25,12 @@ define(
                     // remove all items in list combo
                     $('#stores_list_id').empty();
                     // get the selected apikey
-                    var apiKey = $('#stores_apikey').find(':selected').text();
+                    var apiKey = $('#stores_apikey').find(':selected').val();
                     // get the list for this apikey via ajax
                     //var apiUrl = this.options.apikeyUrl;
                     $.ajax({
                             url: apiUrl,
-                            data: {'form_key':  window.FORM_KEY, 'apikey': apiKey},
+                            data: {'form_key':  window.FORM_KEY, 'apikey': apiKey, 'encrypt': 1},
                             type: 'POST',
                             dataType: 'json',
                             showLoader: true

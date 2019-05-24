@@ -47,8 +47,9 @@ class Get extends Action
     {
         $param = $this->getRequest()->getParams();
         $apiKey = $param['apikey'];
+        $encrypt = $param['encrypt'];
         try {
-            $api = $this->_helper->getApiByApiKey($apiKey);
+            $api = $this->_helper->getApiByApiKey($apiKey,$encrypt);
             $stores = $api->ecommerce->stores->get(null, null, null, self::MAX_STORES);
             $result = [];
             foreach ($stores['stores'] as $store) {

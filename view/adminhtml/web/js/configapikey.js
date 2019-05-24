@@ -28,12 +28,8 @@ define(
             _init: function () {
                 var self = this;
                 $('#mailchimp_general_apikey').change(function () {
-                    var apiKey = $('#mailchimp_general_apikey').find(':selected').val();
+                    var apiKey = $('#mailchimp_general_apikey').val();
                     self._loadStores(apiKey);
-                });
-                $('#mailchimp_general_apikeylist').change(function () {
-                    var oldApiKey = $('#mailchimp_general_apikey').find(':selected').val();
-                    self._loadApiKeys(oldApiKey);
                 });
                 $('#mailchimp_general_monkeystore').change(function () {
                     self._loadDetails();
@@ -44,7 +40,7 @@ define(
                     $('#row_mailchimp_general_monkeystore .note').hide();
                 }
                 $('#mailchimp_general_webhook_create').click(function () {
-                    var apiKey = $('#mailchimp_general_apikey').find(':selected').val();
+                    var apiKey = $('#mailchimp_general_apikey').val();
                     var listId = $('#mailchimp_general_monkeylist').find(':selected').val();
                     self._createWebhook(apiKey, listId);
                 });
@@ -103,7 +99,7 @@ define(
                 // get the list for this apikey via ajax
                 $.ajax({
                         url: storeUrl,
-                        data: {'form_key':  window.FORM_KEY, 'apikey': apiKey},
+                        data: {'form_key':  window.FORM_KEY, 'apikey': apiKey, 'encrypt': 0},
                         type: 'GET',
                         dataType: 'json',
                         showLoader: true
@@ -131,50 +127,20 @@ define(
                     self._loadDetails();
                 });
             },
-            _loadApiKeys: function (oldApiKey) {
-                $('#mailchimp_general_apikey').empty();
-
-                $('#mailchimp_general_apikey').append($('<option>', {
-                    value: -1,
-                    text: 'Select one ApiKey'
-                }));
-                var apikeys = $('#mailchimp_general_apikeylist').val();
-                var lines = apikeys.split(/\n/);
-                var unique = 0;
-                var newApiKey = 0;
-                if (lines.length == 1) {
-                    unique = 1;
-                }
-                $.each(lines, function (i, item) {
-                    if (lines[i] == oldApiKey || unique) {
-                        $('#mailchimp_general_apikey').append($('<option>', {
-                            value: lines[i],
-                            text: lines[i],
-                            selected: "selected"
-                        }));
-                        newApiKey = lines[i];
-                    } else {
-                        $('#mailchimp_general_apikey').append($('<option>', {
-                            value: lines[i],
-                            text: lines[i]
-                        }));
-                    }
-                });
-                if (newApiKey!=oldApiKey) {
-                    this._loadStores(newApiKey);
-                }
-
-            },
             _loadDetails: function () {
                 var detailsUrl = this.options.detailsUrl;
                 var interestUrl = this.options.getInterestUrl;
-                var selectedApiKey = $('#mailchimp_general_apikey').find(':selected').val();
+                var apiKey = $('#mailchimp_general_apikey').val();
                 var selectedStore = $('#mailchimp_general_monkeystore').find(':selected').val();
+                var encrypt = 0;
+                if (apiKey=='******') {
+                    encrypt = 3;
+                }
                 $('#mailchimp_general_account_details_ul').empty();
                 $('#mailchimp_general_monkeylist').empty();
                 $.ajax({
                         url: detailsUrl,
-                        data: {'form_key':  window.FORM_KEY, 'apikey': selectedApiKey, "store": selectedStore},
+                        data: {'form_key':  window.FORM_KEY, 'apikey': apiKey, "store": selectedStore, 'encrypt': encrypt},
                         type: 'GET',
                         dataType: 'json',
                         showLoader: true
@@ -184,16 +150,18 @@ define(
                             $('#mailchimp_general_account_details_ul').append('<li>' + item.label + ' ' + item.value + '</li>');
                         }
                     });
-                    $('#mailchimp_general_monkeylist').append($('<option>', {
-                        value: data.list_id,
-                        text: data.list_name,
-                        selected: "selected"
-                    }));
+                    if (data.list_id) {
+                        $('#mailchimp_general_monkeylist').append($('<option>', {
+                            value: data.list_id,
+                            text: data.list_name,
+                            selected: "selected"
+                        }));
+                    }
                     var selectedList = data.list_id;
                     $('#mailchimp_general_interest').empty();
                     $.ajax({
                         url: interestUrl,
-                        data: {'form_key': window.FORM_KEY, 'apikey': selectedApiKey, "list": selectedList},
+                        data: {'form_key': window.FORM_KEY, 'apikey': apiKey, "list": selectedList, "encrypt": encrypt},
                         type: 'GET',
                         dataType: 'json',
                         showLoader: true
