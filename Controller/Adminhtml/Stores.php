@@ -7,70 +7,64 @@
  * @author Ebizmarts Team <info@ebizmarts.com>
  * @copyright Ebizmarts (http://ebizmarts.com)
  * @license     http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
- * @date: 4/20/17 3:20 PM
- * @file: Get.php
+ * @date: 4/12/17 11:35 AM
+ * @file: Stores.php
  */
-namespace Ebizmarts\MailChimp\Controller\Adminhtml\Stores;
+
+namespace Ebizmarts\MailChimp\Controller\Adminhtml;
 
 use Magento\Backend\App\Action;
 use Magento\Backend\App\Action\Context;
-use Magento\Framework\Controller\ResultFactory;
+use Magento\Framework\Registry;
+use Magento\Framework\View\Result\PageFactory;
+use Ebizmarts\MailChimp\Model\MailChimpStoresFactory;
 
-class Get extends Action
+class Stores extends Action
 {
-    const MAX_STORES = 200;
-
+    /**
+     * @var Registry
+     */
+    protected $_coreRegistry;
+    /**
+     * @var PageFactory
+     */
+    protected $_resultPageFactory;
+    /**
+     * @var MailChimpStoresFactory
+     */
+    protected $_mailchimpStoresFactory;
     /**
      * @var \Ebizmarts\MailChimp\Helper\Data
      */
     protected $_helper;
-    /**
-     * @var ResultFactory
-     */
-    protected $_resultFactory;
 
     /**
-     * Get constructor.
+     * Stores constructor.
      * @param Context $context
+     * @param Registry $registry
+     * @param PageFactory $resultPageFactory
+     * @param MailChimpStoresFactory $storesFactory
      * @param \Ebizmarts\MailChimp\Helper\Data $helper
      */
     public function __construct(
         Context $context,
+        Registry $registry,
+        PageFactory $resultPageFactory,
+        MailChimpStoresFactory $storesFactory,
         \Ebizmarts\MailChimp\Helper\Data $helper
     ) {
 
         parent::__construct($context);
-        $this->_resultFactory       = $context->getResultFactory();
+        $this->_coreRegistry            = $registry;
+        $this->_resultPageFactory       = $resultPageFactory;
+        $this->_mailchimpStoresFactory  = $storesFactory;
         $this->_helper                  = $helper;
     }
     public function execute()
     {
-        $param = $this->getRequest()->getParams();
-        $apiKey = $param['apikey'];
-        $encrypt = $param['encrypt'];
-        try {
-            $api = $this->_helper->getApiByApiKey($apiKey,$encrypt);
-            $stores = $api->ecommerce->stores->get(null, null, null, self::MAX_STORES);
-            $result = [];
-            foreach ($stores['stores'] as $store) {
-                if ($store['platform'] == \Ebizmarts\MailChimp\Helper\Data::PLATFORM) {
-                    if ($store['list_id']=='') {
-                        continue;
-                    }
-                    $list = $api->lists->getLists($store['list_id']);
-                    $result[] = ['id' => $store['id'], 'name' => $store['name'], 'list_name' => $list['name'], 'list_id' => $store['list_id']];
-                }
-            }
-        } catch (\Mailchimp_Error $e) {
-            $this->_helper->log($e->getFriendlyMessage());
-            $result = [];
-        }
-        $resultJson = $this->_resultFactory->create(ResultFactory::TYPE_JSON);
-        $resultJson->setData($result);
-        return $resultJson;
     }
     protected function _isAllowed()
     {
-        return $this->_authorization->isAllowed('Ebizmarts_MailChimp::config_mailchimp');
+        return $this->_authorization->isAllowed('Ebizmarts_MailChimp::stores_grid');
     }
 }
