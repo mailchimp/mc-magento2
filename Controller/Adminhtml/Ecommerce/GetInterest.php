@@ -27,20 +27,27 @@ class GetInterest extends Action
      * @var ResultFactory
      */
     protected $_resultFactory;
+    /**
+     * @var \Magento\Store\Model\StoreManager
+     */
+    protected $_storeManager;
 
     /**
      * GetInterest constructor.
      * @param Context $context
+     * @param \Magento\Store\Model\StoreManager $storeManager
      * @param \Ebizmarts\MailChimp\Helper\Data $helper
      */
     public function __construct(
         Context $context,
+        \Magento\Store\Model\StoreManager $storeManager,
         \Ebizmarts\MailChimp\Helper\Data $helper
     ) {
 
         parent::__construct($context);
         $this->_resultFactory       = $context->getResultFactory();
         $this->_helper                  = $helper;
+        $this->_storeManager        = $storeManager;
     }
 
     /**
@@ -54,8 +61,14 @@ class GetInterest extends Action
         if (array_key_exists('apikey', $param) && array_key_exists('list', $param)) {
             $apiKey = $param['apikey'];
             $list  = $param['list'];
+            $encrypt = $param['encrypt'];
             try {
-                $api = $this->_helper->getApiByApiKey($apiKey);
+                if ($encrypt == 3) {
+                    $api = $this->_helper->getApi($this->_storeManager->getStore()->getId());
+                } else {
+                    $api = $this->_helper->getApiByApiKey($apiKey, $encrypt);
+                }
+
                 $result = $api->lists->interestCategory->getAll($list);
                 if (is_array($result['categories']) && count($result['categories'])) {
                     $rc = $result['categories'];
