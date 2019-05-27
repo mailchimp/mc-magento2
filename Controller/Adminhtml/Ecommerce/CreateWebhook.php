@@ -61,6 +61,10 @@ class CreateWebhook extends \Magento\Backend\App\Action
         $params = $this->getRequest()->getParams();
         $apiKey = $params['apikey'];
         $listId = $params['listId'];
+        if ($apiKey=='******') {
+            $apiKey = $this->helper->getApiKey($this->storeManager->getStore()->getId());
+        }
+
         $return = $this->helper->createWebHook($apiKey, $listId);
         if (isset($return['message'])) {
             $valid = 0;
