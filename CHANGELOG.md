@@ -1,5 +1,28 @@
 # Change Log
 
+## [101.2.35](https://github.com/mailchimp/mc-magento2/tree/HEAD)
+
+[Full Changelog](https://github.com/mailchimp/mc-magento2/compare/102.3.34...101.2.35)
+
+**Implemented enhancements:**
+
+- Wrong error message in order grid [\#710](https://github.com/mailchimp/mc-magento2/issues/710)
+- Add a button to re sync customers [\#702](https://github.com/mailchimp/mc-magento2/issues/702)
+- Encrypt sensitive data [\#701](https://github.com/mailchimp/mc-magento2/issues/701)
+- Some exceptions are not added into logs, making it hard to find the error message. [\#700](https://github.com/mailchimp/mc-magento2/issues/700)
+
+**Fixed bugs:**
+
+- Remove error message when resend an item with error [\#719](https://github.com/mailchimp/mc-magento2/issues/719)
+- Error message 'Resource Not Found' on creating new customers [\#715](https://github.com/mailchimp/mc-magento2/issues/715)
+- Don't delete the cart from ecommerce table when the order is made [\#706](https://github.com/mailchimp/mc-magento2/issues/706)
+- Customer and subscriber with same email sent to mailchimp with different id [\#692](https://github.com/mailchimp/mc-magento2/issues/692)
+- Order is not marked to resync when the credit memo comes via magento API [\#687](https://github.com/mailchimp/mc-magento2/issues/687)
+- Order is not marked to resync when the invoice comes via magento API [\#682](https://github.com/mailchimp/mc-magento2/issues/682)
+- Order is not marked to resync when the shipment comes via magento API [\#678](https://github.com/mailchimp/mc-magento2/issues/678)
+- Multistore with different Mailchimp account wrong synchronization on customer delete/unsubcribe from magento admin [\#674](https://github.com/mailchimp/mc-magento2/issues/674)
+- MySQL error during setup:upgrade after module install \(with split database Magento EE feature enabled\) [\#664](https://github.com/mailchimp/mc-magento2/issues/664)
+
 ## [101.2.34](https://github.com/mailchimp/mc-magento2/tree/HEAD)
 
 [Full Changelog](https://github.com/mailchimp/mc-magento2/compare/1.2.33...101.2.34)
