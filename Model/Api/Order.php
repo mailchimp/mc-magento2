@@ -166,6 +166,7 @@ class Order
                     $productData = $this->_apiProduct->sendModifiedProduct($order, $mailchimpStoreId, $magentoStoreId);
                 } catch (\Exception $e) {
                     $error = $e->getMessage();
+                    $this->_helper->log($error);
                     $this->_updateOrder($mailchimpStoreId, $orderId, $this->_helper->getGmtDate(), $error, 0);
                     continue;
                 }
@@ -235,6 +236,7 @@ class Order
                     $productData = $this->_apiProduct->sendModifiedProduct($order, $mailchimpStoreId, $magentoStoreId);
                 } catch (\Exception $e) {
                     $error = $e->getMessage();
+                    $this->_helper->log($error);
                     $this->_updateOrder($mailchimpStoreId, $orderId, $this->_helper->getGmtDate(), $error, 0);
                     continue;
                 }
