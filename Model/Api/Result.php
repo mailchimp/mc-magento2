@@ -188,6 +188,7 @@ class Result
                     } else {
                         $chimpSync = $this->_helper->getChimpSyncEcommerce($mailchimpStoreId, $id, $type);
                         $chimpSync->setData('mailchimp_sent', \Ebizmarts\MailChimp\Helper\Data::SYNCED);
+                        $chimpSync->setData('mailchimp_sync_error','');
                         $chimpSync->getResource()->save($chimpSync);
                     }
                 }
