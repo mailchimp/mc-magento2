@@ -249,6 +249,7 @@ class Cart
                 $productData = $this->_apiProduct->sendQuoteModifiedProduct($cart, $mailchimpStoreId, $magentoStoreId);
             } catch (\Exception $e) {
                 $error = $e->getMessage();
+                $this->_helper->log($error);
                 $this->_updateQuote($mailchimpStoreId, $cartId);
                 continue;
             }

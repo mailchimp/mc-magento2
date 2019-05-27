@@ -104,6 +104,7 @@ class Webhook
                     $processed = self::PROCESSED_WITH_ERROR;
                 }
             } catch (\Exception $e) {
+                $this->_helper->log($e->getMessage());
                 $processed = self::PROCESSED_WITH_ERROR;
             }
             $item->setProcessed($processed);

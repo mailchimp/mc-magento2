@@ -84,6 +84,7 @@ class SaveAfter implements \Magento\Framework\Event\ObserverInterface
                     $interestGroup->getResource()->save($interestGroup);
                 }
             } catch (\Exception $e) {
+                $this->helper->log($e->getMessage());
             }
         } else {
             $subscriber->loadByEmail($customer->getEmail());
