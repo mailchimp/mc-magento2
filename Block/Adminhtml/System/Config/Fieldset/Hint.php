@@ -21,9 +21,15 @@ class Hint extends \Magento\Backend\Block\Template implements \Magento\Framework
      * @var \Magento\Framework\App\ProductMetadataInterface
      */
     private $_metaData;
-    
+    /**
+     * @var \Ebizmarts\MailChimp\Helper\Data
+     */
     private $_helper;
-    
+    /**
+     * @var \Magento\Backend\Block\Template\Context
+     */
+    private $_context;
+
     /**
      * @param \Magento\Backend\Block\Template\Context $context
      * @param \Magento\Framework\App\ProductMetadataInterface $productMetaData
@@ -39,6 +45,7 @@ class Hint extends \Magento\Backend\Block\Template implements \Magento\Framework
         parent::__construct($context, $data);
         $this->_metaData = $productMetaData;
         $this->_helper = $helper;
+        $this->_context = $context;
     }
     /**
      * @param \Magento\Framework\Data\Form\Element\AbstractElement $element
@@ -70,5 +77,14 @@ class Hint extends \Magento\Backend\Block\Template implements \Magento\Framework
     public function getModuleVersion()
     {
         return $this->_helper->getModuleVersion();
+    }
+    public function getHasApiKey() {
+        $apikey = $this->_helper->getApiKey($this->_context->getStoreManager()->getStore()->getId());
+        if ($apikey) {
+            return true;
+        } else {
+            return false;
+        }
+
     }
 }
