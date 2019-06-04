@@ -106,9 +106,7 @@ class Subscriber
                     $email = $customer->getEmail();
                     $mergeVars = $this->_helper->getMergeVarsBySubscriber($subscriber, $email);
                     $api = $this->_helper->getApi($storeId);
-                    $isSubscribeOwnEmail = $this->_customerSession->isLoggedIn()
-                        && $this->_customerSession->getCustomerDataObject()->getEmail() == $subscriber->getSubscriberEmail();
-                    if ($this->_helper->isDoubleOptInEnabled($storeId) && !$isSubscribeOwnEmail) {
+                    if ($this->_helper->isDoubleOptInEnabled($storeId)) {
                         $status = 'pending';
                     } else {
                         $status = 'subscribed';
