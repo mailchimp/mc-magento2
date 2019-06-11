@@ -6,6 +6,7 @@
 
 **Implemented enhancements:**
 
+- Show the amount of list subscribers [\#740](https://github.com/mailchimp/mc-magento2/issues/740)
 - Wrong error message in order grid [\#710](https://github.com/mailchimp/mc-magento2/issues/710)
 - Add a button to re sync customers [\#702](https://github.com/mailchimp/mc-magento2/issues/702)
 - Encrypt sensitive data [\#701](https://github.com/mailchimp/mc-magento2/issues/701)
@@ -16,6 +17,7 @@
 - Remove error message when resend an item with error [\#719](https://github.com/mailchimp/mc-magento2/issues/719)
 - Error message 'Resource Not Found' on creating new customers [\#715](https://github.com/mailchimp/mc-magento2/issues/715)
 - Don't delete the cart from ecommerce table when the order is made [\#706](https://github.com/mailchimp/mc-magento2/issues/706)
+- Success unsubscription, if subscribe again doesn't send confirm subscription emails [\#696](https://github.com/mailchimp/mc-magento2/issues/696)
 - Customer and subscriber with same email sent to mailchimp with different id [\#692](https://github.com/mailchimp/mc-magento2/issues/692)
 - Order is not marked to resync when the credit memo comes via magento API [\#687](https://github.com/mailchimp/mc-magento2/issues/687)
 - Order is not marked to resync when the invoice comes via magento API [\#682](https://github.com/mailchimp/mc-magento2/issues/682)
