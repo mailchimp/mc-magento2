@@ -1,6 +1,14 @@
 # Change Log
 
-## [102.3.35](https://github.com/mailchimp/mc-magento2/tree/HEAD)
+## [102.3.36](https://github.com/mailchimp/mc-magento2/tree/102.3.36)
+
+[Full Changelog](https://github.com/mailchimp/mc-magento2/compare/102.3.35...102.3.36)
+
+**Implemented enhancements:**
+
+- Take the version from the composer.json [\#759](https://github.com/mailchimp/mc-magento2/issues/759)
+
+## [102.3.35](https://github.com/mailchimp/mc-magento2/tree/102.3.35)
 
 [Full Changelog](https://github.com/mailchimp/mc-magento2/compare/102.3.34...101.2.35)
 
@@ -25,7 +33,7 @@
 - Multistore with different Mailchimp account wrong synchronization on customer delete/unsubcribe from magento admin [\#674](https://github.com/mailchimp/mc-magento2/issues/674)
 - MySQL error during setup:upgrade after module install \(with split database Magento EE feature enabled\) [\#664](https://github.com/mailchimp/mc-magento2/issues/664)
 
-## [102.3.34](https://github.com/mailchimp/mc-magento2/tree/HEAD)
+## [102.3.34](https://github.com/mailchimp/mc-magento2/tree/102.3.34)
 
 [Full Changelog](https://github.com/mailchimp/mc-magento2/compare/1.3.33...102.3.34)
 
