@@ -29,22 +29,30 @@ class Hint extends \Magento\Backend\Block\Template implements \Magento\Framework
      * @var \Magento\Backend\Block\Template\Context
      */
     private $_context;
+    /**
+     * @var \Ebizmarts\MailChimp\Model\Config\ModuleVersion
+     */
+    private $_moduleVersion;
 
     /**
+     * Hint constructor.
      * @param \Magento\Backend\Block\Template\Context $context
      * @param \Magento\Framework\App\ProductMetadataInterface $productMetaData
      * @param \Ebizmarts\MailChimp\Helper\Data $helper
+     * @param \Ebizmarts\MailChimp\Model\Config\ModuleVersion $moduleVersion
      * @param array $data
      */
     public function __construct(
         \Magento\Backend\Block\Template\Context $context,
         \Magento\Framework\App\ProductMetadataInterface $productMetaData,
         \Ebizmarts\MailChimp\Helper\Data $helper,
+        \Ebizmarts\MailChimp\Model\Config\ModuleVersion $moduleVersion,
         array $data = []
     ) {
         parent::__construct($context, $data);
         $this->_metaData = $productMetaData;
         $this->_helper = $helper;
+        $this->_moduleVersion   = $moduleVersion;
         $this->_context = $context;
     }
     /**
@@ -58,7 +66,7 @@ class Hint extends \Magento\Backend\Block\Template implements \Magento\Framework
     public function getPxParams()
     {
 
-        $extension = "MailChimp;{$this->getModuleVersion()}";
+        $extension = $extension = "MailChimp;{$this->_moduleVersion->getModuleVersion('MailChimp/mc-magento2')}";
         $mageEdition = $this->_metaData->getEdition();
         switch ($mageEdition) {
             case 'Community':
@@ -76,7 +84,7 @@ class Hint extends \Magento\Backend\Block\Template implements \Magento\Framework
 
     public function getModuleVersion()
     {
-        return $this->_helper->getModuleVersion();
+        return $this->_moduleVersion->getModuleVersion('Ebizmarts_MailChimp');
     }
     public function getHasApiKey() {
         $apikey = $this->_helper->getApiKey($this->_context->getStoreManager()->getStore()->getId());
