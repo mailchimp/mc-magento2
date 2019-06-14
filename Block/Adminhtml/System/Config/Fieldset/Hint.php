@@ -63,25 +63,6 @@ class Hint extends \Magento\Backend\Block\Template implements \Magento\Framework
     {
         return $this->toHtml();
     }
-    public function getPxParams()
-    {
-
-        $extension = "MailChimp;{$this->_moduleVersion->getModuleVersion('MailChimp/mc-magento2')}";
-        $mageEdition = $this->_metaData->getEdition();
-        switch ($mageEdition) {
-            case 'Community':
-                $mageEdition = 'CE';
-                break;
-            case 'Enterprise':
-                $mageEdition = 'EE';
-                break;
-        }
-        $mageVersion = $this->_metaData->getVersion();
-        $mage = "Magento {$mageEdition};{$mageVersion}";
-        $hash = md5($extension . '_' . $mage . '_' . $extension);
-        return "ext=$extension&mage={$mage}&ctrl={$hash}";
-    }
-
     public function getModuleVersion()
     {
         return $this->_moduleVersion->getModuleVersion('Ebizmarts_MailChimp');
