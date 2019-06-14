@@ -66,7 +66,7 @@ class Hint extends \Magento\Backend\Block\Template implements \Magento\Framework
     public function getPxParams()
     {
 
-        $extension = $extension = "MailChimp;{$this->_moduleVersion->getModuleVersion('MailChimp/mc-magento2')}";
+        $extension = "MailChimp;{$this->_moduleVersion->getModuleVersion('MailChimp/mc-magento2')}";
         $mageEdition = $this->_metaData->getEdition();
         switch ($mageEdition) {
             case 'Community':
