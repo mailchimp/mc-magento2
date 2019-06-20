@@ -7,7 +7,7 @@
  */
 namespace Ebizmarts\MailChimp\Block\Adminhtml\System\Config;
 
-class ResyncCustomer extends \Magento\Config\Block\System\Config\Form\Field
+class ResyncSubscriber extends \Magento\Config\Block\System\Config\Form\Field
 {
     /**
      * @var \Ebizmarts\MailChimp\Helper\Data
@@ -33,7 +33,7 @@ class ResyncCustomer extends \Magento\Config\Block\System\Config\Form\Field
     protected function _construct()
     {
         parent::_construct();
-        $this->setTemplate('system/config/resynccustomer.phtml');
+        $this->setTemplate('system/config/resyncsubscriber.phtml');
     }
 
     protected function _getElementHtml(\Magento\Framework\Data\Form\Element\AbstractElement $element)
