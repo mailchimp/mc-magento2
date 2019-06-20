@@ -37,7 +37,7 @@ class ModuleVersion
         $this->componentRegistrar = $componentRegistrar;
         $this->readFactory = $readFactory;
     }
-    public function getModuleVersion($moduleName) : string
+    public function getModuleVersion($moduleName)
     {
         $emptyVersionNumber = '';
         $composerJsonData = null;
@@ -53,8 +53,12 @@ class ModuleVersion
         $jsonData = json_decode($composerJsonData);
         if ($jsonData === null) {
             return $emptyVersionNumber;
+                                                                                                            }
+        if ($jsonData->version) {
+            return $jsonData->version;
+        } else {
+            return $emptyVersionNumber;
         }
-        return $jsonData->version ?? $emptyVersionNumber;
     }
 }
 
