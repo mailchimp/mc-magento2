@@ -17,7 +17,7 @@ use Magento\Framework\Controller\Result\JsonFactory;
 use Magento\Framework\Exception\ValidatorException;
 use Symfony\Component\Config\Definition\Exception\Exception;
 
-class ResyncCustomer extends \Magento\Backend\App\Action
+class ResyncSubscribers extends \Magento\Backend\App\Action
 {
     /**
      * @var JsonFactory
@@ -58,27 +58,27 @@ class ResyncCustomer extends \Magento\Backend\App\Action
         $message = '';
         $params = $this->getRequest()->getParams();
         if (isset($params['website'])) {
-            $mailchimpStore = $this->helper->getConfigValue(
-                \Ebizmarts\MailChimp\Helper\Data::XML_MAILCHIMP_STORE,
+            $mailchimpList = $this->helper->getConfigValue(
+                \Ebizmarts\MailChimp\Helper\Data::XML_PATH_LIST,
                 $params['website'],
                 'website'
             );
         } elseif (isset($params['store'])) {
-            $mailchimpStore = $this->helper->getConfigValue(
-                \Ebizmarts\MailChimp\Helper\Data::XML_MAILCHIMP_STORE,
+            $mailchimpList = $this->helper->getConfigValue(
+                \Ebizmarts\MailChimp\Helper\Data::XML_PATH_LIST,
                 $params['store'],
                 'store'
             );
         } else {
-            $mailchimpStore = $this->helper->getConfigValue(
-                \Ebizmarts\MailChimp\Helper\Data::XML_MAILCHIMP_STORE,
+            $mailchimpList = $this->helper->getConfigValue(
+                \Ebizmarts\MailChimp\Helper\Data::XML_PATH_LIST,
                 $this->storeManager->getStore()
             );
         }
 
         $resultJson = $this->resultJsonFactory->create();
         try {
-            $this->helper->resyncCustomer($mailchimpStore);
+            $this->helper->resyncAllSubscribers($mailchimpList);
         } catch (ValidatorException $e) {
             $valid = 0;
             $message = $e->getMessage();
