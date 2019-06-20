@@ -118,9 +118,9 @@
                         <field id="*/*/active">1</field>
                     </depends>
                 </field>
-                <field id="resync_customers" translate="button_label" type="button" sortOrder="85" showInDefault="1" showInWebsite="1" showInStore="1">
-                    <button_label>Resync Customers</button_label>
-                    <frontend_model>Ebizmarts\MailChimp\Block\Adminhtml\System\Config\ResyncCustomer</frontend_model>
+                <field id="resync_subscribers" translate="button_label" type="button" sortOrder="85" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <button_label>Resync Subscribers</button_label>
+                    <frontend_model>Ebizmarts\MailChimp\Block\Adminhtml\System\Config\ResyncSubscriber</frontend_model>
                     <depends>
                         <field id="*/*/active">1</field>
                     </depends>
