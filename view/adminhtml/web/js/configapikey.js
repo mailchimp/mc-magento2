@@ -22,7 +22,7 @@ define(
                 "storeGridUrl": "",
                 "createWebhookUrl": "",
                 "getInterestUrl": "",
-                "resyncCustomerUrl": ""
+                "resyncSubscribersUrl": ""
             },
 
             _init: function () {
@@ -44,25 +44,25 @@ define(
                     var listId = $('#mailchimp_general_monkeylist').find(':selected').val();
                     self._createWebhook(apiKey, listId);
                 });
-                $('#mailchimp_general_resync_customers').click(function () {
+                $('#mailchimp_general_resync_subscribers').click(function () {
                     var mailchimpStoreId = $('#mailchimp_general_monkeystore').find(':selected').val();
-                    self._resyncCustomer(mailchimpStoreId);
+                    self._resyncSubscribers(mailchimpStoreId);
                 });
 
             },
-            _resyncCustomer: function(mailchimpStoreId) {
-                var resyncCustomerUrl = this.options.resyncCustomerUrl;
+            _resyncSubscribers: function(mailchimpStoreId) {
+                var resyncSubscribersUrl = this.options.resyncSubscribersUrl;
                 $.ajax({
-                    url: resyncCustomerUrl,
+                    url: resyncSubscribersUrl,
                     data: {'form_key': window.FORM_KEY,'mailchimpStoreId': mailchimpStoreId},
                     type: 'GET',
                     dataType: 'json',
                     showLoader: true
                 }).done(function (data) {
                     if (data.valid==0) {
-                        alert({content:'Error: can\'t resync your customers'});
+                        alert({content:'Error: can\'t resync your subscribers'});
                     } else if (data.valid==1) {
-                        alert({content:'All customers marked for resync'});
+                        alert({content:'All subscribers marked for resync'});
                     }
                 });
             },
