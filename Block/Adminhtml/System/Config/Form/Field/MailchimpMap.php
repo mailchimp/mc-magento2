@@ -62,7 +62,7 @@ class MailchimpMap extends \Magento\Framework\View\Element\Html\Select
             $scope = 'default';
         }
 
-        $api = $this->_helper->getApi($storeId);
+        $api = $this->_helper->getApi($storeId,$scope);
         try {
             $merge = $api->lists->mergeFields->getAll($this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_PATH_LIST, $storeId, $scope), null, null, \Ebizmarts\MailChimp\Helper\Data::MAX_MERGEFIELDS);
             foreach ($merge['merge_fields'] as $item) {
