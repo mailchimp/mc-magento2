@@ -94,12 +94,8 @@ class Customer
         foreach ($collection as $item) {
             $customer = $this->_customerFactory->create();
             $customer->getResource()->load($customer, $item->getId());
-
-
-//            $item->getId());
             $data           = $this->_buildCustomerData($customer);
             $customerJson   = '';
-
             try {
                 $customerJson = json_encode($data);
             } catch (Exception $e) {
@@ -111,8 +107,9 @@ class Customer
                 } else {
                     $this->_helper->modifyCounter(\Ebizmarts\MailChimp\Helper\Data::CUS_NEW);
                 }
+                $customerMailchimpId = md5(strtolower($customer->getEmail()));
                 $customerArray[$counter]['method'] = "PUT";
-                $customerArray[$counter]['path'] = "/ecommerce/stores/" . $mailchimpStoreId . "/customers/" . $customer->getId();
+                $customerArray[$counter]['path'] = "/ecommerce/stores/" . $mailchimpStoreId . "/customers/" . $customerMailchimpId;
                 $customerArray[$counter]['operation_id'] = $this->_batchId . '_' . $customer->getId();
                 $customerArray[$counter]['body'] = $customerJson;
 
