@@ -1026,22 +1026,25 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
             $api = $this->getApi($storeId);
             $listId = $this->getConfigValue(self::XML_PATH_LIST, $storeId);
             $allInterest = $api->lists->interestCategory->getAll($listId);
-            foreach ($allInterest['categories'] as $item) {
-                if (in_array($item['id'], $interest)) {
-                    $rc[$item['id']]['interest'] = ['id' => $item['id'], 'title' => $item['title'], 'type' => $item['type']];
+            if (array_key_exists('categories',$allInterest) && is_array($allInterest['categories'])) {
+                foreach ($allInterest['categories'] as $item) {
+                    if (in_array($item['id'], $interest)) {
+                        $rc[$item['id']]['interest'] = ['id' => $item['id'], 'title' => $item['title'], 'type' => $item['type']];
+                    }
                 }
-            }
-            foreach ($interest as $interestId) {
-                $mailchimpInterest = $api->lists->interestCategory->interests->getAll($listId, $interestId);
-                foreach ($mailchimpInterest['interests'] as $mi) {
-                    $rc[$mi['category_id']]['category'][$mi['display_order']] = ['id' => $mi['id'], 'name' => $mi['name'], 'checked' => false];
+                foreach ($interest as $interestId) {
+                    $mailchimpInterest = $api->lists->interestCategory->interests->getAll($listId, $interestId);
+                    foreach ($mailchimpInterest['interests'] as $mi) {
+                        $rc[$mi['category_id']]['category'][$mi['display_order']] = ['id' => $mi['id'], 'name' => $mi['name'], 'checked' => false];
+                    }
                 }
+            } else {
+                $this->log(__('Error retrieving interest groups for store ').$storeId);
             }
         } catch (\Mailchimp_Error $e) {
             $this->log($e->getFriendlyMessage());
         }
-        return $rc;
-    }
+        return $rc;    }
     public function getSubscriberInterest($subscriberId, $storeId, $interest = null)
     {
         if (!$interest) {
