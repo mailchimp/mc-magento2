@@ -25,6 +25,7 @@
   },
   "require" : {
     "magento/framework": "100.1.*",
-    "ebizmarts/mailchimp-lib": ">=3.0.27"
+    "ebizmarts/mailchimp-lib": ">=3.0.27",
+    "ext-json": "*"
   }
 }
