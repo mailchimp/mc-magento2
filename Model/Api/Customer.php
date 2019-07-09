@@ -40,7 +40,14 @@ class Customer
      * @var \Magento\Customer\Model\CustomerFactory
      */
     protected $_customerFactory;
+    /**
+     * @var \Magento\Customer\Model\Address
+     */
     protected $_address;
+    /**
+     * @var \Magento\Newsletter\Model\SubscriberFactory
+     */
+    protected $subscriberFactory;
 
     /**
      * @var string
@@ -55,6 +62,7 @@ class Customer
      * @param \Magento\Sales\Model\ResourceModel\Order\CollectionFactory $orderCollection
      * @param CountryFactory $countryFactory
      * @param \Magento\Customer\Model\Address $address
+     * @param \Magento\Newsletter\Model\SubscriberFactory $subscriberFactory
      */
     public function __construct(
         \Ebizmarts\MailChimp\Helper\Data $helper,
@@ -62,7 +70,8 @@ class Customer
         \Magento\Customer\Model\ResourceModel\Customer\CollectionFactory $collection,
         \Magento\Sales\Model\ResourceModel\Order\CollectionFactory $orderCollection,
         \Magento\Directory\Model\CountryFactory $countryFactory,
-        \Magento\Customer\Model\Address $address
+        \Magento\Customer\Model\Address $address,
+        \Magento\Newsletter\Model\SubscriberFactory $subscriberFactory
     ) {
     
         $this->_helper              = $helper;
@@ -72,10 +81,12 @@ class Customer
         $this->_address             = $address;
         $this->_customerFactory     = $customerFactory;
         $this->_countryFactory      = $countryFactory;
+        $this->subscriberFactory    = $subscriberFactory;
     }
     public function sendCustomers($storeId)
     {
         $mailchimpStoreId = $this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_MAILCHIMP_STORE, $storeId);
+        $listId = $this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_PATH_LIST, $storeId);
         $collection = $this->_collection->create();
         $collection->addFieldToFilter('store_id', ['eq'=>$storeId]);
         $collection->getSelect()->joinLeft(
@@ -113,13 +124,41 @@ class Customer
                 $customerArray[$counter]['path'] = "/ecommerce/stores/" . $mailchimpStoreId . "/customers/" . $customerMailchimpId;
                 $customerArray[$counter]['operation_id'] = $this->_batchId . '_' . $customer->getId();
                 $customerArray[$counter]['body'] = $customerJson;
-
+                $counter++;
+                if ( !$this->isSubscriber($customer)) {
+                    $subscriberData = $this->buildSubscriberData($customer);
+                    $customerArray[$counter]['method'] = "PATCH";
+                    $customerArray[$counter]['path'] = "/lists/" . $listId . "/members/" . $customerMailchimpId;;
+                    $customerArray[$counter]['operation_id'] = $this->_batchId . '_SUB_' . $customer->getId();
+                    $customerArray[$counter]['body'] = json_encode($subscriberData);
+                    $counter++;
+                }
                 //update customers delta
                 $this->_updateCustomer($mailchimpStoreId, $customer->getId());
             }
-            $counter++;
         }
         return $customerArray;
+    }
+    /**
+     * @param \Magento\Customer\Model\Customer $customer
+     * @return mixed
+     */
+    protected function buildSubscriberData(\Magento\Customer\Model\Customer $customer)
+    {
+        $data = [];
+        $data["merge_fields"] = $this->_helper->getMergeVars($customer,$customer->getStoreId());
+        return $data;
+    }
+    protected function isSubscriber(\Magento\Customer\Model\Customer $customer)
+    {
+        $subscriber = $this->subscriberFactory->create();
+        $subscriber->loadByEmail($customer->getEmail());
+        if ($subscriber->getEmail() == $customer->getEmail()) {
+            if ($subscriber->getStatus() === \Magento\Newsletter\Model\Subscriber::STATUS_SUBSCRIBED) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
