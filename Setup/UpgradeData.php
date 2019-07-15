@@ -116,6 +116,9 @@ class UpgradeData implements UpgradeDataInterface
                     $connection->update($table, $row, $where);
                 } catch (\Exception $e) {
                     $this->_helper->log($e->getMessage());
+                    $row['value'] ='';
+                    $where = ['config_id =?' => $row['config_id']];
+                    $connection->update($table, $row, $where);
                 }
             }
 
@@ -140,6 +143,7 @@ class UpgradeData implements UpgradeDataInterface
                             $item->getResource()->save($item);
                         } catch (\Exception $e) {
                             $this->_helper->log($e->getMessage());
+                            $item->getResource()->delete($item);
                         }
                         $lastId = $item->getId();
                     }
@@ -167,6 +171,8 @@ class UpgradeData implements UpgradeDataInterface
                             $webhookItem->getResource()->save($webhookItem);
                         } catch (\Exception $e) {
                             $this->_helper->log($e->getMessage());
+                            $webhookItem->setProcesed(\Ebizmarts\MailChimp\Cron\Webhook::DATA_WITH_ERROR);
+                            $webhookItem->getResource()->save($webhookItem);
                         }
                         $lastId = $webhookItem->getId();
                     }
