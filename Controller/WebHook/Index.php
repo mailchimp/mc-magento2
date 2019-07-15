@@ -74,12 +74,17 @@ class Index extends Action
             $request = $this->getRequest()->getPost();
             if ($this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_PATH_WEBHOOK_ACTIVE) ||
                 $request['type']==\Ebizmarts\MailChimp\Cron\Webhook::TYPE_SUBSCRIBE) {
-                $chimpRequest = $this->_chimpWebhookRequestFactory->create();
-                $chimpRequest->setType($request['type']);
-                $chimpRequest->setFiredAt($request['fired_at']);
-                $chimpRequest->setDataRequest($this->_helper->serialize($request['data']));
-                $chimpRequest->setProcessed(false);
-                $chimpRequest->getResource()->save($chimpRequest);
+                try {
+                    $chimpRequest = $this->_chimpWebhookRequestFactory->create();
+                    $chimpRequest->setType($request['type']);
+                    $chimpRequest->setFiredAt($request['fired_at']);
+                    $chimpRequest->setDataRequest($this->_helper->serialize($request['data']));
+                    $chimpRequest->setProcessed(false);
+                    $chimpRequest->getResource()->save($chimpRequest);
+                } catch(\Exception $e) {
+                    $this->_helper->log($e->getMessage());
+                    $this->_helper->log($request['data']);
+                }
             }
         } else {
             $this->_helper->log('An empty request comes from ip: '.$this->_remoteAddress->getRemoteAddress());
