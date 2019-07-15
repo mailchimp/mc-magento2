@@ -94,6 +94,7 @@ class Save
             }
         } catch (\Exception $e) {
             $this->helper->log($e->getMessage());
+            $this->helper->log($params);
         }
     }
     protected function _updateSubscriber($listId, $entityId, $sync_delta = null, $sync_error = null, $sync_modified = null)
