@@ -89,6 +89,7 @@ class VarsMap extends \Magento\Framework\App\Helper\AbstractHelper
     }
     protected function serializeValue($value)
     {
+        $rc = '';
         if (is_array($value)) {
             $data = [];
             foreach ($value as $customerFiledId => $mailchimpName) {
@@ -96,18 +97,26 @@ class VarsMap extends \Magento\Framework\App\Helper\AbstractHelper
                     $data[$customerFiledId] = $mailchimpName;
                 }
             }
-            return $this->_helper->serialize($data);
-        } else {
-            return '';
+            try {
+                $rc = $this->_helper->serialize($data);
+            } catch(\Exception $e)
+            {
+                $this->_helper->log($e->getMessage());
+            }
         }
+        return $rc;
     }
     protected function unserializeValue($value)
     {
+        $rc = [];
         if (is_string($value) && !empty($value)) {
-            return $this->_helper->unserialize($value);
-        } else {
-            return [];
+            try {
+                $rc = $this->_helper->unserialize($value);
+            } catch(\Exception $e) {
+                $this->_helper->log($e->getMessage());
+            }
         }
+        return $rc;
     }
     protected function encodeArrayFieldValue(array $value)
     {
