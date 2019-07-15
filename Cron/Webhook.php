@@ -27,6 +27,7 @@ class Webhook
     const NOT_PROCESSED         = 0;
     const PROCESSED_OK          = 1;
     const PROCESSED_WITH_ERROR  = 2;
+    const DATA_WITH_ERROR       = 3;
     /**
      * @var \Ebizmarts\MailChimp\Helper\Data
      */

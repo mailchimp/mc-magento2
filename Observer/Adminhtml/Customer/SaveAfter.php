@@ -85,6 +85,7 @@ class SaveAfter implements \Magento\Framework\Event\ObserverInterface
                 }
             } catch (\Exception $e) {
                 $this->helper->log($e->getMessage());
+                $this->helper->log($params);
             }
         } else {
             $subscriber->loadByEmail($customer->getEmail());
