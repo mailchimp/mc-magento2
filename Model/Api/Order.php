@@ -259,7 +259,7 @@ class Order
                 } else {
                     $error = __('Something went wrong when retreiving product information.');
                     $this->_helper->log($error);
-//                    $this->_updateOrder($mailchimpStoreId, $orderId, $this->_date->gmtDate(), $error, 0);
+                    $this->_updateOrder($mailchimpStoreId, $orderId, $this->_helper->getGmtDate(), $error, 0);
                 }
 
             } catch (Exception $e) {
