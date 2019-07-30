@@ -275,10 +275,6 @@ class Product
             $data['path'] = "/ecommerce/stores/" . $mailchimpStoreId . "/products";
             $data['operation_id'] = $this->_batchId . '_' . $product->getId();
             $data['body'] = $body;
-            if($product->getId()%2) {
-                $data['invalid'] = "\xe2\x28\xa1";
-            }
-
             $this->productPrice = null;
         }
         return $data;
