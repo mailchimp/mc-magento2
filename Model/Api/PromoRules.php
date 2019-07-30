@@ -163,14 +163,19 @@ class PromoRules
             $promoRules = $this->_generateRuleData($rule);
             if (!empty($promoRules)) {
                 $promoRulesJson = json_encode($promoRules);
-                if (!empty($promoRulesJson)) {
-                    $data['method'] = 'POST';
-                    $data['path'] = '/ecommerce/stores/' . $mailchimpStoreId . '/promo-rules';
-                    $data['operation_id'] = $this->_batchId . '_' . $ruleId;
-                    $data['body'] = $promoRulesJson;
-                    $this->_updateSyncData($mailchimpStoreId, $ruleId);
+                if ($promoRulesJson !== false) {
+                    if (!empty($promoRulesJson)) {
+                        $data['method'] = 'POST';
+                        $data['path'] = '/ecommerce/stores/' . $mailchimpStoreId . '/promo-rules';
+                        $data['operation_id'] = $this->_batchId . '_' . $ruleId;
+                        $data['body'] = $promoRulesJson;
+                        $this->_updateSyncData($mailchimpStoreId, $ruleId);
+                    } else {
+                        $error = __('Something went wrong when retrieving the information.');
+                        $this->_updateSyncData($mailchimpStoreId, $ruleId, $this->_helper->getGmtDate(), $error, 0);
+                    }
                 } else {
-                    $error = __('Something went wrong when retrieving the information.');
+                    $error = json_last_error_msg();
                     $this->_updateSyncData($mailchimpStoreId, $ruleId, $this->_helper->getGmtDate(), $error, 0);
                 }
             } else {

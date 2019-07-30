@@ -162,18 +162,23 @@ class PromoCodes
                         continue;
                     }
                     $promoCodeJson = json_encode($this->generateCodeData($item, $magentoStoreId));
-                    if (!empty($promoCodeJson)) {
-                        $batchArray[$counter]['method'] = 'POST';
-                        $batchArray[$counter]['path'] = "/ecommerce/stores/$mailchimpStoreId/promo-rules/$ruleId/promo-codes/";
-                        $batchArray[$counter]['operation_id'] = $this->_batchId . '_' . $couponId;
-                        $batchArray[$counter]['body'] = $promoCodeJson;
+                    if ($promoCodeJson !== false) {
+                        if (!empty($promoCodeJson)) {
+                            $batchArray[$counter]['method'] = 'POST';
+                            $batchArray[$counter]['path'] = "/ecommerce/stores/$mailchimpStoreId/promo-rules/$ruleId/promo-codes/";
+                            $batchArray[$counter]['operation_id'] = $this->_batchId . '_' . $couponId;
+                            $batchArray[$counter]['body'] = $promoCodeJson;
+                        } else {
+                            $error = __('Something went wrong when retrieving the information for promo rule');
+                            $this->_updateSyncData($mailchimpStoreId, $couponId, $this->_helper->getGmtDate(), $error, 0);
+                            continue;
+                        }
+                        $counter++;
+                        $this->_updateSyncData($mailchimpStoreId, $couponId);
                     } else {
-                        $error = __('Something went wrong when retrieving the information for promo rule');
+                        $error = json_last_error_msg();
                         $this->_updateSyncData($mailchimpStoreId, $couponId, $this->_helper->getGmtDate(), $error, 0);
-                        continue;
                     }
-                    $counter++;
-                    $this->_updateSyncData($mailchimpStoreId, $couponId);
                 } catch (Exception $e) {
                     $this->_helper->log($e->getMessage());
                 }
