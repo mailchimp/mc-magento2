@@ -178,21 +178,27 @@ class Order
                 }
 
                 $orderJson = $this->GeneratePOSTPayload($order, $mailchimpStoreId, $magentoStoreId, true);
-                if (!empty($orderJson)) {
-                    $this->_helper->modifyCounter(\Ebizmarts\MailChimp\Helper\Data::ORD_MOD);
-                    $batchArray[$this->_counter]['method'] = "PATCH";
-                    $batchArray[$this->_counter]['path'] = '/ecommerce/stores/' . $mailchimpStoreId . '/orders/' . $order->getIncrementId();
-                    $batchArray[$this->_counter]['operation_id'] = $this->_batchId . '_' . $orderId;
-                    $batchArray[$this->_counter]['body'] = $orderJson;
+                if ($orderJson!==false) {
+                    if (!empty($orderJson)) {
+                        $this->_helper->modifyCounter(\Ebizmarts\MailChimp\Helper\Data::ORD_MOD);
+                        $batchArray[$this->_counter]['method'] = "PATCH";
+                        $batchArray[$this->_counter]['path'] = '/ecommerce/stores/' . $mailchimpStoreId . '/orders/' . $order->getIncrementId();
+                        $batchArray[$this->_counter]['operation_id'] = $this->_batchId . '_' . $orderId;
+                        $batchArray[$this->_counter]['body'] = $orderJson;
+                    } else {
+                        $error = __('Order ['.$order->getIncrementId().'] is empty');
+                        $this->_helper->log($error);
+                        $this->_updateOrder($mailchimpStoreId, $orderId, $this->_helper->getGmtDate(), $error, 0);
+                        continue;
+                    }
+                    //update order delta
+                    $this->_updateOrder($mailchimpStoreId, $orderId);
+                    $this->_counter++;
                 } else {
-                    $error = __('Something went wrong when retreiving product information.');
+                    $error = __('Json error');
                     $this->_updateOrder($mailchimpStoreId, $orderId, $this->_helper->getGmtDate(), $error, 0);
                     continue;
                 }
-
-                //update order delta
-                $this->_updateOrder($mailchimpStoreId, $orderId);
-                $this->_counter++;
             } catch (Exception $e) {
                 $this->_helper->log($e->getMessage());
             }
@@ -247,21 +253,26 @@ class Order
                     }
                 }
                 $orderJson = $this->GeneratePOSTPayload($order, $mailchimpStoreId, $magentoStoreId);
-                if (!empty($orderJson)) {
-                    $this->_helper->modifyCounter(\Ebizmarts\MailChimp\Helper\Data::ORD_NEW);
-                    $batchArray[$this->_counter]['method'] = "POST";
-                    $batchArray[$this->_counter]['path'] = '/ecommerce/stores/' . $mailchimpStoreId . '/orders';
-                    $batchArray[$this->_counter]['operation_id'] = $this->_batchId . '_' . $orderId;
-                    $batchArray[$this->_counter]['body'] = $orderJson;
-                    //update order delta
-                    $this->_updateOrder($mailchimpStoreId, $orderId);
-                    $this->_counter++;
+                if ($orderJson!==false) {
+                    if (!empty($orderJson)) {
+                        $this->_helper->modifyCounter(\Ebizmarts\MailChimp\Helper\Data::ORD_NEW);
+                        $batchArray[$this->_counter]['method'] = "POST";
+                        $batchArray[$this->_counter]['path'] = '/ecommerce/stores/' . $mailchimpStoreId . '/orders';
+                        $batchArray[$this->_counter]['operation_id'] = $this->_batchId . '_' . $orderId;
+                        $batchArray[$this->_counter]['body'] = $orderJson;
+                        //update order delta
+                        $this->_updateOrder($mailchimpStoreId, $orderId);
+                        $this->_counter++;
+                    } else {
+                        $error = __('Order ['.$item->getIncrementId().'] is empty');
+                        $this->_helper->log($error);
+                        $this->_updateOrder($mailchimpStoreId, $orderId, $this->_helper->getGmtDate(), $error, 0);
+                    }
                 } else {
-                    $error = __('Something went wrong when retreiving product information.');
-                    $this->_helper->log($error);
+                    $error = __('Json error');
                     $this->_updateOrder($mailchimpStoreId, $orderId, $this->_helper->getGmtDate(), $error, 0);
+                    continue;
                 }
-
             } catch (Exception $e) {
                 $this->_helper->log($e->getMessage());
             }
@@ -511,11 +522,12 @@ class Order
         $jsonData = "";
 
         //enconde to JSON
-        try {
-            $jsonData = json_encode($data);
-        } catch (Exception $e) {
-            //json encode failed
-            $this->_helper->log("Order " . $order->getEntityId() . " json encode failed");
+        $jsonData = json_encode($data);
+        if ($jsonData===false) {
+            $jsonError = json_last_error();
+            $jsonErrorMsg = json_last_error_msg();
+            $this->_helper->log('');
+            $this->_helper->log("$jsonErrorMsg on order [".$order->getEntityId()."]");
         }
 
         return $jsonData;
