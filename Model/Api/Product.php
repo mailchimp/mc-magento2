@@ -263,20 +263,23 @@ class Product
                 return [];
         }
         $bodyData = $this->_buildProductData($product, $magentoStoreId, false, $variantProducts);
-        try {
-            $body = json_encode($bodyData, JSON_HEX_APOS|JSON_HEX_QUOT);
-        } catch (\Exception $e) {
-            //json encode failed
-            $this->_helper->log("Product " . $product->getId() . " json encode failed");
+        $body = json_encode($bodyData, JSON_HEX_APOS|JSON_HEX_QUOT);
+        if ($body === false) {
+            $jsonError = json_last_error();
+            $jsonErrorMsg = json_last_error_msg();
+            $this->_helper->log("");
+            $this->_helper->log("$jsonErrorMsg for product [".$product->getId()."]");
             return [];
+
+        } else {
+            $this->_helper->modifyCounter(\Ebizmarts\MailChimp\Helper\Data::PRO_NEW);
+            $data = [];
+            $data['method'] = "POST";
+            $data['path'] = "/ecommerce/stores/" . $mailchimpStoreId . "/products";
+            $data['operation_id'] = $this->_batchId . '_' . $product->getId();
+            $data['body'] = $body;
+            $this->productPrice = null;
         }
-        $this->_helper->modifyCounter(\Ebizmarts\MailChimp\Helper\Data::PRO_NEW);
-        $data = [];
-        $data['method'] = "POST";
-        $data['path'] = "/ecommerce/stores/" . $mailchimpStoreId . "/products";
-        $data['operation_id'] = $this->_batchId . '_' . $product->getId();
-        $data['body'] = $body;
-        $this->productPrice = null;
         return $data;
     }
     protected function _buildOldProductRequest(
@@ -317,11 +320,11 @@ class Product
                     $productdata['method'] = "PUT";
                     $productdata['path'] = "/ecommerce/stores/" . $mailchimpStoreId . "/products/" . $parentId . '/variants/' . $data['id'];
                     $productdata['operation_id'] = $batchId . '_' . $parentId;
-                    try {
-                        $body = json_encode($variendata);
-                    } catch (\Exception $e) {
-                        //json encode failed
-                        $this->_helper->log("Product " . $product->getId() . " json encode failed");
+                    $body = json_encode($variendata);
+                    if ($body===false) {
+                        $jsonErrorMsg = json_last_error_msg();
+                        $this->_helper->log("");
+                        $this->_helper->log("$jsonErrorMsg for product [".$product->getId()."]");
                         continue;
                     }
 
@@ -342,11 +345,11 @@ class Product
         }
 
         $bodyData = $this->_buildProductData($product, $magentoStoreId, false, $variantProducts);
-        try {
-            $body = json_encode($bodyData, JSON_HEX_APOS|JSON_HEX_QUOT);
-        } catch (\Exception $e) {
-            //json encode failed
-            $this->_helper->log("Product " . $product->getId() . " json encode failed");
+        $body = json_encode($bodyData, JSON_HEX_APOS|JSON_HEX_QUOT);
+        if ($body===false) {
+            $jsonErrorMsg = json_last_error_msg();
+            $this->_helper->log("");
+            $this->_helper->log("$jsonErrorMsg for product [".$product->getId()."]");
             return [];
         }
         $this->_helper->modifyCounter(\Ebizmarts\MailChimp\Helper\Data::PRO_MOD);
@@ -540,7 +543,9 @@ class Product
             if ($product->getId()!=$item->getProductId() || (
                     $product->getTypeId() != \Magento\Catalog\Model\Product\Type::TYPE_SIMPLE &&
                     $product->getTypeId() != \Magento\Catalog\Model\Product\Type::TYPE_VIRTUAL &&
+                    $product->getTypeId() != \Magento\ConfigurableProduct\Model\Product\Type\Configurable::TYPE_CODE &&
                     $product->getTypeId() != "downloadable")) {
+                $this->_helper->log('The product with id ['.$product->getId().'] is not supported ['.$product->getTypeId().']');
                 continue;
             }
             if ($productSyncData->getMailchimpSyncModified() &&
@@ -575,7 +580,9 @@ class Product
             if ($product->getId()!=$item->getProductId() || (
                     $product->getTypeId() != \Magento\Catalog\Model\Product\Type::TYPE_SIMPLE &&
                     $product->getTypeId() != \Magento\Catalog\Model\Product\Type::TYPE_VIRTUAL &&
+                    $product->getTypeId() != \Magento\ConfigurableProduct\Model\Product\Type\Configurable::TYPE_CODE &&
                     $product->getTypeId() != "downloadable")) {
+                $this->_helper->log('The product with id ['.$product->getId().'] is not supported ['.$product->getTypeId().']');
                 continue;
             }
 

@@ -108,34 +108,38 @@ class Customer
             $customer->getResource()->load($customer, $item->getId());
             $data           = $this->_buildCustomerData($customer);
             $customerJson   = '';
-            try {
-                $customerJson = json_encode($data);
-            } catch (Exception $e) {
-                $this->_helper->log('Customer: '.$customer->getId().' json encode failed');
-            }
-            if (!empty($customerJson)) {
-                if ($item->getMailchimpSyncModified() == 1) {
-                    $this->_helper->modifyCounter(\Ebizmarts\MailChimp\Helper\Data::CUS_MOD);
-                } else {
-                    $this->_helper->modifyCounter(\Ebizmarts\MailChimp\Helper\Data::CUS_NEW);
-                }
-                $customerMailchimpId = md5(strtolower($customer->getEmail()));
-                $customerArray[$counter]['method'] = "PUT";
-                $customerArray[$counter]['path'] = "/ecommerce/stores/" . $mailchimpStoreId . "/customers/" . $customerMailchimpId;
-                $customerArray[$counter]['operation_id'] = $this->_batchId . '_' . $customer->getId();
-                $customerArray[$counter]['body'] = $customerJson;
-                $counter++;
-                if ( !$this->isSubscriber($customer)) {
-                    $subscriberData = $this->buildSubscriberData($customer);
-                    $customerArray[$counter]['method'] = "PATCH";
-                    $customerArray[$counter]['path'] = "/lists/" . $listId . "/members/" . $customerMailchimpId;;
-                    $customerArray[$counter]['operation_id'] = $this->_batchId . '_SUB_' . $customer->getId();
-                    $customerArray[$counter]['body'] = json_encode($subscriberData);
+            $customerJson = json_encode($data);
+            if ($customerJson!==false) {
+                if (!empty($customerJson)) {
+                    if ($item->getMailchimpSyncModified() == 1) {
+                        $this->_helper->modifyCounter(\Ebizmarts\MailChimp\Helper\Data::CUS_MOD);
+                    } else {
+                        $this->_helper->modifyCounter(\Ebizmarts\MailChimp\Helper\Data::CUS_NEW);
+                    }
+                    $customerMailchimpId = md5(strtolower($customer->getEmail()));
+                    $customerArray[$counter]['method'] = "PUT";
+                    $customerArray[$counter]['path'] = "/ecommerce/stores/" . $mailchimpStoreId . "/customers/" . $customerMailchimpId;
+                    $customerArray[$counter]['operation_id'] = $this->_batchId . '_' . $customer->getId();
+                    $customerArray[$counter]['body'] = $customerJson;
                     $counter++;
+                    if (!$this->isSubscriber($customer)) {
+                        $subscriberData = $this->buildSubscriberData($customer);
+                        $subscriberJson = json_encode($subscriberData);
+                        if($subscriberJson !==false) {
+                            $customerArray[$counter]['method'] = "PATCH";
+                            $customerArray[$counter]['path'] = "/lists/" . $listId . "/members/" . $customerMailchimpId;;
+                            $customerArray[$counter]['operation_id'] = $this->_batchId . '_SUB_' . $customer->getId();
+                            $customerArray[$counter]['body'] = $subscriberJson;
+                            $counter++;
+                        }
+                    }
+                    //update customers delta
+                    $this->_updateCustomer($mailchimpStoreId, $customer->getId());
+                } else {
+                    $this->_updateCustomer($mailchimpStoreId, $customer->getId(),$this->_helper->getGmtDate(),'Customer with no data', 0);
                 }
-
-                //update customers delta
-                $this->_updateCustomer($mailchimpStoreId, $customer->getId());
+            } else {
+                $this->_updateCustomer($mailchimpStoreId, $customer->getId(),$this->_helper->getGmtDate(),json_last_error_msg(), 0);
             }
         }
         return $customerArray;
