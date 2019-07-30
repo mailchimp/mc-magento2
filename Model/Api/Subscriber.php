@@ -84,14 +84,6 @@ class Subscriber
             $subscriberJson = "";
             //enconde to JSON
             $subscriberJson = json_encode($data);
-
-            try {
-                $subscriberJson = json_encode($data);
-            } catch (\Exception $e) {
-                //json encode failed
-                $errorMessage = "Subscriber ".$subscriber->getSubscriberId()." json encode failed";
-                $this->_helper->log($errorMessage, $storeId);
-            }
             if ($subscriberJson!==false) {
                 if (!empty($subscriberJson)) {
                     if ($subscriber->getMailchimpSyncModified() == 1) {
