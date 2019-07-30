@@ -581,6 +581,7 @@ class Product
                 $product->getTypeId() != \Magento\Catalog\Model\Product\Type::TYPE_VIRTUAL &&
                 $product->getTypeId() != \Magento\ConfigurableProduct\Model\Product\Type\Configurable::TYPE_CODE &&
                 $product->getTypeId() != "downloadable")) {
+                $this->_helper->log('The product with id ['.$product->getId().'] is not supported ['.$product->getTypeId().']');
                 continue;
             }
 
