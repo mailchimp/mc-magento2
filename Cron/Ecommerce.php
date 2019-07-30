@@ -294,6 +294,14 @@ class Ecommerce
         $this->_helper->log("Sent batch $batchId for $storeId");
         $this->_helper->log($this->_helper->getCounters());
     }
+
+    protected function _saveRequest($resquest)
+    {
+        $pathLog = $this->_dir->getPath('log').DIRECTORY_SEPARATOR.'Request'.$this->_helper->getGmtTimeStamp().'.log';
+        error_log(var_export($resquest,true),3,$pathLog);
+        $this->_helper->log("Request with error was saved in $pathLog");
+    }
+
     protected function encodeOperations($operations) {
         $OKOperations = [];
         $BadOperations = [];
