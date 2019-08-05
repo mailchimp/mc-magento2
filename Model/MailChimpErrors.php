@@ -19,4 +19,9 @@ class MailChimpErrors extends \Magento\Framework\Model\AbstractModel
     {
         $this->_init('\Ebizmarts\MailChimp\Model\ResourceModel\MailChimpErrors');
     }
+    public function getByStoreIdType($storeId, $id, $type)
+    {
+        $this->getResource()->getByStoreIdType($this, $storeId, $id, $type);
+        return $this;
+    }
 }
