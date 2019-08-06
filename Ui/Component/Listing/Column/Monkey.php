@@ -106,12 +106,12 @@ class Monkey extends Column
                 if ($this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_PATH_ACTIVE,$order->getStoreId())) {
                     $mailchimpStoreId = $this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_MAILCHIMP_STORE, $order->getStoreId());
                     $syncData = $this->_helper->getChimpSyncEcommerce($mailchimpStoreId, $order->getId(), \Ebizmarts\MailChimp\Helper\Data::IS_ORDER);
+                    $alt = '';
                     if (!$syncData || $syncData->getMailchimpStoreId() != $mailchimpStoreId || $syncData->getRelatedId() != $order->getId() || $syncData->getType() != \Ebizmarts\MailChimp\Helper\Data::IS_ORDER) {
                         $url = $this->_assetRepository->getUrlWithParams('Ebizmarts_MailChimp::images/no.png',$params);
                         $text = __('Syncing');
                     } else {
                         $sync = $syncData->getMailchimpSent();
-                        $alt = '';
                         switch ($sync) {
                             case \Ebizmarts\MailChimp\Helper\Data::SYNCED:
                                 $url = $this->_assetRepository->getUrlWithParams('Ebizmarts_MailChimp::images/yes.png', $params);
