@@ -112,9 +112,12 @@ class MonkeyStore extends \Magento\Framework\App\Config\Value
                 $this->_helper->deleteConfig(\Ebizmarts\MailChimp\Helper\Data::XML_MAILCHIMP_JS_URL, $storeId, \Magento\Store\Model\ScopeInterface::SCOPE_STORES);
             }
             if ($found==1) {
-                $this->_helper->markAllBatchesAs($mailchimpStore, 'canceled');
+                //$this->_helper->markAllBatchesAs($mailchimpStore, \Ebizmarts\MailChimp\Helper\Data::BATCH_CANCELED);
+                $this->_helper->cancelAllPendingBatches($mailchimpStore);
                 $this->_helper->resetErrors($mailchimpStore);
             }
+            $this->_helper->restoreAllCanceledBatches($this->getValue());
+
             if ($createWebhook) {
                 $this->_helper->createWebHook($apiKey, $newListId);
             }

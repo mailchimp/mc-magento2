@@ -17,69 +17,74 @@ use Symfony\Component\Config\Definition\Exception\Exception;
 
 class Data extends \Magento\Framework\App\Helper\AbstractHelper
 {
-    const XML_PATH_ACTIVE            = 'mailchimp/general/active';
-    const XML_PATH_APIKEY            = 'mailchimp/general/apikey';
-    const XML_PATH_APIKEY_LIST       = 'mailchimp/general/apikeylist';
-    const XML_PATH_MAXLISTAMOUNT     = 'mailchimp/general/maxlistamount';
-    const XML_PATH_LIST              = 'mailchimp/general/monkeylist';
-    const XML_PATH_WEBHOOK_ACTIVE    = 'mailchimp/general/webhook_active';
-    const XML_PATH_WEBHOOK_DELETE    = 'mailchimp/general/webhook_delete';
-    const XML_PATH_LOG               = 'mailchimp/general/log';
-    const XML_PATH_MAPPING           = 'mailchimp/general/mapping';
-    const XML_MAILCHIMP_STORE        = 'mailchimp/general/monkeystore';
-    const XML_MAILCHIMP_JS_URL       = 'mailchimp/general/mailchimpjsurl';
+    const XML_PATH_ACTIVE = 'mailchimp/general/active';
+    const XML_PATH_APIKEY = 'mailchimp/general/apikey';
+    const XML_PATH_APIKEY_LIST = 'mailchimp/general/apikeylist';
+    const XML_PATH_MAXLISTAMOUNT = 'mailchimp/general/maxlistamount';
+    const XML_PATH_LIST = 'mailchimp/general/monkeylist';
+    const XML_PATH_WEBHOOK_ACTIVE = 'mailchimp/general/webhook_active';
+    const XML_PATH_WEBHOOK_DELETE = 'mailchimp/general/webhook_delete';
+    const XML_PATH_LOG = 'mailchimp/general/log';
+    const XML_PATH_MAPPING = 'mailchimp/general/mapping';
+    const XML_MAILCHIMP_STORE = 'mailchimp/general/monkeystore';
+    const XML_MAILCHIMP_JS_URL = 'mailchimp/general/mailchimpjsurl';
     const XML_PATH_CONFIRMATION_FLAG = 'newsletter/subscription/confirm';
-    const XML_PATH_STORE             = 'mailchimp/ecommerce/store';
-    const XML_PATH_ECOMMERCE_ACTIVE  = 'mailchimp/ecommerce/active';
-    const XML_PATH_SYNC_DATE         = 'mailchimp/general/mcminsyncdateflag';
-    const XML_ECOMMERCE_OPTIN        = 'mailchimp/ecommerce/customer_optin';
-    const XML_ECOMMERCE_FIRSTDATE    = 'mailchimp/ecommerce/firstdate';
-    const XML_ABANDONEDCART_ACTIVE   = 'mailchimp/abandonedcart/active';
-    const XML_ABANDONEDCART_FIRSTDATE   = 'mailchimp/abandonedcart/firstdate';
-    const XML_ABANDONEDCART_PAGE     = 'mailchimp/abandonedcart/page';
-    const XML_PATH_IS_SYNC           = 'mailchimp/general/issync';
-    const XML_ABANDONEDCART_EMAIL    = 'mailchimp/abandonedcart/save_email_in_quote';
-    const XML_MERGEVARS              = 'mailchimp/general/map_fields';
-    const XML_INTEREST               = 'mailchimp/general/interest';
-    const XML_INTEREST_IN_SUCCESS    = 'mailchimp/general/interest_in_success';
-    const XML_INTEREST_SUCCESS_HTML_BEFORE  = 'mailchimp/general/interest_success_html_before';
-    const XML_INTEREST_SUCCESS_HTML_AFTER   = 'mailchimp/general/interest_success_html_after';
-    const XML_MAGENTO_MAIL           = 'mailchimp/general/magentoemail';
-    const XML_SEND_PROMO             = 'mailchimp/ecommerce/send_promo';
-    const XML_INCLUDING_TAXES        = 'mailchimp/ecommerce/including_taxes';
+    const XML_PATH_STORE = 'mailchimp/ecommerce/store';
+    const XML_PATH_ECOMMERCE_ACTIVE = 'mailchimp/ecommerce/active';
+    const XML_PATH_SYNC_DATE = 'mailchimp/general/mcminsyncdateflag';
+    const XML_ECOMMERCE_OPTIN = 'mailchimp/ecommerce/customer_optin';
+    const XML_ECOMMERCE_FIRSTDATE = 'mailchimp/ecommerce/firstdate';
+    const XML_ABANDONEDCART_ACTIVE = 'mailchimp/abandonedcart/active';
+    const XML_ABANDONEDCART_FIRSTDATE = 'mailchimp/abandonedcart/firstdate';
+    const XML_ABANDONEDCART_PAGE = 'mailchimp/abandonedcart/page';
+    const XML_PATH_IS_SYNC = 'mailchimp/general/issync';
+    const XML_ABANDONEDCART_EMAIL = 'mailchimp/abandonedcart/save_email_in_quote';
+    const XML_MERGEVARS = 'mailchimp/general/map_fields';
+    const XML_INTEREST = 'mailchimp/general/interest';
+    const XML_INTEREST_IN_SUCCESS = 'mailchimp/general/interest_in_success';
+    const XML_INTEREST_SUCCESS_HTML_BEFORE = 'mailchimp/general/interest_success_html_before';
+    const XML_INTEREST_SUCCESS_HTML_AFTER = 'mailchimp/general/interest_success_html_after';
+    const XML_MAGENTO_MAIL = 'mailchimp/general/magentoemail';
+    const XML_SEND_PROMO = 'mailchimp/ecommerce/send_promo';
+    const XML_INCLUDING_TAXES = 'mailchimp/ecommerce/including_taxes';
 
 
-    const ORDER_STATE_OK             = 'complete';
+    const ORDER_STATE_OK = 'complete';
 
-    const GUEST_GROUP                = 'NOT LOGGED IN';
-    const IS_CUSTOMER   = "CUS";
-    const IS_PRODUCT    = "PRO";
-    const IS_ORDER      = "ORD";
-    const IS_QUOTE      = "QUO";
+    const GUEST_GROUP = 'NOT LOGGED IN';
+    const IS_CUSTOMER = "CUS";
+    const IS_PRODUCT = "PRO";
+    const IS_ORDER = "ORD";
+    const IS_QUOTE = "QUO";
     const IS_SUBSCRIBER = "SUB";
     const IS_PROMO_RULE = "PRL";
     const IS_PROMO_CODE = "PCD";
 
-    const PLATFORM      = 'Magento2';
-    const MAXSTORES     = 200;
+    const PLATFORM = 'Magento2';
+    const MAXSTORES = 200;
 
-    const SUB_MOD       = "SubscriberModified";
-    const SUB_NEW       = "SubscriberNew";
-    const PRO_MOD       = "ProductModified";
-    const PRO_NEW       = "ProductNew";
-    const CUS_MOD       = "CustomerModified";
-    const CUS_NEW       = "CustomerNew";
-    const ORD_MOD       = "OrderModified";
-    const ORD_NEW       = "OrderNew";
-    const QUO_MOD       = "QuoteModified";
-    const QUO_NEW       = "QuoteNew";
+    const SUB_MOD = "SubscriberModified";
+    const SUB_NEW = "SubscriberNew";
+    const PRO_MOD = "ProductModified";
+    const PRO_NEW = "ProductNew";
+    const CUS_MOD = "CustomerModified";
+    const CUS_NEW = "CustomerNew";
+    const ORD_MOD = "OrderModified";
+    const ORD_NEW = "OrderNew";
+    const QUO_MOD = "QuoteModified";
+    const QUO_NEW = "QuoteNew";
 
-    const SYNCED        = 1;
-    const NEEDTORESYNC  = 2;
-    const WAITINGSYNC   = 3;
-    const SYNCERROR     = 4;
+    const SYNCED = 1;
+    const NEEDTORESYNC = 2;
+    const WAITINGSYNC = 3;
+    const SYNCERROR = 4;
 
-    const NEVERSYNC     = 6;
+    const NEVERSYNC = 6;
+
+    const BATCH_CANCELED = 'canceled';
+    const BATCH_COMPLETED = 'completed';
+    const BATCH_PENDING = 'pending';
+    const BATCH_ERROR = 'error';
 
 
     const MAX_MERGEFIELDS = 100;
@@ -201,8 +206,8 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     protected $_serializer;
 
 
-    private $customerAtt    = null;
-    private $_mapFields     = null;
+    private $customerAtt = null;
+    private $_mapFields = null;
 
     /**
      * Data constructor.
@@ -262,37 +267,38 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         \Ebizmarts\MailChimp\Model\MailChimpInterestGroupFactory $interestGroupFactory,
         \Magento\Framework\Serialize\Serializer\Json $serializer,
         \Magento\Framework\Stdlib\DateTime\DateTime $date
-    ) {
+    )
+    {
 
-        $this->_storeManager  = $storeManager;
-        $this->_mlogger       = $logger;
+        $this->_storeManager = $storeManager;
+        $this->_mlogger = $logger;
         $this->_groupRegistry = $groupRegistry;
-        $this->_scopeConfig   = $context->getScopeConfig();
-        $this->_request       = $context->getRequest();
-        $this->_state         = $state;
-        $this->_loader        = $loader;
-        $this->_config        = $config;
-        $this->_api           = $api;
-        $this->_customer      = $customer;
-        $this->_mailChimpErrors         = $mailChimpErrors;
-        $this->_mailChimpSyncEcommerce  = $mailChimpSyncEcommerce;
-        $this->_mailChimpSyncE          = $mailChimpSyncE;
-        $this->_syncBatches             = $syncBatches;
-        $this->_mailChimpStores         = $mailChimpStores;
-        $this->_mailChimpStoresFactory  = $mailChimpStoresFactory;
-        $this->_encryptor               = $encryptor;
-        $this->_subscriberCollection    = $subscriberCollection;
-        $this->_customerCollection      = $customerCollection;
+        $this->_scopeConfig = $context->getScopeConfig();
+        $this->_request = $context->getRequest();
+        $this->_state = $state;
+        $this->_loader = $loader;
+        $this->_config = $config;
+        $this->_api = $api;
+        $this->_customer = $customer;
+        $this->_mailChimpErrors = $mailChimpErrors;
+        $this->_mailChimpSyncEcommerce = $mailChimpSyncEcommerce;
+        $this->_mailChimpSyncE = $mailChimpSyncE;
+        $this->_syncBatches = $syncBatches;
+        $this->_mailChimpStores = $mailChimpStores;
+        $this->_mailChimpStoresFactory = $mailChimpStoresFactory;
+        $this->_encryptor = $encryptor;
+        $this->_subscriberCollection = $subscriberCollection;
+        $this->_customerCollection = $customerCollection;
         $this->_addressRepositoryInterface = $addressRepositoryInterface;
-        $this->_resource                = $resource;
-        $this->connection               = $resource->getConnection();
-        $this->_cacheTypeList           = $cacheTypeList;
-        $this->_attCollection           = $attCollection;
-        $this->_customerFactory         = $customerFactory;
-        $this->_countryInformation      = $countryInformation;
-        $this->_interestGroupFactory    = $interestGroupFactory;
-        $this->_serializer              = $serializer;
-        $this->_date                    = $date;
+        $this->_resource = $resource;
+        $this->connection = $resource->getConnection();
+        $this->_cacheTypeList = $cacheTypeList;
+        $this->_attCollection = $attCollection;
+        $this->_customerFactory = $customerFactory;
+        $this->_countryInformation = $countryInformation;
+        $this->_interestGroupFactory = $interestGroupFactory;
+        $this->_serializer = $serializer;
+        $this->_date = $date;
         parent::__construct($context);
     }
 
@@ -320,7 +326,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
      */
     public function getApiKey($store = null, $scope = null)
     {
-        $apiKey =$this->getConfigValue(self::XML_PATH_APIKEY, $store, $scope);
+        $apiKey = $this->getConfigValue(self::XML_PATH_APIKEY, $store, $scope);
         return $this->_encryptor->decrypt($apiKey);
     }
 
@@ -335,6 +341,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         $this->_api->setUserAgent('Mailchimp4Magento' . (string)$this->getModuleVersion());
         return $this->_api;
     }
+
     private function getCustomerAtts()
     {
         $ret = [];
@@ -353,16 +360,17 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
                 } catch (\Exception $e) {
                     $options = [];
                 }
-                $isDate = ($item->getBackendModel()=='Magento\Eav\Model\Entity\Attribute\Backend\Datetime') ? 1:0;
-                $isAddress = ($item->getBackendModel()=='Magento\Customer\Model\Customer\Attribute\Backend\Billing' ||
-                    $item->getBackendModel()=='Magento\Customer\Model\Customer\Attribute\Backend\Shipping') ? 1:0;
-                $ret[$item->getId()] = ['attCode' => $item->getAttributeCode(), 'isDate' =>$isDate, 'isAddress' => $isAddress, 'options'=>$options] ;
+                $isDate = ($item->getBackendModel() == 'Magento\Eav\Model\Entity\Attribute\Backend\Datetime') ? 1 : 0;
+                $isAddress = ($item->getBackendModel() == 'Magento\Customer\Model\Customer\Attribute\Backend\Billing' ||
+                    $item->getBackendModel() == 'Magento\Customer\Model\Customer\Attribute\Backend\Shipping') ? 1 : 0;
+                $ret[$item->getId()] = ['attCode' => $item->getAttributeCode(), 'isDate' => $isDate, 'isAddress' => $isAddress, 'options' => $options];
             }
 
             $this->customerAtt = $ret;
         }
         return $this->customerAtt;
     }
+
     public function getMapFields($storeId = null)
     {
         if (!$this->_mapFields) {
@@ -381,12 +389,13 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
                         ];
                     }
                 }
-            } catch(\Exception $e) {
+            } catch (\Exception $e) {
                 $this->log($e->getMessage());
             }
         }
         return $this->_mapFields;
     }
+
     public function getDateFormat()
     {
         return 'm/d/Y';
@@ -398,7 +407,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
      * @return \Mailchimp
      * @throws \Magento\Framework\Exception\LocalizedException
      */
-    public function getApiByApiKey($apiKey, $encrypted=false)
+    public function getApiByApiKey($apiKey, $encrypted = false)
     {
         if ($encrypted) {
             $this->_api->setApiKey($this->_encryptor->decrypt($apiKey));
@@ -424,6 +433,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         }
         return $value;
     }
+
     public function deleteConfig($path, $storeId = null, $scope = null)
     {
         $this->_config->deleteConfig($path, $scope, $storeId);
@@ -438,11 +448,13 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         }
         $this->_cacheTypeList->cleanType('config');
     }
+
     public function getMCMinSyncing($storeId)
     {
         $ret = $this->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_PATH_IS_SYNC, $storeId);
         return !$ret;
     }
+
     public function getCartUrl($storeId, $cartId, $token)
     {
         $rc = $this->_storeManager->getStore($storeId)->getUrl(
@@ -456,6 +468,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         );
         return $rc;
     }
+
     public function getRedemptionUrl($storeId, $couponId, $token)
     {
         $rc = $this->_storeManager->getStore($storeId)->getUrl(
@@ -469,6 +482,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         );
         return $rc;
     }
+
     public function getSuccessInterestUrl($storeId)
     {
         $rc = $this->_storeManager->getStore($storeId)->getUrl(
@@ -480,6 +494,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         );
         return $rc;
     }
+
     /**
      * @param null $store
      * @return mixed
@@ -521,24 +536,36 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         }
         return $v;
     }
+
     public function deleteStore($mailchimpStore)
     {
         try {
-//            $storeId = $this->getConfigValue(self::XML_MAILCHIMP_STORE);
             $this->getApi()->ecommerce->stores->delete($mailchimpStore);
-            $this->markAllBatchesAs($mailchimpStore, 'canceled');
+            $this->cancelAllPendingBatches($mailchimpStore);
         } catch (\Mailchimp_Error $e) {
             $this->log($e->getFriendlyMessage());
         } catch (Exception $e) {
             $this->log($e->getMessage());
         }
     }
-    public function markAllBatchesAs($mailchimpStore, $status)
+
+    public function markAllBatchesAs($mailchimpStore, $fromStatus, $toStatus)
     {
         $connection = $this->_syncBatches->getResource()->getConnection();
         $tableName = $this->_syncBatches->getResource()->getMainTable();
-        $connection->update($tableName, ['status' => $status], "mailchimp_store_id = '".$mailchimpStore."'");
+        $connection->update($tableName, ['status' => $toStatus], "mailchimp_store_id = '" . $mailchimpStore . "' and status = '" . $fromStatus . "'");
     }
+
+    public function cancelAllPendingBatches($mailchimpStore)
+    {
+        $this->markAllBatchesAs($mailchimpStore,self::BATCH_PENDING, self::BATCH_CANCELED);
+    }
+
+    public function restoreAllCanceledBatches($mailchimpStore)
+    {
+        $this->markAllBatchesAs($mailchimpStore,self::BATCH_CANCELED, self::BATCH_PENDING);
+    }
+
     public function markRegisterAsModified($registerId, $type)
     {
         if(!empty($registerId)) {

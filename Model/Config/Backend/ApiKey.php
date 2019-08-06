@@ -88,8 +88,9 @@ class ApiKey extends \Magento\Framework\App\Config\Value
                 }
             }
             if ($found==1) {
-                $this->_helper->markAllBatchesAs($mailchimpStore, 'canceled');
+                $this->_helper->cancelAllPendingBatches($mailchimpStore);
             }
+
         }
         return parent::beforeSave();
     }
