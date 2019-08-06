@@ -68,11 +68,11 @@ class Result
                 $files = $this->getBatchResponse($item->getBatchId(), $storeId);
                 if (is_array($files) && count($files)) {
                     $this->processEachResponseFile($files, $item->getBatchId(), $mailchimpStoreId, $storeId);
-                    $item->setStatus('completed');
+                    $item->setStatus(\Ebizmarts\MailChimp\Helper\Data::BATCH_COMPLETED);
                     $item->setModifiedDate( $this->_helper->getGmtDate() );
                     $item->getResource()->save($item);
                 } elseif ($files === false) {
-                    $item->setStatus('canceled');
+                    $item->setStatus(\Ebizmarts\MailChimp\Helper\Data::BATCH_ERROR);
                     $item->getResource()->save($item);
                     continue;
                 }

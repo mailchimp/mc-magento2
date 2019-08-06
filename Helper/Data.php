@@ -81,6 +81,11 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
 
     const NEVERSYNC     = 6;
 
+    const BATCH_CANCELED = 'canceled';
+    const BATCH_COMPLETED = 'completed';
+    const BATCH_PENDING = 'pending';
+    const BATCH_ERROR = 'error';
+
     const MAX_MERGEFIELDS = 100;
 
     protected $counters = [];
@@ -524,19 +529,32 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         try {
 //            $storeId = $this->getConfigValue(self::XML_MAILCHIMP_STORE);
             $this->getApi()->ecommerce->stores->delete($mailchimpStore);
-            $this->markAllBatchesAs($mailchimpStore, 'canceled');
+            $this->cancelAllPendingBatches($mailchimpStore);
         } catch (\Mailchimp_Error $e) {
             $this->log($e->getFriendlyMessage());
         } catch (Exception $e) {
             $this->log($e->getMessage());
         }
     }
-    public function markAllBatchesAs($mailchimpStore, $status)
+    public function markAllBatchesAs($mailchimpStore, $fromStatus, $toStatus)
     {
         $connection = $this->_syncBatches->getResource()->getConnection();
         $tableName = $this->_syncBatches->getResource()->getMainTable();
-        $connection->update($tableName, ['status' => $status], "mailchimp_store_id = '".$mailchimpStore."'");
+        $connection->update($tableName, ['status' => $toStatus], "mailchimp_store_id = '" . $mailchimpStore . "' and status = '" . $fromStatus . "'");
     }
+
+    public function cancelAllPendingBatches($mailchimpStore)
+    {
+        $this->markAllBatchesAs($mailchimpStore,self::BATCH_PENDING, self::BATCH_CANCELED);
+    }
+
+    public function restoreAllCanceledBatches($mailchimpStore)
+    {
+        $this->markAllBatchesAs($mailchimpStore,self::BATCH_CANCELED, self::BATCH_PENDING);
+    }
+
+
+
     public function markRegisterAsModified($registerId, $type)
     {
         if(!empty($registerId)) {
