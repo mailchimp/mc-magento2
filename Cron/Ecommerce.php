@@ -224,7 +224,7 @@ class Ecommerce
                     } else {
                         $this->_mailChimpSyncBatches->setStoreId($storeId);
                         $this->_mailChimpSyncBatches->setBatchId($batchResponse['id']);
-                        $this->_mailChimpSyncBatches->setStatus($batchResponse['status']);
+                        $this->_mailChimpSyncBatches->setStatus(\Ebizmarts\MailChimp\Helper\Data::BATCH_PENDING);
                         $this->_mailChimpSyncBatches->setMailchimpStoreId($mailchimpStoreId);
                         $this->_mailChimpSyncBatches->setModifiedDate($this->_helper->getGmtDate());
                         $this->_mailChimpSyncBatches->getResource()->save($this->_mailChimpSyncBatches);
