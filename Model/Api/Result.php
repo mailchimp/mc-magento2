@@ -74,6 +74,7 @@ class Result
                 } elseif ($files === false) {
                     $item->setStatus(\Ebizmarts\MailChimp\Helper\Data::BATCH_ERROR);
                     $item->getResource()->save($item);
+                    $this->_helper->deleteAllByBatchId($item->getBatchId());
                     continue;
                 }
                 $baseDir = $this->_helper->getBaseDir();
