@@ -549,9 +549,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     public function markRegisterAsModified($registerId, $type)
     {
         if(!empty($registerId)) {
-            $connection = $this->_mailChimpSyncE->getResource()->getConnection();
-            $tableName = $this->_mailChimpSyncE->getResource()->getMainTable();
-            $connection->update($tableName, ['mailchimp_sync_modified' => 1, 'batch_id' => null], "type = '" . $type . "' and related_id = $registerId");
+            $this->_mailChimpSyncE->markAllAsModified($registerId, $type);
         }
     }
     public function getMCStoreName($storeId)
@@ -790,19 +788,19 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         }
     }
 
-    public function markEcommerceAsModified($relatedId, $type)
-    {
-        $this->_mailChimpSyncE->markAllAsModified($relatedId, $type);
-    }
     public function markEcommerceAsDeleted($relatedId, $type, $relatedDeletedId = null)
     {
         $this->_mailChimpSyncE->markAllAsDeleted($relatedId, $type, $relatedDeletedId);
     }
+
     public function ecommerceDeleteAllByIdType($id, $type, $mailchimpStoreId)
     {
         $this->_mailChimpSyncE->deleteAllByIdType($id, $type, $mailchimpStoreId);
     }
-
+    public function deleteAllByBatchId($batchId)
+    {
+        $this->_mailChimpSyncE->deleteAllByBatchid($batchId);
+    }
     public function getChimpSyncEcommerce($storeId, $id, $type)
     {
         $chimp = $this->_mailChimpSyncEcommerce->create();

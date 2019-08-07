@@ -51,6 +51,6 @@ class SaveAfter implements \Magento\Framework\Event\ObserverInterface
          */
         $rule = $observer->getEvent()->getRule();
         $ruleId = $rule->getRuleId();
-        $this->_helper->markEcommerceAsModified($ruleId, \Ebizmarts\MailChimp\Helper\Data::IS_PROMO_RULE);
+        $this->_helper->markRegisterAsModified($ruleId, \Ebizmarts\MailChimp\Helper\Data::IS_PROMO_RULE);
     }
 }
