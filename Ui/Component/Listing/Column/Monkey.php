@@ -117,14 +117,8 @@ class Monkey extends Column
                                 $text = __('Synced');
                                 break;
                             case \Ebizmarts\MailChimp\Helper\Data::WAITINGSYNC:
-                                if ($syncData->getMailchimpSyncError()) {
-                                    $url = $this->_assetRepository->getUrlWithParams('Ebizmarts_MailChimp::images/never.png', $params);
-                                    $text = __('With Error');
-                                    $alt = $syncData->getMailchimpSyncError();
-                                } else {
-                                    $url = $this->_assetRepository->getUrlWithParams('Ebizmarts_MailChimp::images/waiting.png', $params);
-                                    $text = __('Waiting');
-                                }
+                                $url = $this->_assetRepository->getUrlWithParams('Ebizmarts_MailChimp::images/waiting.png', $params);
+                                $text = __('Waiting');
                                 break;
                             case \Ebizmarts\MailChimp\Helper\Data::SYNCERROR:
                                 $url = $this->_assetRepository->getUrlWithParams('Ebizmarts_MailChimp::images/error.png', $params);
@@ -137,6 +131,11 @@ class Monkey extends Column
                             case \Ebizmarts\MailChimp\Helper\Data::NEEDTORESYNC:
                                 $url = $this->_assetRepository->getUrlWithParams('Ebizmarts_MailChimp::images/resync.png', $params);
                                 $text = __('Resyncing');
+                                break;
+                            case \Ebizmarts\MailChimp\Helper\Data::NOTSYNCED:
+                                $url = $this->_assetRepository->getUrlWithParams('Ebizmarts_MailChimp::images/never.png', $params);
+                                $text = __('With error');
+                                $alt = $syncData->getMailchimpSyncError();
                                 break;
                             default:
                                 $url ='';
