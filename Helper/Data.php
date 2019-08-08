@@ -78,6 +78,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     const NEEDTORESYNC  = 2;
     const WAITINGSYNC   = 3;
     const SYNCERROR     = 4;
+    const NOTSYNCED = 5;
 
     const NEVERSYNC     = 6;
 

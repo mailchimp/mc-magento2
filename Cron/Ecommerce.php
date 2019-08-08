@@ -120,7 +120,7 @@ class Ecommerce
 
         $connection = $this->_chimpSyncEcommerce->getResource()->getConnection();
         $tableName = $this->_chimpSyncEcommerce->getResource()->getMainTable();
-        $connection->delete($tableName, 'batch_id is null and mailchimp_sync_modified != 1');
+        $connection->delete($tableName, 'batch_id is null and mailchimp_sync_modified != 1 and mailchimp_sync_error is null');
 
         foreach ($this->_storeManager->getStores() as $storeId => $val) {
             if ($this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_PATH_ACTIVE, $storeId)) {
@@ -135,8 +135,8 @@ class Ecommerce
                     $this->_apiResult->processResponses($storeId, true, $mailchimpStoreId);
                     $batchId = $this->_processStore($storeId, $mailchimpStoreId, $listId);
                     if ($batchId) {
-                        $connection->update($tableName, ['batch_id' => $batchId, 'mailchimp_sync_modified' => 0, 'mailchimp_sync_delta' => $this->_helper->getGmtDate()], "batch_id is null and mailchimp_store_id = '$mailchimpStoreId'");
-                        $connection->update($tableName, ['batch_id' => $batchId, 'mailchimp_sync_modified' => 0, 'mailchimp_sync_delta' => $this->_helper->getGmtDate()], "batch_id is null and mailchimp_store_id = '$listId'");
+                        $connection->update($tableName, ['batch_id' => $batchId, 'mailchimp_sync_modified' => 0, 'mailchimp_sync_delta' => $this->_helper->getGmtDate()], "batch_id is null and mailchimp_store_id = '$mailchimpStoreId' and mailchimp_syc_error is null");
+                        $connection->update($tableName, ['batch_id' => $batchId, 'mailchimp_sync_modified' => 0, 'mailchimp_sync_delta' => $this->_helper->getGmtDate()], "batch_id is null and mailchimp_store_id = '$listId' and mailchimp_syc_error is null");
                     }
                 }
             }
@@ -364,7 +364,14 @@ class Ecommerce
                         $relatedId = $operationId[2];
                     }
                     if ($type && $relatedId) {
-                        $connection->update($tableName, ['batch_id' => -1, 'mailchimp_sync_modified' => 0, 'mailchimp_sync_delta' => $this->_helper->getGmtDate()], "batch_id is null and mailchimp_store_id = '$storeId' and type ='$type' and related_id = $relatedId");
+                        $connection->update($tableName, [
+                            'batch_id' => -1,
+                            'mailchimp_sync_modified' => 0,
+                            'mailchimp_sync_delta' => $this->_helper->getGmtDate(),
+                            'mailchimp_sycn_error' => __('Json error'),
+                            'mailchimp_sent' => \Ebizmarts\MailChimp\Helper\Data::NOTSYNCED
+                        ],
+                            "batch_id is null and mailchimp_store_id = '$storeId' and type ='$type' and related_id = $relatedId");
                     }
                 }
             }
