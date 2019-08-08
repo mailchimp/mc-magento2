@@ -598,6 +598,11 @@ class Order
 
     protected function _updateOrder($storeId, $entityId, $sync_delta = null, $sync_error = null, $sync_modified = null)
     {
+        if (!isEmpty($sync_error)) {
+            $sent = \Ebizmarts\MailChimp\Helper\Data::NOTSYNCED;
+        } else {
+            $sent = \Ebizmarts\MailChimp\Helper\Data::WAITINGSYNC;
+        }
         $this->_helper->saveEcommerceData(
             $storeId,
             $entityId,
@@ -607,7 +612,7 @@ class Order
             $sync_modified,
             null,
             null,
-            \Ebizmarts\MailChimp\Helper\Data::WAITINGSYNC
+            $sent
         );
     }
 }
