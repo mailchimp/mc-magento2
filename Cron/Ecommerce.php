@@ -120,7 +120,7 @@ class Ecommerce
 
         $connection = $this->_chimpSyncEcommerce->getResource()->getConnection();
         $tableName = $this->_chimpSyncEcommerce->getResource()->getMainTable();
-        $connection->delete($tableName, 'batch_id is null and mailchimp_sync_modified != 1 and mailchimp_sync_error is not null');
+        $connection->delete($tableName, 'batch_id is null and mailchimp_sync_modified != 1 and mailchimp_sync_error is null');
 
         foreach ($this->_storeManager->getStores() as $storeId => $val) {
             if ($this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_PATH_ACTIVE, $storeId)) {
