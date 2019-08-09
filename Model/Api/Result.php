@@ -136,6 +136,7 @@ class Result
     }
     protected function processEachResponseFile($files, $batchId, $mailchimpStoreId, $storeId)
     {
+        $listId = $this->_helper->getDefaultList($storeId);
         foreach ($files as $file) {
             $items = json_decode(file_get_contents($file));
             if ($items!==false) {
@@ -147,9 +148,7 @@ class Result
                         //parse error
                         $response = json_decode($item->response);
                         if (preg_match('/already exists/', $response->detail)) {
-                            $chimpSync = $this->_helper->getChimpSyncEcommerce($mailchimpStoreId, $id, $type);
-                            $chimpSync->setData('mailchimp_sent', \Ebizmarts\MailChimp\Helper\Data::SYNCED);
-                            $chimpSync->getResource()->save($chimpSync);
+                            $this->_updateSyncData($mailchimpStoreId,$listId,$type,$id,null, \Ebizmarts\MailChimp\Helper\Data::SYNCED);
                             continue;
                         }
                         $mailchimpErrors = $this->_chimpErrors->create();
@@ -167,13 +166,7 @@ class Result
                         }
 
                         $error = $response->title . " : " . $response->detail;
-                        /**
-                         * @var \Ebizmarts\MailChimp\Model\MailChimpSyncEcommerce $chimpSync
-                         */
-                        $chimpSync = $this->_helper->getChimpSyncEcommerce($mailchimpStoreId, $id, $type);
-                        $chimpSync->setData("mailchimp_sync_error", $error);
-                        $chimpSync->setData('mailchimp_sent', \Ebizmarts\MailChimp\Helper\Data::SYNCERROR);
-                        $chimpSync->getResource()->save($chimpSync);
+                        $this->_updateSyncData($mailchimpStoreId,$listId,$type,$id,$error,\Ebizmarts\MailChimp\Helper\Data::SYNCERROR);
                         $mailchimpErrors->setType($response->type);
                         $mailchimpErrors->setTitle($response->title);
                         $mailchimpErrors->setStatus($item->status_code);
@@ -187,10 +180,7 @@ class Result
                         $mailchimpErrors->setStoreId($storeId);
                         $mailchimpErrors->getResource()->save($mailchimpErrors);
                     } else {
-                        $chimpSync = $this->_helper->getChimpSyncEcommerce($mailchimpStoreId, $id, $type);
-                        $chimpSync->setData('mailchimp_sent', \Ebizmarts\MailChimp\Helper\Data::SYNCED);
-                        $chimpSync->setData('mailchimp_sync_error','');
-                        $chimpSync->getResource()->save($chimpSync);
+                        $this->_updateSyncData($mailchimpStoreId,$listId,$type,$id,null,\Ebizmarts\MailChimp\Helper\Data::SYNCED);
                     }
                 }
             } else {
@@ -210,6 +200,25 @@ class Result
                 }
             }
             unlink($file);
+        }
+    }
+    private function _updateSyncData($mailchimpStoreId,$listId,$type,$id,$error,$status)
+    {
+        /**
+         * @var \Ebizmarts\MailChimp\Model\MailChimpSyncEcommerce $chimpSync
+         */
+        if ($type == \Ebizmarts\MailChimp\Helper\Data::IS_SUBSCRIBER) {
+            $mailchimpStore = $listId;
+        } else {
+            $mailchimpStore = $mailchimpStoreId;
+        }
+        $chimpSync = $this->_helper->getChimpSyncEcommerce($mailchimpStore, $id, $type);
+        if ($chimpSync->getMailchimpStoreId() == $mailchimpStore && $chimpSync->getType() == $type && $chimpSync->getRelatedId() == $id) {
+            $chimpSync->setMailchimpSent($status);
+            $chimpSync->setMailchimpSyncError($error);
+            $chimpSync->getResource()->save($chimpSync);
+        } else {
+            $this->_helper->log("Can't find original register for type $type and id $id");
         }
     }
 }
