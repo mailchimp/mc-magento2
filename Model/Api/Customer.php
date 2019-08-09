@@ -128,7 +128,7 @@ class Customer
                         if($subscriberJson !==false) {
                             $customerArray[$counter]['method'] = "PATCH";
                             $customerArray[$counter]['path'] = "/lists/" . $listId . "/members/" . $customerMailchimpId;;
-                            $customerArray[$counter]['operation_id'] = $this->_batchId . '_SUB_' . $customer->getId();
+                            $customerArray[$counter]['operation_id'] = $this->_batchId . '_' . $customer->getId().'_SUB';
                             $customerArray[$counter]['body'] = $subscriberJson;
                             $counter++;
                         }
