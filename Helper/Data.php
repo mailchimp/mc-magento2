@@ -1048,7 +1048,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
             $api = $this->getApi($storeId);
             $listId = $this->getConfigValue(self::XML_PATH_LIST, $storeId);
             $allInterest = $api->lists->interestCategory->getAll($listId);
-            if (array_key_exists('categories',$allInterest) && is_array($allInterest['categories'])) {
+            if (is_array($allInterest) && array_key_exists('categories',$allInterest) && is_array($allInterest['categories'])) {
                 foreach ($allInterest['categories'] as $item) {
                     if (in_array($item['id'], $interest)) {
                         $rc[$item['id']]['interest'] = ['id' => $item['id'], 'title' => $item['title'], 'type' => $item['type']];
