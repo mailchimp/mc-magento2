@@ -202,6 +202,8 @@ class Order
 
             } catch (Exception $e) {
                 $this->_helper->log($e->getMessage());
+                $error = $e->getMessage();
+                $this->_updateOrder($mailchimpStoreId, $orderId, $this->_helper->getGmtDate(), $error, 0);
             }
         }
 
@@ -276,6 +278,8 @@ class Order
                 }
             } catch (Exception $e) {
                 $this->_helper->log($e->getMessage());
+                $error = $e->getMessage();
+                $this->_updateOrder($mailchimpStoreId, $orderId, $this->_helper->getGmtDate(), $error, 0);
             }
         }
 
