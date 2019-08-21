@@ -403,8 +403,12 @@ class Order
         $billingAddress = $order->getBillingAddress();
 
         if ($order->getCustomerIsGuest()) {
-            $data["customer"]["first_name"] = $billingAddress->getFirstname();
-            $data["customer"]["last_name"] = $billingAddress->getLastname();
+            if ($billingAddress->getFirstname()) {
+                $data["customer"]["first_name"] = $billingAddress->getFirstname();
+            }
+            if ($billingAddress->getLastname()) {
+                $data["customer"]["last_name"] = $billingAddress->getLastname();
+            }
         }
 
         $street = $billingAddress->getStreet();
