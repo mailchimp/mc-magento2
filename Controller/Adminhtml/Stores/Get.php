@@ -58,12 +58,14 @@ class Get extends Action
                         continue;
                     }
                     $list = $api->lists->getLists($store['list_id']);
-                    $result[] = ['id' => $store['id'], 'name' => $store['name'], 'list_name' => $list['name'], 'list_id' => $store['list_id']];
+                    $result['stores'][] = ['id' => $store['id'], 'name' => $store['name'], 'list_name' => $list['name'], 'list_id' => $store['list_id']];
                 }
+                $result['valid'] = 1;
             }
         } catch (\Mailchimp_Error $e) {
             $this->_helper->log($e->getFriendlyMessage());
-            $result = [];
+            $result['valid'] = 0;
+            $result['errormsg'] = $e->getTitle();
         }
         $resultJson = $this->_resultFactory->create(ResultFactory::TYPE_JSON);
         $resultJson->setData($result);

@@ -72,7 +72,11 @@ class ApiKey implements \Magento\Framework\Option\ArrayInterface
     }
     private function mask($str)
     {
-        return substr($str, 0, 6) . str_repeat('*', strlen($str) - 4) . substr($str, -4);
+        if (strlen($str) < 4) {
+            return __('Invalid API Key');
+        } else {
+            return substr($str, 0, 6) . str_repeat('*', strlen($str) - 4) . substr($str, -4);
+        }
     }
 
 }
