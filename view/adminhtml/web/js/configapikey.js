@@ -104,27 +104,31 @@ define(
                     dataType: 'json',
                     showLoader: true
                 }).done(function (data) {
-                    var unique = data.length;
-                    $.each(data, function (i, item) {
-                        if (unique == 1) {
-                            $('#mailchimp_general_monkeystore').append($('<option>', {
-                                value: item.id,
-                                text: item.name,
-                                selected: "selected"
-                            }));
+                    if (data.valid==1) {
+                        var unique = data.stores.length;
+                        $.each(data.stores, function (i, item) {
+                            if (unique == 1) {
+                                $('#mailchimp_general_monkeystore').append($('<option>', {
+                                    value: item.id,
+                                    text: item.name,
+                                    selected: "selected"
+                                }));
+                            } else {
+                                $('#mailchimp_general_monkeystore').append($('<option>', {
+                                    value: item.id,
+                                    text: item.name
+                                }));
+                            }
+                        });
+                        if ($('#mailchimp_general_monkeystore option').length > 1) {
+                            $('#row_mailchimp_general_monkeystore').find('.note').hide();
                         } else {
-                            $('#mailchimp_general_monkeystore').append($('<option>', {
-                                value: item.id,
-                                text: item.name
-                            }));
+                            $('#row_mailchimp_general_monkeystore').find('.note').show();
                         }
-                    });
-                    if ($('#mailchimp_general_monkeystore option').length>1) {
-                        $('#row_mailchimp_general_monkeystore').find('.note').hide();
+                        self._loadDetails();
                     } else {
-                        $('#row_mailchimp_general_monkeystore').find('.note').show();
+                        alert({content:data.errormsg});
                     }
-                    self._loadDetails();
                 });
             },
             _loadDetails: function () {
