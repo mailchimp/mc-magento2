@@ -9,9 +9,10 @@
  */
 define(
     [
-        'jquery'
+        'jquery',
+        'Magento_Ui/js/modal/alert'
     ],
-    function ($) {
+    function ($,alert) {
         "use strict";
 
         $.widget('mage.monkeyapikey', {
@@ -35,12 +36,16 @@ define(
                         dataType: 'json',
                         showLoader: true
                     }).done(function (data) {
-                        $.each(data, function (i, item) {
-                            $('#stores_list_id').append($('<option>', {
-                                value: item.id,
-                                text : item.name
-                            }));
-                        });
+                        if (data.valid==1) {
+                            $.each(data.lists, function (i, item) {
+                                $('#stores_list_id').append($('<option>', {
+                                    value: item.id,
+                                    text: item.name
+                                }));
+                            });
+                        } else {
+                            alert({content:data.errormsg});
+                        }
                     });
                 });
             }
