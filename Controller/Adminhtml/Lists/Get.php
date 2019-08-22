@@ -59,9 +59,12 @@ class Get extends Action
             $api = $this->_helper->getApiByApiKey($apiKey);
             $lists = $api->lists->getLists(null, null, null, self::MAX_LISTS);
             foreach ($lists['lists'] as $list) {
-                $result[] = ['id' => $list['id'], 'name' => $list['name']];
+                $result['lists'][] = ['id' => $list['id'], 'name' => $list['name']];
             }
+            $result['valid'] = 1;
         } catch (\Mailchimp_Error $e) {
+            $result['valid'] = 0;
+            $result['errormsg'] = $e->getTitle();
             $this->_helper->log($e->getFriendlyMessage());
         }
         $resultJson = $this->_resultFactory->create(ResultFactory::TYPE_JSON);
