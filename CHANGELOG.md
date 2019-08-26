@@ -1,5 +1,31 @@
 # Change Log
 
+## [101.2.37](https://github.com/mailchimp/mc-magento2/tree/101.2.37)
+
+[Full Changelog](https://github.com/mailchimp/mc-magento2/compare/101.2.36...101.2.37)
+
+**Implemented enhancements:**
+
+- Make strong check for the API key [\#849](https://github.com/mailchimp/mc-magento2/issues/849)
+- Add alt text to the order grid in the mailchimp sync image [\#810](https://github.com/mailchimp/mc-magento2/issues/810)
+- Send the merge\_fields for customers [\#790](https://github.com/mailchimp/mc-magento2/issues/790)
+
+**Fixed bugs:**
+
+- Mark orders with error to not try to re-sync [\#841](https://github.com/mailchimp/mc-magento2/issues/841)
+- PayPal Express orders sync fails - Last name is NULL [\#840](https://github.com/mailchimp/mc-magento2/issues/840)
+- Bad management of old batches [\#821](https://github.com/mailchimp/mc-magento2/issues/821)
+- Bad batches management [\#817](https://github.com/mailchimp/mc-magento2/issues/817)
+- Bad way to test if the json\_encode fails [\#805](https://github.com/mailchimp/mc-magento2/issues/805)
+- Rename delete customer account option [\#801](https://github.com/mailchimp/mc-magento2/issues/801)
+- Orders with no products are not marked as synced [\#797](https://github.com/mailchimp/mc-magento2/issues/797)
+- Re sync the subscriber when the customer is modified [\#786](https://github.com/mailchimp/mc-magento2/issues/786)
+- Use always the md5 of the customer email to identify the customer [\#782](https://github.com/mailchimp/mc-magento2/issues/782)
+- Error when select a website scope in config [\#773](https://github.com/mailchimp/mc-magento2/issues/773)
+- Change the Resync Customers button [\#768](https://github.com/mailchimp/mc-magento2/issues/768)
+-  ebizmarts\_ecommerce has an error [\#767](https://github.com/mailchimp/mc-magento2/issues/767)
+- Unhandled `Magento\Framework\Serialize\Serializer\Json::\(un\)serialize` calls [\#758](https://github.com/mailchimp/mc-magento2/issues/758)
+
 ## [101.2.36](https://github.com/mailchimp/mc-magento2/tree/101.2.36)
 
 [Full Changelog](https://github.com/mailchimp/mc-magento2/compare/101.2.35...101.2.36)
