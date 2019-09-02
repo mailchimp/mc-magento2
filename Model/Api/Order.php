@@ -353,6 +353,10 @@ class Order
             );
             if ($item->getProductType() == \Magento\ConfigurableProduct\Model\Product\Type\Configurable::TYPE_CODE) {
                 $options = $item->getProductOptions();
+                if (!isset($options['simple_sku'])) {
+                    $this->_helper->log('The product ['.$item->getId().'] has no simple_sku');
+                    continue;
+                }
                 $sku = $options['simple_sku'];
                 $variant = $this->_productFactory->create()->getIdBySku($sku);
                 if (!$variant) {
