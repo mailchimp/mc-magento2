@@ -44,9 +44,9 @@ class Ecommerce
      */
     private $_apiCart;
     /**
-     * @var \Ebizmarts\MailChimp\Model\MailChimpSyncBatches
+     * @var \Ebizmarts\MailChimp\Model\MailChimpSyncBatchesFactory
      */
-    private $_mailChimpSyncBatches;
+    private $_mailChimpSyncBatchesFactory;
     /**
      * @var \Ebizmarts\MailChimp\Model\MailChimpSyncEcommerce
      */
@@ -80,7 +80,7 @@ class Ecommerce
      * @param \Ebizmarts\MailChimp\Model\Api\Subscriber $apiSubscriber
      * @param \Ebizmarts\MailChimp\Model\Api\PromoCodes $apiPromoCodes
      * @param \Ebizmarts\MailChimp\Model\Api\PromoRules $apiPromoRules
-     * @param \Ebizmarts\MailChimp\Model\MailChimpSyncBatches $mailChimpSyncBatches
+     * @param \Ebizmarts\MailChimp\Model\MailChimpSyncBatchesFactory $mailChimpSyncBatchesFactory
      * @param \Ebizmarts\MailChimp\Model\MailChimpSyncEcommerce $chimpSyncEcommerce
      * @param \Magento\Framework\Filesystem\DirectoryList $dir
      */
@@ -95,7 +95,7 @@ class Ecommerce
         \Ebizmarts\MailChimp\Model\Api\Subscriber $apiSubscriber,
         \Ebizmarts\MailChimp\Model\Api\PromoCodes $apiPromoCodes,
         \Ebizmarts\MailChimp\Model\Api\PromoRules $apiPromoRules,
-        \Ebizmarts\MailChimp\Model\MailChimpSyncBatches $mailChimpSyncBatches,
+        \Ebizmarts\MailChimp\Model\MailChimpSyncBatchesFactory $mailChimpSyncBatchesFactory,
         \Ebizmarts\MailChimp\Model\MailChimpSyncEcommerce $chimpSyncEcommerce,
         \Magento\Framework\Filesystem\DirectoryList $dir
     ) {
@@ -103,7 +103,7 @@ class Ecommerce
         $this->_storeManager    = $storeManager;
         $this->_helper          = $helper;
         $this->_apiProduct      = $apiProduct;
-        $this->_mailChimpSyncBatches    = $mailChimpSyncBatches;
+        $this->_mailChimpSyncBatchesFactory = $mailChimpSyncBatchesFactory;
         $this->_apiResult       = $apiResult;
         $this->_apiCustomer     = $apiCustomer;
         $this->_apiOrder        = $apiOrder;
@@ -223,12 +223,13 @@ class Ecommerce
                     if (!isset($batchResponse['id'])) {
                         $this->_helper->log('error in the call to batch');
                     } else {
-                        $this->_mailChimpSyncBatches->setStoreId($storeId);
-                        $this->_mailChimpSyncBatches->setBatchId($batchResponse['id']);
-                        $this->_mailChimpSyncBatches->setStatus(\Ebizmarts\MailChimp\Helper\Data::BATCH_PENDING);
-                        $this->_mailChimpSyncBatches->setMailchimpStoreId($mailchimpStoreId);
-                        $this->_mailChimpSyncBatches->setModifiedDate($this->_helper->getGmtDate());
-                        $this->_mailChimpSyncBatches->getResource()->save($this->_mailChimpSyncBatches);
+                        $syncBatches = $this->_mailChimpSyncBatchesFactory->create();
+                        $syncBatches->setStoreId($storeId);
+                        $syncBatches->setBatchId($batchResponse['id']);
+                        $syncBatches->setStatus(\Ebizmarts\MailChimp\Helper\Data::BATCH_PENDING);
+                        $syncBatches->setMailchimpStoreId($mailchimpStoreId);
+                        $syncBatches->setModifiedDate($this->_helper->getGmtDate());
+                        $syncBatches->getResource()->save($syncBatches);
                         $batchId = $batchResponse['id'];
                         $this->_showResume($batchId, $storeId);
                     }
