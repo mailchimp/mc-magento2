@@ -30,6 +30,10 @@ class Success extends \Magento\Framework\View\Element\Template
      * @var \Ebizmarts\MailChimp\Model\MailChimpInterestGroupFactory
      */
     protected $_interestGroupFactory;
+    /**
+     * @var \Magento\Framework\View\Element\Template\Context
+     */
+    protected $_context;
 
     /**
      * Success constructor.
@@ -54,6 +58,7 @@ class Success extends \Magento\Framework\View\Element\Template
         $this->_helper              = $helper;
         $this->_subscriberFactory   = $subscriberFactory;
         $this->_interestGroupFactory= $interestGroupFactory;
+        $this->_context             = $context;
     }
 
     public function getInterest()
@@ -87,5 +92,12 @@ class Success extends \Magento\Framework\View\Element\Template
     {
         $order = $this->_checkoutSession->getLastRealOrder();
         return $this->_helper->getSuccessInterestUrl($order->getStoreId());
+    }
+    public function _toHtml()
+    {
+        if (!$this->_helper->isMailChimpEnabled($this->_context->getStoreManager()->getStore()->getId())) {
+            return "";
+        }
+        return parent::_toHtml();
     }
 }
