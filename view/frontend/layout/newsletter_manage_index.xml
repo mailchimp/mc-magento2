@@ -13,7 +13,7 @@
 <page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
     <body>
         <referenceBlock name="customer_newsletter">
-            <block class="Ebizmarts\MailChimp\Block\Newsletter"  name="customer.form.newsletter.extra" template="form/newsletter.phtml"/>
+            <block class="Ebizmarts\MailChimp\Block\Newsletter"  name="customer.form.newsletter.extra" template="form/newsletter.phtml" ifconfig="mailchimp/general/active"/>
         </referenceBlock>
     </body>
 </page>
