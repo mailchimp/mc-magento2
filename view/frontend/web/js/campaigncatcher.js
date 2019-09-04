@@ -64,10 +64,10 @@ define(
                     }
                     if (mc_cid && !isMailchimp) {
                         $.ajax({
-                            url: checkCampaignUrl,
-                            data: {'form_key': window.FORM_KEY,'mc_cid': mc_cid},
+                            url: checkCampaignUrl + 'mc_cid/' + mc_cid + '/',
                             type: 'GET',
                             dataType: 'json',
+                            cache: true,
                             showLoader: false
                         }).done(function (data) {
                             if (data.valid==0) {
