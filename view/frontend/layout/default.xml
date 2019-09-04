@@ -14,7 +14,7 @@
       xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
     <body>
         <referenceBlock name="head.additional">
-            <block class="Ebizmarts\MailChimp\Block\Mailchimpjs" name="mailchimp.block.mcjs" template="Ebizmarts_MailChimp::mailchimpjs.phtml"/>
+            <block class="Ebizmarts\MailChimp\Block\Mailchimpjs" name="mailchimp.block.mcjs" template="Ebizmarts_MailChimp::mailchimpjs.phtml" ifconfig="mailchimp/general/active"/>
         </referenceBlock>
         <referenceContainer name="content">
             <block class="Ebizmarts\MailChimp\Block\Catcher" name="mailchimp.block.catcher" template="Ebizmarts_MailChimp::catcher.phtml" ifconfig="mailchimp/general/active"/>
