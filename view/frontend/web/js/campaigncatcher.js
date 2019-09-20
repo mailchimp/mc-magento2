@@ -25,7 +25,7 @@ define(
                     var path = location;
                     var urlparams = null;
                     var isGet = path.search.search('\\?');
-                    var mc_cid = {};
+                    var mc_cid = null;
                     var isMailchimp = false;
                     var checkCampaignUrl = self.options.checkCampaignUrl;
                     if(isGet != -1) {
