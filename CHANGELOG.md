@@ -12,6 +12,9 @@
 
 **Fixed bugs:**
 
+- Do not add anything to frontend if module disabled [\#866](https://github.com/mailchimp/mc-magento2/issues/866)
+- Made sure a missing "simple\_sku" won't break the entire sync [\#862](https://github.com/mailchimp/mc-magento2/issues/862)
+- Not all batches are saved when multi store enabled [\#857](https://github.com/mailchimp/mc-magento2/issues/857)
 - Mark orders with error to not try to re-sync [\#841](https://github.com/mailchimp/mc-magento2/issues/841)
 - PayPal Express orders sync fails - Last name is NULL [\#840](https://github.com/mailchimp/mc-magento2/issues/840)
 - Bad management of old batches [\#821](https://github.com/mailchimp/mc-magento2/issues/821)
