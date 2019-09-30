@@ -65,7 +65,10 @@ class CustomerMap extends \Magento\Config\Block\System\Config\Form\Field\FieldAr
         $optionExtraAttr = [];
         $optionExtraAttr['option_' . $this->_getVarsRenderer()->calcOptionHash($row->getData('customer_field_id'))] =
             'selected="selected"';
-        $optionExtraAttr['option_' . $this->_getMailchimpRenderer()->calcOptionHash($row->getData('mailchimp_field_id'))] =
+        $optionExtraAttr['option_' . $this->_getMailchimpRenderer()->calcOptionHash(
+            $row->getData('mailchimp_field_id')
+        )
+        ] =
             'selected="selected"';
         $row->setData(
             'option_extra_attrs',
