@@ -102,38 +102,65 @@ class Monkey extends Column
                 $status = $item['mailchimp_flag'];
                 $order = $this->_orderFactory->create()->loadByIncrementId($item['increment_id']);
                 $params = ['_secure' => $this->_requestInterfase->isSecure()];
-                if ($this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_PATH_ACTIVE,$order->getStoreId())) {
-                    $mailchimpStoreId = $this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_MAILCHIMP_STORE, $order->getStoreId());
-                    $syncData = $this->_helper->getChimpSyncEcommerce($mailchimpStoreId, $order->getId(), \Ebizmarts\MailChimp\Helper\Data::IS_ORDER);
+                if ($this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_PATH_ACTIVE, $order->getStoreId())) {
+                    $mailchimpStoreId = $this->_helper->getConfigValue(
+                        \Ebizmarts\MailChimp\Helper\Data::XML_MAILCHIMP_STORE,
+                        $order->getStoreId()
+                    );
+                    $syncData = $this->_helper->getChimpSyncEcommerce(
+                        $mailchimpStoreId,
+                        $order->getId(),
+                        \Ebizmarts\MailChimp\Helper\Data::IS_ORDER
+                    );
                     $alt = '';
-                    if (!$syncData || $syncData->getMailchimpStoreId() != $mailchimpStoreId || $syncData->getRelatedId() != $order->getId() || $syncData->getType() != \Ebizmarts\MailChimp\Helper\Data::IS_ORDER) {
-                        $url = $this->_assetRepository->getUrlWithParams('Ebizmarts_MailChimp::images/no.png',$params);
+                    if (!$syncData || $syncData->getMailchimpStoreId() != $mailchimpStoreId ||
+                        $syncData->getRelatedId() != $order->getId() ||
+                        $syncData->getType() != \Ebizmarts\MailChimp\Helper\Data::IS_ORDER) {
+                        $url = $this->_assetRepository->getUrlWithParams(
+                            'Ebizmarts_MailChimp::images/no.png',
+                            $params
+                        );
                         $text = __('Syncing');
                     } else {
                         $sync = $syncData->getMailchimpSent();
                         switch ($sync) {
                             case \Ebizmarts\MailChimp\Helper\Data::SYNCED:
-                                $url = $this->_assetRepository->getUrlWithParams('Ebizmarts_MailChimp::images/yes.png', $params);
+                                $url = $this->_assetRepository->getUrlWithParams(
+                                    'Ebizmarts_MailChimp::images/yes.png',
+                                    $params
+                                );
                                 $text = __('Synced');
                                 break;
                             case \Ebizmarts\MailChimp\Helper\Data::WAITINGSYNC:
-                                $url = $this->_assetRepository->getUrlWithParams('Ebizmarts_MailChimp::images/waiting.png', $params);
+                                $url = $this->_assetRepository->getUrlWithParams(
+                                    'Ebizmarts_MailChimp::images/waiting.png',
+                                    $params
+                                );
                                 $text = __('Waiting');
                                 break;
                             case \Ebizmarts\MailChimp\Helper\Data::SYNCERROR:
-                                $url = $this->_assetRepository->getUrlWithParams('Ebizmarts_MailChimp::images/error.png', $params);
+                                $url = $this->_assetRepository->getUrlWithParams(
+                                    'Ebizmarts_MailChimp::images/error.png',
+                                    $params
+                                );
                                 $text = __('Error');
-                                $orderError = $this->_getError($order->getId(),$order->getStoreId());
+                                $orderError = $this->_getError($order->getId(), $order->getStoreId());
                                 if ($orderError) {
                                     $alt = $orderError->getErrors();
                                 }
                                 break;
                             case \Ebizmarts\MailChimp\Helper\Data::NEEDTORESYNC:
-                                $url = $this->_assetRepository->getUrlWithParams('Ebizmarts_MailChimp::images/resync.png', $params);
+                                $url = $this->_assetRepository->getUrlWithParams(
+                                    'Ebizmarts_MailChimp::images/resync.png',
+                                    $params
+                                );
                                 $text = __('Resyncing');
                                 break;
                             case \Ebizmarts\MailChimp\Helper\Data::NOTSYNCED:
-                                $url = $this->_assetRepository->getUrlWithParams('Ebizmarts_MailChimp::images/never.png', $params);
+                                $url = $this->_assetRepository->getUrlWithParams(
+                                    'Ebizmarts_MailChimp::images/never.png',
+                                    $params
+                                );
                                 $text = __('With error');
                                 $alt = $syncData->getMailchimpSyncError();
                                 break;
@@ -142,10 +169,12 @@ class Monkey extends Column
                                 $text = '';
                         }
                     }
-                    $item['mailchimp_sync'] = "<div style='width: 50%;margin: 0 auto;text-align: center'><img src='".$url."' style='border: none; width: 5rem; text-align: center; max-width: 100%' title='$alt' />$text</div>";
+                    $item['mailchimp_sync'] =
+                        "<div style='width: 50%;margin: 0 auto;text-align: center'><img src='".$url."' style='border: none; width: 5rem; text-align: center; max-width: 100%' title='$alt' />$text</div>";
                     if ($status) {
                         $url = $this->_assetRepository->getUrlWithParams('Ebizmarts_MailChimp::images/freddie.png', $params);
-                        $item['mailchimp_status'] = "<div style='width: 50%;margin: 0 auto'><img src='".$url."' style='border: none; width: 5rem; text-align: center; max-width: 100%'/></div>";
+                        $item['mailchimp_status'] =
+                            "<div style='width: 50%;margin: 0 auto'><img src='".$url."' style='border: none; width: 5rem; text-align: center; max-width: 100%'/></div>";
                     }
                 }
             }

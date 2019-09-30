@@ -80,7 +80,10 @@ class UpgradeData implements UpgradeDataInterface
         if (version_compare($context->getVersion(), '1.0.24') < 0) {
             $setup->startSetup();
             $connection = $this->_resource->getConnectionByName('default');
-            if ($this->_deploymentConfig->get(\Magento\Framework\Config\ConfigOptionsListConstants::CONFIG_PATH_DB_CONNECTIONS . '/sales')) {
+            if ($this->_deploymentConfig->get(
+                \Magento\Framework\Config\ConfigOptionsListConstants::CONFIG_PATH_DB_CONNECTIONS . '/sales'
+            )
+            ) {
                     $salesConnection = $this->_resource->getConnectionByName('sales');
             } else {
                     $salesConnection = $connection;
@@ -103,7 +106,10 @@ class UpgradeData implements UpgradeDataInterface
             $setup->startSetup();
             $connection = $this->_resource->getConnectionByName('default');
             $table = $setup->getTable('core_config_data');
-            $select = $connection->select()->from($table)->where('path = ?', \Ebizmarts\MailChimp\Helper\Data::XML_MERGEVARS);
+            $select = $connection->select()->from($table)->where(
+                'path = ?',
+                \Ebizmarts\MailChimp\Helper\Data::XML_MERGEVARS
+            );
             $rows = $connection->fetchAll($select);
             foreach ($rows as $row) {
                 try {
@@ -183,17 +189,20 @@ class UpgradeData implements UpgradeDataInterface
             /**
              * @var $config \Magento\Config\Model\ResourceModel\Config
              */
-            foreach($configCollection as $config) {
+            foreach ($configCollection as $config) {
                 try {
                     $config->setValue($this->_helper->encrypt($config->getvalue()));
                     $config->getResource()->save($config);
-                } catch(\Exception $e) {
+                } catch (\Exception $e) {
                     $this->_helper->log($e->getMessage());
                 }
             }
             $configCollection = $this->configFactory->create();
-            $configCollection->addFieldToFilter('path', ['eq' => \Ebizmarts\MailChimp\Helper\Data::XML_PATH_APIKEY_LIST]);
-            foreach($configCollection as $config) {
+            $configCollection->addFieldToFilter(
+                'path',
+                ['eq' => \Ebizmarts\MailChimp\Helper\Data::XML_PATH_APIKEY_LIST]
+            );
+            foreach ($configCollection as $config) {
                 $config->getResource()->delete($config);
             }
         }

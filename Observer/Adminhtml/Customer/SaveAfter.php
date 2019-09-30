@@ -72,7 +72,10 @@ class SaveAfter implements \Magento\Framework\Event\ObserverInterface
                     $interestGroup->setStoreId($subscriber->getStoreId());
                     $interestGroup->setUpdatedAt($this->helper->getGmtDate());
                     $interestGroup->getResource()->save($interestGroup);
-                    $this->helper->markRegisterAsModified($subscriber->getId(), \Ebizmarts\MailChimp\Helper\Data::IS_SUBSCRIBER);
+                    $this->helper->markRegisterAsModified(
+                        $subscriber->getId(),
+                        \Ebizmarts\MailChimp\Helper\Data::IS_SUBSCRIBER
+                    );
                 } else {
                     $this->subscriberFactory->create()->subscribe($customer->getEmail());
                     $subscriber->loadByEmail($customer->getEmail());
@@ -90,7 +93,10 @@ class SaveAfter implements \Magento\Framework\Event\ObserverInterface
         } else {
             $subscriber->loadByEmail($customer->getEmail());
             if ($subscriber->getEmail() == $customer->getEmail()) {
-                $this->helper->markRegisterAsModified($subscriber->getId(), \Ebizmarts\MailChimp\Helper\Data::IS_SUBSCRIBER);
+                $this->helper->markRegisterAsModified(
+                    $subscriber->getId(),
+                    \Ebizmarts\MailChimp\Helper\Data::IS_SUBSCRIBER
+                );
             }
         }
         $this->helper->markRegisterAsModified($customer->getId(), \Ebizmarts\MailChimp\Helper\Data::IS_CUSTOMER);

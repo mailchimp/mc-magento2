@@ -40,12 +40,18 @@ class UpgradeSchema implements UpgradeSchemaInterface
     public function upgrade(SchemaSetupInterface $setup, ModuleContextInterface $context)
     {
         $connection = $this->_resource->getConnectionByName('default');
-        if ($this->_deploymentConfig->get(\Magento\Framework\Config\ConfigOptionsListConstants::CONFIG_PATH_DB_CONNECTIONS . '/checkout')) {
+        if ($this->_deploymentConfig->get(
+            \Magento\Framework\Config\ConfigOptionsListConstants::CONFIG_PATH_DB_CONNECTIONS . '/checkout'
+        )
+        ) {
             $checkoutConnection = $this->_resource->getConnectionByName('checkout');
         } else {
             $checkoutConnection = $connection;
         }
-        if ($this->_deploymentConfig->get(\Magento\Framework\Config\ConfigOptionsListConstants::CONFIG_PATH_DB_CONNECTIONS . '/sales')) {
+        if ($this->_deploymentConfig->get(
+            \Magento\Framework\Config\ConfigOptionsListConstants::CONFIG_PATH_DB_CONNECTIONS . '/sales'
+        )
+        ) {
             $salesConnection = $this->_resource->getConnectionByName('sales');
         } else {
             $salesConnection = $connection;
@@ -472,7 +478,7 @@ class UpgradeSchema implements UpgradeSchemaInterface
                 );
             $connection->createTable($table);
         }
-        if (version_compare($context->getVersion(),'1.3.33') < 0) {
+        if (version_compare($context->getVersion(), '1.3.33') < 0) {
             $connection->addIndex(
                 $setup->getTable('mailchimp_sync_ecommerce'),
                 $connection->getIndexName($setup->getTable('mailchimp_sync_ecommerce'), 'type', 'index'),
@@ -501,7 +507,7 @@ class UpgradeSchema implements UpgradeSchemaInterface
             );
         }
 
-        if (version_compare($context->getVersion(),'102.3.34') < 0) {
+        if (version_compare($context->getVersion(), '102.3.34') < 0) {
             $connection->addColumn(
                 $setup->getTable('mailchimp_sync_batches'),
                 'modified_date',
@@ -522,7 +528,7 @@ class UpgradeSchema implements UpgradeSchemaInterface
                 ]
             );
         }
-        if (version_compare($context->getVersion(),'102.3.35') < 0) {
+        if (version_compare($context->getVersion(), '102.3.35') < 0) {
             $connection->changeColumn(
                 $setup->getTable('mailchimp_stores'),
                 'apikey',
@@ -533,6 +539,5 @@ class UpgradeSchema implements UpgradeSchemaInterface
                 ]
             );
         }
-
     }
 }

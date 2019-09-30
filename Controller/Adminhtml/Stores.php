@@ -62,6 +62,7 @@ class Stores extends Action
     }
     public function execute()
     {
+        return 1;
     }
     protected function _isAllowed()
     {

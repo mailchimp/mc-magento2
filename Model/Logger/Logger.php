@@ -17,7 +17,8 @@ class Logger extends \Monolog\Logger
     public function mailchimpLog($message, $file)
     {
         if ($file) {
-            $fileName = BP. DIRECTORY_SEPARATOR . 'var' . DIRECTORY_SEPARATOR . 'log'. DIRECTORY_SEPARATOR.$file .'_Request.log';
+            $fileName = BP. DIRECTORY_SEPARATOR .'var'. DIRECTORY_SEPARATOR.'log'.
+                DIRECTORY_SEPARATOR.$file.'_Request.log';
             $this->pushHandler(new \Monolog\Handler\StreamHandler($fileName));
         }
 

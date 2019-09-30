@@ -32,7 +32,6 @@ class AccountManagement
      */
     protected $_storeManager;
 
-
     /**
      * AccountManagement constructor.
      * @param \Ebizmarts\MailChimp\Helper\Data $helper
@@ -66,8 +65,8 @@ class AccountManagement
         $websiteId = null
     ) {
     
-        $ret = $proceed($customerEmail,$websiteId);
-        if ($this->_session  && $this->_helper->isEmailSavingEnabled($this->_storeManager->getStore()->getId())) {
+        $ret = $proceed($customerEmail, $websiteId);
+        if ($this->_session && $this->_helper->isEmailSavingEnabled($this->_storeManager->getStore()->getId())) {
             $quoteId = $this->_session->getQuoteId();
             if ($quoteId) {
                 $quote = $this->_quote->create();

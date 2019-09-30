@@ -136,7 +136,6 @@ class InstallSchema implements InstallSchemaInterface
 
         $connection->createTable($table);
 
-
         $table = $connection
             ->newTable($setup->getTable('mailchimp_sync_ecommerce'))
             ->addColumn(
@@ -202,7 +201,10 @@ class InstallSchema implements InstallSchemaInterface
 
         $connection->createTable($table);
 
-        if ($this->_deploymentConfig->get(\Magento\Framework\Config\ConfigOptionsListConstants::CONFIG_PATH_DB_CONNECTIONS . '/sales')) {
+        if ($this->_deploymentConfig->get(
+            \Magento\Framework\Config\ConfigOptionsListConstants::CONFIG_PATH_DB_CONNECTIONS . '/sales'
+        )
+        ) {
             $connection = $this->_resource->getConnectionByName('sales');
         }
 
@@ -215,7 +217,10 @@ class InstallSchema implements InstallSchemaInterface
                 'comment' => 'Retrieved from Mailchimp'
             ]
         );
-        if ($this->_deploymentConfig->get(\Magento\Framework\Config\ConfigOptionsListConstants::CONFIG_PATH_DB_CONNECTIONS . '/checkout')) {
+        if ($this->_deploymentConfig->get(
+            \Magento\Framework\Config\ConfigOptionsListConstants::CONFIG_PATH_DB_CONNECTIONS . '/checkout'
+        )
+        ) {
             $connection = $this->_resource->getConnectionByName('checkout');
         }
         $connection->addColumn(

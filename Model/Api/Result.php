@@ -69,7 +69,7 @@ class Result
                 if (is_array($files) && count($files)) {
                     $this->processEachResponseFile($files, $item->getBatchId(), $mailchimpStoreId, $storeId);
                     $item->setStatus(\Ebizmarts\MailChimp\Helper\Data::BATCH_COMPLETED);
-                    $item->setModifiedDate( $this->_helper->getGmtDate() );
+                    $item->setModifiedDate($this->_helper->getGmtDate());
                     $item->getResource()->save($item);
                 } elseif ($files === false) {
                     $item->setStatus(\Ebizmarts\MailChimp\Helper\Data::BATCH_ERROR);
@@ -78,9 +78,16 @@ class Result
                     continue;
                 }
                 $baseDir = $this->_helper->getBaseDir();
-                if (is_dir($baseDir . DIRECTORY_SEPARATOR . 'var' . DIRECTORY_SEPARATOR . self::MAILCHIMP_TEMP_DIR . DIRECTORY_SEPARATOR . $item->getBatchId())) {
-                    array_map('unlink', glob($baseDir . DIRECTORY_SEPARATOR . 'var' . DIRECTORY_SEPARATOR . self::MAILCHIMP_TEMP_DIR . DIRECTORY_SEPARATOR . $item->getBatchId().DIRECTORY_SEPARATOR."*.*"));
-                    rmdir($baseDir . DIRECTORY_SEPARATOR . 'var' . DIRECTORY_SEPARATOR . self::MAILCHIMP_TEMP_DIR . DIRECTORY_SEPARATOR . $item->getBatchId());
+                if (is_dir($baseDir . DIRECTORY_SEPARATOR . 'var' . DIRECTORY_SEPARATOR .
+                    self::MAILCHIMP_TEMP_DIR . DIRECTORY_SEPARATOR . $item->getBatchId())) {
+                    array_map(
+                        'unlink',
+                        glob($baseDir . DIRECTORY_SEPARATOR . 'var' . DIRECTORY_SEPARATOR .
+                            self::MAILCHIMP_TEMP_DIR . DIRECTORY_SEPARATOR .
+                            $item->getBatchId().DIRECTORY_SEPARATOR."*.*")
+                    );
+                    rmdir($baseDir . DIRECTORY_SEPARATOR . 'var' . DIRECTORY_SEPARATOR .
+                        self::MAILCHIMP_TEMP_DIR . DIRECTORY_SEPARATOR . $item->getBatchId());
                 }
             } catch (\Exception $e) {
                 $this->_helper->log("Error with a response: " . $e->getMessage());
@@ -103,7 +110,8 @@ class Result
                 }
                 // get the tar.gz file with the results
                 $fileUrl = urldecode($response['response_body_url']);
-                $fileName = $baseDir . DIRECTORY_SEPARATOR . 'var' . DIRECTORY_SEPARATOR . self::MAILCHIMP_TEMP_DIR . DIRECTORY_SEPARATOR . $batchId;
+                $fileName = $baseDir . DIRECTORY_SEPARATOR . 'var' . DIRECTORY_SEPARATOR .
+                    self::MAILCHIMP_TEMP_DIR . DIRECTORY_SEPARATOR . $batchId;
                 $fd = fopen($fileName . '.tar.gz', 'w');
                 $ch = curl_init();
                 curl_setopt($ch, CURLOPT_URL, $fileUrl);
@@ -112,18 +120,31 @@ class Result
                 $r = curl_exec($ch);
                 curl_close($ch);
                 fclose($fd);
-                mkdir($baseDir . DIRECTORY_SEPARATOR . 'var' . DIRECTORY_SEPARATOR . self::MAILCHIMP_TEMP_DIR . DIRECTORY_SEPARATOR . $batchId);
+                mkdir($baseDir . DIRECTORY_SEPARATOR . 'var' . DIRECTORY_SEPARATOR .
+                    self::MAILCHIMP_TEMP_DIR . DIRECTORY_SEPARATOR . $batchId);
                 $archive = $this->_archive;
-                $archive->unpack($fileName . '.tar.gz', $baseDir . DIRECTORY_SEPARATOR . 'var' . DIRECTORY_SEPARATOR . self::MAILCHIMP_TEMP_DIR . DIRECTORY_SEPARATOR . $batchId);
-                $archive->unpack($baseDir . DIRECTORY_SEPARATOR . 'var' . DIRECTORY_SEPARATOR . self::MAILCHIMP_TEMP_DIR . DIRECTORY_SEPARATOR . $batchId . '/' . $batchId . '.tar', $baseDir . DIRECTORY_SEPARATOR . 'var' . DIRECTORY_SEPARATOR . self::MAILCHIMP_TEMP_DIR . DIRECTORY_SEPARATOR . $batchId);
-                $dir = scandir($baseDir . DIRECTORY_SEPARATOR . 'var' . DIRECTORY_SEPARATOR . self::MAILCHIMP_TEMP_DIR . DIRECTORY_SEPARATOR . $batchId);
+                $archive->unpack(
+                    $fileName . '.tar.gz',
+                    $baseDir . DIRECTORY_SEPARATOR . 'var' .
+                    DIRECTORY_SEPARATOR . self::MAILCHIMP_TEMP_DIR . DIRECTORY_SEPARATOR . $batchId
+                );
+                $archive->unpack(
+                    $baseDir . DIRECTORY_SEPARATOR . 'var' . DIRECTORY_SEPARATOR .
+                    self::MAILCHIMP_TEMP_DIR . DIRECTORY_SEPARATOR . $batchId . '/' . $batchId . '.tar',
+                    $baseDir . DIRECTORY_SEPARATOR . 'var' . DIRECTORY_SEPARATOR .
+                    self::MAILCHIMP_TEMP_DIR . DIRECTORY_SEPARATOR . $batchId
+                );
+                $dir = scandir($baseDir . DIRECTORY_SEPARATOR . 'var' . DIRECTORY_SEPARATOR .
+                    self::MAILCHIMP_TEMP_DIR . DIRECTORY_SEPARATOR . $batchId);
                 foreach ($dir as $d) {
                     $name = pathinfo($d);
                     if ($name['extension'] == 'json') {
-                        $files[] = $baseDir . DIRECTORY_SEPARATOR . 'var' . DIRECTORY_SEPARATOR . self::MAILCHIMP_TEMP_DIR . DIRECTORY_SEPARATOR . $batchId . '/' . $d;
+                        $files[] = $baseDir . DIRECTORY_SEPARATOR . 'var' . DIRECTORY_SEPARATOR .
+                            self::MAILCHIMP_TEMP_DIR . DIRECTORY_SEPARATOR . $batchId . '/' . $d;
                     }
                 }
-                unlink($baseDir . DIRECTORY_SEPARATOR . 'var' . DIRECTORY_SEPARATOR . self::MAILCHIMP_TEMP_DIR . DIRECTORY_SEPARATOR . $batchId . '/' . $batchId . '.tar');
+                unlink($baseDir . DIRECTORY_SEPARATOR . 'var' . DIRECTORY_SEPARATOR .
+                    self::MAILCHIMP_TEMP_DIR . DIRECTORY_SEPARATOR . $batchId . '/' . $batchId . '.tar');
                 unlink($fileName . '.tar.gz');
             }
         } catch (\Mailchimp_Error $e) {
@@ -148,7 +169,14 @@ class Result
                         //parse error
                         $response = json_decode($item->response);
                         if (preg_match('/already exists/', $response->detail)) {
-                            $this->_updateSyncData($mailchimpStoreId,$listId,$type,$id,null, \Ebizmarts\MailChimp\Helper\Data::SYNCED);
+                            $this->_updateSyncData(
+                                $mailchimpStoreId,
+                                $listId,
+                                $type,
+                                $id,
+                                null,
+                                \Ebizmarts\MailChimp\Helper\Data::SYNCED
+                            );
                             continue;
                         }
                         $mailchimpErrors = $this->_chimpErrors->create();
@@ -166,7 +194,14 @@ class Result
                         }
 
                         $error = $response->title . " : " . $response->detail;
-                        $this->_updateSyncData($mailchimpStoreId,$listId,$type,$id,$error,\Ebizmarts\MailChimp\Helper\Data::SYNCERROR);
+                        $this->_updateSyncData(
+                            $mailchimpStoreId,
+                            $listId,
+                            $type,
+                            $id,
+                            $error,
+                            \Ebizmarts\MailChimp\Helper\Data::SYNCERROR
+                        );
                         $mailchimpErrors->setType($response->type);
                         $mailchimpErrors->setTitle($response->title);
                         $mailchimpErrors->setStatus($item->status_code);
@@ -180,7 +215,14 @@ class Result
                         $mailchimpErrors->setStoreId($storeId);
                         $mailchimpErrors->getResource()->save($mailchimpErrors);
                     } else {
-                        $this->_updateSyncData($mailchimpStoreId,$listId,$type,$id,null,\Ebizmarts\MailChimp\Helper\Data::SYNCED);
+                        $this->_updateSyncData(
+                            $mailchimpStoreId,
+                            $listId,
+                            $type,
+                            $id,
+                            null,
+                            \Ebizmarts\MailChimp\Helper\Data::SYNCED
+                        );
                     }
                 }
             } else {
@@ -202,7 +244,7 @@ class Result
             unlink($file);
         }
     }
-    private function _updateSyncData($mailchimpStoreId,$listId,$type,$id,$error,$status)
+    private function _updateSyncData($mailchimpStoreId, $listId, $type, $id, $error, $status)
     {
         /**
          * @var \Ebizmarts\MailChimp\Model\MailChimpSyncEcommerce $chimpSync
@@ -213,7 +255,8 @@ class Result
             $mailchimpStore = $mailchimpStoreId;
         }
         $chimpSync = $this->_helper->getChimpSyncEcommerce($mailchimpStore, $id, $type);
-        if ($chimpSync->getMailchimpStoreId() == $mailchimpStore && $chimpSync->getType() == $type && $chimpSync->getRelatedId() == $id) {
+        if ($chimpSync->getMailchimpStoreId() ==
+            $mailchimpStore && $chimpSync->getType() == $type && $chimpSync->getRelatedId() == $id) {
             $chimpSync->setMailchimpSent($status);
             $chimpSync->setMailchimpSyncError($error);
             $chimpSync->getResource()->save($chimpSync);

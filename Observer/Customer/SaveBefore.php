@@ -46,15 +46,28 @@ class SaveBefore implements \Magento\Framework\Event\ObserverInterface
          */
         $customer = $observer->getCustomer();
         $storeId  = $customer->getStoreId();
-        if ($this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_PATH_ACTIVE) ) {
+        if ($this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_PATH_ACTIVE)) {
             if ($this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_PATH_ECOMMERCE_ACTIVE)) {
-                $mailchimpStoreId = $this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_MAILCHIMP_STORE, $storeId);
-                $this->_helper->saveEcommerceData($mailchimpStoreId, $customer->getId(), \Ebizmarts\MailChimp\Helper\Data::IS_CUSTOMER, null, null, 1);
+                $mailchimpStoreId = $this->_helper->getConfigValue(
+                    \Ebizmarts\MailChimp\Helper\Data::XML_MAILCHIMP_STORE,
+                    $storeId
+                );
+                $this->_helper->saveEcommerceData(
+                    $mailchimpStoreId,
+                    $customer->getId(),
+                    \Ebizmarts\MailChimp\Helper\Data::IS_CUSTOMER,
+                    null,
+                    null,
+                    1
+                );
             }
             $subscriber = $this->subscriberFactory->create();
             $subscriber->loadByEmail($customer->getEmail());
             if ($subscriber->getEmail() == $customer->getEmail()) {
-                $this->_helper->markRegisterAsModified($subscriber->getId(), \Ebizmarts\MailChimp\Helper\Data::IS_SUBSCRIBER);
+                $this->_helper->markRegisterAsModified(
+                    $subscriber->getId(),
+                    \Ebizmarts\MailChimp\Helper\Data::IS_SUBSCRIBER
+                );
             }
         }
     }

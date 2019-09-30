@@ -56,17 +56,34 @@ class Details implements \Magento\Framework\Option\ArrayInterface
             $scope = 'default';
         }
 
-
         if ($this->_helper->getApiKey($storeId, $scope)) {
             $api = $this->_helper->getApi($storeId, $scope);
             try {
                 $this->_options = $api->root->info();
-                $optionsList = $api->lists->getLists($this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_PATH_LIST, $storeId, $scope));
-                if ($optionsList && array_key_exists('stats',$optionsList) && array_key_exists('member_count', $optionsList['stats'])) {
+                $optionsList = $api->lists->getLists(
+                    $this->_helper->getConfigValue(
+                        \Ebizmarts\MailChimp\Helper\Data::XML_PATH_LIST,
+                        $storeId,
+                        $scope
+                    )
+                );
+                if ($optionsList &&
+                    array_key_exists('stats', $optionsList) &&
+                    array_key_exists('member_count', $optionsList['stats'])) {
                     $this->_options['list_subscribers'] = $optionsList['stats']['member_count'];
                 }
-                $mailchimpStoreId = $this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_MAILCHIMP_STORE, $storeId, $scope);
-                if ($mailchimpStoreId && $mailchimpStoreId!=-1 && $this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_PATH_ECOMMERCE_ACTIVE, $storeId, $scope)) {
+                $mailchimpStoreId = $this->_helper->getConfigValue(
+                    \Ebizmarts\MailChimp\Helper\Data::XML_MAILCHIMP_STORE,
+                    $storeId,
+                    $scope
+                );
+                if ($mailchimpStoreId && $mailchimpStoreId!=-1 &&
+                    $this->_helper->getConfigValue(
+                        \Ebizmarts\MailChimp\Helper\Data::XML_PATH_ECOMMERCE_ACTIVE,
+                        $storeId,
+                        $scope
+                    )
+                ) {
                     $storeInfo = $api->ecommerce->stores->get($mailchimpStoreId);
                     $this->_options['is_syncing'] = $storeInfo['is_syncing'];
                     $this->_options['date_sync'] = $this->getDateSync($mailchimpStoreId);
@@ -104,9 +121,12 @@ class Details implements \Magento\Framework\Option\ArrayInterface
                     ['label' => __('Username'), 'value' => $this->_options['account_name']],
                     ['label' => 'Total Member Subscribers', 'value' => $this->_options['total_subscribers']]];
                 if (array_key_exists('list_subscribers', $this->_options)) {
-                    $ret = array_merge($ret, [['label' => 'Total List Subscribers', 'value' => $this->_options['list_subscribers']]]);
+                    $ret = array_merge(
+                        $ret,
+                        [['label' => 'Total List Subscribers', 'value' => $this->_options['list_subscribers']]]
+                    );
                 }
-                $ret = array_merge($ret,[['label' => 'Ecommerce Data uploaded to MailChimp', 'value' => '']]);
+                $ret = array_merge($ret, [['label' => 'Ecommerce Data uploaded to MailChimp', 'value' => '']]);
                 if (isset($this->_options['store_exists']) && $this->_options['store_exists']) {
                     $ret = array_merge($ret, [
                         ['label' => '  Total Customers', 'value' => $this->_options['total_customers']],
@@ -140,6 +160,10 @@ class Details implements \Magento\Framework\Option\ArrayInterface
     }
     private function getDateSync($mailchimpStoreId)
     {
-        return $this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_PATH_IS_SYNC."/$mailchimpStoreId", 0, "default");
+        return $this->_helper->getConfigValue(
+            \Ebizmarts\MailChimp\Helper\Data::XML_PATH_IS_SYNC."/$mailchimpStoreId",
+            0,
+            "default"
+        );
     }
 }

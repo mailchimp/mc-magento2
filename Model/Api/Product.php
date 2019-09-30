@@ -110,14 +110,21 @@ class Product
         $this->_option              = $option;
         $this->_categoryCollection  = $categoryCollection;
         $this->taxHelper            = $taxHelper;
-        $this->_batchId             = \Ebizmarts\MailChimp\Helper\Data::IS_PRODUCT. '_' . $this->_helper->getGmtTimeStamp();
+        $this->_batchId             = \Ebizmarts\MailChimp\Helper\Data::IS_PRODUCT. '_' .
+            $this->_helper->getGmtTimeStamp();
     }
     public function _sendProducts($magentoStoreId)
     {
         $batchArray = [];
         $counter = 0;
-        $mailchimpStoreId = $this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_MAILCHIMP_STORE, $magentoStoreId);
-        $this->includingTaxes = $this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_INCLUDING_TAXES, $magentoStoreId);
+        $mailchimpStoreId = $this->_helper->getConfigValue(
+            \Ebizmarts\MailChimp\Helper\Data::XML_MAILCHIMP_STORE,
+            $magentoStoreId
+        );
+        $this->includingTaxes = $this->_helper->getConfigValue(
+            \Ebizmarts\MailChimp\Helper\Data::XML_INCLUDING_TAXES,
+            $magentoStoreId
+        );
         $this->_markSpecialPrices($magentoStoreId, $mailchimpStoreId);
         $collection = $this->_getCollection();
         $collection->addStoreFilter($magentoStoreId);
@@ -127,7 +134,8 @@ class Product
             "' and m4m.mailchimp_store_id = '".$mailchimpStoreId."'",
             ['m4m.*']
         );
-        $collection->getSelect()->where("m4m.mailchimp_sync_delta IS null OR (m4m.mailchimp_sync_delta > '".$this->_helper->getMCMinSyncDateFlag().
+        $collection->getSelect()->where("m4m.mailchimp_sync_delta IS null OR (m4m.mailchimp_sync_delta > '".
+            $this->_helper->getMCMinSyncDateFlag().
             "' and m4m.mailchimp_sync_modified = 1)");
         $collection->getSelect()->limit(self::MAX);
         foreach ($collection as $item) {
@@ -137,7 +145,12 @@ class Product
             $product = $this->_productRepository->getById($item->getId());
             if ($item->getMailchimpSyncModified() && $item->getMailchimpSyncDelta() &&
                 $item->getMailchimpSyncDelta() > $this->_helper->getMCMinSyncDateFlag()) {
-                $batchArray = array_merge($this->_buildOldProductRequest($product, $this->_batchId, $mailchimpStoreId, $magentoStoreId), $batchArray);
+                $batchArray = array_merge($this->_buildOldProductRequest(
+                    $product,
+                    $this->_batchId,
+                    $mailchimpStoreId,
+                    $magentoStoreId
+                ), $batchArray);
                 $this->_updateProduct($mailchimpStoreId, $product->getId());
                 continue;
             } else {
@@ -191,7 +204,9 @@ class Product
         );
         $collection->getSelect()->joinLeft(
             ['mc' => $collection->getTable('mailchimp_sync_ecommerce')],
-            "mc.type = 'PRO' AND mc.related_id = e.entity_id AND mc.mailchimp_sync_modified = 0 ".$collection->getConnection()->quoteInto(" AND  mc.mailchimp_store_id = ?", $mailchimpStoreId) ." and mc.mailchimp_sync_delta <  at_special_from_date.value"
+            "mc.type = 'PRO' AND mc.related_id = e.entity_id AND mc.mailchimp_sync_modified = 0 ".
+            $collection->getConnection()->quoteInto(" AND  mc.mailchimp_store_id = ?", $mailchimpStoreId) .
+            " and mc.mailchimp_sync_delta <  at_special_from_date.value"
         );
         $collection->getSelect()->where('mc.mailchimp_sync_delta is not null');
         foreach ($collection as $item) {
@@ -215,7 +230,9 @@ class Product
         );
         $collection2->getSelect()->joinLeft(
             ['mc' => $collection2->getTable('mailchimp_sync_ecommerce')],
-            "mc.type = 'PRO' and mc.related_id = e.entity_id and mc.mailchimp_sync_modified = 0 ".$collection->getConnection()->quoteInto(" AND  mc.mailchimp_store_id = ?", $mailchimpStoreId) ." and mc.mailchimp_sync_delta < at_special_to_date.value",
+            "mc.type = 'PRO' and mc.related_id = e.entity_id and mc.mailchimp_sync_modified = 0 ".
+            $collection->getConnection()->quoteInto(" AND  mc.mailchimp_store_id = ?", $mailchimpStoreId) .
+            " and mc.mailchimp_sync_delta < at_special_to_date.value",
             []
         );
         $collection2->getSelect()->where('mc.mailchimp_sync_delta is not null');
@@ -315,7 +332,8 @@ class Product
                     $variendata["visibility"] = $data["visibility"];
                     $productdata = [];
                     $productdata['method'] = "PUT";
-                    $productdata['path'] = "/ecommerce/stores/" . $mailchimpStoreId . "/products/" . $parentId . '/variants/' . $data['id'];
+                    $productdata['path'] = "/ecommerce/stores/" . $mailchimpStoreId . "/products/" .
+                        $parentId . '/variants/' . $data['id'];
                     $productdata['operation_id'] = $batchId . '_' . $parentId;
                     $body = json_encode($variendata);
                     if ($body===false) {
@@ -374,14 +392,20 @@ class Product
         $data["url"] = $product->getProductUrl();
         if ($product->getImage() && $product->getImage()!='no_selection') {
             $filePath = 'catalog/product'.$product->getImage();
-            $data["image_url"] = $this->_helper->getBaserUrl($magentoStoreId, \Magento\Framework\UrlInterface::URL_TYPE_MEDIA).$filePath;
+            $data["image_url"] = $this->_helper->getBaserUrl(
+                $magentoStoreId,
+                \Magento\Framework\UrlInterface::URL_TYPE_MEDIA
+            ).$filePath;
         } elseif ($this->_parentImage) {
             $data['image_url'] = $this->_parentImage;
         } else {
             $parent = $this->_getParent($product->getId());
             if ($parent && $parent->getImage() && $parent->getImage()!='no_selection') {
                 $filePath = 'catalog/product'.$parent->getImage();
-                $data["image_url"] = $this->_helper->getBaserUrl($magentoStoreId, \Magento\Framework\UrlInterface::URL_TYPE_MEDIA).$filePath;
+                $data["image_url"] = $this->_helper->getBaserUrl(
+                    $magentoStoreId,
+                    \Magento\Framework\UrlInterface::URL_TYPE_MEDIA
+                ).$filePath;
             }
         }
         $data["published_at_foreign"] = "";
@@ -417,7 +441,10 @@ class Product
                     $this->_childtUrl = $data['url'] = $parent->getProductUrl() . $tailUrl;
                     if (empty($data['image_url'])) {
                         $filePath = 'catalog/product'.$parent->getImage();
-                        $data["image_url"] = $this->_helper->getBaserUrl($magentoStoreId, \Magento\Framework\UrlInterface::URL_TYPE_MEDIA).$filePath;
+                        $data["image_url"] = $this->_helper->getBaserUrl(
+                            $magentoStoreId,
+                            \Magento\Framework\UrlInterface::URL_TYPE_MEDIA
+                        ).$filePath;
                     }
                 }
             } else {
@@ -459,7 +486,7 @@ class Product
              */
             foreach ($variants as $variant) {
                 if ($variant) {
-                    if($variant->getId() != $product->getId()) {
+                    if ($variant->getId() != $product->getId()) {
                         $this->productPrice = null;
                     }
                     $data["variants"][] = $this->_buildProductData($variant, $magentoStoreId);
@@ -541,12 +568,16 @@ class Product
                     $product->getTypeId() != \Magento\Catalog\Model\Product\Type::TYPE_VIRTUAL &&
                     $product->getTypeId() != \Magento\ConfigurableProduct\Model\Product\Type\Configurable::TYPE_CODE &&
                     $product->getTypeId() != "downloadable")) {
-                $this->_helper->log('The product with id ['.$product->getId().'] is not supported ['.$product->getTypeId().']');
+                $this->_helper->log('The product with id ['.$product->getId().
+                    '] is not supported ['.$product->getTypeId().']');
                 continue;
             }
             if ($productSyncData->getMailchimpSyncModified() &&
                 $productSyncData->getMailchimpSyncDelta() > $this->_helper->getMCMinSyncDateFlag()) {
-                $data = array_merge($data, $this->_buildOldProductRequest($product, $batchId, $mailchimpStoreId, $magentoStoreId));
+                $data = array_merge(
+                    $data,
+                    $this->_buildOldProductRequest($product, $batchId, $mailchimpStoreId, $magentoStoreId)
+                );
                 $this->_updateProduct($mailchimpStoreId, $product->getId());
             } elseif (!$productSyncData->getMailchimpSyncDelta() ||
                 $productSyncData->getMailchimpSyncDelta() < $this->_helper->getMCMinSyncDateFlag()) {
@@ -578,13 +609,18 @@ class Product
                     $product->getTypeId() != \Magento\Catalog\Model\Product\Type::TYPE_VIRTUAL &&
                     $product->getTypeId() != \Magento\ConfigurableProduct\Model\Product\Type\Configurable::TYPE_CODE &&
                     $product->getTypeId() != "downloadable")) {
-                $this->_helper->log('The product with id ['.$product->getId().'] is not supported ['.$product->getTypeId().']');
+                $this->_helper->log(
+                    'The product with id ['.$product->getId().'] is not supported ['.$product->getTypeId().']'
+                );
                 continue;
             }
 
             if ($productSyncData->getMailchimpSyncModified() &&
                 $productSyncData->getMailchimpSyncDelta() > $this->_helper->getMCMinSyncDateFlag()) {
-                $data = array_merge($data, $this->_buildOldProductRequest($product, $batchId, $mailchimpStoreId, $magentoStoreId));
+                $data = array_merge(
+                    $data,
+                    $this->_buildOldProductRequest($product, $batchId, $mailchimpStoreId, $magentoStoreId)
+                );
                 $this->_updateProduct($mailchimpStoreId, $product->getId());
             } elseif (!$productSyncData->getMailchimpSyncDelta() ||
                 $productSyncData->getMailchimpSyncDelta() < $this->_helper->getMCMinSyncDateFlag()) {
@@ -610,8 +646,13 @@ class Product
      * @param $sync_error
      * @param $sync_modified
      */
-    protected function _updateProduct($storeId, $entityId, $sync_delta = null, $sync_error = null, $sync_modified = null)
-    {
+    protected function _updateProduct(
+        $storeId,
+        $entityId,
+        $sync_delta = null,
+        $sync_error = null,
+        $sync_modified = null
+    ) {
         $this->_helper->saveEcommerceData(
             $storeId,
             $entityId,

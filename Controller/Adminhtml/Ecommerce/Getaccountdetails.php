@@ -91,7 +91,6 @@ class Getaccountdetails extends Action
             $options['error'] = ['label' => 'Error', 'value' => __('--- Invalid API Key ---')];
         }
 
-
         $resultJson = $this->_resultFactory->create(ResultFactory::TYPE_JSON);
         $resultJson->setData($options);
         return $resultJson;

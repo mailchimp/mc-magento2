@@ -11,7 +11,8 @@
 
 namespace Ebizmarts\MailChimp\Block\Adminhtml\System\Config\Fieldset;
 
-class Hint extends \Magento\Backend\Block\Template implements \Magento\Framework\Data\Form\Element\Renderer\RendererInterface
+class Hint extends \Magento\Backend\Block\Template implements
+    \Magento\Framework\Data\Form\Element\Renderer\RendererInterface
 {
     /**
      * @var string
@@ -68,13 +69,13 @@ class Hint extends \Magento\Backend\Block\Template implements \Magento\Framework
     {
         return $this->_moduleVersion->getModuleVersion('Ebizmarts_MailChimp');
     }
-    public function getHasApiKey() {
+    public function getHasApiKey()
+    {
         $apikey = $this->_helper->getApiKey($this->_context->getStoreManager()->getStore()->getId());
         if ($apikey) {
             return true;
         } else {
             return false;
         }
-
     }
 }
