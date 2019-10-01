@@ -32,25 +32,39 @@ class Result
      * @var \Ebizmarts\MailChimp\Model\MailChimpErrorsFactory
      */
     private $_chimpErrors;
+    /**
+     * @var \Magento\Framework\Filesystem\Driver\File
+     */
+    private $_driver;
+    /**
+     * @var \Magento\Framework\HTTP\Client\CurlFactory
+     */
+    private $_curlFactory;
 
     /**
      * Result constructor.
      * @param \Ebizmarts\MailChimp\Helper\Data $helper
-     * @param \Ebizmarts\MailChimp\Model\ResourceModel\MailChimpSyncBatches\Collection $batchCollection
+     * @param \Ebizmarts\MailChimp\Model\ResourceModel\MailChimpSyncBatches\CollectionFactory $batchCollection
      * @param \Ebizmarts\MailChimp\Model\MailChimpErrorsFactory $chimpErrors
      * @param \Magento\Framework\Archive $archive
+     * @param \Magento\Framework\Filesystem\Driver\File $driver
+     * @param \Magento\Framework\HTTP\Client\CurlFactory $curlFactory
      */
     public function __construct(
         \Ebizmarts\MailChimp\Helper\Data $helper,
         \Ebizmarts\MailChimp\Model\ResourceModel\MailChimpSyncBatches\CollectionFactory $batchCollection,
         \Ebizmarts\MailChimp\Model\MailChimpErrorsFactory $chimpErrors,
-        \Magento\Framework\Archive $archive
+        \Magento\Framework\Archive $archive,
+        \Magento\Framework\Filesystem\Driver\File $driver,
+        \Magento\Framework\HTTP\Client\CurlFactory $curlFactory
     ) {
     
         $this->_batchCollection     = $batchCollection;
         $this->_helper              = $helper;
         $this->_archive             = $archive;
         $this->_chimpErrors         = $chimpErrors;
+        $this->_driver              = $driver;
+        $this->_curlFactory         = $curlFactory;
     }
     public function processResponses($storeId, $isMailChimpStoreId = false, $mailchimpStoreId)
     {
@@ -78,15 +92,21 @@ class Result
                     continue;
                 }
                 $baseDir = $this->_helper->getBaseDir();
-                if (is_dir($baseDir . DIRECTORY_SEPARATOR . 'var' . DIRECTORY_SEPARATOR .
+                if ($this->_driver->isDirectory($baseDir . DIRECTORY_SEPARATOR . 'var' . DIRECTORY_SEPARATOR .
                     self::MAILCHIMP_TEMP_DIR . DIRECTORY_SEPARATOR . $item->getBatchId())) {
-                    array_map(
-                        'unlink',
-                        glob($baseDir . DIRECTORY_SEPARATOR . 'var' . DIRECTORY_SEPARATOR .
-                            self::MAILCHIMP_TEMP_DIR . DIRECTORY_SEPARATOR .
-                            $item->getBatchId().DIRECTORY_SEPARATOR."*.*")
+                    $dirFiles = $this->_driver->readDirectory(
+                        $baseDir . DIRECTORY_SEPARATOR . 'var' . DIRECTORY_SEPARATOR .
+                        self::MAILCHIMP_TEMP_DIR . DIRECTORY_SEPARATOR .
+                        $item->getBatchId().DIRECTORY_SEPARATOR
                     );
-                    rmdir($baseDir . DIRECTORY_SEPARATOR . 'var' . DIRECTORY_SEPARATOR .
+                    foreach ($dirFiles as $dirFile) {
+                        $this->_driver->deleteFile(
+                            $baseDir . DIRECTORY_SEPARATOR . 'var' . DIRECTORY_SEPARATOR .
+                            self::MAILCHIMP_TEMP_DIR . DIRECTORY_SEPARATOR .
+                            $item->getBatchId().DIRECTORY_SEPARATOR.$dirFile
+                        );
+                    }
+                    $this->_driver->deleteDirectory($baseDir . DIRECTORY_SEPARATOR . 'var' . DIRECTORY_SEPARATOR .
                         self::MAILCHIMP_TEMP_DIR . DIRECTORY_SEPARATOR . $item->getBatchId());
                 }
             } catch (\Exception $e) {
@@ -105,22 +125,21 @@ class Result
 
             if (isset($response['status']) && $response['status'] == 'finished') {
                 // Create temporary directory, if that does not exist
-                if (!is_dir($baseDir . DIRECTORY_SEPARATOR . 'var' . DIRECTORY_SEPARATOR . self::MAILCHIMP_TEMP_DIR)) {
-                    mkdir($baseDir . DIRECTORY_SEPARATOR . 'var' . DIRECTORY_SEPARATOR . self::MAILCHIMP_TEMP_DIR);
+                if (!$this->_driver->isDirectory($baseDir . DIRECTORY_SEPARATOR . 'var' . DIRECTORY_SEPARATOR . self::MAILCHIMP_TEMP_DIR)) {
+                    $this->_driver->createDirectory($baseDir . DIRECTORY_SEPARATOR . 'var' . DIRECTORY_SEPARATOR . self::MAILCHIMP_TEMP_DIR);
                 }
                 // get the tar.gz file with the results
                 $fileUrl = urldecode($response['response_body_url']);
                 $fileName = $baseDir . DIRECTORY_SEPARATOR . 'var' . DIRECTORY_SEPARATOR .
                     self::MAILCHIMP_TEMP_DIR . DIRECTORY_SEPARATOR . $batchId;
-                $fd = fopen($fileName . '.tar.gz', 'w');
-                $ch = curl_init();
-                curl_setopt($ch, CURLOPT_URL, $fileUrl);
-                curl_setopt($ch, CURLOPT_FILE, $fd);
-                curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true); // this will follow redirects
-                $r = curl_exec($ch);
-                curl_close($ch);
-                fclose($fd);
-                mkdir($baseDir . DIRECTORY_SEPARATOR . 'var' . DIRECTORY_SEPARATOR .
+                $fd = $this->_driver->fileOpen($fileName . '.tar.gz', 'w');
+                $ch = $this->_curlFactory->create();
+                $ch->setOption(CURLOPT_URL, $fileUrl);
+                $ch->setOption(CURLOPT_FILE, $fd);
+                $ch->setOption(CURLOPT_FOLLOWLOCATION, true);
+                $r =$ch->get($fileUrl);
+                $this->_driver->fileClose($fd);
+                $this->_driver->createDirectory($baseDir . DIRECTORY_SEPARATOR . 'var' . DIRECTORY_SEPARATOR .
                     self::MAILCHIMP_TEMP_DIR . DIRECTORY_SEPARATOR . $batchId);
                 $archive = $this->_archive;
                 $archive->unpack(
@@ -134,18 +153,17 @@ class Result
                     $baseDir . DIRECTORY_SEPARATOR . 'var' . DIRECTORY_SEPARATOR .
                     self::MAILCHIMP_TEMP_DIR . DIRECTORY_SEPARATOR . $batchId
                 );
-                $dir = scandir($baseDir . DIRECTORY_SEPARATOR . 'var' . DIRECTORY_SEPARATOR .
+                $dirFiles = $this->_driver->readDirectory($baseDir . DIRECTORY_SEPARATOR . 'var' . DIRECTORY_SEPARATOR .
                     self::MAILCHIMP_TEMP_DIR . DIRECTORY_SEPARATOR . $batchId);
-                foreach ($dir as $d) {
-                    $name = pathinfo($d);
+                foreach ($dirFiles as $dirFile) {
+                    $name = pathinfo($dirFile);
                     if ($name['extension'] == 'json') {
-                        $files[] = $baseDir . DIRECTORY_SEPARATOR . 'var' . DIRECTORY_SEPARATOR .
-                            self::MAILCHIMP_TEMP_DIR . DIRECTORY_SEPARATOR . $batchId . '/' . $d;
+                        $files[] = $dirFile;
                     }
                 }
-                unlink($baseDir . DIRECTORY_SEPARATOR . 'var' . DIRECTORY_SEPARATOR .
+                $this->_driver->deleteFile($baseDir . DIRECTORY_SEPARATOR . 'var' . DIRECTORY_SEPARATOR .
                     self::MAILCHIMP_TEMP_DIR . DIRECTORY_SEPARATOR . $batchId . '/' . $batchId . '.tar');
-                unlink($fileName . '.tar.gz');
+                $this->_driver->deleteFile($fileName . '.tar.gz');
             }
         } catch (\Mailchimp_Error $e) {
             $this->_helper->log($e->getFriendlyMessage());
@@ -159,7 +177,7 @@ class Result
     {
         $listId = $this->_helper->getDefaultList($storeId);
         foreach ($files as $file) {
-            $items = json_decode(file_get_contents($file));
+            $items = json_decode($this->_driver->fileGetContents($file));
             if ($items!==false) {
                 foreach ($items as $item) {
                     $line = explode('_', $item->operation_id);
@@ -241,7 +259,7 @@ class Result
                         break;
                 }
             }
-            unlink($file);
+            $this->_driver->deleteFile($file);
         }
     }
     private function _updateSyncData($mailchimpStoreId, $listId, $type, $id, $error, $status)
