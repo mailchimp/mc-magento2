@@ -35,7 +35,7 @@ class Getresponse extends \Magento\Backend\App\Action
      */
     protected $_helper;
     /**
-     * @var \Magento\Framework\Filesystem\DriverInterface
+     * @var \Magento\Framework\Filesystem\Driver\File
      */
     protected $_driver;
 
@@ -45,14 +45,14 @@ class Getresponse extends \Magento\Backend\App\Action
      * @param \Ebizmarts\MailChimp\Model\MailChimpErrorsFactory $errorsFactory
      * @param \Ebizmarts\MailChimp\Helper\Data $helper
      * @param \Ebizmarts\MailChimp\Model\Api\Result $result
-     * @param \Magento\Framework\Filesystem\DriverInterface $driver
+     * @param \Magento\Framework\Filesystem\Driver\File $driver
      */
     public function __construct(
         \Magento\Backend\App\Action\Context $context,
         \Ebizmarts\MailChimp\Model\MailChimpErrorsFactory $errorsFactory,
         \Ebizmarts\MailChimp\Helper\Data $helper,
         \Ebizmarts\MailChimp\Model\Api\Result $result,
-        \Magento\Framework\Filesystem\DriverInterface $driver
+        \Magento\Framework\Filesystem\Driver\File $driver
     ) {
         parent::__construct($context);
         $this->_resultFactory       = $context->getResultFactory();
