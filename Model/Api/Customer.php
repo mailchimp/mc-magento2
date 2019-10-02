@@ -116,7 +116,7 @@ class Customer
                     } else {
                         $this->_helper->modifyCounter(\Ebizmarts\MailChimp\Helper\Data::CUS_NEW);
                     }
-                    $customerMailchimpId = md5(strtolower($customer->getEmail()));
+                    $customerMailchimpId = hash('md5', strtolower($customer->getEmail()));
                     $customerArray[$counter]['method'] = "PUT";
                     $customerArray[$counter]['path'] = "/ecommerce/stores/" . $mailchimpStoreId . "/customers/" . $customerMailchimpId;
                     $customerArray[$counter]['operation_id'] = $this->_batchId . '_' . $customer->getId();
@@ -175,7 +175,7 @@ class Customer
     {
         $point = 0;
         $data = [];
-        $data["id"] = md5(strtolower($customer->getEmail()));
+        $data["id"] = hash('md5', strtolower($customer->getEmail()));
         $data["email_address"] = $customer->getEmail() ? $customer->getEmail() : '';
         $data["first_name"] = $customer->getFirstname() ? $customer->getFirstname() : '';
         $data["last_name"] = $customer->getLastname() ? $customer->getLastname() : '';

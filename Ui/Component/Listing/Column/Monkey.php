@@ -100,8 +100,11 @@ class Monkey extends Column
     {
         if (isset($dataSource['data']['items'])) {
             foreach ($dataSource['data']['items'] as & $item) {
-                $status = $item['mailchimp_flag'];
                 $order = $this->_orderFactory->create()->loadByIncrementId($item['increment_id']);
+                $freddie = false;
+                if($order->getMailchimpAbandonedcartFlag()||$order->getMailchimpCampaignId()) {
+                    $freddie = true;
+                }
                 $params = ['_secure' => $this->_requestInterfase->isSecure()];
                 if ($this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_PATH_ACTIVE,$order->getStoreId())) {
                     $mailchimpStoreId = $this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_MAILCHIMP_STORE, $order->getStoreId());
@@ -144,7 +147,7 @@ class Monkey extends Column
                         }
                     }
                     $item['mailchimp_sync'] = "<div style='width: 50%;margin: 0 auto;text-align: center'><img src='".$url."' style='border: none; width: 5rem; text-align: center; max-width: 100%' title='$alt' />$text</div>";
-                    if ($status) {
+                    if ($freddie) {
                         $url = $this->_assetRepository->getUrlWithParams('Ebizmarts_MailChimp::images/freddie.png', $params);
                         $item['mailchimp_status'] = "<div style='width: 50%;margin: 0 auto'><img src='".$url."' style='border: none; width: 5rem; text-align: center; max-width: 100%'/></div>";
                     }

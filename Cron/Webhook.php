@@ -244,7 +244,7 @@ class Webhook
                     $subscriber->setStoreId($stores[0]);
                     try {
                         $api = $this->_helper->getApi($stores[0]);
-                        $member = $api->lists->members->get($listId, md5(strtolower($email)));
+                        $member = $api->lists->members->get($listId, hash('md5', strtolower($email)));
                         if ($member) {
                             if ($member['status'] == \Mailchimp::SUBSCRIBED) {
                                 $this->_subscribeMember($subscriber, \Magento\Newsletter\Model\Subscriber::STATUS_SUBSCRIBED);

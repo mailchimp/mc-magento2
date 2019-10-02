@@ -80,7 +80,7 @@ class Subscriber
          */
         foreach ($collection as $subscriber) {
             $data = $this->_buildSubscriberData($subscriber);
-            $md5HashEmail = md5(strtolower($subscriber->getSubscriberEmail()));
+            $md5HashEmail = hash('md5', strtolower($subscriber->getSubscriberEmail()));
             $subscriberJson = "";
             //enconde to JSON
             $subscriberJson = json_encode($data);
@@ -166,7 +166,7 @@ class Subscriber
         $listId = $this->_helper->getGeneralList($storeId);
         $api = $this->_helper->getApi($storeId);
         try {
-            $md5HashEmail = md5(strtolower($subscriber->getSubscriberEmail()));
+            $md5HashEmail = hash('md5', strtolower($subscriber->getSubscriberEmail()));
             $api->lists->members->update($listId, $md5HashEmail, null, 'cleaned');
         } catch (\MailChimp_Error $e) {
             $this->_helper->log($e->getFriendlyMessage(), $storeId);
