@@ -29,10 +29,25 @@ class InstallSchema implements InstallSchemaInterface
      * @var DeploymentConfig
      */
     protected $_deploymentConfig;
-    public function __construct(ResourceConnection $resource, DeploymentConfig $deploymentConfig)
-    {
-        $this->_resource = $resource;
-        $this->_deploymentConfig = $deploymentConfig;
+    /**
+     * @var \Magento\Framework\Filesystem\Driver\File
+     */
+    protected $_driver;
+
+    /**
+     * InstallSchema constructor.
+     * @param ResourceConnection $resource
+     * @param DeploymentConfig $deploymentConfig
+     * @param \Magento\Framework\Filesystem\Driver\File $driver
+     */
+    public function __construct(
+        ResourceConnection $resource,
+        DeploymentConfig $deploymentConfig,
+        \Magento\Framework\Filesystem\Driver\File $driver
+    ) {
+        $this->_resource            = $resource;
+        $this->_deploymentConfig    = $deploymentConfig;
+        $this->_driver              = $driver;
     }
 
     /**
@@ -234,8 +249,8 @@ class InstallSchema implements InstallSchemaInterface
         );
 
         $path = BP . DIRECTORY_SEPARATOR . 'var' . DIRECTORY_SEPARATOR . 'Mailchimp';
-        if (!is_dir($path)) {
-            mkdir($path);
+        if (!$this->_driver->isDirectory($path)) {
+            $this->_driver->createDirectory($path);
         }
     }
 }
