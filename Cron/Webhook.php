@@ -28,6 +28,7 @@ class Webhook
     const PROCESSED_OK          = 1;
     const PROCESSED_WITH_ERROR  = 2;
     const DATA_WITH_ERROR       = 3;
+    const DATA_NOT_CONVERTED    = 4;
     /**
      * @var \Ebizmarts\MailChimp\Helper\Data
      */
