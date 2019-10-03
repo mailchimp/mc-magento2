@@ -24,30 +24,26 @@ define(
                 $(document).ready(function () {
                     var path = location;
                     var urlparams = null;
-                    var isGet = path.search.search('&');
+                    var isGet = path.search.search('\\?');
                     var mc_cid = null;
                     var isMailchimp = false;
                     var checkCampaignUrl = self.options.checkCampaignUrl;
-                    if(isGet > 0) {
-                        urlparams = path.search.substr(1).split('&');
-                        for (var i = 0; i < urlparams.length; i++) {
-                            var param = urlparams[i].split('=');
-                            var key = param[0];
-                            var val = param[1];
-
-                            if (key=='utm_source') {
-                                var reg = /^mailchimp$/;
-                                if (reg.exec(val)) {
+                    if(isGet != -1) {
+                        urlparams = self.getUrlVars();
+                        urlparams.forEach(function (item) {
+                            if (item.key=='utm_source') {
+                                var reg = /^mailchimp$/;z
+                                if (reg.exec(item.value)) {
                                     isMailchimp = true;
                                 }
                             } else {
-                                if (key=='mc_cid') {
-                                    mc_cid = val;
+                                if (item.key=='mc_cid') {
+                                    mc_cid = item.value;
                                 }
                             }
-                        }
+                        });
                     } else {
-                        urlparams = path.pathname.split('/');
+                        urlparams = path.href.split('/');
                         var utmIndex = $.inArray('utm_source', urlparams);
                         var mccidIndex = $.inArray('mc_cid', urlparams);
                         if (utmIndex != -1) {
@@ -64,10 +60,10 @@ define(
                     }
                     if (mc_cid && !isMailchimp) {
                         $.ajax({
-                            url: checkCampaignUrl,
-                            data: {'form_key': window.FORM_KEY,'mc_cid': mc_cid},
+                            url: checkCampaignUrl + 'mc_cid/' + mc_cid + '/',
                             type: 'GET',
                             dataType: 'json',
+                            cache: true,
                             showLoader: false
                         }).done(function (data) {
                             if (data.valid==0) {
@@ -85,6 +81,15 @@ define(
                         $.mage.cookies.set('mailchimp_landing_page', location);
                     }
                 });
+            },
+            getUrlVars: function() {
+                var vars = [];
+                var i = 0;
+                var parts = window.location.href.replace(/[?&]+([^=&]+)=([^&]*)/gi, function(m,key,value) {
+                    vars[i] = {'value':value,'key':key};
+                    i++;
+                });
+                return vars;
             }
         });
         return $.mage.campaigncatcher;
