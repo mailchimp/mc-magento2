@@ -11,6 +11,7 @@
 
 namespace Ebizmarts\MailChimp\Helper;
 
+use Magento\Framework\App\ResourceConnection;
 use Magento\Framework\Exception\ValidatorException;
 use Magento\Store\Model\Store;
 use Symfony\Component\Config\Definition\Exception\Exception;
@@ -200,6 +201,10 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
      * @var \Magento\Framework\Stdlib\DateTime\DateTime
      */
     protected $_date;
+    /**
+     * @var \Magento\Framework\App\DeploymentConfig
+     */
+    protected $_deploymentConfig;
 
 
     private $customerAtt    = null;
@@ -232,6 +237,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
      * @param \Magento\Directory\Api\CountryInformationAcquirerInterface $countryInformation
      * @param \Magento\Framework\App\ResourceConnection $resource
      * @param \Ebizmarts\MailChimp\Model\MailChimpInterestGroupFactory $interestGroupFactory
+     * @param \Magento\Framework\App\DeploymentConfig $deploymentConfig
      * @param \Magento\Framework\Stdlib\DateTime\DateTime $date
      */
     public function __construct(
@@ -260,6 +266,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         \Magento\Directory\Api\CountryInformationAcquirerInterface $countryInformation,
         \Magento\Framework\App\ResourceConnection $resource,
         \Ebizmarts\MailChimp\Model\MailChimpInterestGroupFactory $interestGroupFactory,
+        \Magento\Framework\App\DeploymentConfig $deploymentConfig,
         \Magento\Framework\Stdlib\DateTime\DateTime $date
     ) {
 
@@ -291,6 +298,8 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         $this->_countryInformation      = $countryInformation;
         $this->_interestGroupFactory    = $interestGroupFactory;
         $this->_date                    = $date;
+        $this->_deploymentConfig        = $deploymentConfig;
+
         parent::__construct($context);
     }
 
@@ -1018,11 +1027,13 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
 
     /**
      * @param $tableName
+     * @param string $conn
      * @return string
      */
-    public function getTableName($tableName)
+    public function getTableName($tableName, $conn = ResourceConnection::DEFAULT_CONNECTION)
     {
-        return $this->_resource->getTableName($tableName);
+        $dbName = $this->_deploymentConfig->get("db/connection/$conn/dbname");
+        return $dbName.'.'.$this->_resource->getTableName($tableName, $conn);
     }
     public function getWebsiteId($storeId)
     {
