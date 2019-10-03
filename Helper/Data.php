@@ -1045,6 +1045,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
 
     /**
      * @param $tableName
+     * @param string $conn
      * @return string
      */
     public function getTableName($tableName, $conn = ResourceConnection::DEFAULT_CONNECTION)
