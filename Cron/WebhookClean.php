@@ -31,8 +31,7 @@ class WebhookClean
     public function __construct(
         \Ebizmarts\MailChimp\Helper\Data $helper,
         \Ebizmarts\MailChimp\Model\MailChimpWebhookRequest $webhookRequest
-    )
-    {
+    ) {
         $this->helper   = $helper;
         $this->webhooks = $webhookRequest;
     }
@@ -41,9 +40,9 @@ class WebhookClean
         try {
             $connection = $this->webhooks->getResource()->getConnection();
             $tableName = $this->webhooks->getResource()->getMainTable();
-            $quoteInto = $connection->quoteInto('processed = ? and date_add(fired_at, interval 1 month) < now()',1);
+            $quoteInto = $connection->quoteInto('processed = ? and date_add(fired_at, interval 1 month) < now()', 1);
             $connection->delete($tableName, $quoteInto);
-        } catch( \Exception $e) {
+        } catch (\Exception $e) {
             $this->helper->log($e->getMessage());
         }
     }

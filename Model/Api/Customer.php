@@ -77,7 +77,8 @@ class Customer
         $this->_helper              = $helper;
         $this->_collection          = $collection;
         $this->_orderCollection     = $orderCollection;
-        $this->_batchId             = \Ebizmarts\MailChimp\Helper\Data::IS_CUSTOMER. '_' . $this->_helper->getGmtTimeStamp();
+        $this->_batchId             = \Ebizmarts\MailChimp\Helper\Data::IS_CUSTOMER. '_' .
+            $this->_helper->getGmtTimeStamp();
         $this->_address             = $address;
         $this->_customerFactory     = $customerFactory;
         $this->_countryFactory      = $countryFactory;
@@ -85,7 +86,10 @@ class Customer
     }
     public function sendCustomers($storeId)
     {
-        $mailchimpStoreId = $this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_MAILCHIMP_STORE, $storeId);
+        $mailchimpStoreId = $this->_helper->getConfigValue(
+            \Ebizmarts\MailChimp\Helper\Data::XML_MAILCHIMP_STORE,
+            $storeId
+        );
         $listId = $this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_PATH_LIST, $storeId);
         $collection = $this->_collection->create();
         $collection->addFieldToFilter('store_id', ['eq'=>$storeId]);
@@ -116,19 +120,22 @@ class Customer
                     } else {
                         $this->_helper->modifyCounter(\Ebizmarts\MailChimp\Helper\Data::CUS_NEW);
                     }
-                    $customerMailchimpId = md5(strtolower($customer->getEmail()));
+                    $customerMailchimpId = hash('md5', strtolower($customer->getEmail()));
                     $customerArray[$counter]['method'] = "PUT";
-                    $customerArray[$counter]['path'] = "/ecommerce/stores/" . $mailchimpStoreId . "/customers/" . $customerMailchimpId;
+                    $customerArray[$counter]['path'] = "/ecommerce/stores/" . $mailchimpStoreId . "/customers/" .
+                        $customerMailchimpId;
                     $customerArray[$counter]['operation_id'] = $this->_batchId . '_' . $customer->getId();
                     $customerArray[$counter]['body'] = $customerJson;
                     $counter++;
                     if (!$this->isSubscriber($customer)) {
                         $subscriberData = $this->buildSubscriberData($customer);
                         $subscriberJson = json_encode($subscriberData);
-                        if($subscriberJson !==false) {
+                        if ($subscriberJson !==false) {
                             $customerArray[$counter]['method'] = "PATCH";
-                            $customerArray[$counter]['path'] = "/lists/" . $listId . "/members/" . $customerMailchimpId;;
-                            $customerArray[$counter]['operation_id'] = $this->_batchId . '_' . $customer->getId().'_SUB';
+                            $customerArray[$counter]['path'] = "/lists/" . $listId . "/members/" .
+                                $customerMailchimpId;
+                            $customerArray[$counter]['operation_id'] = $this->_batchId . '_' .
+                                $customer->getId().'_SUB';
                             $customerArray[$counter]['body'] = $subscriberJson;
                             $counter++;
                         }
@@ -136,10 +143,22 @@ class Customer
                     //update customers delta
                     $this->_updateCustomer($mailchimpStoreId, $customer->getId());
                 } else {
-                    $this->_updateCustomer($mailchimpStoreId, $customer->getId(),$this->_helper->getGmtDate(),'Customer with no data', 0);
+                    $this->_updateCustomer(
+                        $mailchimpStoreId,
+                        $customer->getId(),
+                        $this->_helper->getGmtDate(),
+                        'Customer with no data',
+                        0
+                    );
                 }
             } else {
-                $this->_updateCustomer($mailchimpStoreId, $customer->getId(),$this->_helper->getGmtDate(),json_last_error_msg(), 0);
+                $this->_updateCustomer(
+                    $mailchimpStoreId,
+                    $customer->getId(),
+                    $this->_helper->getGmtDate(),
+                    json_last_error_msg(),
+                    0
+                );
             }
         }
         return $customerArray;
@@ -151,7 +170,7 @@ class Customer
     protected function buildSubscriberData(\Magento\Customer\Model\Customer $customer)
     {
         $data = [];
-        $data["merge_fields"] = $this->_helper->getMergeVars($customer,$customer->getStoreId());
+        $data["merge_fields"] = $this->_helper->getMergeVars($customer, $customer->getStoreId());
         return $data;
     }
     protected function isSubscriber(\Magento\Customer\Model\Customer $customer)
@@ -174,7 +193,7 @@ class Customer
     {
         $point = 0;
         $data = [];
-        $data["id"] = md5(strtolower($customer->getEmail()));
+        $data["id"] = hash('md5', strtolower($customer->getEmail()));
         $data["email_address"] = $customer->getEmail() ? $customer->getEmail() : '';
         $data["first_name"] = $customer->getFirstname() ? $customer->getFirstname() : '';
         $data["last_name"] = $customer->getLastname() ? $customer->getLastname() : '';
@@ -236,7 +255,6 @@ class Customer
         return $data;
     }
 
-
     public function getOptin($storeId = 0)
     {
         if ($this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_ECOMMERCE_OPTIN, $storeId)) {
@@ -246,8 +264,13 @@ class Customer
         }
         return $optin;
     }
-    protected function _updateCustomer($storeId, $entityId, $sync_delta = null, $sync_error = null, $sync_modified = null)
-    {
+    protected function _updateCustomer(
+        $storeId,
+        $entityId,
+        $sync_delta = null,
+        $sync_error = null,
+        $sync_modified = null
+    ) {
         $this->_helper->saveEcommerceData(
             $storeId,
             $entityId,

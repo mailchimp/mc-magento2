@@ -120,7 +120,10 @@ class Ecommerce
 
         $connection = $this->_chimpSyncEcommerce->getResource()->getConnection();
         $tableName = $this->_chimpSyncEcommerce->getResource()->getMainTable();
-        $connection->delete($tableName, 'batch_id is null and mailchimp_sync_modified != 1 and mailchimp_sync_error is null');
+        $connection->delete(
+            $tableName,
+            'batch_id is null and mailchimp_sync_modified != 1 and mailchimp_sync_error is null'
+        );
 
         foreach ($this->_storeManager->getStores() as $storeId => $val) {
             if ($this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_PATH_ACTIVE, $storeId)) {
@@ -130,22 +133,46 @@ class Ecommerce
                 }
                 $this->_storeManager->setCurrentStore($storeId);
                 $listId = $this->_helper->getGeneralList($storeId);
-                $mailchimpStoreId = $this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_MAILCHIMP_STORE, $storeId);
+                $mailchimpStoreId = $this->_helper->getConfigValue(
+                    \Ebizmarts\MailChimp\Helper\Data::XML_MAILCHIMP_STORE,
+                    $storeId
+                );
                 if ($mailchimpStoreId != -1 && $mailchimpStoreId != '') {
                     $this->_apiResult->processResponses($storeId, true, $mailchimpStoreId);
                     $batchId = $this->_processStore($storeId, $mailchimpStoreId, $listId);
                     if ($batchId) {
-                        $connection->update($tableName, ['batch_id' => $batchId, 'mailchimp_sync_modified' => 0, 'mailchimp_sync_delta' => $this->_helper->getGmtDate()], "batch_id is null and mailchimp_store_id = '$mailchimpStoreId' and mailchimp_sync_error is null");
-                        $connection->update($tableName, ['batch_id' => $batchId, 'mailchimp_sync_modified' => 0, 'mailchimp_sync_delta' => $this->_helper->getGmtDate()], "batch_id is null and mailchimp_store_id = '$listId' and mailchimp_sync_error is null");
+                        $connection->update(
+                            $tableName,
+                            [
+                                'batch_id' => $batchId,
+                                'mailchimp_sync_modified' => 0,
+                                'mailchimp_sync_delta' => $this->_helper->getGmtDate()
+                            ],
+                            "batch_id is null and mailchimp_store_id = '$mailchimpStoreId' and mailchimp_sync_error is null"
+                        );
+                        $connection->update(
+                            $tableName,
+                            [
+                                'batch_id' => $batchId,
+                                'mailchimp_sync_modified' => 0,
+                                'mailchimp_sync_delta' => $this->_helper->getGmtDate()],
+                            "batch_id is null and mailchimp_store_id = '$listId' and mailchimp_sync_error is null"
+                        );
                     }
                 }
             }
         }
         $syncs = [];
         foreach ($this->_storeManager->getStores() as $storeId => $val) {
-            $mailchimpStoreId = $this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_MAILCHIMP_STORE, $storeId);
+            $mailchimpStoreId = $this->_helper->getConfigValue(
+                \Ebizmarts\MailChimp\Helper\Data::XML_MAILCHIMP_STORE,
+                $storeId
+            );
             if ($mailchimpStoreId != -1 && $mailchimpStoreId != '') {
-                $dateSync = $this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_PATH_IS_SYNC, $storeId);
+                $dateSync = $this->_helper->getConfigValue(
+                    \Ebizmarts\MailChimp\Helper\Data::XML_PATH_IS_SYNC,
+                    $storeId
+                );
                 if (isset($syncs[$mailchimpStoreId])) {
                     if ($syncs[$mailchimpStoreId] && $syncs[$mailchimpStoreId]['datesync'] < $dateSync) {
                         $syncs[$mailchimpStoreId]['datesync'] = $dateSync;
@@ -160,7 +187,12 @@ class Ecommerce
             }
         }
         foreach ($syncs as $mailchimpStoreId => $val) {
-            if ($val && !$this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_PATH_IS_SYNC . "/$mailchimpStoreId", 0, 'default')) {
+            if ($val && !$this->_helper->getConfigValue(
+                \Ebizmarts\MailChimp\Helper\Data::XML_PATH_IS_SYNC . "/$mailchimpStoreId",
+                0,
+                'default'
+            )
+            ) {
                 $this->updateSyncFlagData($val['storeid'], $mailchimpStoreId);
             }
         }
@@ -234,7 +266,7 @@ class Ecommerce
                     }
                 }
                 if (count($BadOperations)) {
-                    $this->markWithError($BadOperations, $mailchimpStoreId,$listId);
+                    $this->markWithError($BadOperations, $mailchimpStoreId, $listId);
                 }
 
             } catch (\Mailchimp_Error $e) {
@@ -248,7 +280,11 @@ class Ecommerce
         $countTotal = $countCustomers + $countProducts + $countOrders;
         $syncing = $this->_helper->getMCMinSyncing($storeId);
         if ($countTotal == 0 && $syncing) {
-            $this->_helper->saveConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_PATH_IS_SYNC, date('Y-m-d'), $storeId);
+            $this->_helper->saveConfigValue(
+                \Ebizmarts\MailChimp\Helper\Data::XML_PATH_IS_SYNC,
+                date('Y-m-d'),
+                $storeId
+            );
         }
 
         return $batchId;
@@ -261,7 +297,12 @@ class Ecommerce
     protected function updateSyncFlagData($storeId, $mailchimpStoreId)
     {
         $this->apiUpdateSyncFlag($storeId, $mailchimpStoreId);
-        $this->_helper->saveConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_PATH_IS_SYNC . "/$mailchimpStoreId", date('Y-m-d'), 0, 'default');
+        $this->_helper->saveConfigValue(
+            \Ebizmarts\MailChimp\Helper\Data::XML_PATH_IS_SYNC . "/$mailchimpStoreId",
+            date('Y-m-d'),
+            0,
+            'default'
+        );
     }
 
     /**
@@ -272,7 +313,20 @@ class Ecommerce
     {
         try {
             $api = $this->_helper->getApi($storeId);
-            $api->ecommerce->stores->edit($mailchimpStoreId, null, null, null, null, null, null, null, null, null, null, false);
+            $api->ecommerce->stores->edit(
+                $mailchimpStoreId,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                false
+            );
         } catch (\Mailchimp_Error $e) {
             $this->_helper->log('MailChimp error when updating syncing flag for store ' . $storeId);
             $this->_helper->log($e->getFriendlyMessage());
@@ -298,22 +352,23 @@ class Ecommerce
     protected function _saveRequest($resquest)
     {
         $pathLog = $this->_dir->getPath('log').DIRECTORY_SEPARATOR.'Request'.$this->_helper->getGmtTimeStamp().'.log';
-        error_log(var_export($resquest,true),3,$pathLog);
+        error_log(var_export($resquest, true), 3, $pathLog);
         $this->_helper->log("Request with error was saved in $pathLog");
     }
 
-    protected function encodeOperations($operations) {
+    protected function encodeOperations($operations)
+    {
         $OKOperations = [];
         $BadOperations = [];
         $batchJson = json_encode($operations);
         $jsonLastErrorGeneral  = json_last_error();
         $jsonLastErrorMsgGeneral = json_last_error_msg();
-        if($jsonLastErrorGeneral) {
+        if ($jsonLastErrorGeneral) {
             $this->_helper->log("Encode error");
-            foreach($operations as $opIndex => $operation){
+            foreach ($operations as $opIndex => $operation) {
                 $jsonEncode = json_encode($operation);
                 $jsonLastErrorItem = json_last_error();
-                if($jsonLastErrorItem) {
+                if ($jsonLastErrorItem) {
                     $jsonLastErrorMsgItem = json_last_error_msg();
                     $this->_helper->log("");
                     $this->_helper->log("json_encode error: $jsonLastErrorMsgItem, operation:");
@@ -328,9 +383,9 @@ class Ecommerce
         } else {
             $OKOperations = $operations;
         }
-        return array($OKOperations, $BadOperations);
+        return [$OKOperations, $BadOperations];
     }
-    protected function markWithError($operations,$mailchimpStoreId, $listId)
+    protected function markWithError($operations, $mailchimpStoreId, $listId)
     {
         $type = null;
         $relatedId = null;
@@ -344,10 +399,10 @@ class Ecommerce
         ];
         $connection = $this->_chimpSyncEcommerce->getResource()->getConnection();
         $tableName = $this->_chimpSyncEcommerce->getResource()->getMainTable();
-        foreach($operations as $operation) {
+        foreach ($operations as $operation) {
             if (is_array($operation)) {
-                if (array_key_exists('operation_id' ,$operation)) {
-                    $operationId = explode("_",$operation['operation_id']);
+                if (array_key_exists('operation_id', $operation)) {
+                    $operationId = explode("_", $operation['operation_id']);
                     if (isset($operationId[0])) {
                         $type = $operationId[0];
                         if (!in_array($type, $types)) {
@@ -364,18 +419,20 @@ class Ecommerce
                         $relatedId = $operationId[2];
                     }
                     if ($type && $relatedId) {
-                        $connection->update($tableName, [
+                        $connection->update(
+                            $tableName,
+                            [
                             'batch_id' => -1,
                             'mailchimp_sync_modified' => 0,
                             'mailchimp_sync_delta' => $this->_helper->getGmtDate(),
                             'mailchimp_sycn_error' => __('Json error'),
                             'mailchimp_sent' => \Ebizmarts\MailChimp\Helper\Data::NOTSYNCED
-                        ],
-                            "batch_id is null and mailchimp_store_id = '$storeId' and type ='$type' and related_id = $relatedId");
+                            ],
+                            "batch_id is null and mailchimp_store_id = '$storeId' and type ='$type' and related_id = $relatedId"
+                        );
                     }
                 }
             }
         }
     }
-
 }

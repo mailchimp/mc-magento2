@@ -25,7 +25,7 @@ class CustomerMap extends \Magento\Config\Block\System\Config\Form\Field\FieldAr
     {
         if (!$this->_varsRenderer) {
             $this->_varsRenderer = $this->getLayout()->createBlock(
-                'Ebizmarts\MailChimp\Block\Adminhtml\System\Config\Form\Field\VarsMap',
+                \Ebizmarts\MailChimp\Block\Adminhtml\System\Config\Form\Field\VarsMap::class,
                 '',
                 ['data' => ['is_render_to_js_template' => true]]
             );
@@ -37,7 +37,7 @@ class CustomerMap extends \Magento\Config\Block\System\Config\Form\Field\FieldAr
     {
         if (!$this->_mailchimpRenderer) {
             $this->_mailchimpRenderer = $this->getLayout()->createBlock(
-                'Ebizmarts\MailChimp\Block\Adminhtml\System\Config\Form\Field\MailchimpMap',
+                \Ebizmarts\MailChimp\Block\Adminhtml\System\Config\Form\Field\MailchimpMap::class,
                 '',
                 ['data' => ['is_render_to_js_template' => true]]
             );
@@ -65,7 +65,10 @@ class CustomerMap extends \Magento\Config\Block\System\Config\Form\Field\FieldAr
         $optionExtraAttr = [];
         $optionExtraAttr['option_' . $this->_getVarsRenderer()->calcOptionHash($row->getData('customer_field_id'))] =
             'selected="selected"';
-        $optionExtraAttr['option_' . $this->_getMailchimpRenderer()->calcOptionHash($row->getData('mailchimp_field_id'))] =
+        $optionExtraAttr['option_' . $this->_getMailchimpRenderer()->calcOptionHash(
+            $row->getData('mailchimp_field_id')
+        )
+        ] =
             'selected="selected"';
         $row->setData(
             'option_extra_attrs',

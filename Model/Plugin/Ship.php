@@ -33,13 +33,22 @@ class Ship
     public function afterSave(
         SalesShipmentRepositoryInterface $subject,
         ShipmentInterface $shipment
-    )
-    {
-        $mailchimpStoreId = $this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_MAILCHIMP_STORE, $shipment->getStoreId());
-        $this->_helper->saveEcommerceData($mailchimpStoreId, $shipment->getOrderId(), \Ebizmarts\MailChimp\Helper\Data::IS_ORDER, null, null, 1,
-            null , null, \Ebizmarts\MailChimp\Helper\Data::NEEDTORESYNC);
-
+    ) {
+        $mailchimpStoreId = $this->_helper->getConfigValue(
+            \Ebizmarts\MailChimp\Helper\Data::XML_MAILCHIMP_STORE,
+            $shipment->getStoreId()
+        );
+        $this->_helper->saveEcommerceData(
+            $mailchimpStoreId,
+            $shipment->getOrderId(),
+            \Ebizmarts\MailChimp\Helper\Data::IS_ORDER,
+            null,
+            null,
+            1,
+            null,
+            null,
+            \Ebizmarts\MailChimp\Helper\Data::NEEDTORESYNC
+        );
         return $shipment;
     }
-
 }

@@ -16,7 +16,6 @@ namespace Ebizmarts\MailChimp\Controller\Campaign;
 use Magento\Framework\App\Action\Context;
 use Magento\Framework\Controller\ResultFactory;
 
-
 class Check extends \Magento\Framework\App\Action\Action
 {
     /**
@@ -50,28 +49,29 @@ class Check extends \Magento\Framework\App\Action\Action
     {
         $param = $this->getRequest()->getParams();
         $mc_cid = null;
-        if(key_exists('mc_cid', $param)) {
+        if (key_exists('mc_cid', $param)) {
             $mc_cid = $param['mc_cid'];
             $magentoStoreId = $this->_storeManager->getStore()->getId();
             $api = $this->_helper->getApi($magentoStoreId);
             try {
                 $campaign =$api->campaigns->get($mc_cid);
-                $mailchimpList = $this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_PATH_LIST,$magentoStoreId);
-                if($mailchimpList == $campaign['recipients']['list_id']) {
+                $mailchimpList = $this->_helper->getConfigValue(
+                    \Ebizmarts\MailChimp\Helper\Data::XML_PATH_LIST,
+                    $magentoStoreId
+                );
+                if ($mailchimpList == $campaign['recipients']['list_id']) {
                     $valid = 1;
                 } else {
                     $valid = 0;
                 }
-            } catch(\Exception $e) {
+            } catch (\Exception $e) {
                 $valid = 0;
             }
-        }
-        else {
+        } else {
             $valid = 0;
         }
         $resultJson = $this->_resultFactory->create(ResultFactory::TYPE_JSON);
         $resultJson->setData(['valid' => $valid]);
         return $resultJson;
-
     }
 }

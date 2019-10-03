@@ -34,6 +34,10 @@ class Getresponse extends \Magento\Backend\App\Action
      * @var \Ebizmarts\MailChimp\Helper\Data
      */
     protected $_helper;
+    /**
+     * @var \Magento\Framework\Filesystem\Driver\File
+     */
+    protected $_driver;
 
     /**
      * Getresponse constructor.
@@ -41,18 +45,21 @@ class Getresponse extends \Magento\Backend\App\Action
      * @param \Ebizmarts\MailChimp\Model\MailChimpErrorsFactory $errorsFactory
      * @param \Ebizmarts\MailChimp\Helper\Data $helper
      * @param \Ebizmarts\MailChimp\Model\Api\Result $result
+     * @param \Magento\Framework\Filesystem\Driver\File $driver
      */
     public function __construct(
         \Magento\Backend\App\Action\Context $context,
         \Ebizmarts\MailChimp\Model\MailChimpErrorsFactory $errorsFactory,
         \Ebizmarts\MailChimp\Helper\Data $helper,
-        \Ebizmarts\MailChimp\Model\Api\Result $result
+        \Ebizmarts\MailChimp\Model\Api\Result $result,
+        \Magento\Framework\Filesystem\Driver\File $driver
     ) {
         parent::__construct($context);
         $this->_resultFactory       = $context->getResultFactory();
         $this->_errorsFactory       = $errorsFactory;
         $this->_result              = $result;
         $this->_helper              = $helper;
+        $this->_driver              = $driver;
     }
 
     public function execute()
@@ -71,7 +78,7 @@ class Getresponse extends \Magento\Backend\App\Action
                 break;
             }
             foreach ($files as $file) {
-                $items = json_decode(file_get_contents($file));
+                $items = json_decode($this->_driver->fileGetContents($file));
                 foreach ($items as $item) {
                     $content = [
                         'status_code' => $item->status_code,
@@ -80,11 +87,15 @@ class Getresponse extends \Magento\Backend\App\Action
                     ];
                     $fileContent[] = $content;
                 }
-                unlink($file);
+                $this->_driver->deleteFile($file);
             }
             $baseDir = $this->_helper->getBaseDir();
-            if (is_dir($baseDir . DIRECTORY_SEPARATOR . 'var' . DIRECTORY_SEPARATOR . \Ebizmarts\MailChimp\Model\Api\Result::MAILCHIMP_TEMP_DIR . DIRECTORY_SEPARATOR . $batchId)) {
-                rmdir($baseDir . DIRECTORY_SEPARATOR . 'var' . DIRECTORY_SEPARATOR . \Ebizmarts\MailChimp\Model\Api\Result::MAILCHIMP_TEMP_DIR . DIRECTORY_SEPARATOR . $batchId);
+            if ($this->_driver->isDirectory($baseDir . DIRECTORY_SEPARATOR . 'var' . DIRECTORY_SEPARATOR .
+                \Ebizmarts\MailChimp\Model\Api\Result::MAILCHIMP_TEMP_DIR . DIRECTORY_SEPARATOR . $batchId)) {
+                $this->_driver->deleteDirectory(
+                    $baseDir . DIRECTORY_SEPARATOR . 'var' . DIRECTORY_SEPARATOR .
+                    \Ebizmarts\MailChimp\Model\Api\Result::MAILCHIMP_TEMP_DIR . DIRECTORY_SEPARATOR . $batchId
+                );
             }
         } while (!count($fileContent) && $counter<self::MAX_RETRIES);
         $resultJson =$this->_resultFactory->create(ResultFactory::TYPE_JSON);

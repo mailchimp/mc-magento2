@@ -43,14 +43,17 @@ class SaveAfter implements \Magento\Framework\Event\ObserverInterface
          * @var \Magento\Catalog\Model\Product $product
          */
         $product = $observer->getProduct();
-        $mailchimpStore = $this->helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_MAILCHIMP_STORE, $product->getStoreId());
-        if($product->getTypeId() == \Magento\Catalog\Model\Product\Type::TYPE_SIMPLE) {
+        $mailchimpStore = $this->helper->getConfigValue(
+            \Ebizmarts\MailChimp\Helper\Data::XML_MAILCHIMP_STORE,
+            $product->getStoreId()
+        );
+        if ($product->getTypeId() == \Magento\Catalog\Model\Product\Type::TYPE_SIMPLE) {
             $parents = $this->configurable->getParentIdsByChild($product->getId());
-            if(is_array($parents)) {
+            if (is_array($parents)) {
                 foreach ($parents as $parentid) {
                     $this->_updateProduct($parentid);
                 }
-            } elseif($parents) {
+            } elseif ($parents) {
                 $this->_updateProduct($parents);
             }
         }

@@ -51,8 +51,6 @@ class CreateWebhook extends \Magento\Config\Block\System\Config\Form\Field
 
     public function getButtonHtml(\Magento\Framework\Data\Form\Element\AbstractElement $element)
     {
-
-
         $originalData = $element->getOriginalData();
         $label = $originalData['button_label'];
         $this->addData([

@@ -35,7 +35,7 @@ class Collection extends \Magento\Framework\View\Element\UiComponent\DataProvide
         FetchStrategy $fetchStrategy,
         EventManager $eventManager,
         $mainTable = 'mailchimp_stores',
-        $resourceModel = '\Ebizmarts\MailChimp\Model\ResourceModel\MailChimpStores'
+        $resourceModel = \Ebizmarts\MailChimp\Model\ResourceModel\MailChimpStores::class
     ) {
         parent::__construct($entityFactory, $logger, $fetchStrategy, $eventManager, $mainTable, $resourceModel);
     }

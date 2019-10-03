@@ -99,8 +99,7 @@ class VarsMap extends \Magento\Framework\App\Helper\AbstractHelper
             }
             try {
                 $rc = $this->_helper->serialize($data);
-            } catch(\Exception $e)
-            {
+            } catch (\Exception $e) {
                 $this->_helper->log($e->getMessage());
             }
         }
@@ -112,7 +111,7 @@ class VarsMap extends \Magento\Framework\App\Helper\AbstractHelper
         if (is_string($value) && !empty($value)) {
             try {
                 $rc = $this->_helper->unserialize($value);
-            } catch(\Exception $e) {
+            } catch (\Exception $e) {
                 $this->_helper->log($e->getMessage());
             }
         }

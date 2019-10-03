@@ -41,7 +41,7 @@ class Tabs extends WidgetTabs
                 'label' => __('General'),
                 'title' => __('General'),
                 'content' => $this->getLayout()->createBlock(
-                    'Ebizmarts\MailChimp\Block\Adminhtml\Stores\Edit\Tab\Info'
+                    \Ebizmarts\MailChimp\Block\Adminhtml\Stores\Edit\Tab\Info::class
                 )->toHtml(),
                 'active' => true
             ]
@@ -52,7 +52,7 @@ class Tabs extends WidgetTabs
                 'label' => __('Address'),
                 'title' => __('Address'),
                 'content' => $this->getLayout()->createBlock(
-                    'Ebizmarts\MailChimp\Block\Adminhtml\Stores\Edit\Tab\Address'
+                    \Ebizmarts\MailChimp\Block\Adminhtml\Stores\Edit\Tab\Address::class
                 )->toHtml(),
                 'active' => false
             ]

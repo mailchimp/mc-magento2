@@ -81,7 +81,6 @@ class Info extends Generic implements TabInterface
         $form->setHtmlIdPrefix('stores_');
         $form->setFieldNameSuffix('stores');
 
-
         $fieldset = $form->addFieldset(
             'base_fieldset',
             ['legend' => __('General')]

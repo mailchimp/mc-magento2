@@ -63,7 +63,8 @@ class Subscriber
             ->addFieldToFilter('store_id', ['eq' => $storeId]);
         $collection->getSelect()->joinLeft(
             ['m4m' => $this->_helper->getTableName('mailchimp_sync_ecommerce')],
-            "m4m.related_id = main_table.subscriber_id and m4m.type = '".\Ebizmarts\MailChimp\Helper\Data::IS_SUBSCRIBER.
+            "m4m.related_id = main_table.subscriber_id and m4m.type = '".
+            \Ebizmarts\MailChimp\Helper\Data::IS_SUBSCRIBER.
             "' and m4m.mailchimp_store_id = '".$listId."'",
             ['m4m.*']
         );
@@ -80,7 +81,7 @@ class Subscriber
          */
         foreach ($collection as $subscriber) {
             $data = $this->_buildSubscriberData($subscriber);
-            $md5HashEmail = md5(strtolower($subscriber->getSubscriberEmail()));
+            $md5HashEmail = hash('md5', strtolower($subscriber->getSubscriberEmail()));
             $subscriberJson = "";
             //enconde to JSON
             $subscriberJson = json_encode($data);
@@ -101,7 +102,13 @@ class Subscriber
                 $counter++;
             } else {
                 $errorMessage = json_last_error_msg();
-                $this->_updateSubscriber($listId, $subscriber->getId(),$this->_helper->getGmtDate(),$errorMessage,0);
+                $this->_updateSubscriber(
+                    $listId,
+                    $subscriber->getId(),
+                    $this->_helper->getGmtDate(),
+                    $errorMessage,
+                    0
+                );
             }
         }
         return $subscriberArray;
@@ -127,16 +134,17 @@ class Subscriber
     protected function _getInterest(\Magento\Newsletter\Model\Subscriber $subscriber)
     {
         $rc = [];
-        $interest = $this->_helper->getSubscriberInterest($subscriber->getSubscriberId(), $subscriber->getStoreId(), $this->_interest);
+        $interest = $this->_helper->getSubscriberInterest(
+            $subscriber->getSubscriberId(),
+            $subscriber->getStoreId(),
+            $this->_interest
+        );
         foreach ($interest as $i) {
             foreach ($i['category'] as $key => $value) {
                 $rc[$value['id']] = $value['checked'];
             }
         }
         return $rc;
-    }
-    protected function _getInterestFromMailchimp($listId)
-    {
     }
     /**
      * Get status to send confirmation if Need to Confirm enabled on Magento
@@ -166,7 +174,7 @@ class Subscriber
         $listId = $this->_helper->getGeneralList($storeId);
         $api = $this->_helper->getApi($storeId);
         try {
-            $md5HashEmail = md5(strtolower($subscriber->getSubscriberEmail()));
+            $md5HashEmail = hash('md5', strtolower($subscriber->getSubscriberEmail()));
             $api->lists->members->update($listId, $md5HashEmail, null, 'cleaned');
         } catch (\MailChimp_Error $e) {
             $this->_helper->log($e->getFriendlyMessage(), $storeId);
@@ -179,10 +187,21 @@ class Subscriber
     {
         $storeId = $subscriber->getStoreId();
         $listId = $this->_helper->getGeneralList($storeId);
-        $this->_updateSubscriber($listId, $subscriber->getId(), $this->_helper->getGmtDate(), '', 1);
+        $this->_updateSubscriber(
+            $listId,
+            $subscriber->getId(),
+            $this->_helper->getGmtDate(),
+            '',
+            1
+        );
     }
-    protected function _updateSubscriber($listId, $entityId, $sync_delta = null, $sync_error = null, $sync_modified = null)
-    {
+    protected function _updateSubscriber(
+        $listId,
+        $entityId,
+        $sync_delta = null,
+        $sync_error = null,
+        $sync_modified = null
+    ) {
         $this->_helper->saveEcommerceData(
             $listId,
             $entityId,

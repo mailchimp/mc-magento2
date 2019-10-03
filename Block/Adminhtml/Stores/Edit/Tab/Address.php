@@ -45,7 +45,6 @@ class Address extends Generic implements TabInterface
         parent::__construct($context, $registry, $formFactory, $data);
     }
 
-
     protected function _prepareForm()
     {
         $model  = $this->_coreRegistry->registry('mailchimp_stores');
@@ -114,7 +113,6 @@ class Address extends Generic implements TabInterface
                 'options'   => $countryArray
             ]
         );
-
 
         $data = $model->getData();
         $form->setValues($data);

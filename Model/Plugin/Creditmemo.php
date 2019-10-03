@@ -30,14 +30,26 @@ class Creditmemo
     ) {
         $this->_helper  = $helper;
     }
-    public function afterSave(       SalesCreditmemoRepositoryInterface $subject,
-                                     CreditmemoInterface $creditmemo)
-    {
-        $mailchimpStoreId = $this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_MAILCHIMP_STORE, $creditmemo->getStoreId());
-        $this->_helper->saveEcommerceData($mailchimpStoreId, $creditmemo->getOrderId(), \Ebizmarts\MailChimp\Helper\Data::IS_ORDER, null, null, 1,
-            null , null, \Ebizmarts\MailChimp\Helper\Data::NEEDTORESYNC);
+    public function afterSave(
+        SalesCreditmemoRepositoryInterface $subject,
+        CreditmemoInterface $creditmemo
+    ) {
+        $mailchimpStoreId = $this->_helper->getConfigValue(
+            \Ebizmarts\MailChimp\Helper\Data::XML_MAILCHIMP_STORE,
+            $creditmemo->getStoreId()
+        );
+        $this->_helper->saveEcommerceData(
+            $mailchimpStoreId,
+            $creditmemo->getOrderId(),
+            \Ebizmarts\MailChimp\Helper\Data::IS_ORDER,
+            null,
+            null,
+            1,
+            null,
+            null,
+            \Ebizmarts\MailChimp\Helper\Data::NEEDTORESYNC
+        );
 
         return $creditmemo;
     }
-
 }

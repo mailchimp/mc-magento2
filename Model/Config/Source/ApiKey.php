@@ -41,7 +41,6 @@ class ApiKey implements \Magento\Framework\Option\ArrayInterface
         \Ebizmarts\MailChimp\Helper\Data $helper,
         \Magento\Framework\App\RequestInterface $request,
         \Magento\Framework\Encryption\Encryptor $encryptor
-
     ) {
         $this->storeManager = $storeManager;
         $this->helper = $helper;
@@ -80,5 +79,4 @@ class ApiKey implements \Magento\Framework\Option\ArrayInterface
             return substr($str, 0, 6) . str_repeat('*', strlen($str) - 4) . substr($str, -4);
         }
     }
-
 }

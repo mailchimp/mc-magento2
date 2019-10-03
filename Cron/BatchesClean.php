@@ -31,8 +31,7 @@ class BatchesClean
     public function __construct(
         \Ebizmarts\MailChimp\Helper\Data $helper,
         \Ebizmarts\MailChimp\Model\MailChimpSyncBatches $_mailChimpSyncBatches
-    )
-    {
+    ) {
         $this->helper               = $helper;
         $this->mailChimpSyncBatches = $_mailChimpSyncBatches;
     }
@@ -41,9 +40,12 @@ class BatchesClean
         try {
             $connection = $this->mailChimpSyncBatches->getResource()->getConnection();
             $tableName = $this->mailChimpSyncBatches->getResource()->getMainTable();
-            $quoteInto = $connection->quoteInto('status IN("completed","canceled") and ( date_add(modified_date, interval ? month) < now() OR modified_date IS NULL)',1);
+            $quoteInto = $connection->quoteInto(
+                'status IN("completed","canceled") and ( date_add(modified_date, interval ? month) < now() OR modified_date IS NULL)',
+                1
+            );
             $connection->delete($tableName, $quoteInto);
-        } catch( \Exception $e) {
+        } catch (\Exception $e) {
             $this->helper->log($e->getMessage());
         }
     }

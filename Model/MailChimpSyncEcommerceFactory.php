@@ -26,7 +26,7 @@ class MailChimpSyncEcommerceFactory
      */
     public function __construct(
         \Magento\Framework\ObjectManagerInterface $objectManager,
-        $instanceName = '\\Ebizmarts\MailChimp\\Model\\MailChimpSyncEcommerce'
+        $instanceName = \Ebizmarts\MailChimp\Model\MailChimpSyncEcommerce::class
     ) {
     
         $this->_objectManager   = $objectManager;

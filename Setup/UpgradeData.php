@@ -80,7 +80,10 @@ class UpgradeData implements UpgradeDataInterface
         if (version_compare($context->getVersion(), '1.0.24') < 0) {
             $setup->startSetup();
             $connection = $this->_resource->getConnectionByName('default');
-            if ($this->_deploymentConfig->get(\Magento\Framework\Config\ConfigOptionsListConstants::CONFIG_PATH_DB_CONNECTIONS . '/sales')) {
+            if ($this->_deploymentConfig->get(
+                \Magento\Framework\Config\ConfigOptionsListConstants::CONFIG_PATH_DB_CONNECTIONS . '/sales'
+            )
+            ) {
                     $salesConnection = $this->_resource->getConnectionByName('sales');
             } else {
                     $salesConnection = $connection;
@@ -98,54 +101,26 @@ class UpgradeData implements UpgradeDataInterface
             $setup->endSetup();
         }
         if (version_compare($context->getVersion(), '1.2.32') < 0) {
-        // must convert all the serialized data in the db
-            // convert the data in core_config_data
+            // delete the old serialized data from core_config_data
             $setup->startSetup();
             $connection = $this->_resource->getConnectionByName('default');
             $table = $setup->getTable('core_config_data');
-            $select = $connection->select()->from($table)->where('path = ?', \Ebizmarts\MailChimp\Helper\Data::XML_MERGEVARS);
-            $rows = $connection->fetchAll($select);
-            foreach ($rows as $row) {
-                try {
-                    $value = $row['value'];
-                    $uvalue = unserialize($value);
-                    $row['value'] = $this->_helper->serialize($uvalue);
-                    $where = ['config_id =?' => $row['config_id']];
-                    $connection->update($table, $row, $where);
-                } catch (\Exception $e) {
-                    $this->_helper->log($e->getMessage());
-                    $row['value'] ='';
-                    $where = ['config_id =?' => $row['config_id']];
-                    $connection->update($table, $row, $where);
-                }
+            try {
+                $connection->delete($table, ['path = ?'=> \Ebizmarts\MailChimp\Helper\Data::XML_MERGEVARS]);
+            } catch (\Exception $e) {
+                $this->_helper->log($e->getMessage());
             }
 
-            // convert table mailchimp_interest_group
+            // empty table mailchimp_interest_group
             /**
              * @var \Ebizmarts\MailChimp\Model\ResourceModel\MailChimpInterestGroup $item
              */
-            $lastId = 0;
-            $done = false;
-            while (!$done) {
-                $collection = $this->_insterestGroupCollectionFactory->create();
-                $collection->addFieldToFilter('id', ['gt' => $lastId]);
-                $collection->getSelect()->limit(500);
-                if (!$collection->getSize()) {
-                    $done = true;
-                } else {
-                    foreach ($collection as $item) {
-                        try {
-                            $group = $item->getGroupdata();
-                            $ugroup = unserialize($group);
-                            $item->setGroupdata($this->_helper->serialize($ugroup));
-                            $item->getResource()->save($item);
-                        } catch (\Exception $e) {
-                            $this->_helper->log($e->getMessage());
-                            $item->getResource()->delete($item);
-                        }
-                        $lastId = $item->getId();
-                    }
-                }
+            $table = $setup->getTable('mailchimp_interest_group');
+
+            try {
+                $connection->delete($table);
+            } catch (\Exception $e) {
+                $this->_helper->log($e->getMessage());
             }
             // convert table mailchimp_webhook_request
             /**
@@ -163,9 +138,7 @@ class UpgradeData implements UpgradeDataInterface
                 } else {
                     foreach ($webhookCollection as $webhookItem) {
                         try {
-                            $dt = $webhookItem->getDataRequest();
-                            $udt = unserialize($dt);
-                            $webhookItem->setDataRequest($this->_helper->serialize($udt));
+                            $webhookItem->setProcessed(\Ebizmarts\MailChimp\Cron\Webhook::DATA_NOT_CONVERTED);
                             $webhookItem->getResource()->save($webhookItem);
                         } catch (\Exception $e) {
                             $this->_helper->log($e->getMessage());
@@ -183,17 +156,20 @@ class UpgradeData implements UpgradeDataInterface
             /**
              * @var $config \Magento\Config\Model\ResourceModel\Config
              */
-            foreach($configCollection as $config) {
+            foreach ($configCollection as $config) {
                 try {
                     $config->setValue($this->_helper->encrypt($config->getvalue()));
                     $config->getResource()->save($config);
-                } catch(\Exception $e) {
+                } catch (\Exception $e) {
                     $this->_helper->log($e->getMessage());
                 }
             }
             $configCollection = $this->configFactory->create();
-            $configCollection->addFieldToFilter('path', ['eq' => \Ebizmarts\MailChimp\Helper\Data::XML_PATH_APIKEY_LIST]);
-            foreach($configCollection as $config) {
+            $configCollection->addFieldToFilter(
+                'path',
+                ['eq' => \Ebizmarts\MailChimp\Helper\Data::XML_PATH_APIKEY_LIST]
+            );
+            foreach ($configCollection as $config) {
                 $config->getResource()->delete($config);
             }
         }

@@ -62,9 +62,18 @@ class MailchimpMap extends \Magento\Framework\View\Element\Html\Select
             $scope = 'default';
         }
 
-        $api = $this->_helper->getApi($storeId,$scope);
+        $api = $this->_helper->getApi($storeId, $scope);
         try {
-            $merge = $api->lists->mergeFields->getAll($this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_PATH_LIST, $storeId, $scope), null, null, \Ebizmarts\MailChimp\Helper\Data::MAX_MERGEFIELDS);
+            $merge = $api->lists->mergeFields->getAll(
+                $this->_helper->getConfigValue(
+                    \Ebizmarts\MailChimp\Helper\Data::XML_PATH_LIST,
+                    $storeId,
+                    $scope
+                ),
+                null,
+                null,
+                \Ebizmarts\MailChimp\Helper\Data::MAX_MERGEFIELDS
+            );
             foreach ($merge['merge_fields'] as $item) {
                 $ret[$item['tag']] = $item['tag'] . ' (' . $item['name'] . ' : ' . $item['type'] . ')';
             }
@@ -87,7 +96,7 @@ class MailchimpMap extends \Magento\Framework\View\Element\Html\Select
     {
         if (!$this->getOptions()) {
             foreach ($this->_getMailchimpTags() as $attId => $attLabel) {
-                $this->addOption($attId, addslashes($attLabel));
+                $this->addOption($attId, $this->escapeHtmlAttr($attLabel));
             }
         }
         return parent::_toHtml();
