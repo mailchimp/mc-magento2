@@ -11,6 +11,7 @@
 
 namespace Ebizmarts\MailChimp\Helper;
 
+use Magento\Framework\App\ResourceConnection;
 use Magento\Framework\Exception\ValidatorException;
 use Magento\Store\Model\Store;
 use Symfony\Component\Config\Definition\Exception\Exception;
@@ -205,6 +206,11 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
      * @var \Magento\Framework\Serialize\Serializer\Json
      */
     protected $_serializer;
+    /**
+     * @var \Magento\Framework\App\DeploymentConfig
+     */
+    protected $_deploymentConfig;
+
 
 
     private $customerAtt = null;
@@ -235,9 +241,10 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
      * @param \Magento\Customer\Api\AddressRepositoryInterface $addressRepositoryInterface
      * @param \Magento\Customer\Model\CustomerFactory $customerFactory
      * @param \Magento\Directory\Api\CountryInformationAcquirerInterface $countryInformation
-     * @param \Magento\Framework\App\ResourceConnection $resource
+     * @param ResourceConnection $resource
      * @param \Ebizmarts\MailChimp\Model\MailChimpInterestGroupFactory $interestGroupFactory
      * @param \Magento\Framework\Serialize\Serializer\Json $serializer
+     * @param \Magento\Framework\App\DeploymentConfig $deploymentConfig
      * @param \Magento\Framework\Stdlib\DateTime\DateTime $date
      */
     public function __construct(
@@ -267,38 +274,40 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         \Magento\Framework\App\ResourceConnection $resource,
         \Ebizmarts\MailChimp\Model\MailChimpInterestGroupFactory $interestGroupFactory,
         \Magento\Framework\Serialize\Serializer\Json $serializer,
+        \Magento\Framework\App\DeploymentConfig $deploymentConfig,
         \Magento\Framework\Stdlib\DateTime\DateTime $date
     )
     {
 
-        $this->_storeManager = $storeManager;
-        $this->_mlogger = $logger;
-        $this->_groupRegistry = $groupRegistry;
-        $this->_scopeConfig = $context->getScopeConfig();
-        $this->_request = $context->getRequest();
-        $this->_state = $state;
-        $this->_loader = $loader;
-        $this->_config = $config;
-        $this->_api = $api;
-        $this->_customer = $customer;
-        $this->_mailChimpErrors = $mailChimpErrors;
-        $this->_mailChimpSyncEcommerce = $mailChimpSyncEcommerce;
-        $this->_mailChimpSyncE = $mailChimpSyncE;
-        $this->_syncBatches = $syncBatches;
-        $this->_mailChimpStores = $mailChimpStores;
-        $this->_mailChimpStoresFactory = $mailChimpStoresFactory;
-        $this->_encryptor = $encryptor;
-        $this->_subscriberCollection = $subscriberCollection;
-        $this->_customerCollection = $customerCollection;
+        $this->_storeManager            = $storeManager;
+        $this->_mlogger                 = $logger;
+        $this->_groupRegistry           = $groupRegistry;
+        $this->_scopeConfig             = $context->getScopeConfig();
+        $this->_request                 = $context->getRequest();
+        $this->_state                   = $state;
+        $this->_loader                  = $loader;
+        $this->_config                  = $config;
+        $this->_api                     = $api;
+        $this->_customer                = $customer;
+        $this->_mailChimpErrors         = $mailChimpErrors;
+        $this->_mailChimpSyncEcommerce  = $mailChimpSyncEcommerce;
+        $this->_mailChimpSyncE          = $mailChimpSyncE;
+        $this->_syncBatches             = $syncBatches;
+        $this->_mailChimpStores         = $mailChimpStores;
+        $this->_mailChimpStoresFactory  = $mailChimpStoresFactory;
+        $this->_encryptor               = $encryptor;
+        $this->_subscriberCollection    = $subscriberCollection;
+        $this->_customerCollection      = $customerCollection;
         $this->_addressRepositoryInterface = $addressRepositoryInterface;
-        $this->_resource = $resource;
-        $this->connection = $resource->getConnection();
-        $this->_cacheTypeList = $cacheTypeList;
-        $this->_attCollection = $attCollection;
-        $this->_customerFactory = $customerFactory;
-        $this->_countryInformation = $countryInformation;
-        $this->_interestGroupFactory = $interestGroupFactory;
-        $this->_serializer = $serializer;
+        $this->_resource                = $resource;
+        $this->connection               = $resource->getConnection();
+        $this->_cacheTypeList           = $cacheTypeList;
+        $this->_attCollection           = $attCollection;
+        $this->_customerFactory         = $customerFactory;
+        $this->_countryInformation      = $countryInformation;
+        $this->_interestGroupFactory    = $interestGroupFactory;
+        $this->_serializer              = $serializer;
+        $this->_deploymentConfig        = $deploymentConfig;
         $this->_date = $date;
         parent::__construct($context);
     }
@@ -1038,9 +1047,10 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
      * @param $tableName
      * @return string
      */
-    public function getTableName($tableName)
+    public function getTableName($tableName, $conn = ResourceConnection::DEFAULT_CONNECTION)
     {
-        return $this->_resource->getTableName($tableName);
+        $dbName = $this->_deploymentConfig->get("db/connection/$conn/dbname");
+        return $dbName.'.'.$this->_resource->getTableName($tableName, $conn);
     }
     public function getWebsiteId($storeId)
     {
