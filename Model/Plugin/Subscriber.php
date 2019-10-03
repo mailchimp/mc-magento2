@@ -72,7 +72,7 @@ class Subscriber
             if ($subscriber->isSubscribed()) {
                 $api = $this->_helper->getApi($storeId);
                 try {
-                    $md5HashEmail = md5(strtolower($subscriber->getSubscriberEmail()));
+                    $md5HashEmail = hash('md5', strtolower($subscriber->getSubscriberEmail()));
                     $api->lists->members->update($this->_helper->getDefaultList($storeId), $md5HashEmail, null, 'unsubscribed');
                 } catch (\Mailchimp_Error $e) {
                     $this->_helper->log($e->getFriendlyMessage());
@@ -112,7 +112,7 @@ class Subscriber
                         $status = 'subscribed';
                     }
                     try {
-                        $emailHash = md5(strtolower($customer->getEmail()));
+                        $emailHash = hash('md5', strtolower($customer->getEmail()));
                         $api->lists->members->addOrUpdate($this->_helper->getDefaultList($storeId), $emailHash, null, $status, $mergeVars, null, null, null, null, $email, $status);
                     } catch (\Mailchimp_Error $e) {
                         $this->_helper->log($e->getFriendlyMessage());
@@ -148,7 +148,7 @@ class Subscriber
                 }
                 $mergeVars = $this->_helper->getMergeVarsBySubscriber($subscriber, $email);
                 try {
-                    $md5HashEmail = md5(strtolower($email));
+                    $md5HashEmail = hash('md5', strtolower($email));
                     $return = $api->lists->members->addOrUpdate($this->_helper->getDefaultList($storeId), $md5HashEmail, null, $status, $mergeVars, null, null, null, null, $email, $status);
                 } catch (\Mailchimp_Error $e) {
                     $this->_helper->log($e->getFriendlyMessage());
@@ -170,7 +170,7 @@ class Subscriber
         if ($this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_PATH_ACTIVE, $storeId)) {
             $api = $this->_helper->getApi($storeId);
             try {
-                $md5HashEmail = md5(strtolower($subscriber->getSubscriberEmail()));
+                $md5HashEmail = hash('md5', strtolower($subscriber->getSubscriberEmail()));
                 $api->lists->members->update($this->_helper->getDefaultList($storeId), $md5HashEmail, null, 'unsubscribed');
             } catch (\Mailchimp_Error $e) {
                 $this->_helper->log($e->getFriendlyMessage());
@@ -192,7 +192,7 @@ class Subscriber
             $api = $this->_helper->getApi($storeId);
             if ($subscriber->isSubscribed()) {
                 try {
-                    $md5HashEmail = md5(strtolower($subscriber->getSubscriberEmail()));
+                    $md5HashEmail = hash('md5', strtolower($subscriber->getSubscriberEmail()));
                     if ($subscriber->getCustomerId()) {
                         $api->lists->members->update($this->_helper->getDefaultList($storeId), $md5HashEmail, null, 'unsubscribed');
                     } else {

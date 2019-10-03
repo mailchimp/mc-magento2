@@ -490,7 +490,7 @@ class Cart
      */
     protected function _getCheckoutUrl(\Magento\Quote\Model\Quote $cart, $storeId)
     {
-        $token = md5(rand(0, 9999999));
+        $token = hash('md5', rand(0, 9999999));
         $url = $this->_helper->getCartUrl($storeId, $cart->getId(), $token);
         $this->_token = $token;
         return $url;
@@ -498,7 +498,7 @@ class Cart
     protected function _getCustomer(\Magento\Quote\Model\Quote $cart, $mailchimpStoreId, $magentoStoreId)
     {
         $customer = [
-            'id' => md5(strtolower($cart->getCustomerEmail())),
+            'id' => hash('md5', strtolower($cart->getCustomerEmail())),
             'email_address' => $cart->getCustomerEmail(),
             'opt_in_status' => $this->_apiCustomer->getOptin($magentoStoreId)
         ];

@@ -587,7 +587,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
             //generate store id
             $date = date('Y-m-d-His');
             $baseUrl = $this->_storeManager->getStore($storeId)->getName();
-            $mailchimpStoreId = md5(parse_url($baseUrl, PHP_URL_HOST) . '_' . $date);
+            $mailchimpStoreId = hash('md5', parse_url($baseUrl, PHP_URL_HOST) . '_' . $date);
             $currencyCode = $this->_storeManager->getStore($storeId)->getDefaultCurrencyCode();
             $name = $this->getMCStoreName($storeId);
 
@@ -925,7 +925,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     public function getWebhooksKey()
     {
         $keys =explode("\n", $this->_encryptor->exportKeys());
-        $crypt = md5((string)$keys[0]);
+        $crypt = hash('md5', (string)$keys[0]);
         $key = substr($crypt, 0, (strlen($crypt) / 2));
 
         return $key;

@@ -198,7 +198,7 @@ class PromoCodes
     }
     protected function _getRedemptionUrl($code, $magentoStoreId)
     {
-        $token = md5(rand(0, 9999999));
+        $token = hash('md5', rand(0, 9999999));
         $url = $this->_helper->getRedemptionUrl($magentoStoreId, $code, $token);
         $this->_token = $token;
         return $url;
