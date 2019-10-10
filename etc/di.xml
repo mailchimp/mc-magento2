@@ -11,7 +11,11 @@
  */
 -->
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
-    <preference for="Ebizmarts\MailChimp\Helper\Data" type="Ebizmarts\MailChimp\Helper\Data\Proxy" />
+    <type name="Ebizmarts\MailChimp\Block\Mailchimpjs">
+        <arguments>
+            <argument name="helper" xsi:type="object">Ebizmarts\MailChimp\Helper\Data\Proxy</argument> 
+        </arguments> 
+    </type>
     <type name="Magento\Quote\Model\Quote">
         <plugin name="mailchimp-save-quote" type="Ebizmarts\MailChimp\Model\Plugin\Quote" sortOrder="10"/>
     </type>
