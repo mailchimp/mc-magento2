@@ -47,8 +47,14 @@ class Mailchimpjs extends \Magento\Framework\View\Element\Template
     {
         $storeId = $this->_storeManager->getStore()->getId();
 
-        $url    = $this->_scopeConfig->getValue(\Ebizmarts\MailChimp\Helper\Data::XML_MAILCHIMP_JS_URL, ScopeInterface::SCOPE_STORES, $storeId);
-        $active = $this->_scopeConfig->getValue(\Ebizmarts\MailChimp\Helper\Data::XML_PATH_ACTIVE, ScopeInterface::SCOPE_STORES, $storeId);
+        $url    = $this->_scopeConfig->getValue(
+			\Ebizmarts\MailChimp\Helper\Data::XML_MAILCHIMP_JS_URL, ScopeInterface::SCOPE_STORES,
+			$storeId
+		);
+        $active = $this->_scopeConfig->getValue(
+			\Ebizmarts\MailChimp\Helper\Data::XML_PATH_ACTIVE, ScopeInterface::SCOPE_STORES,
+			$storeId
+		);
 
         // if we have URL cached or integration is disabled
         // then avoid initialization of Mailchimp Helper and all linked classes (~30 classes)
