@@ -207,6 +207,14 @@
                         <field id="*/*/active">1</field>
                     </depends>
                 </field>
+                <field id="synchronizable_order_statuses" translate="label,comment" type="multiselect" sortOrder="140" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Synchronizable order statuses</label>
+                    <comment>Select none if all statuses should be synced.</comment>
+                    <source_model>Magento\Sales\Model\Config\Source\Order\Status</source_model>
+                    <depends>
+                        <field id="*/*/active">1</field>
+                    </depends>
+                </field>
             </group>
             <group id="abandonedcart" translate="label" type="text" sortOrder="130" showInDefault="1" showInWebsite="1" showInStore="1">
                 <label>Abandoned Cart Configuration</label>

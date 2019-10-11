@@ -98,7 +98,7 @@ class Order
         \Ebizmarts\MailChimp\Model\MailChimpSyncEcommerce $chimpSyncEcommerce,
         \Magento\Framework\Url $urlHelper
     ) {
-    
+
         $this->_helper          = $helper;
         $this->_order           = $order;
         $this->_orderCollectionFactory = $orderCollectionFactory;
@@ -227,6 +227,10 @@ class Order
         // filter by first date if exists.
         if ($this->_firstDate) {
             $newOrders->addFieldToFilter('created_at', ['gt' => $this->_firstDate]);
+        }
+        $synchronizableStatuses = $this->_helper->getSynchronizableOrderStatuses($magentoStoreId);
+        if (!empty($synchronizableStatuses)) {
+            $newOrders->addFieldToFilter('status', ['in' => $synchronizableStatuses]);
         }
         $newOrders->getSelect()->joinLeft(
             ['m4m' => $this->_helper->getTableName('mailchimp_sync_ecommerce')],
