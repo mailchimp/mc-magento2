@@ -856,7 +856,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     }
     public function loadStores()
     {
-        
+
         $mcUserName = [];
         $connection = $this->_mailChimpStores->getResource()->getConnection();
         $tableName = $this->_mailChimpStores->getResource()->getMainTable();
@@ -1209,6 +1209,10 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
             \Magento\Store\Model\ScopeInterface::SCOPE_STORES,
             $storeId
         );
+    }
+    public function isNewsletterModuleEnabled()
+    {
+        return $this->_moduleManager->isEnabled('Magento_Newsletter');
     }
     public function resyncAllSubscribers($mailchimpList)
     {
