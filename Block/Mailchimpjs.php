@@ -13,6 +13,8 @@
 
 namespace Ebizmarts\MailChimp\Block;
 
+use Magento\Store\Model\ScopeInterface;
+
 class Mailchimpjs extends \Magento\Framework\View\Element\Template
 {
     /**
@@ -44,6 +46,19 @@ class Mailchimpjs extends \Magento\Framework\View\Element\Template
     public function getJsUrl()
     {
         $storeId = $this->_storeManager->getStore()->getId();
-        return $this->_helper->getJsUrl($storeId);
+
+        $url = $this->_scopeConfig->getValue(
+            \Ebizmarts\MailChimp\Helper\Data::XML_MAILCHIMP_JS_URL, ScopeInterface::SCOPE_STORES,
+            $storeId
+        );
+        $active = $this->_scopeConfig->getValue(
+            \Ebizmarts\MailChimp\Helper\Data::XML_PATH_ACTIVE, ScopeInterface::SCOPE_STORES,
+            $storeId
+        );
+        if ($active && !$url) {
+            $url = $this->_helper->getJsUrl($storeId);
+        }
+
+        return $url;
     }
 }
