@@ -367,7 +367,7 @@ class Ecommerce
                                 'batch_id' => -1,
                                 'mailchimp_sync_modified' => 0,
                                 'mailchimp_sync_delta' => $this->_helper->getGmtDate(),
-                                'mailchimp_sycn_error' => __('Json error'),
+                                'mailchimp_sync_error' => __('Json error'),
                                 'mailchimp_sent' => \Ebizmarts\MailChimp\Helper\Data::NOTSYNCED
                             ],
                             "batch_id is null and mailchimp_store_id = '$storeId' and type ='$type' and related_id = $relatedId");
