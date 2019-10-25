@@ -27,6 +27,7 @@ define(
 
             _init: function () {
                 var self = this;
+                $('#mailchimp_general_apikey').removeAttribute('autocomplete');
                 $('#mailchimp_general_apikey').change(function () {
                     var apiKey = $('#mailchimp_general_apikey').val();
                     self._loadStores(apiKey);
