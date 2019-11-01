@@ -9,7 +9,9 @@
  */
 define(
     [
-        'jquery'
+        'jquery',
+        'jquery/ui',
+        'mage/cookies'
     ],
     function ($) {
         "use strict";
