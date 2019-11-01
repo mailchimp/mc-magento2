@@ -49,7 +49,7 @@ class Save extends \Ebizmarts\MailChimp\Controller\Adminhtml\Stores
     }
     protected function _updateMailchimp($formData)
     {
-        $api = $this->_helper->getApiByApiKey($formData['apikey']);
+        $api = $this->_helper->getApiByApiKey($formData['apikey'], true);
         // set the address
         $address = [];
         $address['address1']    = $formData['address_address_one'];
@@ -60,7 +60,6 @@ class Save extends \Ebizmarts\MailChimp\Controller\Adminhtml\Stores
         $address['postal_code'] = $formData['address_postal_code'];
         $address['country']     = '';
         $address['country_code'] = $formData['address_country_code'];
-        // *****
         $emailAddress   = $formData['email_address'];
         $currencyCode   = $formData['currency_code'];
         $primaryLocale  = $formData['primary_locale'];
@@ -69,7 +68,6 @@ class Save extends \Ebizmarts\MailChimp\Controller\Adminhtml\Stores
         $name           = $formData['name'];
         $domain         = $formData['domain'];
         $storeId = isset($formData['storeid']) ? $formData['storeid'] : null;
-//        $is_sync        = $formData['is_sync'] ? true : false;
         $is_sync = null;
 
         if ($storeId) {
@@ -89,7 +87,8 @@ class Save extends \Ebizmarts\MailChimp\Controller\Adminhtml\Stores
             );
         } else {
             $date = $this->_helper->getDateMicrotime();
-            $mailchimpStoreId = md5($name. '_' . $date);
+            $mailchimpStoreId = hash('md5', $name. '_' . $date);
+            //$mailchimpStoreId = md5($name. '_' . $date);
             $is_sync = true;
             $ret =$api->ecommerce->stores->add(
                 $mailchimpStoreId,

@@ -37,8 +37,12 @@ class MailChimpSyncEcommerce extends AbstractDb
         }
         return $chimp;
     }
-    public function markAllAsDeleted(\Ebizmarts\MailChimp\Model\MailChimpSyncEcommerce $chimp, $id, $type, $relatedDeletedId)
-    {
+    public function markAllAsDeleted(
+        \Ebizmarts\MailChimp\Model\MailChimpSyncEcommerce $chimp,
+        $id,
+        $type,
+        $relatedDeletedId
+    ) {
         $connection = $this->getConnection();
         $connection->update(
             $this->getTable('mailchimp_sync_ecommerce'),
@@ -50,13 +54,30 @@ class MailChimpSyncEcommerce extends AbstractDb
     public function markAllAsModified(\Ebizmarts\MailChimp\Model\MailChimpSyncEcommerce $chimp, $id, $type)
     {
         $connection = $this->getConnection();
-        $connection->update($this->getTable('mailchimp_sync_ecommerce'), ['mailchimp_sync_modified'=>1], ['related_id = ?'=> $id, 'type = ?'=>$type]);
+        $connection->update(
+            $this->getTable('mailchimp_sync_ecommerce'),
+            ['mailchimp_sync_modified'=>1],
+            ['related_id = ?'=> $id, 'type = ?'=>$type]
+        );
         return $this;
     }
-    public function deleteAllByIdType(\Ebizmarts\MailChimp\Model\MailChimpSyncEcommerce $chimp, $id, $type, $mailchimpStoreId)
+    public function deleteAllByIdType(
+        \Ebizmarts\MailChimp\Model\MailChimpSyncEcommerce $chimp,
+        $id,
+        $type,
+        $mailchimpStoreId
+    ) {
+        $connection = $this->getConnection();
+        $connection->delete(
+            $this->getTable('mailchimp_sync_ecommerce'),
+            ['related_id = ?'=> $id, 'type = ?'=>$type, 'mailchimp_store_id = ?' => $mailchimpStoreId]
+        );
+        return $this;
+    }
+    public function deleteAllByBatchId(\Ebizmarts\MailChimp\Model\MailChimpSyncEcommerce $chimp, $batchId)
     {
         $connection = $this->getConnection();
-        $connection->delete($this->getTable('mailchimp_sync_ecommerce'), ['related_id = ?'=> $id, 'type = ?'=>$type, 'mailchimp_store_id = ?' => $mailchimpStoreId]);
+        $connection->delete($this->getTable('mailchimp_sync_ecommerce'), ['batch_id = ?' => $batchId]);
         return $this;
     }
 }

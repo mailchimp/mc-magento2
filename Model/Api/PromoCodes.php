@@ -66,13 +66,17 @@ class PromoCodes
         $this->_couponCollection    = $couponCollection;
         $this->_ruleCollection      = $ruleCollection;
         $this->_chimpSyncEcommerce  = $chimpSyncEcommerce;
-        $this->_batchId             = \Ebizmarts\MailChimp\Helper\Data::IS_PROMO_CODE. '_' . $this->_helper->getGmtTimeStamp();
+        $this->_batchId             = \Ebizmarts\MailChimp\Helper\Data::IS_PROMO_CODE. '_' .
+            $this->_helper->getGmtTimeStamp();
         $this->_promoRules          = $promoRules;
         $this->_syncCollection      = $syncCollection;
     }
     public function sendCoupons($magentoStoreId)
     {
-        $mailchimpStoreId = $this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_MAILCHIMP_STORE, $magentoStoreId);
+        $mailchimpStoreId = $this->_helper->getConfigValue(
+            \Ebizmarts\MailChimp\Helper\Data::XML_MAILCHIMP_STORE,
+            $magentoStoreId
+        );
         $batchArray = [];
         $batchArray = array_merge($batchArray, $this->_sendDeletedCoupons($mailchimpStoreId, $magentoStoreId));
 //        $batchArray = array_merge($batchArray, $this->_sendModifiedCoupons($mailchimpStoreId, $magentoStoreId));
@@ -98,9 +102,14 @@ class PromoCodes
             $ruleId = $coupon->getDeletedRelatedId();
             $batchArray[$counter]['method'] = 'DELETE';
             $batchArray[$counter]['operation_id'] = $this->_batchId . '_' . $couponId;
-            $batchArray[$counter]['path'] = "/ecommerce/stores/$mailchimpStoreId/promo-rules/$ruleId/promo-codes/$couponId";
+            $batchArray[$counter]['path'] =
+                "/ecommerce/stores/$mailchimpStoreId/promo-rules/$ruleId/promo-codes/$couponId";
             $counter++;
-            $syncCoupon =$this->_helper->getChimpSyncEcommerce($mailchimpStoreId, $couponId, \Ebizmarts\MailChimp\Helper\Data::IS_PROMO_CODE);
+            $syncCoupon =$this->_helper->getChimpSyncEcommerce(
+                $mailchimpStoreId,
+                $couponId,
+                \Ebizmarts\MailChimp\Helper\Data::IS_PROMO_CODE
+            );
             $syncCoupon->getResource()->delete($syncCoupon);
         }
         return $batchArray;
@@ -123,7 +132,8 @@ class PromoCodes
             $collection = $this->_couponCollection->create();
             $collection->getSelect()->joinLeft(
                 ['m4m' => $this->_helper->getTableName('mailchimp_sync_ecommerce')],
-                "m4m.related_id = main_table.coupon_id and m4m.type = '" . \Ebizmarts\MailChimp\Helper\Data::IS_PROMO_CODE .
+                "m4m.related_id = main_table.coupon_id and m4m.type = '" .
+                \Ebizmarts\MailChimp\Helper\Data::IS_PROMO_CODE .
                 "' and m4m.mailchimp_store_id = '" . $mailchimpStoreId . "'",
                 ['m4m.*']
             );
@@ -142,38 +152,77 @@ class PromoCodes
                 $ruleId = $item->getRuleId();
                 $couponId = $item->getCouponId();
                 try {
-                    $promoRule = $this->_helper->getChimpSyncEcommerce($mailchimpStoreId, $ruleId, \Ebizmarts\MailChimp\Helper\Data::IS_PROMO_RULE);
-                    if (!$promoRule->getMailchimpSyncDelta() || $promoRule->getMailchimpSyncDelta() < $this->_helper->getMCMinSyncDateFlag($magentoStoreId)) {
+                    $promoRule = $this->_helper->getChimpSyncEcommerce(
+                        $mailchimpStoreId,
+                        $ruleId,
+                        \Ebizmarts\MailChimp\Helper\Data::IS_PROMO_RULE
+                    );
+                    if (!$promoRule->getMailchimpSyncDelta() ||
+                        $promoRule->getMailchimpSyncDelta() < $this->_helper->getMCMinSyncDateFlag($magentoStoreId)) {
                         // must send the promorule before the promocode
-                        $newPromoRule = $this->_promoRules->getNewPromoRule($ruleId, $mailchimpStoreId, $magentoStoreId);
+                        $newPromoRule = $this->_promoRules->getNewPromoRule(
+                            $ruleId,
+                            $mailchimpStoreId,
+                            $magentoStoreId
+                        );
                         if (!empty($newPromoRule)) {
                             $batchArray[$counter] = $newPromoRule;
                             $counter++;
                         } else {
                             $error = __('Parent rule with id ' . $ruleId . 'has not been correctly sent.');
-                            $this->_updateSyncData($mailchimpStoreId, $ruleId, $this->_helper->getGmtDate(), $error, 0);
+                            $this->_updateSyncData(
+                                $mailchimpStoreId,
+                                $ruleId,
+                                $this->_helper->getGmtDate(),
+                                $error,
+                                0
+                            );
                             continue;
                         }
                     }
                     if ($promoRule->getMailchimpSyncError()) {
                         // the promorule associated has an error
                         $error = __('Parent rule with id ' . $ruleId . 'has not been correctly sent.');
-                        $this->_updateSyncData($mailchimpStoreId, $couponId, $this->_helper->getGmtDate(), $error, 0);
+                        $this->_updateSyncData(
+                            $mailchimpStoreId,
+                            $couponId,
+                            $this->_helper->getGmtDate(),
+                            $error,
+                            0
+                        );
                         continue;
                     }
                     $promoCodeJson = json_encode($this->generateCodeData($item, $magentoStoreId));
-                    if (!empty($promoCodeJson)) {
-                        $batchArray[$counter]['method'] = 'POST';
-                        $batchArray[$counter]['path'] = "/ecommerce/stores/$mailchimpStoreId/promo-rules/$ruleId/promo-codes/";
-                        $batchArray[$counter]['operation_id'] = $this->_batchId . '_' . $couponId;
-                        $batchArray[$counter]['body'] = $promoCodeJson;
+                    if ($promoCodeJson !== false) {
+                        if (!empty($promoCodeJson)) {
+                            $batchArray[$counter]['method'] = 'POST';
+                            $batchArray[$counter]['path'] =
+                                "/ecommerce/stores/$mailchimpStoreId/promo-rules/$ruleId/promo-codes/";
+                            $batchArray[$counter]['operation_id'] = $this->_batchId . '_' . $couponId;
+                            $batchArray[$counter]['body'] = $promoCodeJson;
+                        } else {
+                            $error = __('Something went wrong when retrieving the information for promo rule');
+                            $this->_updateSyncData(
+                                $mailchimpStoreId,
+                                $couponId,
+                                $this->_helper->getGmtDate(),
+                                $error,
+                                0
+                            );
+                            continue;
+                        }
+                        $counter++;
+                        $this->_updateSyncData($mailchimpStoreId, $couponId);
                     } else {
-                        $error = __('Something went wrong when retrieving the information for promo rule');
-                        $this->_updateSyncData($mailchimpStoreId, $couponId, $this->_helper->getGmtDate(), $error, 0);
-                        continue;
+                        $error = json_last_error_msg();
+                        $this->_updateSyncData(
+                            $mailchimpStoreId,
+                            $couponId,
+                            $this->_helper->getGmtDate(),
+                            $error,
+                            0
+                        );
                     }
-                    $counter++;
-                    $this->_updateSyncData($mailchimpStoreId, $couponId);
                 } catch (Exception $e) {
                     $this->_helper->log($e->getMessage());
                 }
@@ -193,13 +242,19 @@ class PromoCodes
     }
     protected function _getRedemptionUrl($code, $magentoStoreId)
     {
-        $token = md5(rand(0, 9999999));
+        $token = hash('md5', rand(0, 9999999));
         $url = $this->_helper->getRedemptionUrl($magentoStoreId, $code, $token);
         $this->_token = $token;
         return $url;
     }
-    protected function _updateSyncData($storeId, $entityId, $sync_delta = null, $sync_error = null, $sync_modified = null, $sync_deleted = null)
-    {
+    protected function _updateSyncData(
+        $storeId,
+        $entityId,
+        $sync_delta = null,
+        $sync_error = null,
+        $sync_modified = null,
+        $sync_deleted = null
+    ) {
         $this->_helper->saveEcommerceData(
             $storeId,
             $entityId,

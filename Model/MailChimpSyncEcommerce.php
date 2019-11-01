@@ -18,7 +18,7 @@ class MailChimpSyncEcommerce extends \Magento\Framework\Model\AbstractModel
     protected function _construct()
     {
         parent::_construct();
-        $this->_init('\Ebizmarts\MailChimp\Model\ResourceModel\MailChimpSyncEcommerce');
+        $this->_init(\Ebizmarts\MailChimp\Model\ResourceModel\MailChimpSyncEcommerce::class);
     }
 
     public function getByStoreIdType($storeId, $id, $type)
@@ -40,5 +40,9 @@ class MailChimpSyncEcommerce extends \Magento\Framework\Model\AbstractModel
     {
         $this->getResource()->deleteAllByIdType($this, $id, $type, $mailchimpStoreId);
         return $this;
+    }
+    public function deleteAllByBatchid($batchId)
+    {
+        $this->getResource()->deleteAllByBatchid($this, $batchId);
     }
 }

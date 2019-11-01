@@ -11,7 +11,8 @@
 
 namespace Ebizmarts\MailChimp\Block\Adminhtml\System\Config\Fieldset;
 
-class Hint extends \Magento\Backend\Block\Template implements \Magento\Framework\Data\Form\Element\Renderer\RendererInterface
+class Hint extends \Magento\Backend\Block\Template implements
+    \Magento\Framework\Data\Form\Element\Renderer\RendererInterface
 {
     /**
      * @var string
@@ -21,24 +22,39 @@ class Hint extends \Magento\Backend\Block\Template implements \Magento\Framework
      * @var \Magento\Framework\App\ProductMetadataInterface
      */
     private $_metaData;
-    
-    private $_helper;
-    
     /**
+     * @var \Ebizmarts\MailChimp\Helper\Data
+     */
+    private $_helper;
+    /**
+     * @var \Magento\Backend\Block\Template\Context
+     */
+    private $_context;
+    /**
+     * @var \Ebizmarts\MailChimp\Model\Config\ModuleVersion
+     */
+    private $_moduleVersion;
+
+    /**
+     * Hint constructor.
      * @param \Magento\Backend\Block\Template\Context $context
      * @param \Magento\Framework\App\ProductMetadataInterface $productMetaData
      * @param \Ebizmarts\MailChimp\Helper\Data $helper
+     * @param \Ebizmarts\MailChimp\Model\Config\ModuleVersion $moduleVersion
      * @param array $data
      */
     public function __construct(
         \Magento\Backend\Block\Template\Context $context,
         \Magento\Framework\App\ProductMetadataInterface $productMetaData,
         \Ebizmarts\MailChimp\Helper\Data $helper,
+        \Ebizmarts\MailChimp\Model\Config\ModuleVersion $moduleVersion,
         array $data = []
     ) {
         parent::__construct($context, $data);
         $this->_metaData = $productMetaData;
         $this->_helper = $helper;
+        $this->_moduleVersion   = $moduleVersion;
+        $this->_context = $context;
     }
     /**
      * @param \Magento\Framework\Data\Form\Element\AbstractElement $element
@@ -48,27 +64,18 @@ class Hint extends \Magento\Backend\Block\Template implements \Magento\Framework
     {
         return $this->toHtml();
     }
-    public function getPxParams()
-    {
-
-        $extension = "MailChimp;{$this->getModuleVersion()}";
-        $mageEdition = $this->_metaData->getEdition();
-        switch ($mageEdition) {
-            case 'Community':
-                $mageEdition = 'CE';
-                break;
-            case 'Enterprise':
-                $mageEdition = 'EE';
-                break;
-        }
-        $mageVersion = $this->_metaData->getVersion();
-        $mage = "Magento {$mageEdition};{$mageVersion}";
-        $hash = md5($extension . '_' . $mage . '_' . $extension);
-        return "ext=$extension&mage={$mage}&ctrl={$hash}";
-    }
 
     public function getModuleVersion()
     {
-        return $this->_helper->getModuleVersion();
+        return $this->_moduleVersion->getModuleVersion('Ebizmarts_MailChimp');
+    }
+    public function getHasApiKey()
+    {
+        $apikey = $this->_helper->getApiKey($this->_context->getStoreManager()->getStore()->getId());
+        if ($apikey) {
+            return true;
+        } else {
+            return false;
+        }
     }
 }

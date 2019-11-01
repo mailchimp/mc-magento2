@@ -39,7 +39,9 @@ class MonkeyList implements \Magento\Framework\Option\ArrayInterface
 
         if ($helper->getApiKey($storeId, $scope)) {
             try {
-                $this->options = $helper->getApi($storeId, $scope)->lists->getLists($helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_PATH_LIST, $storeId, $scope));
+                $this->options = $helper->getApi($storeId, $scope)->lists->getLists(
+                    $helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_PATH_LIST, $storeId, $scope)
+                );
             } catch (\Mailchimp_Error $e) {
                 $helper->log($e->getFriendlyMessage());
             }

@@ -35,10 +35,6 @@ class Success extends \Magento\Framework\App\Action\Action
      * @var \Ebizmarts\MailChimp\Model\MailChimpInterestGroupFactory
      */
     protected $_interestGroupFactory;
-    /**
-     * @var \Magento\Framework\Serialize\Serializer\Json
-     */
-    protected $_serializer;
 
     /**
      * Success constructor.
@@ -48,7 +44,6 @@ class Success extends \Magento\Framework\App\Action\Action
      * @param \Magento\Checkout\Model\Session $checkoutSession
      * @param \Magento\Newsletter\Model\SubscriberFactory $subscriberFactory
      * @param \Ebizmarts\MailChimp\Model\MailChimpInterestGroupFactory $interestGroupFactory
-     * @param \Magento\Framework\Serialize\Serializer\Json $serializer
      */
     public function __construct(
         \Magento\Framework\App\Action\Context $context,
@@ -56,8 +51,7 @@ class Success extends \Magento\Framework\App\Action\Action
         \Ebizmarts\MailChimp\Helper\Data $helper,
         \Magento\Checkout\Model\Session $checkoutSession,
         \Magento\Newsletter\Model\SubscriberFactory $subscriberFactory,
-        \Ebizmarts\MailChimp\Model\MailChimpInterestGroupFactory $interestGroupFactory,
-        \Magento\Framework\Serialize\Serializer\Json $serializer
+        \Ebizmarts\MailChimp\Model\MailChimpInterestGroupFactory $interestGroupFactory
     ) {
     
         $this->_pageFactory         =$pageFactory;
@@ -65,7 +59,6 @@ class Success extends \Magento\Framework\App\Action\Action
         $this->_checkoutSession     = $checkoutSession;
         $this->_subscriberFactory   = $subscriberFactory;
         $this->_interestGroupFactory= $interestGroupFactory;
-        $this->_serializer          = $serializer;
         parent::__construct($context);
     }
 
@@ -82,8 +75,11 @@ class Success extends \Magento\Framework\App\Action\Action
         try {
             $subscriber->loadByEmail($order->getCustomerEmail());
             if ($subscriber->getEmail()==$order->getCustomerEmail()) {
+                if ($subscriber->getStatus()==\Magento\Newsletter\Model\Subscriber::STATUS_UNSUBSCRIBED) {
+                    $subscriber->subscribe($subscriber->getEmail());
+                }
                 $interestGroup->getBySubscriberIdStoreId($subscriber->getSubscriberId(), $subscriber->getStoreId());
-                $interestGroup->setGroupdata($this->_serializer->serialize($params));
+                $interestGroup->setGroupdata($this->_helper->serialize($params));
                 $interestGroup->setSubscriberId($subscriber->getSubscriberId());
                 $interestGroup->setStoreId($subscriber->getStoreId());
                 $interestGroup->setUpdatedAt($this->_helper->getGmtDate());
@@ -94,7 +90,7 @@ class Success extends \Magento\Framework\App\Action\Action
                 $this->_subscriberFactory->create()->subscribe($order->getCustomerEmail());
                 $subscriber->loadByEmail($order->getCustomerEmail());
                 $interestGroup->getBySubscriberIdStoreId($subscriber->getSubscriberId(), $subscriber->getStoreId());
-                $interestGroup->setGroupdata($this->_serializer->serialize($params));
+                $interestGroup->setGroupdata($this->_helper->serialize($params));
                 $interestGroup->setSubscriberId($subscriber->getSubscriberId());
                 $interestGroup->setStoreId($subscriber->getStoreId());
                 $interestGroup->setUpdatedAt($this->_helper->getGmtDate());
@@ -104,10 +100,18 @@ class Success extends \Magento\Framework\App\Action\Action
             $this->_helper->log($e->getMessage());
         }
         $this->messageManager->addSuccessMessage(__('Thanks for share your interest with us'));
-        $this->_redirect($this->_helper->getBaserUrl($order->getStoreId(), \Magento\Framework\UrlInterface::URL_TYPE_WEB));
+        $this->_redirect($this->_helper->getBaserUrl(
+            $order->getStoreId(),
+            \Magento\Framework\UrlInterface::URL_TYPE_WEB
+        ));
     }
-    protected function _updateSubscriber($listId, $entityId, $sync_delta = null, $sync_error = null, $sync_modified = null)
-    {
+    protected function _updateSubscriber(
+        $listId,
+        $entityId,
+        $sync_delta = null,
+        $sync_error = null,
+        $sync_modified = null
+    ) {
         $this->_helper->saveEcommerceData(
             $listId,
             $entityId,

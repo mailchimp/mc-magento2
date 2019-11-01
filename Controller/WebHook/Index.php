@@ -17,8 +17,11 @@ use Magento\Framework\App\Action\Action;
 use Magento\Framework\Controller\ResultFactory;
 use Magento\Framework\View\Result\PageFactory;
 use Magento\Framework\App\Action\Context;
+use Magento\Framework\App\CsrfAwareActionInterface;
+use Magento\Framework\App\Request\InvalidRequestException;
+use Magento\Framework\App\RequestInterface;
 
-class Index extends Action
+class Index extends Action implements CsrfAwareActionInterface
 {
     const WEBHOOK__PATH = 'mailchimp/webhook/index';
     /**
@@ -33,10 +36,6 @@ class Index extends Action
      * @var \Ebizmarts\MailChimp\Model\MailChimpWebhookRequestFactory
      */
     protected $_chimpWebhookRequestFactory;
-    /**
-     * @var \Magento\Framework\Serialize\Serializer\Json
-     */
-    protected $serializer;
     private $_remoteAddress;
 
     /**
@@ -45,14 +44,12 @@ class Index extends Action
      * @param \Ebizmarts\MailChimp\Helper\Data $helper
      * @param \Ebizmarts\MailChimp\Model\MailChimpWebhookRequestFactory $chimpWebhookRequestFactory
      * @param \Magento\Framework\HTTP\PhpEnvironment\RemoteAddress $remoteAddress
-     * @param \Magento\Framework\Serialize\Serializer\Json $serializer
      */
     public function __construct(
         Context $context,
         \Ebizmarts\MailChimp\Helper\Data $helper,
         \Ebizmarts\MailChimp\Model\MailChimpWebhookRequestFactory $chimpWebhookRequestFactory,
-        \Magento\Framework\HTTP\PhpEnvironment\RemoteAddress $remoteAddress,
-        \Magento\Framework\Serialize\Serializer\Json $serializer
+        \Magento\Framework\HTTP\PhpEnvironment\RemoteAddress $remoteAddress
     ) {
     
         parent::__construct($context);
@@ -60,7 +57,21 @@ class Index extends Action
         $this->_helper                      = $helper;
         $this->_chimpWebhookRequestFactory  = $chimpWebhookRequestFactory;
         $this->_remoteAddress               = $remoteAddress;
-        $this->serializer                   = $serializer;
+    }
+    /**
+     * @inheritDoc
+     */
+    public function createCsrfValidationException(
+        RequestInterface $request
+    ): ?InvalidRequestException {
+        return null;
+    }
+    /**
+     * @inheritDoc
+     */
+    public function validateForCsrf(RequestInterface $request): ?bool
+    {
+        return true;
     }
 
     public function execute()
@@ -81,12 +92,17 @@ class Index extends Action
             $request = $this->getRequest()->getPost();
             if ($this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_PATH_WEBHOOK_ACTIVE) ||
                 $request['type']==\Ebizmarts\MailChimp\Cron\Webhook::TYPE_SUBSCRIBE) {
-                $chimpRequest = $this->_chimpWebhookRequestFactory->create();
-                $chimpRequest->setType($request['type']);
-                $chimpRequest->setFiredAt($request['fired_at']);
-                $chimpRequest->setDataRequest($this->serializer->serialize($request['data']));
-                $chimpRequest->setProcessed(false);
-                $chimpRequest->getResource()->save($chimpRequest);
+                try {
+                    $chimpRequest = $this->_chimpWebhookRequestFactory->create();
+                    $chimpRequest->setType($request['type']);
+                    $chimpRequest->setFiredAt($request['fired_at']);
+                    $chimpRequest->setDataRequest($this->_helper->serialize($request['data']));
+                    $chimpRequest->setProcessed(false);
+                    $chimpRequest->getResource()->save($chimpRequest);
+                } catch (\Exception $e) {
+                    $this->_helper->log($e->getMessage());
+                    $this->_helper->log($request['data']);
+                }
             }
         } else {
             $this->_helper->log('An empty request comes from ip: '.$this->_remoteAddress->getRemoteAddress());

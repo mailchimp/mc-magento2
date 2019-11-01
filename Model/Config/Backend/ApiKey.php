@@ -80,15 +80,24 @@ class ApiKey extends \Magento\Framework\App\Config\Value
             $active = $data['ecommerce']['fields']['active']['inherit'];
         }
         if ($active && $this->isValueChanged()) {
-            $mailchimpStore = $this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_MAILCHIMP_STORE, $this->getScopeId(), $this->getScope());
-            $this->resourceConfig->deleteConfig(\Ebizmarts\MailChimp\Helper\Data::XML_MAILCHIMP_STORE, $this->getScope(), $this->getScopeId());
+            $mailchimpStore = $this->_helper->getConfigValue(
+                \Ebizmarts\MailChimp\Helper\Data::XML_MAILCHIMP_STORE,
+                $this->getScopeId(),
+                $this->getScope()
+            );
+            $this->resourceConfig->deleteConfig(
+                \Ebizmarts\MailChimp\Helper\Data::XML_MAILCHIMP_STORE,
+                $this->getScope(),
+                $this->getScopeId()
+            );
             foreach ($this->_storeManager->getStores() as $storeId => $val) {
-                if ($this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_MAILCHIMP_STORE, $storeId) == $mailchimpStore) {
+                if ($this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_MAILCHIMP_STORE, $storeId) ==
+                    $mailchimpStore) {
                     $found++;
                 }
             }
             if ($found==1) {
-                $this->_helper->markAllBatchesAs($mailchimpStore, 'canceled');
+                $this->_helper->cancelAllPendingBatches($mailchimpStore);
             }
         }
         return parent::beforeSave();

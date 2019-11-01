@@ -27,29 +27,22 @@ class SaveAfter implements \Magento\Framework\Event\ObserverInterface
      * @var \Ebizmarts\MailChimp\Model\MailChimpInterestGroupFactory
      */
     protected $interestGroupFactory;
-    /**
-     * @var \Magento\Framework\Serialize\Serializer\Json
-     */
-    protected $serlializer;
 
     /**
      * SaveAfter constructor.
      * @param \Ebizmarts\MailChimp\Helper\Data $helper
      * @param \Magento\Newsletter\Model\SubscriberFactory $subscriberFactory
      * @param \Ebizmarts\MailChimp\Model\MailChimpInterestGroupFactory $interestGroupFactory
-     * @param \Magento\Framework\Serialize\Serializer\Json $serializer
      */
     public function __construct(
         \Ebizmarts\MailChimp\Helper\Data $helper,
         \Magento\Newsletter\Model\SubscriberFactory $subscriberFactory,
-        \Ebizmarts\MailChimp\Model\MailChimpInterestGroupFactory $interestGroupFactory,
-        \Magento\Framework\Serialize\Serializer\Json $serializer
+        \Ebizmarts\MailChimp\Model\MailChimpInterestGroupFactory $interestGroupFactory
     ) {
     
         $this->helper               = $helper;
         $this->subscriberFactory    = $subscriberFactory;
         $this->interestGroupFactory = $interestGroupFactory;
-        $this->serlializer          = $serializer;
     }
 
     public function execute(\Magento\Framework\Event\Observer $observer)
@@ -74,28 +67,36 @@ class SaveAfter implements \Magento\Framework\Event\ObserverInterface
                 $subscriber->loadByEmail($customer->getEmail());
                 if ($subscriber->getEmail() == $customer->getEmail()) {
                     $interestGroup->getBySubscriberIdStoreId($subscriber->getSubscriberId(), $subscriber->getStoreId());
-                    $interestGroup->setGroupdata($this->serlializer->serialize($params));
+                    $interestGroup->setGroupdata($this->helper->serialize($params));
                     $interestGroup->setSubscriberId($subscriber->getSubscriberId());
                     $interestGroup->setStoreId($subscriber->getStoreId());
                     $interestGroup->setUpdatedAt($this->helper->getGmtDate());
                     $interestGroup->getResource()->save($interestGroup);
-                    $this->helper->markRegisterAsModified($subscriber->getId(), \Ebizmarts\MailChimp\Helper\Data::IS_SUBSCRIBER);
+                    $this->helper->markRegisterAsModified(
+                        $subscriber->getId(),
+                        \Ebizmarts\MailChimp\Helper\Data::IS_SUBSCRIBER
+                    );
                 } else {
                     $this->subscriberFactory->create()->subscribe($customer->getEmail());
                     $subscriber->loadByEmail($customer->getEmail());
                     $interestGroup->getBySubscriberIdStoreId($subscriber->getSubscriberId(), $subscriber->getStoreId());
-                    $interestGroup->setGroupdata($this->serlializer->serialize($params));
+                    $interestGroup->setGroupdata($this->helper->serialize($params));
                     $interestGroup->setSubscriberId($subscriber->getSubscriberId());
                     $interestGroup->setStoreId($subscriber->getStoreId());
                     $interestGroup->setUpdatedAt($this->helper->getGmtDate());
                     $interestGroup->getResource()->save($interestGroup);
                 }
             } catch (\Exception $e) {
+                $this->helper->log($e->getMessage());
+                $this->helper->log($params);
             }
         } else {
             $subscriber->loadByEmail($customer->getEmail());
             if ($subscriber->getEmail() == $customer->getEmail()) {
-                $this->helper->markRegisterAsModified($subscriber->getId(), \Ebizmarts\MailChimp\Helper\Data::IS_SUBSCRIBER);
+                $this->helper->markRegisterAsModified(
+                    $subscriber->getId(),
+                    \Ebizmarts\MailChimp\Helper\Data::IS_SUBSCRIBER
+                );
             }
         }
         $this->helper->markRegisterAsModified($customer->getId(), \Ebizmarts\MailChimp\Helper\Data::IS_CUSTOMER);

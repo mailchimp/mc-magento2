@@ -17,6 +17,11 @@ class MailChimpErrors extends \Magento\Framework\Model\AbstractModel
 {
     protected function _construct()
     {
-        $this->_init('\Ebizmarts\MailChimp\Model\ResourceModel\MailChimpErrors');
+        $this->_init(\Ebizmarts\MailChimp\Model\ResourceModel\MailChimpErrors::class);
+    }
+    public function getByStoreIdType($storeId, $id, $type)
+    {
+        $this->getResource()->getByStoreIdType($this, $storeId, $id, $type);
+        return $this;
     }
 }

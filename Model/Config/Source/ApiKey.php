@@ -23,20 +23,28 @@ class ApiKey implements \Magento\Framework\Option\ArrayInterface
      * @var \Ebizmarts\MailChimp\Helper\Data
      */
     protected $helper;
+    /**
+     * @var \Magento\Framework\Encryption\Encryptor
+     */
+    protected $encryptor;
 
     /**
      * ApiKey constructor.
      * @param \Magento\Store\Model\StoreManager $storeManager
      * @param \Ebizmarts\MailChimp\Helper\Data $helper
      * @param \Magento\Framework\App\RequestInterface $request
+     * @param \Magento\Framework\Encryption\Encryptor $encryptor
+     * @throws \Magento\Framework\Exception\LocalizedException
      */
     public function __construct(
         \Magento\Store\Model\StoreManager $storeManager,
         \Ebizmarts\MailChimp\Helper\Data $helper,
-        \Magento\Framework\App\RequestInterface $request
+        \Magento\Framework\App\RequestInterface $request,
+        \Magento\Framework\Encryption\Encryptor $encryptor
     ) {
         $this->storeManager = $storeManager;
         $this->helper = $helper;
+        $this->encryptor    = $encryptor;
         $storeId = (int) $request->getParam("store", 0);
         if ($request->getParam('website', 0)) {
             $scope = 'website';
@@ -47,28 +55,28 @@ class ApiKey implements \Magento\Framework\Option\ArrayInterface
         } else {
             $scope = 'default';
         }
-        $apiKeys = $helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_PATH_APIKEY_LIST, $storeId, $scope);
-        if ($apiKeys) {
-            $this->options = explode("\n", $apiKeys);
-        } else {
-            $this->options = [];
-        }
     }
     public function toOptionArray()
     {
+        $rc = [];
         if (is_array($this->options) && count($this->options)) {
-            $rc = [];
             $rc[] = ['value' => -1, 'label' => 'Select one ApiKey'];
             foreach ($this->options as $apiKey) {
-                    $rc[] = ['value'=> trim($apiKey), 'label' => trim($apiKey)];
+                $rc[] = ['value'=> $this->encryptor->encrypt(trim($apiKey)), 'label' => $this->mask(trim($apiKey))];
             }
-        } else {
-            $rc[] = ['value' => 0, 'label' => __('---Enter first an APIKey list---')];
         }
         return $rc;
     }
     public function getAllApiKeys()
     {
         $this->options = $this->helper->getAllApiKeys();
+    }
+    private function mask($str)
+    {
+        if (strlen($str) < 4) {
+            return __('Invalid API Key');
+        } else {
+            return substr($str, 0, 6) . str_repeat('*', strlen($str) - 4) . substr($str, -4);
+        }
     }
 }

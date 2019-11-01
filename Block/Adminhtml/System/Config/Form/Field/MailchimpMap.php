@@ -18,11 +18,15 @@ class MailchimpMap extends \Magento\Framework\View\Element\Html\Select
     /**
      * @var \Ebizmarts\MailChimp\Helper\Data
      */
-    private $_helper;
+    protected $_helper;
     /**
      * @var \Magento\Store\Model\StoreManagerInterface
      */
-    private $_storeManager;
+    protected $_storeManager;
+    /**
+     * @var \Magento\Framework\App\RequestInterface
+     */
+    protected $_request;
 
     /**
      * MailchimpMap constructor.
@@ -41,14 +45,35 @@ class MailchimpMap extends \Magento\Framework\View\Element\Html\Select
         parent::__construct($context, $data);
         $this->_helper          = $helper;
         $this->_storeManager    = $storeManager;
+        $this->_request         = $context->getRequest();
     }
 
     protected function _getMailchimpTags()
     {
         $ret = [];
-        $api = $this->_helper->getApi($this->_storeManager->getStore()->getId());
+        $storeId = (int) $this->_request->getParam("store", 0);
+        if ($this->_request->getParam('website', 0)) {
+            $scope = 'website';
+            $storeId = $this->_request->getParam('website', 0);
+        } elseif ($this->_request->getParam('store', 0)) {
+            $scope = 'stores';
+            $storeId = $this->_request->getParam('store', 0);
+        } else {
+            $scope = 'default';
+        }
+
+        $api = $this->_helper->getApi($storeId, $scope);
         try {
-            $merge = $api->lists->mergeFields->getAll($this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_PATH_LIST));
+            $merge = $api->lists->mergeFields->getAll(
+                $this->_helper->getConfigValue(
+                    \Ebizmarts\MailChimp\Helper\Data::XML_PATH_LIST,
+                    $storeId,
+                    $scope
+                ),
+                null,
+                null,
+                \Ebizmarts\MailChimp\Helper\Data::MAX_MERGEFIELDS
+            );
             foreach ($merge['merge_fields'] as $item) {
                 $ret[$item['tag']] = $item['tag'] . ' (' . $item['name'] . ' : ' . $item['type'] . ')';
             }
@@ -71,7 +96,7 @@ class MailchimpMap extends \Magento\Framework\View\Element\Html\Select
     {
         if (!$this->getOptions()) {
             foreach ($this->_getMailchimpTags() as $attId => $attLabel) {
-                $this->addOption($attId, addslashes($attLabel));
+                $this->addOption($attId, $this->escapeHtmlAttr($attLabel));
             }
         }
         return parent::_toHtml();

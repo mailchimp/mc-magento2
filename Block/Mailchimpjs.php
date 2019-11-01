@@ -13,12 +13,15 @@
 
 namespace Ebizmarts\MailChimp\Block;
 
+use Magento\Store\Model\ScopeInterface;
+
 class Mailchimpjs extends \Magento\Framework\View\Element\Template
 {
     /**
      * @var \Ebizmarts\MailChimp\Helper\Data
      */
     protected $_helper;
+
     /**
      * @var \Magento\Store\Model\StoreManagerInterface
      */
@@ -35,7 +38,6 @@ class Mailchimpjs extends \Magento\Framework\View\Element\Template
         \Ebizmarts\MailChimp\Helper\Data $helper,
         array $data
     ) {
-    
         parent::__construct($context, $data);
         $this->_helper          = $helper;
         $this->_storeManager    = $context->getStoreManager();
@@ -44,6 +46,22 @@ class Mailchimpjs extends \Magento\Framework\View\Element\Template
     public function getJsUrl()
     {
         $storeId = $this->_storeManager->getStore()->getId();
-        return $this->_helper->getJsUrl($storeId);
+
+        $url = $this->_scopeConfig->getValue(
+            \Ebizmarts\MailChimp\Helper\Data::XML_MAILCHIMP_JS_URL, ScopeInterface::SCOPE_STORES,
+            $storeId
+        );
+        $active = $this->_scopeConfig->getValue(
+            \Ebizmarts\MailChimp\Helper\Data::XML_PATH_ACTIVE, ScopeInterface::SCOPE_STORES,
+            $storeId
+        );
+
+        // if we have URL cached or integration is disabled
+        // then avoid initialization of Mailchimp Helper and all linked classes (~30 classes)
+        if ($active && !$url) {
+            $url = $this->_helper->getJsUrl($storeId);
+        }
+
+        return $url;
     }
 }

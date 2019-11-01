@@ -11,6 +11,17 @@
  */
 -->
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
+    <type name="Ebizmarts\MailChimp\Block\Mailchimpjs">
+        <arguments>
+            <argument name="helper" xsi:type="object">Ebizmarts\MailChimp\Helper\Data\Proxy</argument> 
+        </arguments> 
+    </type>
+    <type name="Magento\Quote\Model\Quote">
+        <plugin name="mailchimp-save-quote" type="Ebizmarts\MailChimp\Model\Plugin\Quote" sortOrder="10"/>
+    </type>
+    <type name="Magento\Newsletter\Controller\Manage\Save">
+        <plugin name="mailchimp-account-interest-group" type="Ebizmarts\MailChimp\Model\Plugin\Newsletter\Save" sortOrder="10"/>
+    </type>
     <type name="Ebizmarts\MailChimp\Model\Logger\Handler">
         <arguments>
             <argument name="filesystem" xsi:type="object">Magento\Framework\Filesystem\Driver\File</argument>
@@ -59,5 +70,14 @@
     </virtualType>
     <type name="Magento\SalesRule\Model\Coupon">
         <plugin name="mailchimp-coupon" type="Ebizmarts\MailChimp\Model\Plugin\Coupon" sortOrder="10"/>
+    </type>
+    <type name="Magento\Sales\Model\Order\ShipmentRepository">
+        <plugin name="mailchimp_save_shipment" type="Ebizmarts\MailChimp\Model\Plugin\Ship" sortOrder="10"/>
+    </type>
+    <type name="Magento\Sales\Model\Order\InvoiceRepository">
+        <plugin name="mailchimp_save_invoice" type="Ebizmarts\MailChimp\Model\Plugin\Invoice" sortOrder="10"/>
+    </type>
+    <type name="Magento\Sales\Model\Order\CreditmemoRepository">
+        <plugin name="mailchimp_save_creditmemo" type="Ebizmarts\MailChimp\Model\Plugin\Creditmemo" sortOrder="10"/>
     </type>
 </config>

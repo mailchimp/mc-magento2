@@ -19,9 +19,9 @@ class Order
 {
     const BATCH_LIMIT = 50;
     const PAID = 'paid';
-    const PARTIALLY_PAID = 'parially_paid';
+    const PARTIALLY_PAID = 'partially_paid';
     const SHIPPED = 'shipped';
-    const PARTIALLY_SHIPPED = 'parially_shipped';
+    const PARTIALLY_SHIPPED = 'partially_shipped';
     const PENDING = 'pending';
     const REFUNDED = 'refunded';
     const PARTIALLY_REFUNDED = 'partially_refunded';
@@ -138,7 +138,10 @@ class Order
     protected function _getModifiedOrders($magentoStoreId)
     {
         $batchArray = [];
-        $mailchimpStoreId = $this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_MAILCHIMP_STORE, $magentoStoreId);
+        $mailchimpStoreId = $this->_helper->getConfigValue(
+            \Ebizmarts\MailChimp\Helper\Data::XML_MAILCHIMP_STORE,
+            $magentoStoreId
+        );
         $modifiedOrders = $this->_getCollection();
         // select orders for the current Magento store id
         $modifiedOrders->addFieldToFilter('store_id', ['eq' => $magentoStoreId]);
@@ -150,7 +153,9 @@ class Order
             ['m4m.*']
         );
         // be sure that the order are already in mailchimp and not deleted
-        $modifiedOrders->getSelect()->where("m4m.mailchimp_sync_modified = 1 AND m4m.mailchimp_store_id = '".$mailchimpStoreId."'");
+        $modifiedOrders->getSelect()->where(
+            "m4m.mailchimp_sync_modified = 1 AND m4m.mailchimp_store_id = '".$mailchimpStoreId."'"
+        );
         // limit the collection
         $modifiedOrders->getSelect()->limit(self::BATCH_LIMIT);
         /**
@@ -166,6 +171,7 @@ class Order
                     $productData = $this->_apiProduct->sendModifiedProduct($order, $mailchimpStoreId, $magentoStoreId);
                 } catch (\Exception $e) {
                     $error = $e->getMessage();
+                    $this->_helper->log($error);
                     $this->_updateOrder($mailchimpStoreId, $orderId, $this->_helper->getGmtDate(), $error, 0);
                     continue;
                 }
@@ -176,34 +182,45 @@ class Order
                     }
                 }
 
-                $orderJson = $this->GeneratePOSTPayload($order, $mailchimpStoreId, $magentoStoreId, true);
-                if (!empty($orderJson)) {
-                    $this->_helper->modifyCounter(\Ebizmarts\MailChimp\Helper\Data::ORD_MOD);
-                    $batchArray[$this->_counter]['method'] = "PATCH";
-                    $batchArray[$this->_counter]['path'] = '/ecommerce/stores/' . $mailchimpStoreId . '/orders/' . $order->getIncrementId();
-                    $batchArray[$this->_counter]['operation_id'] = $this->_batchId . '_' . $orderId;
-                    $batchArray[$this->_counter]['body'] = $orderJson;
+                $orderJson = $this->generatePOSTPayload($order, $mailchimpStoreId, $magentoStoreId, true);
+                if ($orderJson!==false) {
+                    if (!empty($orderJson)) {
+                        $this->_helper->modifyCounter(\Ebizmarts\MailChimp\Helper\Data::ORD_MOD);
+                        $batchArray[$this->_counter]['method'] = "PATCH";
+                        $batchArray[$this->_counter]['path'] = '/ecommerce/stores/' . $mailchimpStoreId . '/orders/' .
+                            $order->getIncrementId();
+                        $batchArray[$this->_counter]['operation_id'] = $this->_batchId . '_' . $orderId;
+                        $batchArray[$this->_counter]['body'] = $orderJson;
+                    } else {
+                        $error = __('Order ['.$order->getIncrementId().'] is empty');
+                        $this->_helper->log($error);
+                        $this->_updateOrder($mailchimpStoreId, $orderId, $this->_helper->getGmtDate(), $error, 0);
+                        continue;
+                    }
+                    //update order delta
+                    $this->_updateOrder($mailchimpStoreId, $orderId);
+                    $this->_counter++;
                 } else {
-                    $error = __('Something went wrong when retreiving product information.');
+                    $error = __('Json error');
                     $this->_updateOrder($mailchimpStoreId, $orderId, $this->_helper->getGmtDate(), $error, 0);
                     continue;
                 }
-
-                //update order delta
-                $this->_updateOrder($mailchimpStoreId, $orderId);
-                $this->_counter++;
             } catch (Exception $e) {
                 $this->_helper->log($e->getMessage());
+                $error = $e->getMessage();
+                $this->_updateOrder($mailchimpStoreId, $orderId, $this->_helper->getGmtDate(), $error, 0);
             }
         }
-
         return $batchArray;
     }
 
     protected function _getNewOrders($magentoStoreId)
     {
         $batchArray = [];
-        $mailchimpStoreId = $this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_MAILCHIMP_STORE, $magentoStoreId);
+        $mailchimpStoreId = $this->_helper->getConfigValue(
+            \Ebizmarts\MailChimp\Helper\Data::XML_MAILCHIMP_STORE,
+            $magentoStoreId
+        );
         $newOrders = $this->_getCollection();
         // select carts for the current Magento store id
         $newOrders->addFieldToFilter('store_id', ['eq' => $magentoStoreId]);
@@ -235,6 +252,7 @@ class Order
                     $productData = $this->_apiProduct->sendModifiedProduct($order, $mailchimpStoreId, $magentoStoreId);
                 } catch (\Exception $e) {
                     $error = $e->getMessage();
+                    $this->_helper->log($error);
                     $this->_updateOrder($mailchimpStoreId, $orderId, $this->_helper->getGmtDate(), $error, 0);
                     continue;
                 }
@@ -244,26 +262,33 @@ class Order
                         $this->_counter++;
                     }
                 }
-                $orderJson = $this->GeneratePOSTPayload($order, $mailchimpStoreId, $magentoStoreId);
-                if (!empty($orderJson)) {
-                    $this->_helper->modifyCounter(\Ebizmarts\MailChimp\Helper\Data::ORD_NEW);
-                    $batchArray[$this->_counter]['method'] = "POST";
-                    $batchArray[$this->_counter]['path'] = '/ecommerce/stores/' . $mailchimpStoreId . '/orders';
-                    $batchArray[$this->_counter]['operation_id'] = $this->_batchId . '_' . $orderId;
-                    $batchArray[$this->_counter]['body'] = $orderJson;
+                $orderJson = $this->generatePOSTPayload($order, $mailchimpStoreId, $magentoStoreId);
+                if ($orderJson!==false) {
+                    if (!empty($orderJson)) {
+                        $this->_helper->modifyCounter(\Ebizmarts\MailChimp\Helper\Data::ORD_NEW);
+                        $batchArray[$this->_counter]['method'] = "POST";
+                        $batchArray[$this->_counter]['path'] = '/ecommerce/stores/' . $mailchimpStoreId . '/orders';
+                        $batchArray[$this->_counter]['operation_id'] = $this->_batchId . '_' . $orderId;
+                        $batchArray[$this->_counter]['body'] = $orderJson;
+                        //update order delta
+                        $this->_updateOrder($mailchimpStoreId, $orderId);
+                        $this->_counter++;
+                    } else {
+                        $error = __('Order ['.$item->getIncrementId().'] is empty');
+                        $this->_helper->log($error);
+                        $this->_updateOrder($mailchimpStoreId, $orderId, $this->_helper->getGmtDate(), $error, 0);
+                    }
                 } else {
-                    $error = __('Something went wrong when retreiving product information.');
-//                    $this->_updateOrder($mailchimpStoreId, $orderId, $this->_date->gmtDate(), $error, 0);
+                    $error = __('Json error');
+                    $this->_updateOrder($mailchimpStoreId, $orderId, $this->_helper->getGmtDate(), $error, 0);
+                    continue;
                 }
-
-                //update order delta
-                $this->_updateOrder($mailchimpStoreId, $orderId);
-                $this->_counter++;
             } catch (Exception $e) {
                 $this->_helper->log($e->getMessage());
+                $error = $e->getMessage();
+                $this->_updateOrder($mailchimpStoreId, $orderId, $this->_helper->getGmtDate(), $error, 0);
             }
         }
-
         return $batchArray;
     }
 
@@ -276,8 +301,12 @@ class Order
      * @param $isModifiedOrder
      * @return string
      */
-    protected function GeneratePOSTPayload(\Magento\Sales\Model\Order $order, $mailchimpStoreId, $magentoStoreId, $isModifiedOrder = false)
-    {
+    protected function generatePOSTPayload(
+        \Magento\Sales\Model\Order $order,
+        $mailchimpStoreId,
+        $magentoStoreId,
+        $isModifiedOrder = false
+    ) {
         $data = [];
         $data['id'] = $order->getIncrementId();
         if ($order->getMailchimpCampaignId()) {
@@ -337,6 +366,10 @@ class Order
             );
             if ($item->getProductType() == \Magento\ConfigurableProduct\Model\Product\Type\Configurable::TYPE_CODE) {
                 $options = $item->getProductOptions();
+                if (!isset($options['simple_sku'])) {
+                    $this->_helper->log('The product ['.$item->getId().'] has no simple_sku');
+                    continue;
+                }
                 $sku = $options['simple_sku'];
                 $variant = $this->_productFactory->create()->getIdBySku($sku);
                 if (!$variant) {
@@ -345,7 +378,8 @@ class Order
             } else {
                 $variant = $item->getProductId();
             }
-            if ($productSyncData->getRelatedId() == $item->getProductId() && $productSyncData->getMailchimpSyncError() == '' && $variant) {
+            if ($productSyncData->getRelatedId() == $item->getProductId() &&
+                $productSyncData->getMailchimpSyncError() == '' && $variant) {
                 $itemCount++;
                 $data["lines"][] = [
                     "id" => (string)$itemCount,
@@ -363,55 +397,11 @@ class Order
         }
 
         //customer data
-        $api = $this->_helper->getApi();
-        $customers = [];
-        try {
-            $customers = $api->ecommerce->customers->getByEmail($mailchimpStoreId, $order->getCustomerEmail());
-        } catch (\Mailchimp_Error $e) {
-            $this->_helper->log($e->getFriendlyMessage());
-        }
-
-        if (!$isModifiedOrder) {
-            if (isset($customers['total_items']) && $customers['total_items'] > 0) {
-                $id = $customers['customers'][0]['id'];
-                $data['customer'] = [
-                    'id' => $id
-                ];
-            } else {
-                if ((bool)$order->getCustomerIsGuest()) {
-                    $guestId = "GUEST-" . $this->_helper->getDateMicrotime();
-                    $data["customer"] = [
-                        "id" => $guestId,
-                        "email_address" => $order->getCustomerEmail(),
-                        "opt_in_status" => false
-                    ];
-                } else {
-                    $custEmailAddr = null;
-                    try {
-                        $customer = $api->ecommerce->customers->get($mailchimpStoreId, $order->getCustomerId(), 'email_address');
-                        if (isset($customer['email_address'])) {
-                            $custEmailAddr = $customer['email_address'];
-                        }
-                    } catch (\Mailchimp_Error $e) {
-                        $this->_helper->log($e->getFriendlyMessage());
-                    }
-
-                    $data["customer"] = [
-                        "id" => ($order->getCustomerId()) ? $order->getCustomerId() : $guestId = "CUSTOMER-" . $this->_helper->getDateMicrotime(),
-                        "email_address" => ($custEmailAddr) ? $custEmailAddr : $order->getCustomerEmail(),
-                        "opt_in_status" => $this->_apiCustomer->getOptin($magentoStoreId)
-                    ];
-                }
-            }
-        } else {
-            if (isset($customers['customers'][0]['id'])) {
-                $id = $customers['customers'][0]['id'];
-                $data['customer'] = [
-                    'id' => $id
-                ];
-            }
-        }
-//        $store = Mage::getModel('core/store')->load($magentoStoreId);
+        $data['customer'] = [
+            'id' => hash('md5', strtolower($order->getCustomerEmail())),
+            'email_address' => $order->getCustomerEmail(),
+            'opt_in_status' => $this->_apiCustomer->getOptin($magentoStoreId)
+        ];
 
         $data['order_url'] = $this->_urlHelper->getUrl(
             'sales/order/view/',
@@ -429,6 +419,16 @@ class Order
             $data["customer"]["last_name"] = $order->getCustomerLastname();
         }
         $billingAddress = $order->getBillingAddress();
+
+        if ($order->getCustomerIsGuest()) {
+            if ($billingAddress->getFirstname()) {
+                $data["customer"]["first_name"] = $billingAddress->getFirstname();
+            }
+            if ($billingAddress->getLastname()) {
+                $data["customer"]["last_name"] = $billingAddress->getLastname();
+            }
+        }
+
         $street = $billingAddress->getStreet();
         $address = [];
 
@@ -546,11 +546,12 @@ class Order
         $jsonData = "";
 
         //enconde to JSON
-        try {
-            $jsonData = json_encode($data);
-        } catch (Exception $e) {
-            //json encode failed
-            $this->_helper->log("Order " . $order->getEntityId() . " json encode failed");
+        $jsonData = json_encode($data);
+        if ($jsonData===false) {
+            $jsonError = json_last_error();
+            $jsonErrorMsg = json_last_error_msg();
+            $this->_helper->log('');
+            $this->_helper->log("$jsonErrorMsg on order [".$order->getEntityId()."]");
         }
 
         return $jsonData;
@@ -619,43 +620,23 @@ class Order
         return $mailChimpStatus;
     }
 
-//    public function update($order, $magentoStoreId)
-//    {
-//        if (Mage::helper('mailchimp')->isEcomSyncDataEnabled('stores', $magentoStoreId)) {
-//            $mailchimpStoreId = Mage::helper('mailchimp')->getMCStoreId('stores', $magentoStoreId);
-//            $orderSyncData = Mage::helper('mailchimp')->getEcommerceSyncDataItem($order->getId(), Ebizmarts_MailChimp_Model_Config::IS_ORDER, $mailchimpStoreId);
-//            if ($orderSyncData->getMailchimpSyncDelta() > Mage::helper('mailchimp')->getMCMinSyncDateFlag('stores', $magentoStoreId)) {
-//                $orderSyncData->setData("mailchimp_sync_error", "")
-//                    ->setData("mailchimp_sync_modified", 1)
-//                    ->save();
-//            }
-//        }
-//    }
-
-//    /**
-//     * Get Api Object
-//     *
-//     * @param $magentoStoreId
-//     * @return Ebizmarts_Mailchimp|null
-//     */
-//    protected function _getApi($magentoStoreId)
-//    {
-//        if (!$this->_api) {
-//            $this->_api = Mage::helper('mailchimp')->getApi('stores', $magentoStoreId);
-//        }
-//
-//        return $this->_api;
-//    }
-
     protected function _updateOrder($storeId, $entityId, $sync_delta = null, $sync_error = null, $sync_modified = null)
     {
+        if (!empty($sync_error)) {
+            $sent = \Ebizmarts\MailChimp\Helper\Data::NOTSYNCED;
+        } else {
+            $sent = \Ebizmarts\MailChimp\Helper\Data::WAITINGSYNC;
+        }
         $this->_helper->saveEcommerceData(
             $storeId,
             $entityId,
             \Ebizmarts\MailChimp\Helper\Data::IS_ORDER,
             $sync_delta,
             $sync_error,
-            $sync_modified
+            $sync_modified,
+            null,
+            null,
+            $sent
         );
     }
 }

@@ -38,7 +38,12 @@ class MonkeyStore implements \Magento\Framework\Option\ArrayInterface
         }
         if ($helper->getApiKey($storeId, $scope)) {
             try {
-                $this->options = $helper->getApi($storeId, $scope)->ecommerce->stores->get(null, null, null, \Ebizmarts\MailChimp\Helper\Data::MAXSTORES);
+                $this->options = $helper->getApi($storeId, $scope)->ecommerce->stores->get(
+                    null,
+                    null,
+                    null,
+                    \Ebizmarts\MailChimp\Helper\Data::MAXSTORES
+                );
             } catch (\Mailchimp_Error $e) {
                 $helper->log($e->getFriendlyMessage());
             }

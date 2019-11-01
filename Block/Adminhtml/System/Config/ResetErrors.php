@@ -42,10 +42,6 @@ class ResetErrors extends \Magento\Config\Block\System\Config\Form\Field
         $this->setTemplate('system/config/reseterrors.phtml');
     }
 
-//    protected function _getElementHtml(\Magento\Framework\Data\Form\Element\AbstractElement $element)
-//    {
-//        return $this->_toHtml();
-//    }
     protected function _getElementHtml(\Magento\Framework\Data\Form\Element\AbstractElement $element)
     {
         $originalData = $element->getOriginalData();
@@ -61,8 +57,6 @@ class ResetErrors extends \Magento\Config\Block\System\Config\Form\Field
 
     public function getButtonHtml(\Magento\Framework\Data\Form\Element\AbstractElement $element)
     {
-
-
         $originalData = $element->getOriginalData();
         $label = $originalData['button_label'];
         $this->addData([

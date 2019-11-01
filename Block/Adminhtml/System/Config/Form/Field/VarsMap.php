@@ -64,7 +64,7 @@ class VarsMap extends \Magento\Framework\View\Element\Html\Select
     {
         if (!$this->getOptions()) {
             foreach ($this->_getCustomerAtt() as $attId => $attLabel) {
-                $this->addOption($attId, addslashes($attLabel));
+                $this->addOption($attId, $this->escapeHtmlAttr($attLabel));
             }
         }
         return parent::_toHtml();

@@ -27,28 +27,40 @@ class Getaccountdetails extends Action
      * @var ResultFactory
      */
     protected $_resultFactory;
+    /**
+     * @var \Magento\Store\Model\StoreManager
+     */
+    protected $_storeManager;
 
     /**
-     * GetAccountDetails constructor.
+     * Getaccountdetails constructor.
      * @param Context $context
+     * @param \Magento\Store\Model\StoreManager $storeManager
      * @param \Ebizmarts\MailChimp\Helper\Data $helper
      */
     public function __construct(
         Context $context,
+        \Magento\Store\Model\StoreManager $storeManager,
         \Ebizmarts\MailChimp\Helper\Data $helper
     ) {
-    
+
         parent::__construct($context);
         $this->_resultFactory       = $context->getResultFactory();
         $this->_helper                  = $helper;
+        $this->_storeManager        = $storeManager;
     }
     public function execute()
     {
         $param = $this->getRequest()->getParams();
         $apiKey = $param['apikey'];
         $store  = $param['store'];
+        $encrypt = $param['encrypt'];
         try {
-            $api = $this->_helper->getApiByApiKey($apiKey);
+            if ($encrypt == 3) {
+                $api = $this->_helper->getApi($this->_storeManager->getStore()->getId());
+            } else {
+                $api = $this->_helper->getApiByApiKey($apiKey, $encrypt);
+            }
             $apiInfo = $api->root->info();
             $options = [];
             if (isset($apiInfo['account_name'])) {
@@ -78,7 +90,6 @@ class Getaccountdetails extends Action
             $this->_helper->log($e->getFriendlyMessage());
             $options['error'] = ['label' => 'Error', 'value' => __('--- Invalid API Key ---')];
         }
-
 
         $resultJson = $this->_resultFactory->create(ResultFactory::TYPE_JSON);
         $resultJson->setData($options);

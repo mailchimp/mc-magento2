@@ -17,8 +17,8 @@ class Collection extends \Magento\Framework\View\Element\UiComponent\DataProvide
     protected function _construct()
     {
         $this->_init(
-            'Ebizmarts\MailChimp\Model\MailChimpStores',
-            'Ebizmarts\MailChimp\Model\ResourceModel\MailChimpStores'
+            \Ebizmarts\MailChimp\Model\MailChimpStores::class,
+            \Ebizmarts\MailChimp\Model\ResourceModel\MailChimpStores::class
         );
     }
 }

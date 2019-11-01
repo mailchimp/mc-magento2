@@ -22,8 +22,11 @@ class MailChimpInterestGroup extends AbstractDb
     {
         $this->_init('mailchimp_interest_group', 'id');
     }
-    public function getBySubscriberIdStoreId(\Ebizmarts\MailChimp\Model\MailChimpInterestGroup $mailChimpInterestGroup, $subscriberId, $storeId)
-    {
+    public function getBySubscriberIdStoreId(
+        \Ebizmarts\MailChimp\Model\MailChimpInterestGroup $mailChimpInterestGroup,
+        $subscriberId,
+        $storeId
+    ) {
         $connection = $this->getConnection();
         $bind = ['subscriber_id'=>$subscriberId, 'store_id' => $storeId];
         $select = $connection->select()->from(

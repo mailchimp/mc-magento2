@@ -19,10 +19,6 @@ class VarsMap extends \Magento\Framework\App\Helper\AbstractHelper
      * @var Data
      */
     protected $_helper;
-    /**
-     * @var \Magento\Framework\Serialize\Serializer\Json
-     */
-    protected $serialize;
     protected $mathRandom;
 
     /**
@@ -30,18 +26,15 @@ class VarsMap extends \Magento\Framework\App\Helper\AbstractHelper
      * @param \Magento\Framework\App\Helper\Context $context
      * @param \Magento\Framework\Math\Random $mathRandom
      * @param Data $helper
-     * @param \Magento\Framework\Serialize\Serializer\Json $serializer
      */
     public function __construct(
         \Magento\Framework\App\Helper\Context $context,
         \Magento\Framework\Math\Random $mathRandom,
-        \Ebizmarts\MailChimp\Helper\Data $helper,
-        \Magento\Framework\Serialize\Serializer\Json $serializer
+        \Ebizmarts\MailChimp\Helper\Data $helper
     ) {
     
         $this->_helper      = $helper;
         $this->mathRandom   = $mathRandom;
-        $this->serialize    = $serializer;
         parent::__construct($context);
     }
     public function makeArrayFieldValue($value)
@@ -96,6 +89,7 @@ class VarsMap extends \Magento\Framework\App\Helper\AbstractHelper
     }
     protected function serializeValue($value)
     {
+        $rc = '';
         if (is_array($value)) {
             $data = [];
             foreach ($value as $customerFiledId => $mailchimpName) {
@@ -103,18 +97,25 @@ class VarsMap extends \Magento\Framework\App\Helper\AbstractHelper
                     $data[$customerFiledId] = $mailchimpName;
                 }
             }
-            return $this->serialize->serialize($data);
-        } else {
-            return '';
+            try {
+                $rc = $this->_helper->serialize($data);
+            } catch (\Exception $e) {
+                $this->_helper->log($e->getMessage());
+            }
         }
+        return $rc;
     }
     protected function unserializeValue($value)
     {
+        $rc = [];
         if (is_string($value) && !empty($value)) {
-            return $this->serialize->unserialize($value);
-        } else {
-            return [];
+            try {
+                $rc = $this->_helper->unserialize($value);
+            } catch (\Exception $e) {
+                $this->_helper->log($e->getMessage());
+            }
         }
+        return $rc;
     }
     protected function encodeArrayFieldValue(array $value)
     {

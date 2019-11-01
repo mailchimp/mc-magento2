@@ -69,12 +69,16 @@ class PromoRules
         $this->_collection          = $collection;
         $this->_chimpSyncEcommerce  = $chimpSyncEcommerce;
         $this->_ruleRepo             = $ruleRepo;
-        $this->_batchId             = \Ebizmarts\MailChimp\Helper\Data::IS_PROMO_RULE. '_' . $this->_helper->getGmtTimeStamp();
+        $this->_batchId             = \Ebizmarts\MailChimp\Helper\Data::IS_PROMO_RULE. '_' .
+            $this->_helper->getGmtTimeStamp();
         $this->_syncCollection      = $syncCollection;
     }
     public function sendRules($magentoStoreId)
     {
-        $mailchimpStoreId = $this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_MAILCHIMP_STORE, $magentoStoreId);
+        $mailchimpStoreId = $this->_helper->getConfigValue(
+            \Ebizmarts\MailChimp\Helper\Data::XML_MAILCHIMP_STORE,
+            $magentoStoreId
+        );
         $batchArray = [];
 
         $batchArray = array_merge($batchArray, $this->_getDeletedPromoRules($mailchimpStoreId, $magentoStoreId));
@@ -99,7 +103,11 @@ class PromoRules
             try {
                 $mailchimpRule = $api->ecommerce->promoCodes->getAll($mailchimpStoreId, $ruleId);
                 foreach ($mailchimpRule['promo_codes'] as $promoCode) {
-                    $this->_helper->ecommerceDeleteAllByIdType($promoCode['id'], \Ebizmarts\MailChimp\Helper\Data::IS_PROMO_CODE, $mailchimpStoreId);
+                    $this->_helper->ecommerceDeleteAllByIdType(
+                        $promoCode['id'],
+                        \Ebizmarts\MailChimp\Helper\Data::IS_PROMO_CODE,
+                        $mailchimpStoreId
+                    );
                 }
                 $batchArray[$count]['method'] = 'DELETE';
                 $batchArray[$count]['path'] = "/ecommerce/stores/$mailchimpStoreId/promo-rules/$ruleId";
@@ -108,7 +116,11 @@ class PromoRules
             } catch (\Mailchimp_Error $e) {
                 $this->_helper->log($e->getFriendlyMessage());
             }
-            $this->_helper->ecommerceDeleteAllByIdType($ruleId, \Ebizmarts\MailChimp\Helper\Data::IS_PROMO_RULE, $mailchimpStoreId);
+            $this->_helper->ecommerceDeleteAllByIdType(
+                $ruleId,
+                \Ebizmarts\MailChimp\Helper\Data::IS_PROMO_RULE,
+                $mailchimpStoreId
+            );
         }
         return $batchArray;
     }
@@ -123,7 +135,8 @@ class PromoRules
         $collection->addWebsiteFilter($websiteId);
         $collection->getSelect()->joinLeft(
             ['m4m' => $this->_helper->getTableName('mailchimp_sync_ecommerce')],
-            "m4m.related_id = main_table.rule_id and m4m.type = '".\Ebizmarts\MailChimp\Helper\Data::IS_PROMO_RULE.
+            "m4m.related_id = main_table.rule_id and m4m.type = '".
+            \Ebizmarts\MailChimp\Helper\Data::IS_PROMO_RULE.
             "' and m4m.mailchimp_store_id = '".$mailchimpStoreId."'",
             ['m4m.*']
         );
@@ -139,12 +152,20 @@ class PromoRules
             try {
                 $mailchimpRule = $api->ecommerce->promoCodes->getAll($mailchimpStoreId, $ruleId);
                 foreach ($mailchimpRule['promo_codes'] as $promoCode) {
-                    $this->_helper->ecommerceDeleteAllByIdType($promoCode['id'], \Ebizmarts\MailChimp\Helper\Data::IS_PROMO_CODE, $mailchimpStoreId);
+                    $this->_helper->ecommerceDeleteAllByIdType(
+                        $promoCode['id'],
+                        \Ebizmarts\MailChimp\Helper\Data::IS_PROMO_CODE,
+                        $mailchimpStoreId
+                    );
                 }
             } catch (\Mailchimp_Error $e) {
                 $this->_helper->log($e->getFriendlyMessage());
             }
-            $this->_helper->ecommerceDeleteAllByIdType($rule->getRuleId(), \Ebizmarts\MailChimp\Helper\Data::IS_PROMO_RULE, $mailchimpStoreId);
+            $this->_helper->ecommerceDeleteAllByIdType(
+                $rule->getRuleId(),
+                \Ebizmarts\MailChimp\Helper\Data::IS_PROMO_RULE,
+                $mailchimpStoreId
+            );
             $batchArray[$count]['method'] = 'DELETE';
             $batchArray[$count]['path'] = "/ecommerce/stores/$mailchimpStoreId/promo-rules/$ruleId";
             $batchArray[$count]['operation_id'] = $this->_batchId. '_' . $rule->getRuleId();
@@ -163,19 +184,42 @@ class PromoRules
             $promoRules = $this->_generateRuleData($rule);
             if (!empty($promoRules)) {
                 $promoRulesJson = json_encode($promoRules);
-                if (!empty($promoRulesJson)) {
-                    $data['method'] = 'POST';
-                    $data['path'] = '/ecommerce/stores/' . $mailchimpStoreId . '/promo-rules';
-                    $data['operation_id'] = $this->_batchId . '_' . $ruleId;
-                    $data['body'] = $promoRulesJson;
-                    $this->_updateSyncData($mailchimpStoreId, $ruleId);
+                if ($promoRulesJson !== false) {
+                    if (!empty($promoRulesJson)) {
+                        $data['method'] = 'POST';
+                        $data['path'] = '/ecommerce/stores/' . $mailchimpStoreId . '/promo-rules';
+                        $data['operation_id'] = $this->_batchId . '_' . $ruleId;
+                        $data['body'] = $promoRulesJson;
+                        $this->_updateSyncData($mailchimpStoreId, $ruleId);
+                    } else {
+                        $error = __('Something went wrong when retrieving the information.');
+                        $this->_updateSyncData(
+                            $mailchimpStoreId,
+                            $ruleId,
+                            $this->_helper->getGmtDate(),
+                            $error,
+                            0
+                        );
+                    }
                 } else {
-                    $error = __('Something went wrong when retrieving the information.');
-                    $this->_updateSyncData($mailchimpStoreId, $ruleId, $this->_helper->getGmtDate(), $error, 0);
+                    $error = json_last_error_msg();
+                    $this->_updateSyncData(
+                        $mailchimpStoreId,
+                        $ruleId,
+                        $this->_helper->getGmtDate(),
+                        $error,
+                        0
+                    );
                 }
             } else {
                 $error = __('Something went wrong when retrieving the information.');
-                $this->_updateSyncData($mailchimpStoreId, $ruleId, $this->_helper->getGmtDate(), $error, 0);
+                $this->_updateSyncData(
+                    $mailchimpStoreId,
+                    $ruleId,
+                    $this->_helper->getGmtDate(),
+                    $error,
+                    0
+                );
             }
         } catch (\Exception $e) {
             $this->_helper->log($e->getMessage());
