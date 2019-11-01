@@ -10,6 +10,7 @@
 define(
     [
         'jquery',
+        'jquery/ui',
         'Magento_Ui/js/modal/alert'
     ],
     function ($, alert) {
