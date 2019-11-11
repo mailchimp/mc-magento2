@@ -20,6 +20,7 @@ use Magento\Framework\App\Action\Context;
 use Magento\Framework\App\CsrfAwareActionInterface;
 use Magento\Framework\App\Request\InvalidRequestException;
 use Magento\Framework\App\RequestInterface;
+use Zend\Db\Adapter\Driver\ResultInterface;
 
 class Index extends Action implements CsrfAwareActionInterface
 {
@@ -77,15 +78,20 @@ class Index extends Action implements CsrfAwareActionInterface
     public function execute()
     {
         $requestKey = $this->getRequest()->getParam('wkey');
+        /**
+         * @var ResultInterface $result
+         */
+        $result = $this->_resultFactory->create(ResultFactory::TYPE_RAW);
+        $result->setContents('');
         if (!$requestKey) {
             $this->_helper->log('No wkey parameter from ip: '.$this->_remoteAddress->getRemoteAddress());
-            $result = $this->_resultFactory->create(ResultFactory::TYPE_RAW)->setHttpResponseCode(403);
+            $result->setHttpResponseCode(403);
             return $result;
         }
         $key = $this->_helper->getWebhooksKey();
         if ($key!=$requestKey) {
             $this->_helper->log('wkey parameter is invalid from ip: '.$this->_remoteAddress->getRemoteAddress());
-            $result = $this->_resultFactory->create(ResultFactory::TYPE_RAW)->setHttpResponseCode(403);
+            $result->setHttpResponseCode(403);
             return $result;
         }
         if ($this->getRequest()->getPost('type')) {
@@ -99,15 +105,17 @@ class Index extends Action implements CsrfAwareActionInterface
                     $chimpRequest->setDataRequest($this->_helper->serialize($request['data']));
                     $chimpRequest->setProcessed(false);
                     $chimpRequest->getResource()->save($chimpRequest);
-                } catch (\Exception $e) {
+                    $result->setHttpResponseCode(200);
+                } catch(\Exception $e) {
                     $this->_helper->log($e->getMessage());
                     $this->_helper->log($request['data']);
+                    $result->setHttpResponseCode(403);
                 }
             }
         } else {
             $this->_helper->log('An empty request comes from ip: '.$this->_remoteAddress->getRemoteAddress());
-            $result = $this->_resultFactory->create(ResultFactory::TYPE_RAW)->setHttpResponseCode(200);
-            return $result;
+            $result->setHttpResponseCode(200);
         }
+        return $result;
     }
 }
