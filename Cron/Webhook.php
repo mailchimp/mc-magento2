@@ -13,7 +13,6 @@
 
 namespace Ebizmarts\MailChimp\Cron;
 
-use Magento\Customer\Model\AddressFactory;
 
 class Webhook
 {
@@ -55,14 +54,6 @@ class Webhook
      * @var \Magento\Store\Model\StoreManager
      */
     protected $storeManager;
-    /**
-     * @var AddressFactory
-     */
-    protected $addressFactory;
-    /**
-     * @var \Magento\Directory\Model\RegionFactory
-     */
-    protected $regionFactory;
     protected $groups = [];
 
     /**
@@ -72,8 +63,6 @@ class Webhook
      * @param \Ebizmarts\MailChimp\Model\ResourceModel\MailChimpWebhookRequest\CollectionFactory $webhookCollection
      * @param \Ebizmarts\MailChimp\Model\MailChimpInterestGroupFactory $interestGroupFactory
      * @param \Magento\Store\Model\StoreManager $storeManager
-     * @param AddressFactory $addressFactory
-     * @param \Magento\Directory\Model\RegionFactory $regionFactory
      * @param \Magento\Customer\Model\CustomerFactory $customer
      */
     public function __construct(
@@ -82,8 +71,6 @@ class Webhook
         \Ebizmarts\MailChimp\Model\ResourceModel\MailChimpWebhookRequest\CollectionFactory $webhookCollection,
         \Ebizmarts\MailChimp\Model\MailChimpInterestGroupFactory $interestGroupFactory,
         \Magento\Store\Model\StoreManager $storeManager,
-        \Magento\Customer\Model\AddressFactory $addressFactory,
-        \Magento\Directory\Model\RegionFactory $regionFactory,
         \Magento\Customer\Model\CustomerFactory $customer
     ) {
 
@@ -93,8 +80,6 @@ class Webhook
         $this->_customer            = $customer;
         $this->interestGroupFactory = $interestGroupFactory;
         $this->storeManager         = $storeManager;
-        $this->addressFactory       = $addressFactory;
-        $this->regionFactory        = $regionFactory;
     }
     public function execute()
     {
