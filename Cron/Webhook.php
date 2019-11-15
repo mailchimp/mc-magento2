@@ -13,7 +13,6 @@
 
 namespace Ebizmarts\MailChimp\Cron;
 
-use Magento\Customer\Model\AddressFactory;
 
 class Webhook
 {
