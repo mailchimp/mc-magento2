@@ -1097,6 +1097,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
                 }
             } else {
                 $this->log(__('Error retrieving interest groups for store ').$storeId);
+                $rc = [];
             }
         } catch (\Mailchimp_Error $e) {
             $this->log($e->getFriendlyMessage());
@@ -1115,12 +1116,12 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         $interestGroup = $this->_interestGroupFactory->create();
         $interestGroup->getBySubscriberIdStoreId($subscriberId, $storeId);
         $serialized = $interestGroup->getGroupdata();
-        if ($serialized) {
+        if ($serialized&&is_array($interest)&&count($interest)) {
             try {
                 $groups = $this->unserialize($serialized);
                 if (isset($groups['group'])) {
                     foreach ($groups['group'] as $key => $value) {
-                        if (isset($interest[$key])) {
+                        if (array_key_exists($interest,$key)) {
                             if (is_array($value)) {
                                 foreach ($value as $groupId) {
                                     foreach ($interest[$key]['category'] as $gkey => $gvalue) {
