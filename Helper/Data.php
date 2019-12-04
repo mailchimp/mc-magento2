@@ -1052,25 +1052,31 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
             $api = $this->getApi($storeId);
             $listId = $this->getConfigValue(self::XML_PATH_LIST, $storeId);
             $allInterest = $api->lists->interestCategory->getAll($listId);
-            if (is_array($allInterest) && array_key_exists('categories',$allInterest) && is_array($allInterest['categories'])) {
+            if (is_array($allInterest) &&
+                array_key_exists('categories', $allInterest) &&
+                is_array($allInterest['categories'])) {
                 foreach ($allInterest['categories'] as $item) {
                     if (in_array($item['id'], $interest)) {
-                        $rc[$item['id']]['interest'] = ['id' => $item['id'], 'title' => $item['title'], 'type' => $item['type']];
+                        $rc[$item['id']]['interest'] =
+                            ['id' => $item['id'], 'title' => $item['title'], 'type' => $item['type']];
                     }
                 }
                 foreach ($interest as $interestId) {
                     $mailchimpInterest = $api->lists->interestCategory->interests->getAll($listId, $interestId);
                     foreach ($mailchimpInterest['interests'] as $mi) {
-                        $rc[$mi['category_id']]['category'][$mi['display_order']] = ['id' => $mi['id'], 'name' => $mi['name'], 'checked' => false];
+                        $rc[$mi['category_id']]['category'][$mi['display_order']] =
+                            ['id' => $mi['id'], 'name' => $mi['name'], 'checked' => false];
                     }
                 }
             } else {
                 $this->log(__('Error retrieving interest groups for store ').$storeId);
+                $rc = [];
             }
         } catch (\Mailchimp_Error $e) {
             $this->log($e->getFriendlyMessage());
         }
-        return $rc;    }
+        return $rc;
+    }
     public function getSubscriberInterest($subscriberId, $storeId, $interest = null)
     {
         if (!$interest) {
@@ -1083,12 +1089,12 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         $interestGroup = $this->_interestGroupFactory->create();
         $interestGroup->getBySubscriberIdStoreId($subscriberId, $storeId);
         $serialized = $interestGroup->getGroupdata();
-        if($serialized) {
+        if ($serialized&&is_array($interest)&&count($interest)) {
             try {
                 $groups = $this->unserialize($serialized);
                 if (isset($groups['group'])) {
                     foreach ($groups['group'] as $key => $value) {
-                        if (isset($interest[$key])) {
+                        if (array_key_exists($interest,$key)) {
                             if (is_array($value)) {
                                 foreach ($value as $groupId) {
                                     foreach ($interest[$key]['category'] as $gkey => $gvalue) {
