@@ -109,7 +109,6 @@ class Order
         $this->_countryFactory  = $countryFactory;
         $this->_chimpSyncEcommerce  = $chimpSyncEcommerce;
         $this->_batchId         = \Ebizmarts\MailChimp\Helper\Data::IS_ORDER. '_' . $this->_helper->getGmtTimeStamp();
-        $this->_firstDate = $this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_ECOMMERCE_FIRSTDATE);
         $this->_counter = 0;
         $this->_urlHelper    = $urlHelper;
     }
@@ -124,6 +123,7 @@ class Order
     public function sendOrders($magentoStoreId)
     {
         $batchArray = [];
+        $this->_firstDate = $this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_ECOMMERCE_FIRSTDATE,$magentoStoreId);
 
         // get all the orders modified
         $batchArray = array_merge($batchArray, $this->_getModifiedOrders($magentoStoreId));
