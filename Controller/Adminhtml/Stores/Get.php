@@ -49,18 +49,24 @@ class Get extends Action
         $apiKey = $param['apikey'];
         $encrypt = $param['encrypt'];
         try {
-            $api = $this->_helper->getApiByApiKey($apiKey,$encrypt);
+            $api = $this->_helper->getApiByApiKey($apiKey, $encrypt);
             $stores = $api->ecommerce->stores->get(null, null, null, self::MAX_STORES);
             $result = [];
+            $result['valid'] = 0;
             foreach ($stores['stores'] as $store) {
                 if ($store['platform'] == \Ebizmarts\MailChimp\Helper\Data::PLATFORM) {
                     if ($store['list_id']=='') {
                         continue;
                     }
                     $list = $api->lists->getLists($store['list_id']);
-                    $result['stores'][] = ['id' => $store['id'], 'name' => $store['name'], 'list_name' => $list['name'], 'list_id' => $store['list_id']];
+                    $result['stores'][] = [
+                        'id' => $store['id'],
+                        'name' => $store['name'],
+                        'list_name' => $list['name'],
+                        'list_id' => $store['list_id']
+                    ];
+                    $result['valid'] = 1;
                 }
-                $result['valid'] = 1;
             }
         } catch (\Mailchimp_Error $e) {
             $this->_helper->log($e->getFriendlyMessage());
