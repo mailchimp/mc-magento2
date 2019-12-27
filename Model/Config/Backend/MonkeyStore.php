@@ -107,6 +107,13 @@ class MonkeyStore extends \Magento\Framework\App\Config\Value
             );
 
             $createWebhook = true;
+            $this->_helper->deleteConfig(
+                \Ebizmarts\MailChimp\Helper\Data::XML_MAILCHIMP_JS_URL,
+                $this->getScopeId(),
+                $this->getScope()
+            );
+            $this->_helper->saveJsUrl($this->getScopeId(),$this->getScope(),$this->getValue());
+
             foreach ($this->_storeManager->getStores() as $storeId => $val) {
                 $mstoreId = $this->_helper->getConfigValue(
                     \Ebizmarts\MailChimp\Helper\Data::XML_MAILCHIMP_STORE,
@@ -119,11 +126,6 @@ class MonkeyStore extends \Magento\Framework\App\Config\Value
                 if ($listId == $newListId) {
                     $createWebhook = false;
                 }
-                $this->_helper->deleteConfig(
-                    \Ebizmarts\MailChimp\Helper\Data::XML_MAILCHIMP_JS_URL,
-                    $storeId,
-                    \Magento\Store\Model\ScopeInterface::SCOPE_STORES
-                );
             }
             if ($found==1) {
                 $this->_helper->cancelAllPendingBatches($mailchimpStore);
