@@ -95,13 +95,32 @@ class MonkeyStore extends \Magento\Framework\App\Config\Value
                 $newListId = $data['general']['fields']['monkeylist']['value'];
             } else {
                 $newListId = $this->getStore($apiKey, $this->getValue());
-                $this->_helper->saveConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_PATH_LIST, $newListId, $this->getScopeId(), $this->getScope());
+                $this->_helper->saveConfigValue(
+                    \Ebizmarts\MailChimp\Helper\Data::XML_PATH_LIST,
+                    $newListId,
+                    $this->getScopeId(),
+                    $this->getScope()
+                );
             }
-            $this->oldListId = $this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_PATH_LIST, $this->getScopeId(), $this->getScope());
+            $this->oldListId = $this->_helper->getConfigValue(
+                \Ebizmarts\MailChimp\Helper\Data::XML_PATH_LIST,
+                $this->getScopeId(),
+                $this->getScope()
+            );
 
             $createWebhook = true;
+            $this->_helper->deleteConfig(
+                \Ebizmarts\MailChimp\Helper\Data::XML_MAILCHIMP_JS_URL,
+                $this->getScopeId(),
+                $this->getScope()
+            );
+            $this->_helper->saveJsUrl($this->getScopeId(),$this->getScope(),$this->getValue());
+
             foreach ($this->_storeManager->getStores() as $storeId => $val) {
-                $mstoreId = $this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_MAILCHIMP_STORE, $storeId);
+                $mstoreId = $this->_helper->getConfigValue(
+                    \Ebizmarts\MailChimp\Helper\Data::XML_MAILCHIMP_STORE,
+                    $storeId
+                );
                 if ($mstoreId == $mailchimpStore) {
                     $found++;
                 }
@@ -109,7 +128,6 @@ class MonkeyStore extends \Magento\Framework\App\Config\Value
                 if ($listId == $newListId) {
                     $createWebhook = false;
                 }
-                $this->_helper->deleteConfig(\Ebizmarts\MailChimp\Helper\Data::XML_MAILCHIMP_JS_URL, $storeId, \Magento\Store\Model\ScopeInterface::SCOPE_STORES);
             }
             if ($found==1) {
                 $this->_helper->cancelAllPendingBatches($mailchimpStore);
