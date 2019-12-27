@@ -907,6 +907,30 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
             }
         }
     }
+    public function saveJsUrl($storeId, $scope = null, $mailChimpStoreId = null)
+    {
+        if (!$scope) {
+            $scope = \Magento\Store\Model\ScopeInterface::SCOPE_STORES;
+        }
+        if ($this->getConfigValue(self::XML_PATH_ACTIVE, $storeId, $scope)) {
+            try {
+                $api = $this->getApi($storeId);
+                $storeData = $api->ecommerce->stores->get($mailChimpStoreId);
+                if (isset($storeData['connected_site']['site_script']['url'])) {
+                    $url = $storeData['connected_site']['site_script']['url'];
+                    $this->_config->saveConfig(
+                        self::XML_MAILCHIMP_JS_URL,
+                        $url,
+                        $scope,
+                        $storeId
+                    );
+                }
+            } catch (\Mailchimp_Error $e) {
+                $this->log($e->getFriendlyMessage());
+            }
+        }
+
+    }
     public function getJsUrl($storeId)
     {
         $url = $this->getConfigValue(self::XML_MAILCHIMP_JS_URL, $storeId);
