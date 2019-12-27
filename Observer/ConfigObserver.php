@@ -53,9 +53,9 @@ class ConfigObserver implements ObserverInterface
         $oldListId  = $this->_registry->registry('oldListId');
         $apiKey     = $this->_registry->registry('apiKey');
         $mustDelete = true;
+
         foreach ($this->_storeManager->getStores() as $storeId => $val) {
             $listId = $this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_PATH_LIST, $storeId);
-            $this->_helper->deleteConfig(\Ebizmarts\MailChimp\Helper\Data::XML_MAILCHIMP_JS_URL, $storeId, 'stores');
             if ($listId == $oldListId) {
                 $mustDelete = false;
             }
