@@ -52,7 +52,8 @@ class Get extends Action
             $api = $this->_helper->getApiByApiKey($apiKey, $encrypt);
             $stores = $api->ecommerce->stores->get(null, null, null, self::MAX_STORES);
             $result = [];
-            $result['valid'] = 0;
+            $result['valid'] = 1;
+            $result['stores'] = [];
             foreach ($stores['stores'] as $store) {
                 if ($store['platform'] == \Ebizmarts\MailChimp\Helper\Data::PLATFORM) {
                     if ($store['list_id']=='') {
