@@ -423,9 +423,18 @@ class Order
             $data['billing_address']["address1"] = $street[0];
         }
 
-        if (count($street) > 1) {
+        if (array_key_exists(1, $street)) {
             $address["address2"] = $street[1];
             $data['billing_address']["address2"] = $street[1];
+        }
+        if (array_key_exists(2, $street)) {
+            if (array_key_exists('address2',$address)) {
+                $address["address2"] = $address['address2'] . ", " . $street[2];
+                $data['billing_address']["address2"] = $data['billing_address']["address2"] . ", " . $street[2];
+            } else {
+                $address["address2"] = $street[2];
+                $data['billing_address']["address2"] = $street[2];
+            }
         }
 
         if ($billingAddress->getCity()) {
@@ -475,15 +484,20 @@ class Order
             if ($shippingAddress->getName()) {
                 $data['shipping_address']['name'] = $shippingAddress->getName();
             }
-
-            if (isset($street[0]) && $street[0]) {
-                $data['shipping_address']['address1'] = $street[0];
+            if ($street[0]) {
+                $data['shipping_address']["address1"] = $street[0];
             }
 
-            if (isset($street[1]) && $street[1]) {
-                $data['shipping_address']['address2'] = $street[1];
+            if (array_key_exists(1, $street)) {
+                $data['shipping_address']["address2"] = $street[1];
             }
-
+            if (array_key_exists(2, $street)) {
+                if (array_key_exists('address2',$data['shipping_address'])) {
+                    $data['shipping_address']["address2"] = $data['shipping_address']["address2"] . ", " . $street[2];
+                } else {
+                    $data['shipping_address']["address2"] = $street[2];
+                }
+            }
             if ($shippingAddress->getCity()) {
                 $data['shipping_address']['city'] = $shippingAddress->getCity();
             }
