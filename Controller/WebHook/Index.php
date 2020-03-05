@@ -20,7 +20,7 @@ use Magento\Framework\App\Action\Context;
 use Magento\Framework\App\CsrfAwareActionInterface;
 use Magento\Framework\App\Request\InvalidRequestException;
 use Magento\Framework\App\RequestInterface;
-use Zend\Db\Adapter\Driver\ResultInterface;
+use Magento\Framework\Controller\ResultInterface;
 
 class Index extends Action implements CsrfAwareActionInterface
 {
