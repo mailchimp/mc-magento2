@@ -1,8 +1,8 @@
 # Change Log
 
-## [101.1.38](https://github.com/mailchimp/mc-magento2/tree/101.1.38)
+## [100.1.38](https://github.com/mailchimp/mc-magento2/tree/100.1.38)
 
-[Full Changelog](https://github.com/mailchimp/mc-magento2/compare/101.1.37...101.1.38)
+[Full Changelog](https://github.com/mailchimp/mc-magento2/compare/100.1.37...100.1.38)
 
 **Implemented enhancements:**
 
