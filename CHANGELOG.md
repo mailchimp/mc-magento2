@@ -1,5 +1,33 @@
 # Change Log
 
+## [101.1.38](https://github.com/mailchimp/mc-magento2/tree/101.1.38)
+
+[Full Changelog](https://github.com/mailchimp/mc-magento2/compare/101.1.37...101.1.38)
+
+**Implemented enhancements:**
+
+- Optimize MailChimp JS block [\#895](https://github.com/mailchimp/mc-magento2/issues/895)
+- Optimize MailChimp JS block [\#891](https://github.com/mailchimp/mc-magento2/pull/891) ([andrey-legayev](https://github.com/andrey-legayev))
+
+**Fixed bugs:**
+
+- Incorrect import in Webhook controller [\#976](https://github.com/mailchimp/mc-magento2/issues/976)
+- The street line 3 is not synced in orders [\#963](https://github.com/mailchimp/mc-magento2/issues/963)
+- Loading screen stuck when attempting to save the API key. [\#940](https://github.com/mailchimp/mc-magento2/issues/940)
+- \[Performance Issue\] HTTP calls to mailchimp on every page request and config cache flush [\#939](https://github.com/mailchimp/mc-magento2/issues/939)
+- Strong check for interest groups [\#932](https://github.com/mailchimp/mc-magento2/issues/932)
+- Take the first date value from storeview scope. [\#931](https://github.com/mailchimp/mc-magento2/issues/931)
+- Bad management of the groups in the webhooks [\#926](https://github.com/mailchimp/mc-magento2/issues/926)
+- Error grid, bad data when try to sort for one field 3 times [\#922](https://github.com/mailchimp/mc-magento2/issues/922)
+- Uncaught TypeError: strpos\(\) expects parameter 1 to be string, null given in vendor/magento/module-theme/Controller/Result/JsFooterPlugin.php:44 in Magento 2.3.3 [\#920](https://github.com/mailchimp/mc-magento2/issues/920)
+- JS error on product page with slow internet [\#912](https://github.com/mailchimp/mc-magento2/issues/912)
+- Invalid API key error when attempting to update settings. [\#906](https://github.com/mailchimp/mc-magento2/issues/906)
+- Typo in Ecommerce cron when mark an object with error [\#900](https://github.com/mailchimp/mc-magento2/issues/900)
+- Error in cron when split databases [\#887](https://github.com/mailchimp/mc-magento2/issues/887)
+- Make changes to pass code sniffer [\#881](https://github.com/mailchimp/mc-magento2/issues/881)
+- Fix catching campaign with enabled Varnish FPC [\#874](https://github.com/mailchimp/mc-magento2/issues/874)
+- Fix incorrect import in Webhook controller [\#973](https://github.com/mailchimp/mc-magento2/pull/973) ([ihor-sviziev](https://github.com/ihor-sviziev))
+
 ## [100.1.37](https://github.com/mailchimp/mc-magento2/tree/100.1.37)
 
 [Full Changelog](https://github.com/mailchimp/mc-magento2/compare/100.1.36...100.1.37)
