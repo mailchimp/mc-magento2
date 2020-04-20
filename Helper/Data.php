@@ -364,10 +364,10 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
                 } catch (\Exception $e) {
                     $options = [];
                 }
-                $isDate = ($item->getBackendModel()==Magento\Eav\Model\Entity\Attribute\Backend\Datetime::class) ? 1:0;
+                $isDate = ($item->getBackendModel()==\Magento\Eav\Model\Entity\Attribute\Backend\Datetime::class) ? 1:0;
                 $isAddress = (
-                    $item->getBackendModel()==Magento\Customer\Model\Customer\Attribute\Backend\Billing::class ||
-                    $item->getBackendModel()==Magento\Customer\Model\Customer\Attribute\Backend\Shipping::class) ? 1:0;
+                    $item->getBackendModel()==\Magento\Customer\Model\Customer\Attribute\Backend\Billing::class ||
+                    $item->getBackendModel()==\Magento\Customer\Model\Customer\Attribute\Backend\Shipping::class) ? 1:0;
                 $ret[$item->getId()] = [
                     'attCode' => $item->getAttributeCode(),
                     'isDate' =>$isDate,
