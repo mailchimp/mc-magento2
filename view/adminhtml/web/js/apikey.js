@@ -10,10 +10,9 @@
 define(
     [
         'jquery',
-        'jquery/ui',
         'Magento_Ui/js/modal/alert'
     ],
-    function ($,alert) {
+    function ($, alert) {
         "use strict";
 
         $.widget('mage.monkeyapikey', {
@@ -32,12 +31,12 @@ define(
                     //var apiUrl = this.options.apikeyUrl;
                     $.ajax({
                         url: apiUrl,
-                        data: {'form_key':  window.FORM_KEY, 'apikey': apiKey, 'encrypt': 1},
+                        data: {'form_key': window.FORM_KEY, 'apikey': apiKey, 'encrypt': 1},
                         type: 'POST',
                         dataType: 'json',
                         showLoader: true
                     }).done(function (data) {
-                        if (data.valid==1) {
+                        if (data.valid == 1) {
                             $.each(data.lists, function (i, item) {
                                 $('#stores_list_id').append($('<option>', {
                                     value: item.id,
@@ -45,7 +44,7 @@ define(
                                 }));
                             });
                         } else {
-                            alert({content:data.errormsg});
+                            alert({content: data.errormsg});
                         }
                     });
                 });
