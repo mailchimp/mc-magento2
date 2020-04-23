@@ -10,7 +10,6 @@
 define(
     [
         'jquery',
-        'jquery/ui',
         'Magento_Ui/js/modal/alert'
     ],
     function ($, alert) {
@@ -18,12 +17,12 @@ define(
 
         $.widget('mage.configmonkeyapikey', {
             "options": {
-              "storeUrl": "",
-              "detailsUrl": "",
-              "storeGridUrl": "",
-              "createWebhookUrl": "",
-              "getInterestUrl": "",
-              "resyncSubscribersUrl": ""
+                "storeUrl": "",
+                "detailsUrl": "",
+                "storeGridUrl": "",
+                "createWebhookUrl": "",
+                "getInterestUrl": "",
+                "resyncSubscribersUrl": ""
             },
 
             _init: function () {
@@ -36,8 +35,8 @@ define(
                     self._loadDetails();
                     // self._loadInterest();
                 });
-                $('#row_mailchimp_general_monkeystore').find('.note').append(' <a href="'+self.options.storeGridUrl+'">here</a>');
-                if ($('#mailchimp_general_monkeystore option').length>1) {
+                $('#row_mailchimp_general_monkeystore').find('.note').append(' <a href="' + self.options.storeGridUrl + '">here</a>');
+                if ($('#mailchimp_general_monkeystore option').length > 1) {
                     $('#row_mailchimp_general_monkeystore .note').hide();
                 }
                 $('#mailchimp_general_webhook_create').click(function () {
@@ -51,19 +50,19 @@ define(
                 });
 
             },
-            _resyncSubscribers: function(mailchimpStoreId) {
+            _resyncSubscribers: function (mailchimpStoreId) {
                 var resyncSubscribersUrl = this.options.resyncSubscribersUrl;
                 $.ajax({
                     url: resyncSubscribersUrl,
-                    data: {'form_key': window.FORM_KEY,'mailchimpStoreId': mailchimpStoreId},
+                    data: {'form_key': window.FORM_KEY, 'mailchimpStoreId': mailchimpStoreId},
                     type: 'GET',
                     dataType: 'json',
                     showLoader: true
                 }).done(function (data) {
-                    if (data.valid==0) {
-                        alert({content:'Error: can\'t resync your subscribers'});
-                    } else if (data.valid==1) {
-                        alert({content:'All subscribers marked for resync'});
+                    if (data.valid == 0) {
+                        alert({content: 'Error: can\'t resync your subscribers'});
+                    } else if (data.valid == 1) {
+                        alert({content: 'All subscribers marked for resync'});
                     }
                 });
             },
@@ -71,15 +70,15 @@ define(
                 var createWebhookUrl = this.options.createWebhookUrl;
                 $.ajax({
                     url: createWebhookUrl,
-                    data: {'form_key': window.FORM_KEY,'apikey': apiKey, 'listId': listId},
+                    data: {'form_key': window.FORM_KEY, 'apikey': apiKey, 'listId': listId},
                     type: 'GET',
                     dataType: 'json',
                     showLoader: true
                 }).done(function (data) {
-                    if (data.valid==0) {
-                        alert({content:'Error: can\'t create WebHook. Your WebHook is already created or your web is private'});
-                    } else if (data.valid==1) {
-                        alert({content:'WebHook created'});
+                    if (data.valid == 0) {
+                        alert({content: 'Error: can\'t create WebHook. Your WebHook is already created or your web is private'});
+                    } else if (data.valid == 1) {
+                        alert({content: 'WebHook created'});
                     }
                 });
             },
@@ -91,45 +90,49 @@ define(
                 // get the selected apikey
                 $('#mailchimp_general_monkeystore').append($('<option>', {
                     value: -1,
-                    text : 'Select one Mailchimp Store'
+                    text: 'Select one Mailchimp Store'
                 }));
                 $('#mailchimp_general_monkeylist').append($('<option>', {
                     value: -1,
-                    text : 'Select one Mailchimp Store'
+                    text: 'Select one Mailchimp Store'
                 }));
                 // get the list for this apikey via ajax
                 $.ajax({
-                        url: storeUrl,
-                        data: {'form_key':  window.FORM_KEY, 'apikey': apiKey, 'encrypt': 0},
-                        type: 'GET',
-                        dataType: 'json',
-                        showLoader: true
-                    }).done(function (data) {
-                        if (data.valid==1) {
-                            var unique = data.stores.length;
-                            $.each(data.stores, function (i, item) {
-                                if (unique == 1) {
-                                    $('#mailchimp_general_monkeystore').append($('<option>', {
-                                        value: item.id,
-                                        text: item.name,
-                                        selected: "selected"
-                                    }));
-                                } else {
-                                    $('#mailchimp_general_monkeystore').append($('<option>', {
-                                        value: item.id,
-                                        text: item.name
-                                    }));
-                                }
-                            });
-                            if ($('#mailchimp_general_monkeystore option').length > 1) {
-                                $('#row_mailchimp_general_monkeystore').find('.note').hide();
+                    url: storeUrl,
+                    data: {'form_key': window.FORM_KEY, 'apikey': apiKey, 'encrypt': 0},
+                    type: 'GET',
+                    dataType: 'json',
+                    showLoader: true
+                }).done(function (data) {
+                    if (data.valid == 1) {
+                        var unique = data.stores.length;
+                        $.each(data.stores, function (i, item) {
+                            if (unique == 1) {
+                                $('#mailchimp_general_monkeystore').append($('<option>', {
+                                    value: item.id,
+                                    text: item.name,
+                                    selected: "selected"
+                                }));
                             } else {
-                                $('#row_mailchimp_general_monkeystore').find('.note').show();
+                                $('#mailchimp_general_monkeystore').append($('<option>', {
+                                    value: item.id,
+                                    text: item.name
+                                }));
                             }
-                            self._loadDetails();
+                        });
+                        if ($('#mailchimp_general_monkeystore option').length > 1) {
+                            $('#row_mailchimp_general_monkeystore').find('.note').hide();
                         } else {
-                            alert({content:data.errormsg});
+                            $('#row_mailchimp_general_monkeystore').find('.note').show();
                         }
+                        self._loadDetails();
+                    } else {
+                        if (data.errormsg != '') {
+                            alert({content: data.errormsg});
+                        } else {
+                            alert({content: "API Key Invalid"});
+                        }
+                    }
                 });
             },
             _loadDetails: function () {
@@ -138,19 +141,19 @@ define(
                 var apiKey = $('#mailchimp_general_apikey').val();
                 var selectedStore = $('#mailchimp_general_monkeystore').find(':selected').val();
                 var encrypt = 0;
-                if (apiKey=='******') {
+                if (apiKey == '******') {
                     encrypt = 3;
                 }
                 $('#mailchimp_general_account_details_ul').empty();
                 $('#mailchimp_general_monkeylist').empty();
                 $.ajax({
-                        url: detailsUrl,
-                        data: {'form_key':  window.FORM_KEY, 'apikey': apiKey, "store": selectedStore, 'encrypt': encrypt},
-                        type: 'GET',
-                        dataType: 'json',
-                        showLoader: true
-                    }).done(function (data) {
-                    $.each(data, function (i,item) {
+                    url: detailsUrl,
+                    data: {'form_key': window.FORM_KEY, 'apikey': apiKey, "store": selectedStore, 'encrypt': encrypt},
+                    type: 'GET',
+                    dataType: 'json',
+                    showLoader: true
+                }).done(function (data) {
+                    $.each(data, function (i, item) {
                         if (item.hasOwnProperty('label')) {
                             $('#mailchimp_general_account_details_ul').append('<li>' + item.label + ' ' + item.value + '</li>');
                         }
@@ -173,7 +176,7 @@ define(
                     }).done(function (data) {
                         if (data.error == 0) {
                             if (data.data.length) {
-                                $.each(data.data, function (i,item) {
+                                $.each(data.data, function (i, item) {
                                     $('#mailchimp_general_interest').append($('<option>', {
                                         value: item.id,
                                         text: item.title
