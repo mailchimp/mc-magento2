@@ -10,10 +10,9 @@
 define(
     [
         'jquery',
-        'jquery/ui',
         'Magento_Ui/js/modal/alert'
     ],
-    function ($, flag, alert) {
+    function ($, alert) {
         "use strict";
 
         $.widget('mage.configmonkeyapikey', {
