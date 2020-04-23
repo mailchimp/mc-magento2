@@ -13,7 +13,7 @@ define(
         'jquery/ui',
         'Magento_Ui/js/modal/alert'
     ],
-    function ($, alert) {
+    function ($) {
         "use strict";
 
         $.widget('mage.configmonkeyapikey', {
@@ -105,7 +105,7 @@ define(
                     dataType: 'json',
                     showLoader: true
                 }).done(function (data) {
-                    if (data.valid==1) {
+                    if (data.valid == 1) {console.log(data);
                         var unique = data.stores.length;
                         $.each(data.stores, function (i, item) {
                             if (unique == 1) {
@@ -128,7 +128,7 @@ define(
                         }
                         self._loadDetails();
                     } else {
-                        alert({content:data.errormsg});
+                        alert(data.errormsg);
                     }
                 });
             },
