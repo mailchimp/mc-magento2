@@ -102,6 +102,7 @@ class Customer
         $collection->getSelect()->limit(self::MAX);
         $counter = 0;
         $customerArray = [];
+        $this->_helper->resetMapFields();
 
         foreach ($collection as $item) {
             $customer = $this->_customerFactory->create();
@@ -151,7 +152,7 @@ class Customer
     protected function buildSubscriberData(\Magento\Customer\Model\Customer $customer)
     {
         $data = [];
-        $data["merge_fields"] = $this->_helper->getMergeVars($customer,$customer->getStoreId());
+        $data["merge_fields"] = $this->_helper->getMergeVars($customer,$customer->getData('store_id'));
         return $data;
     }
     protected function isSubscriber(\Magento\Customer\Model\Customer $customer)
