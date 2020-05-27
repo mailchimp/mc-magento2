@@ -380,6 +380,10 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         }
         return $this->customerAtt;
     }
+    public function resetMapFields()
+    {
+        $this->_mapFields = null;
+    }
     public function getMapFields($storeId = null)
     {
         if (!$this->_mapFields) {
@@ -731,7 +735,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
      */
     public function getMergeVarsByCustomer(\Magento\Customer\Model\Customer $customer, $email)
     {
-        return $this->getMergeVars($customer, $customer->getStoreId());
+        return $this->getMergeVars($customer, $customer->getData('store_id'));
     }
 
     public function getGeneralList($storeId)
