@@ -335,6 +335,9 @@ class Webhook
     protected function _loadGroups()
     {
         foreach ($this->storeManager->getStores() as $storeId => $val) {
+            if (!$this->_helper->isMailChimpEnabled($storeId)) {
+                continue;
+            }
             $listId =$this->_helper->getDefaultList($storeId);
             $api = $this->_helper->getApi($storeId);
             $interestsCat = $api->lists->interestCategory->getAll($listId);
