@@ -380,6 +380,10 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         }
         return $this->customerAtt;
     }
+    public function resetMapFields()
+    {
+        $this->_mapFields = null;
+    }
     public function getMapFields($storeId = null)
     {
         if (!$this->_mapFields) {

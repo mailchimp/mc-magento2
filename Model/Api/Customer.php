@@ -105,6 +105,7 @@ class Customer
         $collection->getSelect()->limit(self::MAX);
         $counter = 0;
         $customerArray = [];
+        $this->_helper->resetMapFields();
 
         foreach ($collection as $item) {
             $customer = $this->_customerFactory->create();
