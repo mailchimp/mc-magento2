@@ -1122,7 +1122,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
                 $groups = $this->unserialize($serialized);
                 if (isset($groups['group'])) {
                     foreach ($groups['group'] as $key => $value) {
-                        if (array_key_exists($interest,$key)) {
+                        if (array_key_exists($key, $interest)) {
                             if (is_array($value)) {
                                 foreach ($value as $groupId) {
                                     foreach ($interest[$key]['category'] as $gkey => $gvalue) {
