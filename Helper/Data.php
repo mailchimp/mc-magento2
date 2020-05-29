@@ -1140,14 +1140,12 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         /**
          * @var $interestGroup \Ebizmarts\MailChimp\Model\MailChimpInterestGroup
          */
-        $this->log($interest);
         $interestGroup = $this->_interestGroupFactory->create();
         $interestGroup->getBySubscriberIdStoreId($subscriberId, $storeId);
         $serialized = $interestGroup->getGroupdata();
         if ($serialized&&is_array($interest)&&count($interest)) {
             try {
                 $groups = $this->unserialize($serialized);
-                $this->log($groups);
                 if (isset($groups['group'])) {
                     foreach ($groups['group'] as $key => $value) {
                         if (array_key_exists($key, $interest)) {
