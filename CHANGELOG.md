@@ -1,5 +1,24 @@
 # Change Log
 
+## [102.3.39](https://github.com/mailchimp/mc-magento2/tree/102.3.39)
+
+[Full Changelog](https://github.com/mailchimp/mc-magento2/compare/102.3.38...102.3.39)
+
+**Implemented enhancements:**
+
+- Licensing? [\#996](https://github.com/mailchimp/mc-magento2/issues/996)
+
+**Fixed bugs:**
+
+- Typo in campaigncatcher.js causing Javascript error [\#1015](https://github.com/mailchimp/mc-magento2/issues/1015)
+- The mailchimp groups are not shown correctly in the customer account [\#1009](https://github.com/mailchimp/mc-magento2/issues/1009)
+- Improper call to interest-categories in the webhook processing [\#1002](https://github.com/mailchimp/mc-magento2/issues/1002)
+- MapFields not getting synced when configured in storeView. [\#998](https://github.com/mailchimp/mc-magento2/issues/998)
+- Eternal Spinning gif after invalid API key has been entered in the configuration [\#990](https://github.com/mailchimp/mc-magento2/issues/990)
+- Syncing customer group changed some customers group id to 0 [\#989](https://github.com/mailchimp/mc-magento2/issues/989)
+- Issue syncing DOB merge field [\#987](https://github.com/mailchimp/mc-magento2/issues/987)
+- JS error on product page with slow internet [\#912](https://github.com/mailchimp/mc-magento2/issues/912)
+
 ## [102.3.38](https://github.com/mailchimp/mc-magento2/tree/102.3.38)
 
 [Full Changelog](https://github.com/mailchimp/mc-magento2/compare/102.3.37...102.3.38)
