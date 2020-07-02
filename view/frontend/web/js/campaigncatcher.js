@@ -34,7 +34,7 @@ define(
                         urlparams = self.getUrlVars();
                         urlparams.forEach(function (item) {
                             if (item.key=='utm_source') {
-                                var reg = /^mailchimp$/;z
+                                var reg = /^mailchimp$/;
                                 if (reg.exec(item.value)) {
                                     isMailchimp = true;
                                 }
