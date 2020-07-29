@@ -1,5 +1,13 @@
 # Change Log
 
+## [Unreleased](https://github.com/mailchimp/mc-magento2/tree/102.3.40)
+
+[Full Changelog](https://github.com/mailchimp/mc-magento2/compare/102.3.39...102.3.40)
+
+**Implemented enhancements:**
+
+- Add magento 2.4 compatibility [\#1027](https://github.com/mailchimp/mc-magento2/issues/1027)
+
 ## [102.3.39](https://github.com/mailchimp/mc-magento2/tree/102.3.39)
 
 [Full Changelog](https://github.com/mailchimp/mc-magento2/compare/102.3.38...102.3.39)
