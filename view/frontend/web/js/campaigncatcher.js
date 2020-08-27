@@ -10,7 +10,6 @@
 define(
     [
         'jquery',
-        'jquery/ui',
         'mage/cookies'
     ],
     function ($) {
