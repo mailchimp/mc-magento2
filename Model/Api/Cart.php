@@ -242,7 +242,7 @@ class Cart
          * @var $cart \Magento\Quote\Model\Quote
          */
         foreach ($modifiedCarts as $cart) {
-            $this->_token = null;
+            $this->_token = $cart->getMailchimpToken();
             $cartId = $cart->getEntityId();
             /**
              * @var $customer \Magento\Customer\Model\Customer
@@ -575,9 +575,10 @@ class Cart
      */
     protected function _getCheckoutUrl(\Magento\Quote\Model\Quote $cart, $storeId)
     {
-        $token = hash('md5', rand(0, 9999999));
-        $url = $this->_helper->getCartUrl($storeId, $cart->getId(), $token);
-        $this->_token = $token;
+        if (!$this->_token) {
+            $this->_token = hash('md5', rand(0, 9999999));
+        }
+        $url = $this->_helper->getCartUrl($storeId, $cart->getId(), $this->_token);
         return $url;
     }
     protected function _getCustomer(\Magento\Quote\Model\Quote $cart, $mailchimpStoreId, $magentoStoreId)
