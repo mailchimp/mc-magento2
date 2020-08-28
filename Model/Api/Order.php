@@ -92,8 +92,9 @@ class Order
      * @param \Magento\Catalog\Model\ProductFactory $productFactory
      * @param \Magento\Directory\Model\CountryFactory $countryFactory
      * @param \Ebizmarts\MailChimp\Model\MailChimpSyncEcommerce $chimpSyncEcommerce
+     * @param \Magento\SalesRule\Model\Coupon $couponRepository
+     * @param RuleRepository $ruleRepository
      * @param \Magento\Framework\Url $urlHelper
-     * @throws \Magento\Framework\Exception\LocalizedException
      */
     public function __construct(
         \Ebizmarts\MailChimp\Helper\Data $helper,
