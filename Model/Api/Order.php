@@ -13,7 +13,6 @@
 
 namespace Ebizmarts\MailChimp\Model\Api;
 
-use Magento\SalesRule\Model\CouponRepository;
 use Magento\SalesRule\Model\RuleRepository;
 use Symfony\Component\Config\Definition\Exception\Exception;
 
@@ -64,7 +63,13 @@ class Order
      * @var \Magento\Catalog\Model\ProductFactory
      */
     protected $_productFactory;
+    /**
+     * @var \Magento\SalesRule\Model\Coupon
+     */
     protected $couponRepository;
+    /**
+     * @var RuleRepository
+     */
     protected $ruleRepository;
     /**
      * @var \Magento\Framework\Url
