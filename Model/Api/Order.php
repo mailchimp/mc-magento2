@@ -13,6 +13,7 @@
 
 namespace Ebizmarts\MailChimp\Model\Api;
 
+use Magento\SalesRule\Model\RuleRepository;
 use Symfony\Component\Config\Definition\Exception\Exception;
 
 class Order
@@ -63,6 +64,15 @@ class Order
      */
     protected $_productFactory;
     /**
+     * @var \Magento\SalesRule\Model\Coupon
+     */
+    protected $couponRepository;
+    /**
+     * @var RuleRepository
+     */
+    protected $ruleRepository;
+
+    /**
      * @var \Magento\Framework\Url
      */
     protected $_urlHelper;
@@ -96,6 +106,8 @@ class Order
         \Magento\Catalog\Model\ProductFactory $productFactory,
         \Magento\Directory\Model\CountryFactory $countryFactory,
         \Ebizmarts\MailChimp\Model\MailChimpSyncEcommerce $chimpSyncEcommerce,
+        \Magento\SalesRule\Model\Coupon $couponRepository,
+        \Magento\SalesRule\Model\RuleRepository $ruleRepository,
         \Magento\Framework\Url $urlHelper
     ) {
     
@@ -111,6 +123,8 @@ class Order
         $this->_batchId         = \Ebizmarts\MailChimp\Helper\Data::IS_ORDER. '_' . $this->_helper->getGmtTimeStamp();
         $this->_counter = 0;
         $this->_urlHelper    = $urlHelper;
+        $this->couponRepository = $couponRepository;
+        $this->ruleRepository = $ruleRepository;
     }
 
     /**
@@ -311,6 +325,10 @@ class Order
         $data['tax_total'] = $order->getTaxAmount();
         $data['discount_total'] = abs($order->getDiscountAmount());
         $data['shipping_total'] = $order->getShippingAmount();
+        $dataPromo = $this->_getPromoData($order);
+        if ($dataPromo !== null) {
+            $data['promos'] = $dataPromo;
+        }
         $statusArray = $this->_getMailChimpStatus($order);
         if (isset($statusArray['financial_status'])) {
             $data['financial_status'] = $statusArray['financial_status'];
@@ -624,6 +642,37 @@ class Order
         return $mailChimpStatus;
     }
 
+    protected function _getPromoData(\Magento\Sales\Model\Order $order)
+    {
+        $promo = null;
+        try {
+            $couponCode = $order->getCouponCode();
+            if ($couponCode !== null) {
+                $code = $this->couponRepository->loadByCode($couponCode);
+                if ($code->getCouponId() !== null) {
+                    $rule = $this->ruleRepository->getById($code->getRuleId());
+                    if ($rule->getRuleId() !== null) {
+                        $amountDiscounted = $order->getBaseDiscountAmount();
+                        $type = $rule->getSimpleAction();
+                        if ($type == 'by_percent') {
+                            $type = 'percentage';
+                        } else {
+                            $type = 'fixed';
+                        }
+
+                        $promo = [[
+                            'code' => $couponCode,
+                            'amount_discounted' => abs($amountDiscounted),
+                            'type' => $type
+                        ]];
+                    }
+                }
+            }
+        } catch(\Exception $e) {
+            $this->_helper->log($e->getMessage());
+        }
+        return $promo;
+    }
 
     protected function _updateOrder($storeId, $entityId, $sync_delta = null, $sync_error = null, $sync_modified = null)
     {
