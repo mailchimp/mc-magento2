@@ -179,8 +179,8 @@ class PromoRules
         /**
          * @var $rule \Magento\SalesRule\Model\Rule
          */
-        $rule = $this->_ruleRepo->getById($ruleId);
         try {
+            $rule = $this->_ruleRepo->getById($ruleId);
             $promoRules = $this->_generateRuleData($rule);
             if (!empty($promoRules)) {
                 $promoRulesJson = json_encode($promoRules);
