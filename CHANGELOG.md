@@ -1,5 +1,19 @@
 # Change Log
 
+## [102.3.41](https://github.com/mailchimp/mc-magento2/tree/102.3.41)
+
+[Full Changelog](https://github.com/mailchimp/mc-magento2/compare/102.3.40...102.3.41)
+
+**Implemented enhancements:**
+
+- Coupon Codes \(Promo Codes\) Do Not Send to Mailchimp With Order Data [\#1032](https://github.com/mailchimp/mc-magento2/issues/1032)
+
+**Fixed bugs:**
+
+- "Unable to unserialize value." issue avoids ecommerce syncing. This happens some times when "Send Promo Codes and Promo Rules" is enabled [\#1035](https://github.com/mailchimp/mc-magento2/issues/1035)
+- Fallback to JQueryUI Compat activated. [\#1034](https://github.com/mailchimp/mc-magento2/issues/1034)
+- Abandoned Cart revenue not showing on Mailchimp account [\#1033](https://github.com/mailchimp/mc-magento2/issues/1033)
+
 ## [102.3.40](https://github.com/mailchimp/mc-magento2/tree/102.3.40)
 
 [Full Changelog](https://github.com/mailchimp/mc-magento2/compare/102.3.39...102.3.40)
