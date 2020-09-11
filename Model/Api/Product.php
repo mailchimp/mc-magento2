@@ -134,7 +134,7 @@ class Product
             /**
              * @var $product \Magento\Catalog\Model\Product
              */
-            $product = $this->_productRepository->getById($item->getId());
+            $product = $this->_productRepository->getById($item->getId(), false, $magentoStoreId);
             if ($item->getMailchimpSyncModified() && $item->getMailchimpSyncDelta() &&
                 $item->getMailchimpSyncDelta() > $this->_helper->getMCMinSyncDateFlag()) {
                 $batchArray = array_merge($this->_buildOldProductRequest($product, $this->_batchId, $mailchimpStoreId, $magentoStoreId), $batchArray);
@@ -246,7 +246,7 @@ class Product
                 $variantProducts[] = $product;
                 if (count($childProducts[0])) {
                     foreach ($childProducts[0] as $childId) {
-                        $variantProducts[] = $this->_productRepository->getById($childId);
+                        $variantProducts[] = $this->_productRepository->getById($childId, false, $magentoStoreId);
                     }
                 }
                 break;
@@ -333,7 +333,7 @@ class Product
             $variantProducts[] = $product;
             if (count($childProducts[0])) {
                 foreach ($childProducts[0] as $childId) {
-                    $variantProducts[] = $this->_productRepository->getById($childId);
+                    $variantProducts[] = $this->_productRepository->getById($childId, false, $magentoStoreId);
                 }
             }
         } else {
@@ -381,7 +381,7 @@ class Product
         } elseif ($this->_parentImage) {
             $data['image_url'] = $this->_parentImage;
         } else {
-            $parent = $this->_getParent($product->getId());
+            $parent = $this->_getParent($product->getId(), $magentoStoreId);
             if ($parent && $parent->getImage() && $parent->getImage()!='no_selection') {
                 $filePath = 'catalog/product'.$parent->getImage();
                 $data["image_url"] = $this->_helper->getBaserUrl($magentoStoreId, \Magento\Framework\UrlInterface::URL_TYPE_MEDIA).$filePath;
@@ -405,7 +405,7 @@ class Product
                 $tailUrl = '';
                 $data["visibility"] = 'false';
                 if (!$parent) {
-                    $parent = $this->_getParent($product->getId());
+                    $parent = $this->_getParent($product->getId(), $magentoStoreId);
                 }
                 if ($parent) {
                     $options = $parent->getTypeInstance()->getConfigurableAttributesAsArray($parent);
@@ -482,12 +482,12 @@ class Product
         return $data;
     }
 
-    protected function _getParent($productId)
+    protected function _getParent($productId, $magentoStoreId)
     {
         $parentIds =$this->_configurable->getParentIdsByChild($productId);
         $parent = null;
         foreach ($parentIds as $id) {
-            $parent = $this->_productRepository->getById($id);
+            $parent = $this->_productRepository->getById($id, false, $magentoStoreId);
             if ($parent->getTypeId() == \Magento\ConfigurableProduct\Model\Product\Type\Configurable::TYPE_CODE) {
                 break;
             } else {
@@ -533,7 +533,7 @@ class Product
         $items = $order->getAllVisibleItems();
         foreach ($items as $item) {
             //@todo get from the store not the default
-            $product = $this->_productRepository->getById($item->getProductId());
+            $product = $this->_productRepository->getById($item->getProductId(), false, $magentoStoreId);
             $productSyncData = $this->_chimpSyncEcommerce->create()->getByStoreIdType(
                 $mailchimpStoreId,
                 $product->getId(),
@@ -570,7 +570,7 @@ class Product
          */
         foreach ($items as $item) {
             //@todo get from the store not the default
-            $product = $this->_productRepository->getById($item->getProductId());
+            $product = $this->_productRepository->getById($item->getProductId(), false, $magentoStoreId);
             $productSyncData = $this->_chimpSyncEcommerce->create()->getByStoreIdType(
                 $mailchimpStoreId,
                 $product->getId(),
