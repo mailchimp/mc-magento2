@@ -376,6 +376,7 @@ class Product
         $data["id"] = $product->getId();
         $data["title"] = $product->getName();
         $data["url"] = $product->getProductUrl();
+        $data["image_url"] = '';
         if ($product->getImage() && $product->getImage()!='no_selection') {
             $filePath = 'catalog/product'.$product->getImage();
             $data["image_url"] = $this->_helper->getBaserUrl($magentoStoreId, \Magento\Framework\UrlInterface::URL_TYPE_MEDIA).$filePath;
