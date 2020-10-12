@@ -123,6 +123,7 @@ class Loadquote extends Action
                         ),
                         ['mc_cid'=> $params['mc_cid']]
                     );
+                    $quote->setData('mailchimp_campaign_id', $params['mc_cid']);
                 } else {
                     $url = $this->_urlHelper->getUrl(
                         $this->_helper->getConfigValue(

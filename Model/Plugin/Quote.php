@@ -47,5 +47,19 @@ class Quote
         if ($mailchimp_landing_page) {
             $quote->setData('mailchimp_landing_page', $mailchimp_landing_page);
         }
+        $mailchimpStoreId = $this->_helper->getConfigValue(
+            \Ebizmarts\MailChimp\Helper\Data::XML_MAILCHIMP_STORE,
+            $quote->getStoreId()
+        );
+        $this->_helper->saveEcommerceData(
+            $mailchimpStoreId,
+            $quote->getId(),
+            \Ebizmarts\MailChimp\Helper\Data::IS_QUOTE,
+            null,
+            0,
+            1,
+            0,
+            null
+        );
     }
 }
