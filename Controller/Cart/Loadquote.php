@@ -123,6 +123,7 @@ class Loadquote extends Action
                         ),
                         ['mc_cid'=> $params['mc_cid']]
                     );
+                    $quote->setData('mailchimp_campaign_id', $params['mc_cid']);
                 } else {
                     $url = $this->_urlHelper->getUrl(
                         $this->_helper->getConfigValue(
@@ -132,6 +133,7 @@ class Loadquote extends Action
                     );
                 }
                 $quote->setData('mailchimp_abandonedcart_flag', true);
+
                 $quote->getResource()->save($quote);
                 if (!$quote->getCustomerId()) {
                     $this->_checkoutSession->setQuoteId($quote->getId());
