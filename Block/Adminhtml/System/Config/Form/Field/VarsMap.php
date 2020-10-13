@@ -34,6 +34,36 @@ class VarsMap extends \Magento\Framework\View\Element\Html\Select
         parent::__construct($context, $data);
         $this->_attCollection = $attCollection;
     }
+    protected function _getAddressAtt()
+    {
+        $ret = [];
+        $ret['default_shipping##zip']     = __('Shipping Zip Code');
+        $ret['default_shipping##country'] = __('Shipping Country');
+        $ret['default_shipping##city']    = __('Shipping City');
+        $ret['default_shipping##state']   = __('Shipping State');
+        $ret['default_shipping##telephone']   = __('Shipping Telephone');
+
+        $ret['default_billing##zip']      = __('Billing Zip Code');
+        $ret['default_billing##country']  = __('Billing Country');
+        $ret['default_billing##city']     = __('Billing City');
+        $ret['default_billing##state']    = __('Billing State');
+        $ret['default_billing##telephone']    = __('Billing Telephone');
+
+        return $ret;
+    }
+
+    protected function _getBindableAttributes()
+    {
+        $systemAtt = $this->_getCustomerAtt();
+        $extraAtt = $this->_getAddressAtt();
+
+        // Note: We cannot use array_merge here because we need to hold
+        // numeric indexes as they are
+        $ret = $systemAtt + $extraAtt;
+
+        natsort($ret);
+        return $ret;
+    }
 
     protected function _getCustomerAtt()
     {
@@ -63,7 +93,7 @@ class VarsMap extends \Magento\Framework\View\Element\Html\Select
     public function _toHtml()
     {
         if (!$this->getOptions()) {
-            foreach ($this->_getCustomerAtt() as $attId => $attLabel) {
+            foreach ($this->_getBindableAttributes() as $attId => $attLabel) {
                 $this->addOption($attId, addslashes($attLabel));
             }
         }

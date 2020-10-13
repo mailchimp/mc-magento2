@@ -62,11 +62,22 @@ class MailchimpMap extends \Magento\Framework\View\Element\Html\Select
             $scope = 'default';
         }
 
-        $api = $this->_helper->getApi($storeId,$scope);
+        $api = $this->_helper->getApi($storeId, $scope);
         try {
-            $merge = $api->lists->mergeFields->getAll($this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_PATH_LIST, $storeId, $scope), null, null, \Ebizmarts\MailChimp\Helper\Data::MAX_MERGEFIELDS);
-            foreach ($merge['merge_fields'] as $item) {
-                $ret[$item['tag']] = $item['tag'] . ' (' . $item['name'] . ' : ' . $item['type'] . ')';
+            $merge = $api->lists->mergeFields->getAll(
+                $this->_helper->getConfigValue(
+                    \Ebizmarts\MailChimp\Helper\Data::XML_PATH_LIST,
+                    $storeId,
+                    $scope
+                ),
+                null,
+                null,
+                \Ebizmarts\MailChimp\Helper\Data::MAX_MERGEFIELDS
+            );
+            if (is_array($merge) && key_exists('merge_fields', $merge)) {
+                foreach ($merge['merge_fields'] as $item) {
+                    $ret[$item['tag']] = $item['tag'] . ' (' . $item['name'] . ' : ' . $item['type'] . ')';
+                }
             }
         } catch (\Mailchimp_Error $e) {
             $this->_helper->log($e->getFriendlyMessage());
