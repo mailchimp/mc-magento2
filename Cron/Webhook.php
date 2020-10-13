@@ -308,15 +308,16 @@ class Webhook
                     if (is_array($mapFields)) {
                         foreach ($mapFields as $map) {
                             if ($map['mailchimp'] == $key) {
-                                if (!$map['isAddress']&&$map['customer_field'] != "dob" && strpos($map['customer_field'], '##') !== false) {                                    if (count($map['options'])) {
-                                    foreach($map['options'] as $option) {
-                                        if ($option['label'] == $value) {
-                                            $customer->setData($map['customer_field'], $option['value']);
+                                if (!$map['isAddress'] && $map['customer_field'] != "dob" && strpos($map['customer_field'], '##') !== false) {
+                                    if (count($map['options'])) {
+                                        foreach ($map['options'] as $option) {
+                                            if ($option['label'] == $value) {
+                                                $customer->setData($map['customer_field'], $option['value']);
+                                            }
                                         }
+                                    } else {
+                                        $customer->setData($map['customer_field'], $value);
                                     }
-                                } else {
-                                    $customer->setData($map['customer_field'], $value);
-                                }
                                 }
                             }
                         }
