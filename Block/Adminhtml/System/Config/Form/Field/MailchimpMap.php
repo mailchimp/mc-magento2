@@ -41,7 +41,7 @@ class MailchimpMap extends \Magento\Framework\View\Element\Html\Select
         \Ebizmarts\MailChimp\Helper\Data $helper,
         array $data = []
     ) {
-    
+
         parent::__construct($context, $data);
         $this->_helper          = $helper;
         $this->_storeManager    = $storeManager;
@@ -74,8 +74,10 @@ class MailchimpMap extends \Magento\Framework\View\Element\Html\Select
                 null,
                 \Ebizmarts\MailChimp\Helper\Data::MAX_MERGEFIELDS
             );
-            foreach ($merge['merge_fields'] as $item) {
-                $ret[$item['tag']] = $item['tag'] . ' (' . $item['name'] . ' : ' . $item['type'] . ')';
+            if (is_array($merge) && key_exists('merge_fields', $merge)) {
+                foreach ($merge['merge_fields'] as $item) {
+                    $ret[$item['tag']] = $item['tag'] . ' (' . $item['name'] . ' : ' . $item['type'] . ')';
+                }
             }
         } catch (\Mailchimp_Error $e) {
             $this->_helper->log($e->getFriendlyMessage());
