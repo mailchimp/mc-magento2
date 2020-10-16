@@ -125,6 +125,10 @@ class Monkey extends Column
             $order = $orderCollection->getItemById($item['entity_id']);
             $params = ['_secure' => $this->_requestInterfase->isSecure()];
 
+            if ($order === null) {
+                continue;
+            }
+
             if (!$this->_helper->getConfigValue(Helper::XML_PATH_ACTIVE, $order->getStoreId())) {
                 continue;
             }
