@@ -23,4 +23,7 @@
     <event name="catalog_product_save_after">
         <observer name="mailchimp_product_save_after" instance="\Ebizmarts\MailChimp\Observer\Adminhtml\Product\SaveAfter" />
     </event>
+    <event name="newsletter_subscriber_save_before">
+        <observer name="'mailchimp_newsletter_subscriber_save_before" instance="\Ebizmarts\MailChimp\Observer\Subscriber\SaveBefore" />
+    </event>
 </config>
