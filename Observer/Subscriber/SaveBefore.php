@@ -28,6 +28,9 @@ class SaveBefore implements \Magento\Framework\Event\ObserverInterface
      * @var \Ebizmarts\MailChimp\Model\Api\Subscriber
      */
     protected $_subscriberApi;
+    /**
+     * @var \Magento\Newsletter\Model\SubscriberFactory
+     */
     protected $_subscriberFactory;
 
     /**
@@ -35,6 +38,7 @@ class SaveBefore implements \Magento\Framework\Event\ObserverInterface
      * @param \Ebizmarts\MailChimp\Model\MailChimpSyncEcommerce $ecommerce
      * @param \Ebizmarts\MailChimp\Helper\Data $helper
      * @param \Ebizmarts\MailChimp\Model\Api\Subscriber $subscriberApi
+     * @param \Magento\Newsletter\Model\SubscriberFactory $subscriberFactory
      */
     public function __construct(
         \Ebizmarts\MailChimp\Model\MailChimpSyncEcommerce $ecommerce,
