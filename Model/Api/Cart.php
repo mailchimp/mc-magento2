@@ -432,11 +432,11 @@ class Cart
          */
         foreach ($items as $item) {
             $line = [];
-            if ($item->getProductType()=='bundle' || $item->getProductType()=='grouped') {
+            if ($item->getData('product_type') === 'bundle' || $item->getData('product_type') === 'grouped') {
                 continue;
             }
 
-            if ($item->getProductType()==\Magento\ConfigurableProduct\Model\Product\Type\Configurable::TYPE_CODE) {
+            if ($item->getData('product_type') === \Magento\ConfigurableProduct\Model\Product\Type\Configurable::TYPE_CODE) {
                 $variant = null;
                 if ($item->getOptionByCode('simple_product')) {
                     $variant = $item->getOptionByCode('simple_product')->getProduct();
