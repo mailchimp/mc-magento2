@@ -1,5 +1,21 @@
 # Change Log
 
+## [100.1.42](https://github.com/mailchimp/mc-magento2/tree/100.1.42)
+
+[Full Changelog](https://github.com/mailchimp/mc-magento2/compare/100.1.41...100.1.42)
+
+**Implemented enhancements:**
+
+- Create custom field mapping [\#1025](https://github.com/mailchimp/mc-magento2/issues/1025)
+
+**Fixed bugs:**
+
+- Subscribing for a second time does not work. [\#1078](https://github.com/mailchimp/mc-magento2/issues/1078)
+- Invalid date format when use mysql 8 [\#1066](https://github.com/mailchimp/mc-magento2/issues/1066)
+- Unable to capture the order for a campaign [\#1065](https://github.com/mailchimp/mc-magento2/issues/1065)
+- Notice: Undefined index: image\_url Model/Api/Product.php [\#1059](https://github.com/mailchimp/mc-magento2/issues/1059)
+- Multistore product sync wrong name  [\#1055](https://github.com/mailchimp/mc-magento2/issues/1055)
+
 ## [100.1.41](https://github.com/mailchimp/mc-magento2/tree/100.1.41)
 
 [Full Changelog](https://github.com/mailchimp/mc-magento2/compare/100.1.39...100.1.41)
