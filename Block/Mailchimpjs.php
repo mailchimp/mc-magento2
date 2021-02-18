@@ -26,6 +26,7 @@ class Mailchimpjs extends \Magento\Framework\View\Element\Template
      * @var \Magento\Store\Model\StoreManagerInterface
      */
     protected $_storeManager;
+    protected $_secureHTtmlRender;
 
     /**
      * Mailchimpjs constructor.
@@ -36,11 +37,13 @@ class Mailchimpjs extends \Magento\Framework\View\Element\Template
     public function __construct(
         \Magento\Framework\View\Element\Template\Context $context,
         \Ebizmarts\MailChimp\Helper\Data $helper,
+        \Magento\Framework\View\Helper\SecureHtmlRenderer $secureHTtmlRender,
         array $data
     ) {
         parent::__construct($context, $data);
         $this->_helper          = $helper;
         $this->_storeManager    = $context->getStoreManager();
+        $this->_secureHTtmlRender   = $secureHTtmlRender;
     }
 
     public function getJsUrl()
@@ -63,5 +66,9 @@ class Mailchimpjs extends \Magento\Framework\View\Element\Template
         }
 
         return $url;
+    }
+    public function getRender()
+    {
+        return $this->_secureHTtmlRender;
     }
 }
