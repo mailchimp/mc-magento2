@@ -856,7 +856,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
                 $chimpSyncEcommerce->setMailchimpStoreId($storeId);
                 $chimpSyncEcommerce->setType($type);
                 $chimpSyncEcommerce->setRelatedId($entityId);
-                if ($modified) {
+                if ($modified!==null) {
                     $chimpSyncEcommerce->setMailchimpSyncModified($modified);
                 }
                 if ($date) {
