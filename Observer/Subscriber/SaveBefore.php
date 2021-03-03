@@ -62,7 +62,7 @@ class SaveBefore implements \Magento\Framework\Event\ObserverInterface
         $subscriber = $observer->getSubscriber();
         $subscriberOld = $factory->loadByCustomerId($subscriber->getCustomerId());
 
-        if ($this->_helper->isMailChimpEnabled($subscriberOld->getStoreId())&&$subscriber->getEmail()!=$subscriberOld->getEmail()) {
+        if ($this->_helper->isMailChimpEnabled($subscriberOld->getStoreId())&&$subscriberOld->getEmail()&&$subscriber->getEmail()!=$subscriberOld->getEmail()) {
             $api = $this->_helper->getApi($subscriberOld->getStoreId());
             $mergeVars = $this->_helper->getMergeVarsBySubscriber($subscriberOld, $subscriberOld->getEmail());
             $status = 'unsubscribed';
