@@ -259,4 +259,22 @@ class Subscriber
     {
         return $subscriber->getStoreId();
     }
+
+    /**
+     * @param \Magento\Newsletter\Model\Subscriber $subscriber
+     * @param $result
+     * @return mixed
+     */
+    public function afterLoadBySubscriberEmail(\Magento\Newsletter\Model\Subscriber $subscriber, $result)
+    {
+        try {
+            if (!$this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_MAGENTO_MAIL, $result->getStoreId())) {
+                $result->setImportMode(true);
+            }
+        } catch (\Exception $exception) {
+            $this->_helper->log($exception->getMessage());
+        }
+
+        return $result;
+    }
 }
