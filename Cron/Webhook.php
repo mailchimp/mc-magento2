@@ -350,7 +350,7 @@ class Webhook
             $api = $this->_helper->getApi($storeId);
             $interestsCat = $api->lists->interestCategory->getAll($listId, null, null, 200);
             foreach ($interestsCat['categories'] as $cat) {
-                $interests = $api->lists->interestCategory->interests->getAll($listId,$cat['id'], null, 200);
+                $interests = $api->lists->interestCategory->interests->getAll($listId,$cat['id'], null, null, 200);
                 $this->groups = array_merge_recursive($this->groups, $interests['interests']);
             }
         }

@@ -1184,7 +1184,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
                     }
                 }
                 foreach ($interest as $interestId) {
-                    $mailchimpInterest = $api->lists->interestCategory->interests->getAll($listId, $interestId, null, 200);
+                    $mailchimpInterest = $api->lists->interestCategory->interests->getAll($listId, $interestId, null, null,200);
                     foreach ($mailchimpInterest['interests'] as $mi) {
                         $rc[$mi['category_id']]['category'][$mi['display_order']] =
                             ['id' => $mi['id'], 'name' => $mi['name'], 'checked' => false];
