@@ -1158,7 +1158,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         try {
             $api = $this->getApi($storeId);
             $listId = $this->getConfigValue(self::XML_PATH_LIST, $storeId);
-            $allInterest = $api->lists->interestCategory->getAll($listId);
+            $allInterest = $api->lists->interestCategory->getAll($listId, null, null, 200);
             if (is_array($allInterest) &&
                 array_key_exists('categories', $allInterest) &&
                 is_array($allInterest['categories'])) {
@@ -1169,7 +1169,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
                     }
                 }
                 foreach ($interest as $interestId) {
-                    $mailchimpInterest = $api->lists->interestCategory->interests->getAll($listId, $interestId);
+                    $mailchimpInterest = $api->lists->interestCategory->interests->getAll($listId, $interestId, null, null, 200);
                     foreach ($mailchimpInterest['interests'] as $mi) {
                         $rc[$mi['category_id']]['category'][$mi['display_order']] =
                             ['id' => $mi['id'], 'name' => $mi['name'], 'checked' => false];
