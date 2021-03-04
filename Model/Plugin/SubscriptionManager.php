@@ -172,9 +172,8 @@ class SubscriptionManager
                 }
                 $mergeVars = $this->_helper->getMergeVarsBySubscriber($subscriber, $email);
                 try {
-                    $this->_helper->log("voy a intentar subscribir el mail [$email]");
                     $md5HashEmail = hash('md5', strtolower($email));
-                    $return = $api->lists->members->addOrUpdate(
+                    $api->lists->members->addOrUpdate(
                         $this->_helper->getDefaultList($storeId),
                         $md5HashEmail,
                         null,
