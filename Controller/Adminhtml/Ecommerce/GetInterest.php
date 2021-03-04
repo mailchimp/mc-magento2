@@ -69,7 +69,7 @@ class GetInterest extends Action
                     $api = $this->_helper->getApiByApiKey($apiKey, $encrypt);
                 }
 
-                $result = $api->lists->interestCategory->getAll($list);
+                $result = $api->lists->interestCategory->getAll($list, null, null,200);
                 if (is_array($result['categories']) && count($result['categories'])) {
                     $rc = $result['categories'];
                 }
