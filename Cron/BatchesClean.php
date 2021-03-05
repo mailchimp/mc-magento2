@@ -22,21 +22,41 @@ class BatchesClean
      * @var \Ebizmarts\MailChimp\Model\MailChimpSyncBatches
      */
     protected $mailChimpSyncBatches;
+    /**
+     * @var \Ebizmarts\MailChimp\Model\MailChimpErrors
+     */
+    protected $mailChimpErrors;
 
     /**
      * BatchesClean constructor.
      * @param \Ebizmarts\MailChimp\Helper\Data $helper
      * @param \Ebizmarts\MailChimp\Model\MailChimpSyncBatches $mailChimpSyncBatches
+     * @param \Ebizmarts\MailChimp\Model\MailChimpErrors $chimpErrors
      */
     public function __construct(
         \Ebizmarts\MailChimp\Helper\Data $helper,
-        \Ebizmarts\MailChimp\Model\MailChimpSyncBatches $_mailChimpSyncBatches
+        \Ebizmarts\MailChimp\Model\MailChimpSyncBatches $mailChimpSyncBatches,
+        \Ebizmarts\MailChimp\Model\MailChimpErrors $chimpErrors
     ) {
         $this->helper               = $helper;
-        $this->mailChimpSyncBatches = $_mailChimpSyncBatches;
+        $this->mailChimpSyncBatches = $mailChimpSyncBatches;
+        $this->mailChimpErrors      = $chimpErrors;
     }
     public function execute()
     {
+
+        try {
+            $connection = $this->mailChimpErrors->getResource()->getConnection();
+            $tableName  = $this->mailChimpErrors->getResource()->getMainTable();
+            $tableNameBatches = $this->mailChimpSyncBatches->getResource()->getMainTable();
+            $quoteInto = $connection->quoteInto(
+                "batch_id IN (SELECT batch_id FROM $tableNameBatches WHERE status IN('completed','canceled') AND ( date_add(modified_date, interval ? month) < now() OR modified_date IS NULL)) OR batch_id NOT IN(SELECT batch_id FROM $tableNameBatches)",
+                1
+            );
+            $connection->delete($tableName, $quoteInto);
+        } catch (\Exception $e) {
+            $this->helper->log($e->getMessage());
+        }
         try {
             $connection = $this->mailChimpSyncBatches->getResource()->getConnection();
             $tableName = $this->mailChimpSyncBatches->getResource()->getMainTable();
