@@ -564,6 +564,11 @@ class Order
             ['neq' => \Magento\Sales\Model\Order::STATE_CANCELED],
             ['neq' => \Magento\Sales\Model\Order::STATE_CLOSED]])
             ->addAttributeToFilter('customer_email', ['eq' => $order->getCustomerEmail()]);
+        
+        $orderCollection
+            ->getSelect()
+            ->reset(\Zend_Db_Select::COLUMNS)
+            ->columns(['grand_total', 'total_refunded', 'total_canceled']);
 
         $totalOrders = 0;
         $totalAmountSpent = 0;
