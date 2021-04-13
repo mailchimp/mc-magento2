@@ -1279,6 +1279,19 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     {
         return $this->counters;
     }
+    public function getTotalNewItemsSent()
+    {
+        $totalAmount = 0;
+        $itemArray = [self::ORD_NEW, self::SUB_NEW, self::PRO_NEW, self::CUS_NEW, self::QUO_NEW];
+
+        foreach ($itemArray as $item) {
+            if (array_key_exists($item, $this->counters)) {
+                $totalAmount += $this->counters[$item];
+            }
+        }
+
+        return $totalAmount;
+    }
     public function serialize($data)
     {
         return $this->_serializer->serialize($data);
