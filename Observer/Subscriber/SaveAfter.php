@@ -14,7 +14,7 @@ namespace Ebizmarts\MailChimp\Observer\Subscriber;
 
 use Magento\Framework\Event\Observer;
 
-class SaveBefore implements \Magento\Framework\Event\ObserverInterface
+class SaveAfter implements \Magento\Framework\Event\ObserverInterface
 {
     /**
      * @var \Ebizmarts\MailChimp\Model\MailChimpSyncEcommerce
