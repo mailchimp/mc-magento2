@@ -167,8 +167,16 @@ class Result
 
                         $error = $response->title . " : " . $response->detail;
                         $this->_updateSyncData($mailchimpStoreId,$listId,$type,$id,$error,\Ebizmarts\MailChimp\Helper\Data::SYNCERROR);
-                        $mailchimpErrors->setType($response->type);
-                        $mailchimpErrors->setTitle($response->title);
+                        if (property_exists($response, 'type')){
+                            $mailchimpErrors->setType($response->type);
+                        } else {
+                            $mailchimpErrors->setType('Unknown');
+                        }
+                        if (property_exists($response, 'title')){
+                            $mailchimpErrors->setTitle($response->title);
+                        } else {
+                            $mailchimpErrors->setTitle('Unknown');
+                        }
                         $mailchimpErrors->setStatus($item->status_code);
                         $mailchimpErrors->setErrors($errorDetails);
                         $mailchimpErrors->setRegtype($type);
