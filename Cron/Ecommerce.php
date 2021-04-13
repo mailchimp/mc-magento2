@@ -277,7 +277,7 @@ class Ecommerce
         } else {
             $this->_helper->log("Nothing to sync for store $storeId");
         }
-        $countTotal = $countCustomers + $countProducts + $countOrders;
+        $countTotal = $this->_helper->getTotalNewItemsSent();
         $syncing = $this->_helper->getMCMinSyncing($storeId);
         if ($countTotal == 0 && $syncing) {
             $this->_helper->saveConfigValue(
