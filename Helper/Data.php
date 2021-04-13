@@ -1235,6 +1235,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         }
         return $apiKeys;
     }
+
     public function modifyCounter($index, $increment = 1)
     {
         if (array_key_exists($index, $this->counters)) {
@@ -1243,14 +1244,31 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
             $this->counters[$index] = 1;
         }
     }
+
     public function resetCounters()
     {
         $this->counters = [];
     }
+
     public function getCounters()
     {
         return $this->counters;
     }
+
+    public function getTotalNewItemsSent()
+    {
+        $totalAmount = 0;
+        $itemArray = [self::ORD_NEW, self::SUB_NEW, self::PRO_NEW, self::CUS_NEW, self::QUO_NEW];
+
+        foreach ($itemArray as $item) {
+            if (array_key_exists($item, $this->counters)) {
+                $totalAmount += $this->counters[$item];
+            }
+        }
+
+        return $totalAmount;
+    }
+
     public function serialize($data)
     {
         $result = json_encode($data);
