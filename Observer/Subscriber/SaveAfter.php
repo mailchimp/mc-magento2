@@ -62,10 +62,11 @@ class SaveAfter implements \Magento\Framework\Event\ObserverInterface
         $subscriber = $observer->getSubscriber();
         $subscriberOld = $factory->loadByCustomerId($subscriber->getCustomerId());
 
-        if ($this->_helper->isMailChimpEnabled($subscriberOld->getStoreId())&&$subscriber->getEmail()!=$subscriberOld->getEmail()) {
+        if ($this->_helper->isMailChimpEnabled($subscriberOld->getStoreId()) && $subscriber->getEmail() != $subscriberOld->getEmail()) {
             $api = $this->_helper->getApi($subscriberOld->getStoreId());
             $mergeVars = $this->_helper->getMergeVarsBySubscriber($subscriberOld, $subscriberOld->getEmail());
             $status = 'unsubscribed';
+
             try {
                 $md5HashEmail = hash('md5', strtolower($subscriberOld->getEmail()));
                 $return = $api->lists->members->addOrUpdate(
@@ -81,11 +82,13 @@ class SaveAfter implements \Magento\Framework\Event\ObserverInterface
                     $subscriberOld->getEmail(),
                     $status
                 );
+
             } catch (\Mailchimp_Error $e) {
                 $this->_helper->log($e->getFriendlyMessage());
             }
 
         }
+
         $this->_subscriberApi->update($subscriber);
     }
 }
