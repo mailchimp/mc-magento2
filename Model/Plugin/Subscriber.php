@@ -69,6 +69,9 @@ class Subscriber
 
         $storeId = $this->getStoreIdFromSubscriber($subscriber);
         if ($this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_PATH_ACTIVE, $storeId)) {
+            if (!$this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_MAGENTO_MAIL, $storeId)) {
+                $subscriber->setImportMode(true);
+            }
             $subscriber->loadByCustomerId($customerId);
             if ($subscriber->isSubscribed()) {
                 $api = $this->_helper->getApi($storeId);
@@ -172,6 +175,9 @@ class Subscriber
 
         $storeId = $this->getStoreIdFromSubscriber($subscriber);
         if ($this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_PATH_ACTIVE, $storeId)) {
+            if (!$this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_MAGENTO_MAIL, $storeId)) {
+                $subscriber->setImportMode(true);
+            }
             $api = $this->_helper->getApi($this->getStoreIdFromSubscriber($subscriber));
             try {
                 $md5HashEmail = md5(strtolower($subscriber->getSubscriberEmail()));
