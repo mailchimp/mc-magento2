@@ -66,9 +66,11 @@ class Subscriber
         \Magento\Newsletter\Model\Subscriber $subscriber,
         $customerId
     ) {
-
         $storeId = $this->getStoreIdFromSubscriber($subscriber);
         if ($this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_PATH_ACTIVE, $storeId)) {
+            if (!$this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_MAGENTO_MAIL, $storeId)) {
+                $subscriber->setImportMode(true);
+            }
             $subscriber->loadByCustomerId($customerId);
             if ($subscriber->isSubscribed()) {
                 $api = $this->_helper->getApi($storeId);
@@ -199,10 +201,11 @@ class Subscriber
     public function beforeUnsubscribe(
         \Magento\Newsletter\Model\Subscriber $subscriber
     ) {
-
         $storeId = $this->getStoreIdFromSubscriber($subscriber);
         if ($this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_PATH_ACTIVE, $storeId)) {
-            $api = $this->_helper->getApi($storeId);
+            if (!$this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_MAGENTO_MAIL, $storeId)) {
+                $subscriber->setImportMode(true);
+            }            $api = $this->_helper->getApi($storeId);
             try {
                 $md5HashEmail = hash('md5', strtolower($subscriber->getSubscriberEmail()));
                 $api->lists->members->update(
@@ -215,7 +218,6 @@ class Subscriber
                 $this->_helper->log($e->getFriendlyMessage());
             }
         }
-        return null;
     }
 
     /**
