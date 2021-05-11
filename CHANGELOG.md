@@ -1,5 +1,25 @@
 # Change Log
 
+## [100.1.43](https://github.com/mailchimp/mc-magento2/tree/100.1.43)
+
+[Full Changelog](https://github.com/mailchimp/mc-magento2/compare/102.3.42...100.1.43)
+
+**Implemented enhancements:**
+
+- Ignore modified items when flagging store as synced [\#1140](https://github.com/mailchimp/mc-magento2/issues/1140)
+- Only fetch specific columns from sales\_order [\#1134](https://github.com/mailchimp/mc-magento2/issues/1134)
+- Error table never getting cleaned up [\#1107](https://github.com/mailchimp/mc-magento2/issues/1107)
+
+**Fixed bugs:**
+
+- Ecommerce order send loop [\#1112](https://github.com/mailchimp/mc-magento2/issues/1112)
+- Problem with suscription [\#1106](https://github.com/mailchimp/mc-magento2/issues/1106)
+- Allow more than 10 interest inside a group [\#1103](https://github.com/mailchimp/mc-magento2/issues/1103)
+- observer name that breaks Magento 2 DOM XML [\#1102](https://github.com/mailchimp/mc-magento2/issues/1102)
+- CSP Whitelist Support [\#1097](https://github.com/mailchimp/mc-magento2/issues/1097)
+- Infinite loop on customer account creation if email present in newsletter subscribers list [\#1090](https://github.com/mailchimp/mc-magento2/issues/1090)
+- The confirmation email is sent twice because the getImportMode \(\) method cannot be honored [\#1089](https://github.com/mailchimp/mc-magento2/issues/1089)
+
 ## [100.1.42](https://github.com/mailchimp/mc-magento2/tree/100.1.42)
 
 [Full Changelog](https://github.com/mailchimp/mc-magento2/compare/100.1.41...100.1.42)
