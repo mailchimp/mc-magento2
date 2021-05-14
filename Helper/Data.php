@@ -317,7 +317,6 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         $this->_deploymentConfig        = $deploymentConfig;
         $this->_date                    = $date;
         $this->countryFactory           = $countryFactory;
-        $this->countryFactory           = $countryFactory;
         $this->resolver                 = $resolver;
         parent::__construct($context);
     }
