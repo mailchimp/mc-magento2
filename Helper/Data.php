@@ -769,7 +769,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
                 $addressData["zip"] = $address->getPostcode();
             }
             if ($address->getCountry()) {
-                $country = $this->_countryFactory->create()->loadByCode($address->getCountryId());
+                $country = $this->countryFactory->create()->loadByCode($address->getCountryId());
                 $addressData["country"] = $country->getFullNameLocale();
             }
             if ($address->getTelephone()) {
