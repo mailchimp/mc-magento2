@@ -212,6 +212,10 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
      * @var \Magento\Directory\Model\CountryFactory
      */
     protected $countryFactory;
+    /**
+     * @var \Magento\Framework\Locale\Resolver
+     */
+    protected $resolver;
 
     private $customerAtt    = null;
     private $addressAtt     = null;
@@ -248,6 +252,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
      * @param \Magento\Framework\App\DeploymentConfig $deploymentConfig
      * @param \Magento\Framework\Stdlib\DateTime\DateTime $date
      * @param \Magento\Directory\Model\CountryFactory $countryFactory
+     * @param \Magento\Framework\Locale\Resolver $resolver
      */
     public function __construct(
         \Magento\Framework\App\Helper\Context $context,
@@ -278,7 +283,8 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         \Magento\Framework\Serialize\Serializer\Json $serializer,
         \Magento\Framework\App\DeploymentConfig $deploymentConfig,
         \Magento\Framework\Stdlib\DateTime\DateTime $date,
-        \Magento\Directory\Model\CountryFactory $countryFactory
+        \Magento\Directory\Model\CountryFactory $countryFactory,
+        \Magento\Framework\Locale\Resolver $resolver
     ) {
 
         $this->_storeManager  = $storeManager;
@@ -312,6 +318,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         $this->_deploymentConfig        = $deploymentConfig;
         $this->_date                    = $date;
         $this->countryFactory           = $countryFactory;
+        $this->resolver                 = $resolver;
         parent::__construct($context);
     }
 
@@ -770,7 +777,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
             }
             if ($address->getCountry()) {
                 $country = $this->countryFactory->create()->loadByCode($address->getCountryId());
-                $addressData["country"] = $country->getFullNameLocale();
+                $addressData["country"] = $country->getName($this->resolver->getLocale());
             }
             if ($address->getTelephone()) {
                 $addressData['telephone'] = $address->getTelephone();
