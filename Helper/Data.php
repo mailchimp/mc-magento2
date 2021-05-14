@@ -202,6 +202,14 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
      */
     protected $_date;
     /**
+     * @var \Magento\Directory\Model\CountryFactory
+     */
+    protected $countryFactory;
+    /**
+     * @var \Magento\Framework\Locale\Resolver
+     */
+    protected $resolver;
+    /**
      * @var \Magento\Framework\App\DeploymentConfig
      */
     protected $_deploymentConfig;
@@ -235,10 +243,12 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
      * @param \Magento\Customer\Api\AddressRepositoryInterface $addressRepositoryInterface
      * @param \Magento\Customer\Model\CustomerFactory $customerFactory
      * @param \Magento\Directory\Api\CountryInformationAcquirerInterface $countryInformation
-     * @param \Magento\Framework\App\ResourceConnection $resource
+     * @param ResourceConnection $resource
      * @param \Ebizmarts\MailChimp\Model\MailChimpInterestGroupFactory $interestGroupFactory
      * @param \Magento\Framework\App\DeploymentConfig $deploymentConfig
      * @param \Magento\Framework\Stdlib\DateTime\DateTime $date
+     * @param \Magento\Directory\Model\CountryFactory $countryFactory
+     * @param \Magento\Framework\Locale\Resolver $resolver
      */
     public function __construct(
         \Magento\Framework\App\Helper\Context $context,
@@ -267,7 +277,9 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         \Magento\Framework\App\ResourceConnection $resource,
         \Ebizmarts\MailChimp\Model\MailChimpInterestGroupFactory $interestGroupFactory,
         \Magento\Framework\App\DeploymentConfig $deploymentConfig,
-        \Magento\Framework\Stdlib\DateTime\DateTime $date
+        \Magento\Framework\Stdlib\DateTime\DateTime $date,
+        \Magento\Directory\Model\CountryFactory $countryFactory,
+        \Magento\Framework\Locale\Resolver $resolver
     ) {
 
         $this->_storeManager  = $storeManager;
@@ -299,6 +311,8 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         $this->_interestGroupFactory    = $interestGroupFactory;
         $this->_date                    = $date;
         $this->_deploymentConfig        = $deploymentConfig;
+        $this->countryFactory           = $countryFactory;
+        $this->resolver                 = $resolver;
 
         parent::__construct($context);
     }
@@ -739,8 +753,8 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
                 $addressData["zip"] = $address->getPostcode();
             }
             if ($address->getCountry()) {
-                $country = $this->_countryInformation->getCountryInfo($address->getCountryId());
-                $addressData["country"] = $country->getFullNameLocale();
+                $country = $this->countryFactory->create()->loadByCode($address->getCountryId());
+                $addressData["country"] = $country->getName($this->resolver->getLocale());
             }
             if ($address->getTelephone()) {
                 $addressData['telephone'] = $address->getTelephone();
