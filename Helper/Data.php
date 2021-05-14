@@ -210,10 +210,19 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
      * @var \Magento\Framework\App\DeploymentConfig
      */
     protected $_deploymentConfig;
+    /**
+     * @var \Magento\Directory\Model\CountryFactory
+     */
+    protected $countryFactory;
+    /**
+     * @var \Magento\Framework\Locale\Resolver
+     */
+    protected $resolver;
 
     private $customerAtt    = null;
     private $addressAtt     = null;
     private $_mapFields     = null;
+
     /**
      * Data constructor.
      * @param \Magento\Framework\App\Helper\Context $context
@@ -244,6 +253,8 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
      * @param \Magento\Framework\Serialize\Serializer\Json $serializer
      * @param \Magento\Framework\App\DeploymentConfig $deploymentConfig
      * @param \Magento\Framework\Stdlib\DateTime\DateTime $date
+     * @param \Magento\Directory\Model\CountryFactory $countryFactory
+     * @param \Magento\Framework\Locale\Resolver $resolver
      */
     public function __construct(
         \Magento\Framework\App\Helper\Context $context,
@@ -273,7 +284,9 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         \Ebizmarts\MailChimp\Model\MailChimpInterestGroupFactory $interestGroupFactory,
         \Magento\Framework\Serialize\Serializer\Json $serializer,
         \Magento\Framework\App\DeploymentConfig $deploymentConfig,
-        \Magento\Framework\Stdlib\DateTime\DateTime $date
+        \Magento\Framework\Stdlib\DateTime\DateTime $date,
+        \Magento\Directory\Model\CountryFactory $countryFactory,
+        \Magento\Framework\Locale\Resolver $resolver
     )
     {
 
@@ -307,6 +320,8 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         $this->_serializer              = $serializer;
         $this->_deploymentConfig        = $deploymentConfig;
         $this->_date = $date;
+        $this->countryFactory           = $countryFactory;
+        $this->resolver                 = $resolver;
         parent::__construct($context);
     }
 
@@ -755,8 +770,8 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
                 $addressData["zip"] = $address->getPostcode();
             }
             if ($address->getCountry()) {
-                $country = $this->_countryInformation->getCountryInfo($address->getCountryId());
-                $addressData["country"] = $country->getFullNameLocale();
+                $country = $this->countryFactory->create()->loadByCode($address->getCountryId());
+                $addressData["country"] = $country->getName($this->resolver->getLocale());
             }
             if ($address->getTelephone()) {
                 $addressData['telephone'] = $address->getTelephone();
