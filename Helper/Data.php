@@ -644,7 +644,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     }
     public function getBaserUrl($storeId, $type)
     {
-        return $this->_storeManager->getStore($storeId)->getBaseUrl($type);
+        return $this->_storeManager->getStore($storeId)->getBaseUrl($type, true);
     }
     public function createStore($listId = null, $storeId)
     {
