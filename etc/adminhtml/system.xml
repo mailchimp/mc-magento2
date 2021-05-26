@@ -44,7 +44,6 @@
                         <field id="*/*/active">1</field>
                     </depends>
                 </field>
-
                 <field id="monkeystore" translate="label" type="select" sortOrder="30" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Mailchimp Store</label>
                     <source_model>Ebizmarts\MailChimp\Model\Config\Source\MonkeyStore</source_model>
@@ -204,6 +203,13 @@
                     <button_label>Delete Store</button_label>
                     <comment>Proceed with caution, this delete the mailchimp store for all the connected magento stores</comment>
                     <frontend_model>Ebizmarts\MailChimp\Block\Adminhtml\System\Config\DeleteStore</frontend_model>
+                    <depends>
+                        <field id="*/*/active">1</field>
+                    </depends>
+                </field>
+                <field id="resync_products" translate="button_label" type="button" sortOrder="130" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <button_label>Resync all products</button_label>
+                    <frontend_model>Ebizmarts\MailChimp\Block\Adminhtml\System\Config\ResyncProducts</frontend_model>
                     <depends>
                         <field id="*/*/active">1</field>
                     </depends>

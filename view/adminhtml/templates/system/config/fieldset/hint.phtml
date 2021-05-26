@@ -16,7 +16,8 @@
      "storeGridUrl": "<?php echo $this->getUrl('mailchimp/stores/index');?>",
      "createWebhookUrl": "<?php echo $this->getUrl('mailchimp/ecommerce/createWebhook');?>",
      "getInterestUrl": "<?php echo $this->getUrl('mailchimp/ecommerce/getInterest');?>",
-     "resyncSubscribersUrl": "<?php echo $this->getUrl('mailchimp/ecommerce/resyncSubscribers');?>"}}'>
+     "resyncSubscribersUrl": "<?php echo $this->getUrl('mailchimp/ecommerce/resyncSubscribers');?>",
+     "resyncProductsUrl": "<?php echo $this->getUrl('mailchimp/ecommerce/resyncProducts');?>"}}'>
 </div>
 <div style="background:#EAF0EE;border:1px solid #CCCCCC;margin-bottom:10px;padding:11px 0 0 10px;">
     <h4>
@@ -26,7 +27,7 @@
             <p><?php echo __('Need help? See our ') ?><a href="http://wiki.ebizmarts.com/installation" target="_blank"><?php echo __('Wiki') ?></a><?php echo __(' or browse our ') ?><a href="http://ebizmarts.com/forums" target="_blank"><?php echo __('support forums') ?></a><?php echo __(' Got feedback? ') ?><a href="mailto:mailchimp@ebizmarts-desk.zendesk.com?Subject=MailChimp For Magento Version <?php echo $this->getModuleVersion()?>"><?php echo __('Email us') ?></a></p>
             <p><?php echo __('You can find more extension in our ') ?><a href="http://store.ebizmarts.com" target="_blank"><?php echo __('Store') ?></a></p>
             <?php if (!$this->getHasApiKey() ) : ?>
-            <p><a style="padding-top: 5px;padding-bottom:5px;padding-left: 30px;padding-right: 30px;background-color:#D75F07 ;color:white;font-weight: bold" href="https://bit.ly/2KpDH5C" target="_blank">Support Mailchimp4Magento, Subscribe for a free Mailchimp Account!</a> </p>
+                <p><a style="padding-top: 5px;padding-bottom:5px;padding-left: 30px;padding-right: 30px;background-color:#D75F07 ;color:white;font-weight: bold" href="https://bit.ly/2KpDH5C" target="_blank">Support Mailchimp4Magento, Subscribe for a free Mailchimp Account!</a> </p>
             <?php endif; ?>
         </div>
     </h4>
