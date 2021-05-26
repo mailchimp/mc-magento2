@@ -1314,6 +1314,16 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         $connection->update($tableName, ['mailchimp_sync_modified' => 1], "type = '" . self::IS_SUBSCRIBER . "' and mailchimp_store_id = '$mailchimpList'");
 
     }
+    public function resyncProducts($mailchimpList)
+    {
+        $connection = $this->_mailChimpSyncE->getResource()->getConnection();
+        $tableName = $this->_mailChimpSyncE->getResource()->getMainTable();
+        $connection->update(
+            $tableName,
+            ['mailchimp_sync_modified' => 1],
+            "type = '" . self::IS_PRODUCT . "' and mailchimp_store_id = '$mailchimpList'"
+        );
+    }
     public function decrypt($value) {
         return $this->_encryptor->decrypt($value);
     }
