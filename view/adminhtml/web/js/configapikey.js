@@ -22,7 +22,8 @@ define(
                 "storeGridUrl": "",
                 "createWebhookUrl": "",
                 "getInterestUrl": "",
-                "resyncSubscribersUrl": ""
+                "resyncSubscribersUrl": "",
+                "resyncProductsUrl": ""
             },
 
             _init: function () {
@@ -48,6 +49,10 @@ define(
                     var mailchimpStoreId = $('#mailchimp_general_monkeystore').find(':selected').val();
                     self._resyncSubscribers(mailchimpStoreId);
                 });
+                $('#mailchimp_ecommerce_resync_products').click(function () {
+                    var mailchimpStoreId = $('#mailchimp_general_monkeystore').find(':selected').val();
+                    self._resyncProducts(mailchimpStoreId);
+                });
 
             },
             _resyncSubscribers: function (mailchimpStoreId) {
@@ -63,6 +68,22 @@ define(
                         alert({content: 'Error: can\'t resync your subscribers'});
                     } else if (data.valid == 1) {
                         alert({content: 'All subscribers marked for resync'});
+                    }
+                });
+            },
+            _resyncProducts: function (mailchimpStoreId) {
+                var resyncProductsUrl = this.options.resyncProductsUrl;
+                $.ajax({
+                    url: resyncProductsUrl,
+                    data: {'form_key': window.FORM_KEY, 'mailchimpStoreId': mailchimpStoreId},
+                    type: 'GET',
+                    dataType: 'json',
+                    showLoader: true
+                }).done(function (data) {
+                    if (data.valid == 0) {
+                        alert({content: 'Error: can\'t resync your products'});
+                    } else if (data.valid == 1) {
+                        alert({content: 'All products marked for resync'});
                     }
                 });
             },
