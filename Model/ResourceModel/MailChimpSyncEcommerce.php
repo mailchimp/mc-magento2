@@ -16,7 +16,7 @@ namespace Ebizmarts\MailChimp\Model\ResourceModel;
 use Magento\Framework\DB\Select;
 use Magento\Framework\Model\ResourceModel\Db\AbstractDb;
 
-class MailChimpSyncEcommerce extends AbstractDb
+class   MailChimpSyncEcommerce extends AbstractDb
 {
     protected function _construct()
     {
