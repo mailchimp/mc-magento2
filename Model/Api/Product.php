@@ -127,6 +127,7 @@ class Product
         );
         $this->_markSpecialPrices($magentoStoreId, $mailchimpStoreId);
         $collection = $this->_getCollection();
+        $collection->addFieldToFilter("type_id", ["nin"=>[\Magento\Catalog\Model\Product\Type::TYPE_BUNDLE, "grouped"]]);
         $collection->addStoreFilter($magentoStoreId);
         $collection->getSelect()->joinLeft(
             ['m4m' => $this->_helper->getTableName('mailchimp_sync_ecommerce')],
