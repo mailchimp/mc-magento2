@@ -120,6 +120,7 @@ class Product
         $this->includingTaxes = $this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_INCLUDING_TAXES, $magentoStoreId);
         $this->_markSpecialPrices($magentoStoreId, $mailchimpStoreId);
         $collection = $this->_getCollection();
+        $collection->addFieldToFilter("type_id", ["nin"=>[\Magento\Catalog\Model\Product\Type::TYPE_BUNDLE, "grouped"]]);
         $collection->addStoreFilter($magentoStoreId);
         $collection->getSelect()->joinLeft(
             ['m4m' => $this->_helper->getTableName('mailchimp_sync_ecommerce')],
@@ -201,6 +202,7 @@ class Product
          * get the products that was synced when it have special price and have no more special price
          */
         $collection2 = $this->_getCollection();
+
         $collection2->addStoreFilter($magentoStoreId);
         $collection2->addAttributeToFilter(
             'special_price',
