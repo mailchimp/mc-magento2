@@ -1,5 +1,35 @@
 # Change Log
 
+## [103.4.43](https://github.com/mailchimp/mc-magento2/tree/103.4.43)
+
+[Full Changelog](https://github.com/mailchimp/mc-magento2/compare/102.3.42...103.4.43)
+
+**Implemented enhancements:**
+
+- Add a button in the admin to resync all products [\#1184](https://github.com/mailchimp/mc-magento2/issues/1184)
+- Missing indexes on mailchimp\_errors [\#1162](https://github.com/mailchimp/mc-magento2/issues/1162)
+- Ignore modified items when flagging store as synced [\#1140](https://github.com/mailchimp/mc-magento2/issues/1140)
+- Only fetch specific columns from sales\_order [\#1134](https://github.com/mailchimp/mc-magento2/issues/1134)
+- Error table never getting cleaned up [\#1107](https://github.com/mailchimp/mc-magento2/issues/1107)
+
+**Fixed bugs:**
+
+- Change the low value for date sync to a valid one [\#1192](https://github.com/mailchimp/mc-magento2/issues/1192)
+- Exclude the bundle and grouped products for the product collection [\#1191](https://github.com/mailchimp/mc-magento2/issues/1191)
+- The product image url don't contain the secure url if Use Secure URLs on Storefront is ON [\#1179](https://github.com/mailchimp/mc-magento2/issues/1179)
+- Mark products as modified when use import products from the admin [\#1167](https://github.com/mailchimp/mc-magento2/issues/1167)
+- Issue with "Magento Always Manage Emails" when Unsubscribing from a Customer Account [\#1157](https://github.com/mailchimp/mc-magento2/issues/1157)
+- errors in cron related to ebizmarts\_webhooks [\#1152](https://github.com/mailchimp/mc-magento2/issues/1152)
+- Ecommerce order send loop [\#1112](https://github.com/mailchimp/mc-magento2/issues/1112)
+- Problem with suscription [\#1106](https://github.com/mailchimp/mc-magento2/issues/1106)
+- Allow more than 10 interest inside a group [\#1103](https://github.com/mailchimp/mc-magento2/issues/1103)
+- observer name that breaks Magento 2 DOM XML [\#1102](https://github.com/mailchimp/mc-magento2/issues/1102)
+- CSP Whitelist Support [\#1097](https://github.com/mailchimp/mc-magento2/issues/1097)
+- Infinite loop on customer account creation if email present in newsletter subscribers list [\#1090](https://github.com/mailchimp/mc-magento2/issues/1090)
+- The confirmation email is sent twice because the getImportMode \(\) method cannot be honored [\#1089](https://github.com/mailchimp/mc-magento2/issues/1089)
+- Ecommerce Cron error "Requested country is not available." [\#1084](https://github.com/mailchimp/mc-magento2/issues/1084)
+- Subscribing for a second time does not work. [\#1078](https://github.com/mailchimp/mc-magento2/issues/1078)
+
 ## [102.3.42](https://github.com/mailchimp/mc-magento2/tree/102.3.42)
 
 [Full Changelog](https://github.com/mailchimp/mc-magento2/compare/102.3.41...102.3.42)
