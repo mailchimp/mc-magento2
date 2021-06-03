@@ -673,7 +673,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     {
         $syncDate = $this->getConfigValue(self::XML_PATH_SYNC_DATE, $storeId);
         if ($syncDate=='') {
-            $syncDate = '0000-00-00';
+            $syncDate = '1900-01-01';
         }
         return $syncDate;    }
     public function getBaseDir()
