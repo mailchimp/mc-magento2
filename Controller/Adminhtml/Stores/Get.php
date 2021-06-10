@@ -23,7 +23,7 @@ class Get extends Action
     /**
      * @var \Ebizmarts\MailChimp\Helper\Data
      */
-    protected $_helper;
+    protected $_mhelper;
     /**
      * @var ResultFactory
      */
@@ -41,7 +41,7 @@ class Get extends Action
     
         parent::__construct($context);
         $this->_resultFactory       = $context->getResultFactory();
-        $this->_helper                  = $helper;
+        $this->_mhelper                  = $helper;
     }
     public function execute()
     {
@@ -49,7 +49,7 @@ class Get extends Action
         $apiKey = $param['apikey'];
         $encrypt = $param['encrypt'];
         try {
-            $api = $this->_helper->getApiByApiKey($apiKey, $encrypt);
+            $api = $this->_mhelper->getApiByApiKey($apiKey, $encrypt);
             $stores = $api->ecommerce->stores->get(null, null, null, self::MAX_STORES);
             $result = [];
             $result['valid'] = 1;
@@ -70,7 +70,7 @@ class Get extends Action
                 }
             }
         } catch (\Mailchimp_Error $e) {
-            $this->_helper->log($e->getFriendlyMessage());
+            $this->_mhelper->log($e->getFriendlyMessage());
             $result['valid'] = 0;
             $result['errormsg'] = $e->getTitle();
         }
