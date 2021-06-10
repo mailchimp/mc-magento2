@@ -36,7 +36,7 @@ class Stores extends Action
     /**
      * @var \Ebizmarts\MailChimp\Helper\Data
      */
-    protected $_helper;
+    protected $_mhelper;
 
     /**
      * Stores constructor.
@@ -58,7 +58,7 @@ class Stores extends Action
         $this->_coreRegistry            = $registry;
         $this->_resultPageFactory       = $resultPageFactory;
         $this->_mailchimpStoresFactory  = $storesFactory;
-        $this->_helper                  = $helper;
+        $this->_mhelper                  = $helper;
     }
     public function execute()
     {
