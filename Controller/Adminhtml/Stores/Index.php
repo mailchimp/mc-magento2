@@ -18,7 +18,7 @@ class Index extends Stores
 {
     public function execute()
     {
-        $this->_helper->loadStores();
+        $this->_mhelper->loadStores();
         $page = $this->_resultPageFactory->create();
         $page->getConfig()->getTitle()->prepend(__('Mailchimp Stores'));
         return $page;
