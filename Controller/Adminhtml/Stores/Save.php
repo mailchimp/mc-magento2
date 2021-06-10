@@ -42,14 +42,14 @@ class Save extends \Ebizmarts\MailChimp\Controller\Adminhtml\Stores
                 }
             } catch (\Mailchimp_Error $e) {
                 $this->messageManager->addErrorMessage(__('Store could not be saved.'.$e->getMessage()));
-                $this->_helper->log($e->getFriendlyMessage());
+                $this->_mhelper->log($e->getFriendlyMessage());
                 return $resultRedirect->setPath('mailchimp/stores/edit', ['id'=>$storeId]);
             }
         }
     }
     protected function _updateMailchimp($formData)
     {
-        $api = $this->_helper->getApiByApiKey($formData['apikey'], true);
+        $api = $this->_mhelper->getApiByApiKey($formData['apikey'], true);
         // set the address
         $address = [];
         $address['address1']    = $formData['address_address_one'];
@@ -86,7 +86,7 @@ class Save extends \Ebizmarts\MailChimp\Controller\Adminhtml\Stores
                 $is_sync
             );
         } else {
-            $date = $this->_helper->getDateMicrotime();
+            $date = $this->_mhelper->getDateMicrotime();
             $mailchimpStoreId = hash('md5', $name. '_' . $date);
             //$mailchimpStoreId = md5($name. '_' . $date);
             $is_sync = true;
