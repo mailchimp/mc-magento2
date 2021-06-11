@@ -4,5 +4,5 @@
  */
 $url = $block->getJsUrl();
 $render = $block->getRender();
-echo $render->renderTag('script',['type'=>'text/javascript','src'=>$url],'',false);
+echo $render->renderTag('script',['type'=>'text/javascript','src'=>$url],"\n",true);
 ?>
