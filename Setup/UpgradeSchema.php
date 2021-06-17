@@ -539,7 +539,7 @@ class UpgradeSchema implements UpgradeSchemaInterface
                 ]
             );
         }
-        if (version_compare($context->getVersion(), '103.4.43') < 0) {
+        if (version_compare($context->getVersion(), '102.3.43') < 0) {
             $connection->addIndex(
                 $setup->getTable('mailchimp_errors'),
                 $connection->getIndexName($setup->getTable('mailchimp_errors'), ['store_id','regtype','original_id'], 'index'),
