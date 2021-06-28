@@ -37,7 +37,7 @@ class ImportAfter implements \Magento\Framework\Event\ObserverInterface
                 $this->_updateProduct($pro->getStoreId(), $pro->getId(), null,null,1);
             }
         } catch (\Exception $e) {
-            echo $e->getMessage();
+            $this->helper->log($e->getMessage());
         }
     }
     protected function _updateProduct(
