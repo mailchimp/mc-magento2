@@ -30,7 +30,11 @@ class ImportAfter implements \Magento\Framework\Event\ObserverInterface
             $bunch = $observer->getBunch();
             foreach ($bunch as $product) {
                 $sku = $product['sku'];
-                $storeId = $product['_store'];
+                if (key_exists('_store', $product)) {
+                    $storeId = $product['_store'];
+                } else {
+                    $storeId = 0;
+                }
                 $pro = $this->productRepository->get($sku, false,$storeId);
                 $id = $pro->getId();
                 $storeId = $pro->getStoreId();
