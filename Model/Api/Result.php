@@ -117,8 +117,10 @@ class Result
     public function getBatchResponse($batchId, $storeId = null)
     {
         $files = [];
+        $baseDir = $this->_helper->getBaseDir();
+        $fileName = $baseDir . DIRECTORY_SEPARATOR . 'var' . DIRECTORY_SEPARATOR .
+            self::MAILCHIMP_TEMP_DIR . DIRECTORY_SEPARATOR . $batchId;
         try {
-            $baseDir = $this->_helper->getBaseDir();
             $api = $this->_helper->getApi($storeId);
             // check the status of the job
             $response = $api->batchOperation->status($batchId);
@@ -130,8 +132,6 @@ class Result
                 }
                 // get the tar.gz file with the results
                 $fileUrl = urldecode($response['response_body_url']);
-                $fileName = $baseDir . DIRECTORY_SEPARATOR . 'var' . DIRECTORY_SEPARATOR .
-                    self::MAILCHIMP_TEMP_DIR . DIRECTORY_SEPARATOR . $batchId;
                 $fd = $this->_driver->fileOpen($fileName . '.tar.gz', 'w');
                 $ch = $this->_curlFactory->create();
                 $ch->setOption(CURLOPT_URL, $fileUrl);
@@ -139,6 +139,7 @@ class Result
                 $ch->setOption(CURLOPT_FOLLOWLOCATION, true);
                 $r =$ch->get($fileUrl);
                 $this->_driver->fileClose($fd);
+
                 $this->_driver->createDirectory($baseDir . DIRECTORY_SEPARATOR . 'var' . DIRECTORY_SEPARATOR .
                     self::MAILCHIMP_TEMP_DIR . DIRECTORY_SEPARATOR . $batchId);
                 $archive = $this->_archive;
@@ -169,7 +170,18 @@ class Result
             $this->_helper->log($e->getFriendlyMessage());
             return false;
         } catch (\Exception $e) {
-            $this->_helper->log($e->getMessage());
+            $this->_helper->log("Something went wrong retrieving result for batch [$batchId]");
+            $this->_helper->log("Deleting temporary files, will retry the next run don't worry");
+
+            try {
+                $this->_driver->deleteFile($baseDir . DIRECTORY_SEPARATOR . 'var' . DIRECTORY_SEPARATOR .
+                    self::MAILCHIMP_TEMP_DIR . DIRECTORY_SEPARATOR . $batchId . '/' . $batchId . '.tar');
+                $this->_driver->deleteFile($fileName . '.tar.gz');
+                $this->_driver->deleteDirectory($baseDir . DIRECTORY_SEPARATOR . 'var' . DIRECTORY_SEPARATOR .
+                    self::MAILCHIMP_TEMP_DIR . DIRECTORY_SEPARATOR . $batchId);
+            } catch(\Exception $e) {
+                $this->_helper->log($e->getMessage());
+            }
         }
         return $files;
     }
