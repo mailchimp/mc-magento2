@@ -102,6 +102,7 @@ class Customer
         $collection->getSelect()->where("m4m.mailchimp_sync_delta IS null ".
             "OR (m4m.mailchimp_sync_delta > '".$this->_helper->getMCMinSyncDateFlag().
             "' and m4m.mailchimp_sync_modified = 1)");
+        $collection->getSelect()->group('e.entity_id');
         $collection->getSelect()->limit(self::MAX);
         $counter = 0;
         $customerArray = [];
