@@ -44,19 +44,6 @@ class BatchesClean
     }
     public function execute()
     {
-
-        try {
-            $connection = $this->mailChimpErrors->getResource()->getConnection();
-            $tableName  = $this->mailChimpErrors->getResource()->getMainTable();
-            $tableNameBatches = $this->mailChimpSyncBatches->getResource()->getMainTable();
-            $quoteInto = $connection->quoteInto(
-                "batch_id IN (SELECT batch_id FROM $tableNameBatches WHERE status IN('completed','canceled') AND ( date_add(modified_date, interval ? month) < now() OR modified_date IS NULL)) OR batch_id NOT IN(SELECT batch_id FROM $tableNameBatches)",
-                1
-            );
-            $connection->delete($tableName, $quoteInto);
-        } catch (\Exception $e) {
-            $this->helper->log($e->getMessage());
-        }
         try {
             $connection = $this->mailChimpSyncBatches->getResource()->getConnection();
             $tableName = $this->mailChimpSyncBatches->getResource()->getMainTable();
@@ -65,6 +52,22 @@ class BatchesClean
                 1
             );
             $connection->delete($tableName, $quoteInto);
+        } catch (\Exception $e) {
+            $this->helper->log($e->getMessage());
+        }
+
+        try {
+            $connection = $this->mailChimpSyncBatches->getResource()->getConnection();
+            $tableName = $this->mailChimpSyncBatches->getResource()->getMainTable();
+            $query = $connection->select()->from($tableName, ['batch_id']);
+            $existingBatchIds = $connection->fetchCol($query);
+
+            $connection = $this->mailChimpErrors->getResource()->getConnection();
+            $tableName  = $this->mailChimpErrors->getResource()->getMainTable();
+            $tableNameBatches = $this->mailChimpSyncBatches->getResource()->getMainTable();
+            $connection->delete($tableName, [
+                'batch_id NOT IN (?)' => $existingBatchIds ,
+            ]);
         } catch (\Exception $e) {
             $this->helper->log($e->getMessage());
         }
