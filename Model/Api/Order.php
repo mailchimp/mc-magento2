@@ -26,7 +26,7 @@ class Order
     const PENDING = 'pending';
     const REFUNDED = 'refunded';
     const PARTIALLY_REFUNDED = 'partially_refunded';
-    const CANCELED = 'canceled';
+    const CANCELED = 'cancelled';
     const COMPLETE = 'complete';
 
     protected $_api = null;
