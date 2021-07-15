@@ -26,7 +26,7 @@ class Order
     const PENDING = 'pending';
     const REFUNDED = 'refunded';
     const PARTIALLY_REFUNDED = 'partially_refunded';
-    const CANCELED = 'canceled';
+    const CANCELED = 'cancelled';
     const COMPLETE = 'complete';
 
     protected $_api = null;
@@ -110,7 +110,7 @@ class Order
         \Magento\SalesRule\Model\RuleRepository $ruleRepository,
         \Magento\Framework\Url $urlHelper
     ) {
-    
+
         $this->_helper          = $helper;
         $this->_order           = $order;
         $this->_orderCollectionFactory = $orderCollectionFactory;
@@ -564,7 +564,7 @@ class Order
             ['neq' => \Magento\Sales\Model\Order::STATE_CANCELED],
             ['neq' => \Magento\Sales\Model\Order::STATE_CLOSED]])
             ->addAttributeToFilter('customer_email', ['eq' => $order->getCustomerEmail()]);
-        
+
         $orderCollection
             ->getSelect()
             ->reset(\Zend_Db_Select::COLUMNS)
