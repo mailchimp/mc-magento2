@@ -61,7 +61,6 @@ class BatchesClean
             $tableName = $this->mailChimpSyncBatches->getResource()->getMainTable();
             $select = $connection->select();
             $select->from($tableName, ['batch_id']);
-            $select->where('status IN("completed","canceled") and ( date_add(modified_date, interval 1 month) < now() OR modified_date IS NULL)');
             $existingBatchIds = $connection->fetchCol($select);
             $connection = $this->mailChimpErrors->getResource()->getConnection();
             $tableName = $this->mailChimpErrors->getResource()->getMainTable();
