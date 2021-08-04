@@ -46,7 +46,7 @@ class Subscriber
         \Magento\Newsletter\Model\SubscriberFactory $subscriberFactory,
         \Magento\Framework\Message\ManagerInterface $message
     ) {
-    
+
         $this->_helper                  = $helper;
         $this->_subscriberCollection    = $subscriberCollection;
         $this->_message                 = $message;
@@ -140,8 +140,10 @@ class Subscriber
             $this->_interest
         );
         foreach ($interest as $i) {
-            foreach ($i['category'] as $key => $value) {
-                $rc[$value['id']] = $value['checked'];
+            if (array_key_exists('category', $i)) {
+                foreach ($i['category'] as $key => $value) {
+                    $rc[$value['id']] = $value['checked'];
+                }
             }
         }
         return $rc;
