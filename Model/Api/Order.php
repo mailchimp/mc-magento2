@@ -331,10 +331,6 @@ class Order
             $data['landing_site'] = $order->getMailchimpLandingPage();
         }
         $data['currency_code'] = $order->getOrderCurrencyCode();
-        $data['order_total'] = $order->getGrandTotal();
-        $data['tax_total'] = $order->getTaxAmount();
-        $data['discount_total'] = abs($order->getDiscountAmount());
-        $data['shipping_total'] = $order->getShippingAmount();
         $dataPromo = $this->_getPromoData($order);
         if ($dataPromo !== null) {
             $data['promos'] = $dataPromo;
@@ -365,7 +361,17 @@ class Order
             if ($orderCancelDate) {
                 $data['cancelled_at_foreign'] = $orderCancelDate;
             }
+            $data['order_total'] = 0;
+            $data['tax_total'] = 0;
+            $data['discount_total'] = 0;
+            $data['shipping_total'] = 0;
+        } else {
+            $data['order_total'] = $order->getGrandTotal();
+            $data['tax_total'] = $order->getTaxAmount();
+            $data['discount_total'] = abs($order->getDiscountAmount());
+            $data['shipping_total'] = $order->getShippingAmount();
         }
+
 
         $data['lines'] = [];
 
