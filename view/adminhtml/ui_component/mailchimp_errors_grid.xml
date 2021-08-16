@@ -117,11 +117,10 @@
             <argument name="data" xsi:type="array">
                 <item name="config" xsi:type="array">
                     <item name="indexField" xsi:type="string">id</item>
-                    <item name="label" xsi:type="string" translate="true">Download Response</item>
+                    <item name="label" xsi:type="string" translate="true">Action</item>
                 </item>
             </argument>
         </actionsColumn>
-
     </columns>
 </listing>
 
