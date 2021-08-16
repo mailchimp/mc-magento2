@@ -47,14 +47,46 @@ class Batch extends Column
     {
         if (isset($dataSource['data']['items'])) {
             foreach ($dataSource['data']['items'] as &$item) {
-                $item[$this->getData('name')]['batch_id'] = [
-                    'href' => $this->urlBuilder->getUrl(
-                        'mailchimp/errors/getresponse',
-                        ['id' => $item['id']]
-                    ),
-                    'label' => $item['batch_id'],
-                    'hidden' => false,
-                ];
+                $edit = false;
+                switch($item['regtype']) {
+                    case \Ebizmarts\MailChimp\Helper\Data::IS_CUSTOMER:
+                        $label = 'Edit customer';
+                        $url = 'customer/index/edit';
+                        $id = 'id';
+                        $edit = true;
+                        break;
+                    case \Ebizmarts\MailChimp\Helper\Data::IS_ORDER:
+                        $label = 'Edit order';
+                        $url = 'sales/order/view';
+                        $id = 'order_id';
+                        $edit = true;
+                        break;
+                    case \Ebizmarts\MailChimp\Helper\Data::IS_PRODUCT:
+                        $label = 'Edit product';
+                        $url = 'catalog/product/edit';
+                        $id = 'id';
+                        $edit = true;
+                        break;
+                }
+                $item[$this->getData('name')] = [
+                    'download' => [
+                        'href' => $this->urlBuilder->getUrl(
+                            'mailchimp/errors/getresponse',
+                            ['id' => $item['id']]
+                        ),
+                        'label' => 'Download Response'
+                    ]
+                    ];
+                if ($edit) {
+                    $item[$this->getData('name')]['edit'] =
+                    [
+                        'href' => $this->urlBuilder->getUrl(
+                            $url,
+                            [$id => $item['original_id']]
+                        ),
+                        'label' => $label
+                    ];
+                }
             }
         }
 
