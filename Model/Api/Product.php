@@ -393,7 +393,7 @@ class Product
         $data["url"] = $product->getProductUrl();
         $data["image_url"] = '';
         if ($product->getImage() && $product->getImage()!='no_selection') {
-            $filePath = 'catalog/product'.$product->getImage();
+            $filePath = 'catalog/product/'.ltrim($product->getImage(), '/');
             $data["image_url"] = $this->_helper->getBaserUrl(
                 $magentoStoreId,
                 \Magento\Framework\UrlInterface::URL_TYPE_MEDIA
@@ -403,7 +403,7 @@ class Product
         } else {
             $parent = $this->_getParent($product->getId(), $magentoStoreId);
             if ($parent && $parent->getImage() && $parent->getImage()!='no_selection') {
-                $filePath = 'catalog/product'.$parent->getImage();
+                $filePath = 'catalog/product/'.ltrim($parent->getImage(), '/');
                 $data["image_url"] = $this->_helper->getBaserUrl(
                     $magentoStoreId,
                     \Magento\Framework\UrlInterface::URL_TYPE_MEDIA
