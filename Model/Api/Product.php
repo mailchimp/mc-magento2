@@ -400,7 +400,7 @@ class Product
         } else {
             $parent = $this->_getParent($product->getId(), $magentoStoreId);
             if ($parent && $parent->getImage() && $parent->getImage()!='no_selection') {
-                $filePath = 'catalog/product'.ltrim($parent->getImage(), '/');
+                $filePath = 'catalog/product/'.ltrim($parent->getImage(), '/');
                 $data["image_url"] = $this->_helper->getBaserUrl($magentoStoreId, \Magento\Framework\UrlInterface::URL_TYPE_MEDIA).$filePath;
             }
         }
