@@ -393,21 +393,15 @@ class Product
         $data["url"] = $product->getProductUrl();
         $data["image_url"] = '';
         if ($product->getImage() && $product->getImage()!='no_selection') {
-            $filePath = 'catalog/product'.$product->getImage();
-            $data["image_url"] = $this->_helper->getBaserUrl(
-                $magentoStoreId,
-                \Magento\Framework\UrlInterface::URL_TYPE_MEDIA
-            ).$filePath;
+            $filePath = 'catalog/product/'.ltrim($product->getImage(), '/');
+            $data["image_url"] = $this->_helper->getBaserUrl($magentoStoreId, \Magento\Framework\UrlInterface::URL_TYPE_MEDIA).$filePath;
         } elseif ($this->_parentImage) {
             $data['image_url'] = $this->_parentImage;
         } else {
             $parent = $this->_getParent($product->getId(), $magentoStoreId);
             if ($parent && $parent->getImage() && $parent->getImage()!='no_selection') {
-                $filePath = 'catalog/product'.$parent->getImage();
-                $data["image_url"] = $this->_helper->getBaserUrl(
-                    $magentoStoreId,
-                    \Magento\Framework\UrlInterface::URL_TYPE_MEDIA
-                ).$filePath;
+                $filePath = 'catalog/product'.ltrim($parent->getImage(), '/');
+                $data["image_url"] = $this->_helper->getBaserUrl($magentoStoreId, \Magento\Framework\UrlInterface::URL_TYPE_MEDIA).$filePath;
             }
         }
         $data["published_at_foreign"] = "";
