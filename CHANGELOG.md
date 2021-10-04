@@ -1,5 +1,25 @@
 # Change Log
 
+## [102.3.44-p1](https://github.com/mailchimp/mc-magento2/tree/102.3.44-p1)
+
+[Full Changelog](https://github.com/mailchimp/mc-magento2/compare/102.3.43-p1...102.3.44)
+
+**Implemented enhancements:**
+
+- Add option in the error grid to link to the register with error [\#1279](https://github.com/mailchimp/mc-magento2/issues/1279)
+
+**Fixed bugs:**
+
+- Incorrect image url with some extensions \(p.e. cloudinary extension\) [\#1288](https://github.com/mailchimp/mc-magento2/issues/1288)
+- Modify order totals to $0 when order is cancelled [\#1272](https://github.com/mailchimp/mc-magento2/issues/1272)
+- Typo at https://github.com/mailchimp/mc-magento2/blob/develop-2.3/Model/Api/Order.php\#L29 [\#1249](https://github.com/mailchimp/mc-magento2/issues/1249)
+- Deleting error records causes database lockup [\#1242](https://github.com/mailchimp/mc-magento2/issues/1242)
+- Change the echo with helper-\>log in https://github.com/mailchimp/mc-magento2/blob/develop-2.3/Observer/Adminhtml/Product/ImportAfter.php\#L40 [\#1228](https://github.com/mailchimp/mc-magento2/issues/1228)
+- ImportAfter observer is throwing exceptions if the \_store column is not present in the import data [\#1224](https://github.com/mailchimp/mc-magento2/issues/1224)
+- Error retrieving the response of a batch from mailchimp [\#1204](https://github.com/mailchimp/mc-magento2/issues/1204)
+- Avoid duplicate entries in the stores grid [\#1217](https://github.com/mailchimp/mc-magento2/issues/1217)
+- Unable to create a new Mailchimp Store in admin [\#1208](https://github.com/mailchimp/mc-magento2/issues/1208)
+
 ## [103.4.43](https://github.com/mailchimp/mc-magento2/tree/103.4.43)
 
 [Full Changelog](https://github.com/mailchimp/mc-magento2/compare/102.3.42...103.4.43)
