@@ -76,4 +76,26 @@ class Hint extends \Magento\Backend\Block\Template implements \Magento\Framework
         }
 
     }
+    public function getScope()
+    {
+        $params = $this->getRequest()->getParams();
+        $scope = 'default';
+        if (isset($params['website'])) {
+            $scope = 'website';
+        } elseif (isset($params['store'])) {
+            $scope = 'store';
+        }
+        return $scope;
+    }
+    public function getScopeId()
+    {
+        $params = $this->getRequest()->getParams();
+        $scopeId = 0;
+        if (isset($params['website'])) {
+            $scopeId = $params['website'];
+        } elseif (isset($params['store'])) {
+            $scopeId = $params['store'];
+        }
+        return $scopeId;
+    }
 }

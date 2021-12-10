@@ -23,7 +23,9 @@ define(
                 "createWebhookUrl": "",
                 "getInterestUrl": "",
                 "resyncSubscribersUrl": "",
-                "resyncProductsUrl": ""
+                "resyncProductsUrl": "",
+                "scope": "",
+                "scopeId": ""
             },
 
             _init: function () {
@@ -89,9 +91,11 @@ define(
             },
             _createWebhook: function (apiKey, listId) {
                 var createWebhookUrl = this.options.createWebhookUrl;
+                var scope = this.options.scope;
+                var scopeId = this.options.scopeId;
                 $.ajax({
                     url: createWebhookUrl,
-                    data: {'form_key': window.FORM_KEY, 'apikey': apiKey, 'listId': listId},
+                    data: {'form_key': window.FORM_KEY, 'apikey': apiKey, 'listId': listId, 'scope': scope, 'scopeId': scopeId},
                     type: 'GET',
                     dataType: 'json',
                     showLoader: true
@@ -102,6 +106,7 @@ define(
                         alert({content: 'WebHook created'});
                     }
                 });
+
             },
             _loadStores: function (apiKey) {
                 var self = this;
