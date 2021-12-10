@@ -1061,7 +1061,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         return $key;
     }
 
-    public function createWebHook($apikey, $listId)
+    public function createWebHook($apikey, $listId, $scope=null, $scopeId=null)
     {
         $events = [
             'subscribe' => true,
@@ -1079,6 +1079,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         try {
             $api = $this->getApiByApiKey($apikey);
             $hookUrl = $this->_getUrl(\Ebizmarts\MailChimp\Controller\WebHook\Index::WEBHOOK__PATH, [
+                '_scope' => $scopeId,
                 'wkey' => $this->getWebhooksKey(),
                 '_nosid' => true,
                 '_secure' => true]);
