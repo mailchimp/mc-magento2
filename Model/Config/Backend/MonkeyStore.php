@@ -71,7 +71,6 @@ class MonkeyStore extends \Magento\Framework\App\Config\Value
 
     public function beforeSave()
     {
-        $this->_helper->log(__METHOD__);
         $data = $this->getData('groups');
         $found = 0;
         $newListId = null;
