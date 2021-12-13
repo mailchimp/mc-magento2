@@ -71,6 +71,7 @@ class MonkeyStore extends \Magento\Framework\App\Config\Value
 
     public function beforeSave()
     {
+        $this->_helper->log(__METHOD__);
         $data = $this->getData('groups');
         $found = 0;
         $newListId = null;
@@ -112,14 +113,17 @@ class MonkeyStore extends \Magento\Framework\App\Config\Value
                 $this->getScopeId(),
                 $this->getScope()
             );
-            $this->_helper->saveJsUrl($this->getScopeId(),$this->getScope(),$this->getValue());
-
             foreach ($this->_storeManager->getStores() as $storeId => $val) {
                 $mstoreId = $this->_helper->getConfigValue(
                     \Ebizmarts\MailChimp\Helper\Data::XML_MAILCHIMP_STORE,
                     $storeId
                 );
                 if ($mstoreId == $mailchimpStore) {
+                    $this->_helper->deleteConfig(
+                        \Ebizmarts\MailChimp\Helper\Data::XML_MAILCHIMP_JS_URL,
+                        $storeId,
+                        'stores'
+                    );
                     $found++;
                 }
                 $listId = $this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_PATH_LIST, $storeId);
