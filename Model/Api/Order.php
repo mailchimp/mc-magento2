@@ -314,6 +314,7 @@ class Order
      * @param $magentoStoreId
      * @param $isModifiedOrder
      * @return string
+     * @throws \Exception
      */
     protected function generatePOSTPayload(
         \Magento\Sales\Model\Order $order,
@@ -376,18 +377,31 @@ class Order
         $data['lines'] = [];
 
         //order lines
-        $items = $order->getAllVisibleItems();
-        $itemCount = 0;
+        try {
+            $items = $order->getAllVisibleItems();
+            $itemCount = 0;
+        } catch (\Exception $e) {
+            $this->_helper->log("Can't load all the visible items");
+            throw $e;
+        }
         /**
          * @var $item \Magento\Sales\Model\Order\Item
          */
         foreach ($items as $item) {
             $variant = null;
-            $productSyncData = $this->_helper->getChimpSyncEcommerce(
-                $mailchimpStoreId,
-                $item->getProductId(),
-                \Ebizmarts\MailChimp\Helper\Data::IS_PRODUCT
-            );
+            try {
+                $productSyncData = $this->_helper->getChimpSyncEcommerce(
+                    $mailchimpStoreId,
+                    $item->getProductId(),
+                    \Ebizmarts\MailChimp\Helper\Data::IS_PRODUCT
+                );
+            } catch (\Exception $e){
+                $this->_helper->log($e->getMessage());
+                continue;
+            }
+            if ($productSyncData->getRelatedId()!=$item->getProductId()||($productSyncData->getRelatedId()==$item->getProductId()&&$productSyncData->getMailchimpSyncDeleted()==1)) {
+                continue;
+            }
             if ($item->getProductType() == \Magento\ConfigurableProduct\Model\Product\Type\Configurable::TYPE_CODE) {
                 $options = $item->getProductOptions();
                 if (!isset($options['simple_sku'])) {
