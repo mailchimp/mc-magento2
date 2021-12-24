@@ -559,32 +559,37 @@ class Product
         $items = $order->getAllVisibleItems();
         foreach ($items as $item) {
             //@todo get from the store not the default
-            $product = $this->_productRepository->getById($item->getProductId(), false, $magentoStoreId);
-            $productSyncData = $this->_chimpSyncEcommerce->create()->getByStoreIdType(
-                $mailchimpStoreId,
-                $product->getId(),
-                \Ebizmarts\MailChimp\Helper\Data::IS_PRODUCT
-            );
-            if ($product->getId()!=$item->getProductId() || (
-                    $product->getTypeId() != \Magento\Catalog\Model\Product\Type::TYPE_SIMPLE &&
-                    $product->getTypeId() != \Magento\Catalog\Model\Product\Type::TYPE_VIRTUAL &&
-                    $product->getTypeId() != \Magento\ConfigurableProduct\Model\Product\Type\Configurable::TYPE_CODE &&
-                    $product->getTypeId() != "downloadable")) {
-                $this->_helper->log('The product with id ['.$product->getId().
-                    '] is not supported ['.$product->getTypeId().']');
-                continue;
-            }
-            if ($productSyncData->getMailchimpSyncModified() &&
-                $productSyncData->getMailchimpSyncDelta() > $this->_helper->getMCMinSyncDateFlag()) {
-                $data = array_merge(
-                    $data,
-                    $this->_buildOldProductRequest($product, $batchId, $mailchimpStoreId, $magentoStoreId)
+            try {
+                $product = $this->_productRepository->getById($item->getProductId(), false, $magentoStoreId);
+                $productSyncData = $this->_chimpSyncEcommerce->create()->getByStoreIdType(
+                    $mailchimpStoreId,
+                    $product->getId(),
+                    \Ebizmarts\MailChimp\Helper\Data::IS_PRODUCT
                 );
-                $this->_updateProduct($mailchimpStoreId, $product->getId());
-            } elseif (!$productSyncData->getMailchimpSyncDelta() ||
-                $productSyncData->getMailchimpSyncDelta() < $this->_helper->getMCMinSyncDateFlag()) {
-                $data[] = $this->_buildNewProductRequest($product, $mailchimpStoreId, $magentoStoreId);
-                $this->_updateProduct($mailchimpStoreId, $product->getId());
+                if ($product->getId() != $item->getProductId() || (
+                        $product->getTypeId() != \Magento\Catalog\Model\Product\Type::TYPE_SIMPLE &&
+                        $product->getTypeId() != \Magento\Catalog\Model\Product\Type::TYPE_VIRTUAL &&
+                        $product->getTypeId() != \Magento\ConfigurableProduct\Model\Product\Type\Configurable::TYPE_CODE &&
+                        $product->getTypeId() != "downloadable")) {
+                    $this->_helper->log('The product with id [' . $product->getId() .
+                        '] is not supported [' . $product->getTypeId() . ']');
+                    continue;
+                }
+                if ($productSyncData->getMailchimpSyncModified() &&
+                    $productSyncData->getMailchimpSyncDelta() > $this->_helper->getMCMinSyncDateFlag()) {
+                    $data = array_merge(
+                        $data,
+                        $this->_buildOldProductRequest($product, $batchId, $mailchimpStoreId, $magentoStoreId)
+                    );
+                    $this->_updateProduct($mailchimpStoreId, $product->getId());
+                } elseif (!$productSyncData->getMailchimpSyncDelta() ||
+                    $productSyncData->getMailchimpSyncDelta() < $this->_helper->getMCMinSyncDateFlag()) {
+                    $data[] = $this->_buildNewProductRequest($product, $mailchimpStoreId, $magentoStoreId);
+                    $this->_updateProduct($mailchimpStoreId, $product->getId());
+                }
+            } catch (\Exception $e) {
+                $this->_helper->log($e->getMessage());
+                $this->_helper->log("Skip product [".$item->getProductId()."]");
             }
         }
         return $data;
