@@ -15,4 +15,7 @@
     <event name="adminhtml_customer_save_after">
         <observer name="mailchimp_adminhtml_customer_save_after" instance="\Ebizmarts\MailChimp\Observer\Adminhtml\Customer\SaveAfter" />
     </event>
+    <event name="catalog_product_delete_after">
+        <observer name="mailchimp_product_delete_after" instance="\Ebizmarts\MailChimp\Observer\Adminhtml\Product\DeleteAfter" />
+    </event>
 </config>
