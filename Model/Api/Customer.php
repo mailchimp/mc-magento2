@@ -73,7 +73,7 @@ class Customer
         \Magento\Customer\Model\Address $address,
         \Magento\Newsletter\Model\SubscriberFactory $subscriberFactory
     ) {
-    
+
         $this->_helper              = $helper;
         $this->_collection          = $collection;
         $this->_orderCollection     = $orderCollection;
@@ -246,7 +246,7 @@ class Customer
                  * @var $country \Magento\Directory\Model\Country
                  */
                 $country = $this->_countryFactory->create()->loadByCode($address->getCountryId());
-                $customerAddress["country"] = $country->getName();
+                $customerAddress["country"] = $country->getName('en_US');
                 $customerAddress["country_code"] = $address->getCountryId();
             }
             if (count($customerAddress)) {
