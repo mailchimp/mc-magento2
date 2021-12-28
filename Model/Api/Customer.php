@@ -246,7 +246,7 @@ class Customer
                  * @var $country \Magento\Directory\Model\Country
                  */
                 $country = $this->_countryFactory->create()->loadByCode($address->getCountryId());
-                $customerAddress["country"] = $country->getName();
+                $customerAddress["country"] = $country->getName('en_US');
                 $customerAddress["country_code"] = $address->getCountryId();
             }
             if (count($customerAddress)) {

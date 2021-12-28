@@ -514,7 +514,7 @@ class Order
              * @var $country \Magento\Directory\Model\Country
              */
             $country = $this->_countryFactory->create()->loadByCode($billingAddress->getCountryId());
-            $address["country"] = $data['billing_address']['country'] = $country->getName();
+            $address["country"] = $data['billing_address']['country'] = $country->getName('en_US');
             $address["country_code"] = $data['billing_address']['country_code'] = $billingAddress->getCountryId();
         }
         if (count($address)) {
@@ -571,7 +571,7 @@ class Order
                  * @var $country \Magento\Directory\Model\Country
                  */
                 $country = $this->_countryFactory->create()->loadByCode($shippingAddress->getCountryId());
-                $data['shipping_address']["country"] = $country->getName();
+                $data['shipping_address']["country"] = $country->getName('en_US');
                 $data['shipping_address']["country_code"] = $shippingAddress->getCountryId();
             }
             if ($shippingAddress->getCompany()) {
