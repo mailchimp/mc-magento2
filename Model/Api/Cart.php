@@ -79,7 +79,7 @@ class Cart
         \Magento\Sales\Model\ResourceModel\Order\CollectionFactory $orderCollectionFactory,
         \Magento\Framework\Url $urlHelper
     ) {
-    
+
         $this->_helper                  = $helper;
         $this->_quoteCollection         = $quoteColletcion;
         $this->_customerFactory         = $customerFactory;
@@ -632,7 +632,7 @@ class Cart
                  * @var $country \Magento\Directory\Model\Country
                  */
                 $country = $this->_countryFactory->create()->loadByCode($billingAddress->getCountryId());
-                $address['shipping_address']['country'] = $country->getName();
+                $address['shipping_address']['country'] = $country->getName('en_US');
                 $address['shipping_address']['country_code'] = $billingAddress->getCountryId();
             }
 
