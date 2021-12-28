@@ -550,7 +550,7 @@ class Cart
                  * @var $country \Magento\Directory\Model\Country
                  */
                 $country = $this->_countryFactory->create()->loadByCode($billingAddress->getCountryId());
-                $address['shipping_address']['country'] = $country->getName();
+                $address['shipping_address']['country'] = $country->getName('en_US');
                 $address['shipping_address']['country_code'] = $billingAddress->getCountryId();
             }
 
