@@ -3,6 +3,7 @@
 namespace Ebizmarts\MailChimp\Observer\Adminhtml\Product;
 
 use Magento\Framework\Event\Observer;
+use Magento\Catalog\Model\ResourceModel\Product\CollectionFactory;
 
 class ImportAfter implements \Magento\Framework\Event\ObserverInterface
 {
@@ -10,58 +11,75 @@ class ImportAfter implements \Magento\Framework\Event\ObserverInterface
      * @var \Ebizmarts\MailChimp\Helper\Data
      */
     protected $helper;
-    protected $productRepository;
+    /**
+     * @var CollectionFactory
+     */
+    protected $productCollectionFactory;
 
     /**
-     * ImportAfter constructor.
      * @param \Ebizmarts\MailChimp\Helper\Data $helper
+     * @param CollectionFactory $productCollectionFactory
      */
     public function __construct(
         \Ebizmarts\MailChimp\Helper\Data $helper,
-        \Magento\Catalog\Model\ProductRepository $productRepository
+        CollectionFactory $productCollectionFactory
     )
     {
         $this->helper = $helper;
-        $this->productRepository = $productRepository;
+        $this->productCollectionFactory = $productCollectionFactory;
     }
     public function execute(Observer $observer)
     {
         try {
             $bunch = $observer->getBunch();
+            $counter = 0;
+            $skus = [];
             foreach ($bunch as $product) {
+                if ($counter % 100 == 0 && count($skus)) {
+                    $this->updateSkus($skus);
+                    $skus =[];
+                }
                 $sku = $product['sku'];
-                if (key_exists('_store', $product)) {
+                if (key_exists('_store', $product)&&!empty($product['_store'])) {
                     $storeId = $product['_store'];
                 } else {
                     $storeId = 0;
                 }
-                $pro = $this->productRepository->get($sku, false,$storeId);
-                $id = $pro->getId();
-                $storeId = $pro->getStoreId();
-                $this->_updateProduct($pro->getStoreId(), $pro->getId(), null,null,1);
+                $skus[$storeId][]=$sku;
+                $counter++;
+            }
+            if (count($skus)) {
+                $this->updateSkus($skus);
             }
         } catch (\Exception $e) {
             $this->helper->log($e->getMessage());
         }
     }
-    protected function _updateProduct(
-        $storeId,
-        $entityId,
-        $sync_delta = null,
-        $sync_error = null,
-        $sync_modified = null
-    ) {
+    protected function updateSkus($skus)
+    {
+        foreach ($skus as $storeId => $storeskus) {
+            /**
+             * @var $collection \Magento\Catalog\Model\ResourceModel\Product\Collection
+             */
+            $collection = $this->productCollectionFactory->create();
+            $collection->addStoreFilter($storeId);
+            $collection->addFieldToFilter('sku', ['in'=>$storeskus]);
+            $collection->addFieldToSelect('id');
+            $productIds = [];
+            foreach ($collection as $item) {
+                $productIds[] = $item->getId();
+            }
+            $this->markAsModified($storeId, $productIds);
+        }
+
+    }
+    protected function markAsModified($storeId,$productsIds)
+    {
         $mailchimpStoreId = $this->helper->getConfigValue(
             \Ebizmarts\MailChimp\Helper\Data::XML_MAILCHIMP_STORE,
             $storeId
         );
-        $this->helper->saveEcommerceData(
-            $mailchimpStoreId,
-            $entityId,
-            \Ebizmarts\MailChimp\Helper\Data::IS_PRODUCT,
-            $sync_delta,
-            $sync_error,
-            $sync_modified
-        );
+        $this->helper->markAllAsModifiedByIds($mailchimpStoreId, $productsIds, \Ebizmarts\MailChimp\Helper\Data::IS_PRODUCT);
+
     }
 }
