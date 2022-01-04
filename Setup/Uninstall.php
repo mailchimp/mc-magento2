@@ -45,7 +45,6 @@ class Uninstall implements UninstallInterface
                 $connection->dropColumn( $setup->getTable($table), $column);
             }
         }
-
         $installer->endSetup();
     }
 }
