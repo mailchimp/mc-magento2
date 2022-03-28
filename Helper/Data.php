@@ -413,11 +413,13 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
                 'default_shipping##city',
                 'default_shipping##state',
                 'default_shipping##telephone',
+                'default_shipping##company',
                 'default_billing##zip',
                 'default_billing##country',
                 'default_billing##city',
                 'default_billing##state',
-                'default_billing##telephone'
+                'default_billing##telephone',
+                'default_billing##company'
             ];
 
             foreach($elements as $item) {
@@ -703,9 +705,13 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
                     $fieldName = $parts[1];
                     $customerAddress = $customer->getPrimaryAddress($attributeCode);
                     if ($customerAddress !== false) {
-                        $addressData = $this->_getAddressValues($customerAddress);
-                        if (!empty($addressData[$fieldName])) {
-                            $value = $addressData[$fieldName];
+                        if ($fieldName!='company') {
+                            $addressData = $this->_getAddressValues($customerAddress);
+                            if (!empty($addressData[$fieldName])) {
+                                $value = $addressData[$fieldName];
+                            }
+                        } else {
+                            $value = $customerAddress->getCompany();
                         }
                     }
                 }
