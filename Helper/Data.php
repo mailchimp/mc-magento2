@@ -651,34 +651,34 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     {
         return $this->_storeManager->getStore($storeId)->getBaseUrl($type, true);
     }
-    public function createStore($listId = null, $storeId)
-    {
-        if ($listId) {
-            //generate store id
-            $date = date('Y-m-d-His');
-            $baseUrl = $this->_storeManager->getStore($storeId)->getName();
-            $mailchimpStoreId = hash('md5', parse_url($baseUrl, PHP_URL_HOST) . '_' . $date);
-            $currencyCode = $this->_storeManager->getStore($storeId)->getDefaultCurrencyCode();
-            $name = $this->getMCStoreName($storeId);
-
-            //create store in mailchimp
-            try {
-                $this->getApi()->ecommerce->stores->add(
-                    $mailchimpStoreId,
-                    $listId,
-                    $name,
-                    $currencyCode,
-                    self::PLATFORM
-                );
-                return $mailchimpStoreId;
-            } catch (\Mailchimp_Error $e) {
-                $this->log($e->getFriendlyMessage());
-            } catch (Exception $e) {
-                return null;
-            }
-        }
-        return null;
-    }
+//    public function createStore($listId = null, $storeId)
+//    {
+//        if ($listId) {
+//            //generate store id
+//            $date = date('Y-m-d-His');
+//            $baseUrl = $this->_storeManager->getStore($storeId)->getName();
+//            $mailchimpStoreId = hash('md5', parse_url($baseUrl, PHP_URL_HOST) . '_' . $date);
+//            $currencyCode = $this->_storeManager->getStore($storeId)->getDefaultCurrencyCode();
+//            $name = $this->getMCStoreName($storeId);
+//
+//            //create store in mailchimp
+//            try {
+//                $this->getApi()->ecommerce->stores->add(
+//                    $mailchimpStoreId,
+//                    $listId,
+//                    $name,
+//                    $currencyCode,
+//                    self::PLATFORM
+//                );
+//                return $mailchimpStoreId;
+//            } catch (\Mailchimp_Error $e) {
+//                $this->log($e->getFriendlyMessage());
+//            } catch (Exception $e) {
+//                return null;
+//            }
+//        }
+//        return null;
+//    }
     public function getMCMinSyncDateFlag($storeId = null)
     {
         $syncDate = $this->getConfigValue(self::XML_PATH_SYNC_DATE, $storeId);
