@@ -156,6 +156,9 @@ class Order
             \Ebizmarts\MailChimp\Helper\Data::XML_MAILCHIMP_STORE,
             $magentoStoreId
         );
+        $mailchimpListId = $this->_helper->getListForMailChimpStore($mailchimpStoreId, $this->_helper->getApiKey($magentoStoreId));
+        $api = $this->_helper->getApi($magentoStoreId);
+
         $modifiedOrders = $this->_getCollection();
         // select orders for the current Magento store id
         $modifiedOrders->addFieldToFilter('store_id', ['eq' => $magentoStoreId]);
@@ -196,7 +199,7 @@ class Order
                     }
                 }
 
-                $orderJson = $this->generatePOSTPayload($order, $mailchimpStoreId, $magentoStoreId, true);
+                $orderJson = $this->generatePOSTPayload($order, $mailchimpStoreId, $magentoStoreId, true, $api, $mailchimpListId);
                 if ($orderJson!==false) {
                     if (!empty($orderJson)) {
                         $this->_helper->modifyCounter(\Ebizmarts\MailChimp\Helper\Data::ORD_MOD);
@@ -235,6 +238,9 @@ class Order
             \Ebizmarts\MailChimp\Helper\Data::XML_MAILCHIMP_STORE,
             $magentoStoreId
         );
+        $mailchimpListId = $this->_helper->getListForMailChimpStore($mailchimpStoreId, $this->_helper->getApiKey($magentoStoreId));
+        $api = $this->_helper->getApi($magentoStoreId);
+
         $newOrders = $this->_getCollection();
         // select carts for the current Magento store id
         $newOrders->addFieldToFilter('store_id', ['eq' => $magentoStoreId]);
@@ -276,7 +282,7 @@ class Order
                         $this->_counter++;
                     }
                 }
-                $orderJson = $this->generatePOSTPayload($order, $mailchimpStoreId, $magentoStoreId);
+                $orderJson = $this->generatePOSTPayload($order, $mailchimpStoreId, $magentoStoreId, true, $api, $mailchimpListId);
                 if ($orderJson!==false) {
                     if (!empty($orderJson)) {
                         $this->_helper->modifyCounter(\Ebizmarts\MailChimp\Helper\Data::ORD_NEW);
@@ -320,7 +326,9 @@ class Order
         \Magento\Sales\Model\Order $order,
         $mailchimpStoreId,
         $magentoStoreId,
-        $isModifiedOrder = false
+        $isModifiedOrder = false,
+        $api,
+        $mailchimpListId
     ) {
         $data = [];
         $data['id'] = $order->getIncrementId();
@@ -434,11 +442,27 @@ class Order
         }
 
         //customer data
-        $data['customer'] = [
-            'id' => hash('md5', strtolower($order->getCustomerEmail())),
-            'email_address' => $order->getCustomerEmail(),
-            'opt_in_status' => $this->_apiCustomer->getOptin($magentoStoreId)
-        ];
+        $subscriberId = hash('md5', strtolower($order->getCustomerEmail()));
+        $customerExist = True;
+        $member = NULL;
+        try{
+            $member = $api->lists->members->get($mailchimpListId,$subscriberId);
+        } catch (\Throwable $e) {
+            $customerExist = False;
+        }
+
+        if ($customerExist){
+            $data['customer'] = [
+                'id' => $subscriberId,
+                'email_address' => $order->getCustomerEmail()
+                ];
+        } else {
+            $data['customer'] = [
+                'id' => $subscriberId,
+                'email_address' => $order->getCustomerEmail(),
+                'opt_in_status' => $this->_apiCustomer->getOptin($magentoStoreId)
+                ];
+        }
 
         $data['order_url'] = $this->_urlHelper->getUrl(
             'sales/order/view/',
