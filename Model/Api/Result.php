@@ -66,7 +66,7 @@ class Result
         $this->_driver              = $driver;
         $this->_curlFactory         = $curlFactory;
     }
-    public function processResponses($storeId, $isMailChimpStoreId = false, $mailchimpStoreId)
+    public function processResponses($storeId, $mailchimpStoreId)
     {
         $collection = $this->_batchCollection->create();
         $collection

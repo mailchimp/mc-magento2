@@ -138,7 +138,7 @@ class Ecommerce
                     $storeId
                 );
                 if ($mailchimpStoreId != -1 && $mailchimpStoreId != '') {
-                    $this->_apiResult->processResponses($storeId, true, $mailchimpStoreId);
+                    $this->_apiResult->processResponses($storeId, $mailchimpStoreId);
                     $batchId = $this->_processStore($storeId, $mailchimpStoreId, $listId);
                     if ($batchId) {
                         $connection->update(
