@@ -159,6 +159,7 @@ class Order
         $modifiedOrders = $this->_getCollection();
         // select orders for the current Magento store id
         $modifiedOrders->addFieldToFilter('store_id', ['eq' => $magentoStoreId]);
+        $modifiedOrders->addFieldToSelect(['store_id','created_at']);
         //join with mailchimp_ecommerce_sync_data table to filter by sync data.
         $modifiedOrders->getSelect()->joinLeft(
             ['m4m' => $this->_helper->getTableName('mailchimp_sync_ecommerce')],
@@ -238,6 +239,7 @@ class Order
         $newOrders = $this->_getCollection();
         // select carts for the current Magento store id
         $newOrders->addFieldToFilter('store_id', ['eq' => $magentoStoreId]);
+        $newOrders->addFieldToSelect(['store_id','created_at']);
         // filter by first date if exists.
         if ($this->_firstDate) {
             $newOrders->addFieldToFilter('created_at', ['gt' => $this->_firstDate]);
