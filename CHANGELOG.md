@@ -1,5 +1,25 @@
 # Change Log
 
+## [103.4.45](https://github.com/mailchimp/mc-magento2/tree/103.4.45)
+
+[Full Changelog](https://github.com/mailchimp/mc-magento2/compare/103.4.44...103.4.45)
+
+**Implemented enhancements:**
+
+- Query optimization for ecommerce table [\#1391](https://github.com/mailchimp/mc-magento2/issues/1391)
+- Add the possibility  to send the company as a merge field [\#1369](https://github.com/mailchimp/mc-magento2/issues/1369)
+- Make uninstall [\#1347](https://github.com/mailchimp/mc-magento2/issues/1347)
+- Performance Issue During Product Import [\#1309](https://github.com/mailchimp/mc-magento2/issues/1309)
+
+**Fixed bugs:**
+
+- Add php 8.1 compatibility for magento 2.4.4 [\#1377](https://github.com/mailchimp/mc-magento2/issues/1377)
+- Subscribers are not added to mailchimp [\#1359](https://github.com/mailchimp/mc-magento2/issues/1359)
+- The sync fails when an order contains a deleted product [\#1330](https://github.com/mailchimp/mc-magento2/issues/1330)
+- Problem syncing country with customer address [\#1329](https://github.com/mailchimp/mc-magento2/issues/1329)
+- Chimpstatic wrong url when change the mailchimp store [\#1322](https://github.com/mailchimp/mc-magento2/issues/1322)
+- Error creating the webhook, wrong webhook url [\#1316](https://github.com/mailchimp/mc-magento2/issues/1316)
+
 ## [103.4.44](https://github.com/mailchimp/mc-magento2/tree/103.4.44)
 
 [Full Changelog](https://github.com/mailchimp/mc-magento2/compare/103.4.43...103.4.44)
