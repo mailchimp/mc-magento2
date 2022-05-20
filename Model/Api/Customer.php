@@ -89,6 +89,7 @@ class Customer
         $listId = $this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_PATH_LIST, $storeId);
         $collection = $this->_collection->create();
         $collection->addFieldToFilter('store_id', ['eq'=>$storeId]);
+        $collection->getSelect()->reset(\Zend_Db_Select::COLUMNS)->columns(['entity_id','store_id']);
         $collection->getSelect()->joinLeft(
             ['m4m' => $this->_helper->getTableName('mailchimp_sync_ecommerce')],
             "m4m.related_id = e.entity_id and m4m.type = '".\Ebizmarts\MailChimp\Helper\Data::IS_CUSTOMER.
