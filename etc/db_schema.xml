@@ -1,0 +1,140 @@
+<schema xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:framework:Setup/Declaration/Schema/etc/schema.xsd">
+    <table name="sales_order">
+        <column xsi:type="boolean" name="mailchimp_abandonedcart_flag" nullable="false" comment="Retrieved from Mailchimp"/>
+        <column xsi:type="varchar" name="mailchimp_campaign_id" length="16" comment="Campaign"/>
+        <column xsi:type="text" name="mailchimp_landing_page" nullable="false" comment="Landing Page"/>
+        <column xsi:type="boolean" name="mailchimp_flag" nullable="false" comment="Retrieved from Mailchimp"/>
+    </table>
+    <table name="sales_order_grid">
+        <column xsi:type="boolean" name="mailchimp_flag" nullable="false" comment="Retrieved from Mailchimp"/>
+    </table>
+    <table name="quote">
+        <column xsi:type="boolean" name="mailchimp_abandonedcart_flag" nullable="false" comment="Retrieved from Mailchimp"/>
+        <column xsi:type="varchar" name="mailchimp_campaign_id" length="16" comment="Campaign"/>
+        <column xsi:type="text" name="mailchimp_landing_page" nullable="false" comment="Landing Page"/>
+    </table>
+    <table name="mailchimp_errors">
+        <column xsi:type="int" name="id" padding="10" nullable="false" identity="true" comment="Table Id"/>
+        <column xsi:type="varchar" name="mailchimp_store_id" length="50" comment="Mailchimp Store Id"/>
+        <column xsi:type="text" name="type" nullable="false" comment="type"/>
+        <column xsi:type="varchar" name="title" length="128" comment="title"/>
+        <column xsi:type="int" name="status" padding="11" nullable="false" comment="status"/>
+        <column xsi:type="text" name="errors" nullable="false" comment="errors"/>
+        <column xsi:type="varchar" name="regtype" length="3" comment="regtype"/>
+        <column xsi:type="int" name="original_id" padding="11" nullable="false" comment="Associated object ID"/>
+        <column xsi:type="varchar" name="batch_id" length="64" comment="Mailchimp Batch ID"/>
+        <column xsi:type="int" name="store_id" padding="11" nullable="false" comment="Magento Store Id"/>
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="id"/>
+        </constraint>
+        <index referenceId="MAILCHIMP_ERRORS_STORE_ID_REGTYPE_ORIGINAL_ID" indexType="btree">
+            <column name="store_id"/>
+            <column name="regtype"/>
+            <column name="original_id"/>
+        </index>
+    </table>
+    <table name="mailchimp_interest_group">
+        <column xsi:type="int" name="id" padding="10" nullable="false" identity="true" comment="Table Id"/>
+        <column xsi:type="int" name="subscriber_id" padding="10" nullable="false" comment="subscriber id"/>
+        <column xsi:type="smallint" name="store_id" padding="5" nullable="false" default="0"
+                comment="Store Id"/>
+        <column xsi:type="datetime" name="updated_at" on_update="true" nullable="false" default="CURRENT_TIMESTAMP"
+                comment=""/>
+        <column xsi:type="text" name="groupdata" nullable="false" comment="data"/>
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="id"/>
+        </constraint>
+    </table>
+    <table name="mailchimp_stores">
+        <column xsi:type="int" name="id" padding="10" nullable="false" identity="true" comment="Table Id"/>
+        <column xsi:type="varchar" name="apikey" length="128" comment="API Key"/>
+        <column xsi:type="varchar" name="store_id" length="50" comment="Store Id"/>
+        <column xsi:type="varchar" name="list_id" length="50" comment="List Id"/>
+        <column xsi:type="varchar" name="name" length="128" comment="Name"/>
+        <column xsi:type="varchar" name="platform" length="50" comment="Platform"/>
+        <column xsi:type="boolean" name="is_sync" nullable="false" comment="if the store is synced or not	"/>
+        <column xsi:type="varchar" name="email_address" length="128" comment="email associated to store"/>
+        <column xsi:type="varchar" name="currency_code" length="3" comment="store currency code"/>
+        <column xsi:type="varchar" name="money_format" length="10" comment="symbol of currency"/>
+        <column xsi:type="varchar" name="primary_locale" length="5" comment="store locale"/>
+        <column xsi:type="varchar" name="timezone" length="32" comment="store timezone"/>
+        <column xsi:type="varchar" name="phone" length="50" comment="store phone"/>
+        <column xsi:type="varchar" name="address_address_one" length="255" comment="first street address"/>
+        <column xsi:type="varchar" name="address_address_two" length="255" comment="second street address"/>
+        <column xsi:type="varchar" name="address_city" length="50" comment="store city"/>
+        <column xsi:type="varchar" name="address_province" length="50" comment="store province"/>
+        <column xsi:type="varchar" name="address_province_code" length="2" comment="store province code"/>
+        <column xsi:type="varchar" name="address_postal_code" length="50" comment="store postal code"/>
+        <column xsi:type="varchar" name="address_country" length="50" comment="store country"/>
+        <column xsi:type="varchar" name="address_country_code" length="2" comment="store country code"/>
+        <column xsi:type="text" name="domain" nullable="false" comment="Domain"/>
+        <column xsi:type="text" name="mc_account_name" nullable="false" comment="MC account name"/>
+        <column xsi:type="text" name="list_name" nullable="false" comment="	List Name"/>
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="id"/>
+        </constraint>
+    </table>
+    <table name="mailchimp_sync_batches">
+        <column xsi:type="int" name="id" padding="10" nullable="false" identity="true" comment="Table Id"/>
+        <column xsi:type="varchar" name="store_id" length="50" comment="Store Id"/>
+        <column xsi:type="varchar" name="mailchimp_store_id" length="50" comment="Mailchimp Store Id"/>
+        <column xsi:type="varchar" name="batch_id" length="24" comment="Batch Id"/>
+        <column xsi:type="varchar" name="status" length="10" comment="Status"/>
+        <column xsi:type="datetime" name="modified_date" on_update="true" nullable="false" default="CURRENT_TIMESTAMP"
+                comment="Sync Delta"/>
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="id"/>
+        </constraint>
+    </table>
+    <table name="mailchimp_sync_ecommerce">
+        <column xsi:type="int" name="id" padding="10" nullable="false" identity="true" comment="Table Id"/>
+        <column xsi:type="varchar" name="mailchimp_store_id" length="50" comment="Store Id"/>
+        <column xsi:type="varchar" name="type" length="24" comment="Type of register"/>
+        <column xsi:type="int" name="related_id" padding="11" unsigned="true" nullable="false"
+                comment="Id of the related entity"/>
+        <column xsi:type="boolean" name="mailchimp_sync_modified" nullable="false" comment="If the entity was modified"/>
+        <column xsi:type="datetime" name="mailchimp_sync_delta" on_update="false" nullable="false" default="CURRENT_TIMESTAMP"
+                comment="Sync Delta"/>
+        <column xsi:type="varchar" name="mailchimp_sync_error" length="128" comment="Error on synchronization"/>
+        <column xsi:type="boolean" name="mailchimp_sync_deleted" nullable="false" comment="If the object was deleted in mailchimp"/>
+        <column xsi:type="varchar" name="mailchimp_token" length="32" comment="Quote token"/>
+        <column xsi:type="varchar" name="batch_id" length="64" comment="Batch id"/>
+        <column xsi:type="int" name="deleted_related_id" padding="11" unsigned="true" nullable="false"
+                comment="Id related to delete item"/>
+        <column xsi:type="smallint" name="mailchimp_sent" padding="6" nullable="false" default="0"
+                comment="Sent to Mailchimp"/>
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="id"/>
+        </constraint>
+        <index referenceId="MAILCHIMP_SYNC_ECOMMERCE_RELATED_ID" indexType="btree">
+            <column name="related_id"/>
+        </index>
+        <index referenceId="MAILCHIMP_SYNC_ECOMMERCE_TYPE" indexType="btree">
+            <column name="type"/>
+        </index>
+        <index referenceId="MAILCHIMP_SYNC_ECOMMERCE_BATCH_ID" indexType="btree">
+            <column name="batch_id"/>
+        </index>
+        <index referenceId="MAILCHIMP_SYNC_ECOMMERCE_MAILCHIMP_STORE_ID" indexType="btree">
+            <column name="mailchimp_store_id"/>
+        </index>
+        <index referenceId="MAILCHIMP_SYNC_ECOMMERCE_mailchimp_sync_delta" indexType="btree">
+            <column name="mailchimp_sync_delta"/>
+        </index>
+        <index referenceId="MAILCHIMP_SYNC_ECOMMERCE_mailchimp_sync_modified" indexType="btree">
+            <column name="mailchimp_sync_modified"/>
+        </index>
+    </table>
+    <table name="mailchimp_webhook_request">
+        <column xsi:type="int" name="id" padding="10" nullable="false" identity="true" comment="Table Id"/>
+        <column xsi:type="varchar" name="type" length="50" comment="request type"/>
+        <column xsi:type="datetime" name="fired_at" on_update="false" nullable="false" default="CURRENT_TIMESTAMP"
+                comment="date of the request"/>
+        <column xsi:type="text" name="data_request" nullable="false" comment="data of the request"/>
+        <column xsi:type="boolean" name="processed" nullable="false" comment="Already processed"/>
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="id"/>
+        </constraint>
+    </table>
+</schema>
