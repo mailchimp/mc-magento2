@@ -12,7 +12,6 @@
     "mailchimp_abandonedcart_flag": true,
     "mailchimp_campaign_id": true,
     "mailchimp_landing_page": true,
-    "mailchimp_flag": true
   },
   "mailchimp_errors": {
     "id": true,
