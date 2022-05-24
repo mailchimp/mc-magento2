@@ -1,0 +1,90 @@
+{
+  "sales_order": {
+    "mailchimp_abandonedcart_flag": true,
+    "mailchimp_campaign_id": true,
+    "mailchimp_landing_page": true,
+    "mailchimp_flag": true
+  },
+  "sales_order_grid": {
+    "mailchimp_flag": true
+  },
+  "quote": {
+    "mailchimp_abandonedcart_flag": true,
+    "mailchimp_campaign_id": true,
+    "mailchimp_landing_page": true,
+  },
+  "mailchimp_errors": {
+    "id": true,
+    "mailchimp_store_id": true,
+    "type": true,
+    "title": true,
+    "status": true,
+    "errors": true,
+    "regtype": true,
+    "original_id": true,
+    "batch_id": true,
+    "store_id": true
+  },
+  "mailchimp_interest_group": {
+    "id": true,
+    "subscriber_id": true,
+    "store_id": true,
+    "updated_at": true,
+    "groupdata": true
+  },
+  "mailchimp_stores": {
+    "id": true,
+    "apikey": true,
+    "storeid": true,
+    "list_id": true,
+    "name": true,
+    "platform": true,
+    "is_sync": true,
+    "email_address": true,
+    "currency_code": true,
+    "money_format": true,
+    "primary_locale": true,
+    "timezone": true,
+    "phone": true,
+    "address_address_one": true,
+    "address_address_two": true,
+    "address_city": true,
+    "address_province": true,
+    "address_province_code": true,
+    "address_postal_code": true,
+    "address_country": true,
+    "address_country_code": true,
+    "domain": true,
+    "mc_account_name": true,
+    "list_name": true
+  },
+  "mailchimp_sync_batches": {
+    "id": true,
+    "store_id": true,
+    "mailchimp_store_id": true,
+    "batch_id": true,
+    "status": true,
+    "modified_date": true
+  },
+  "mailchimp_sync_ecommerce": {
+    "id": true,
+    "mailchimp_store_id": true,
+    "type": true,
+    "related_id": true,
+    "mailchimp_sync_modified": true,
+    "mailchimp_sync_delta": true,
+    "mailchimp_sync_error": true,
+    "mailchimp_sync_deleted": true,
+    "mailchimp_token": true,
+    "batch_id": true,
+    "deleted_related_id": true,
+    "mailchimp_sent": true
+  },
+  "mailchimp_webhook_request": {
+    "id": true,
+    "type": true,
+    "fired_at": true,
+    "data_request": true,
+    "processed": true
+  }
+}
