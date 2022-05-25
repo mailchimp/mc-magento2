@@ -119,10 +119,10 @@
         <index referenceId="MAILCHIMP_SYNC_ECOMMERCE_MAILCHIMP_STORE_ID" indexType="btree">
             <column name="mailchimp_store_id"/>
         </index>
-        <index referenceId="MAILCHIMP_SYNC_ECOMMERCE_mailchimp_sync_delta" indexType="btree">
+        <index referenceId="MAILCHIMP_SYNC_ECOMMERCE_MAILCHIMP_SYNC_DELTA" indexType="btree">
             <column name="mailchimp_sync_delta"/>
         </index>
-        <index referenceId="MAILCHIMP_SYNC_ECOMMERCE_mailchimp_sync_modified" indexType="btree">
+        <index referenceId="MAILCHIMP_SYNC_ECOMMERCE_MAILCHIMP_SYNC_MODIFIED" indexType="btree">
             <column name="mailchimp_sync_modified"/>
         </index>
     </table>
