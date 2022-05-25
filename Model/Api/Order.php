@@ -588,7 +588,7 @@ class Order
 
         $orderCollection
             ->getSelect()
-            ->reset(\Zend_Db_Select::COLUMNS)
+            ->reset(\Magento\Framework\DB\Select::COLUMNS)
             ->columns(['grand_total', 'total_refunded', 'total_canceled']);
 
         $totalOrders = 0;
