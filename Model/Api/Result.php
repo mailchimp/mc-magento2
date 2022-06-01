@@ -129,7 +129,9 @@ class Result
                     $this->_driver->createDirectory($baseDir . DIRECTORY_SEPARATOR . 'var' . DIRECTORY_SEPARATOR . self::MAILCHIMP_TEMP_DIR);
                 }
                 // get the tar.gz file with the results
-                $fileUrl = urldecode($response['response_body_url']);
+                // for AWS S3 use urldecode, for google drive use without urldecode
+                // $fileUrl = urldecode($response['response_body_url']);
+                $fileUrl = $response['response_body_url'];
                 $fileName = $baseDir . DIRECTORY_SEPARATOR . 'var' . DIRECTORY_SEPARATOR .
                     self::MAILCHIMP_TEMP_DIR . DIRECTORY_SEPARATOR . $batchId;
                 $fd = $this->_driver->fileOpen($fileName . '.tar.gz', 'w');
