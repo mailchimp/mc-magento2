@@ -704,6 +704,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         $mapFields = $this->getMapFields($storeId);
         if (is_array($mapFields)) {
             foreach ($mapFields as $map) {
+                $value = null;
                 if (strpos($map['customer_field'], '##') !== false) {
                     $parts = explode('##', $map['customer_field']);
                     $attributeCode = $parts[0];
