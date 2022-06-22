@@ -221,7 +221,7 @@
                     <label>Enabled</label>
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
                 </field>
-                <field id="firstdate" translate="label" type="date" showInDefault="1" showInWebsite="1" showInStore="1">
+                <field id="firstdate" translate="label" type="date" sortOrder="30" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>First Date</label>
                     <frontend_model>Ebizmarts\MailChimp\Block\Adminhtml\System\Config\Date</frontend_model>
                     <depends>
@@ -239,6 +239,14 @@
                     <label>Save Email to the Quote before place Order</label>
                     <comment>Select No to prevent saving customer Email to the quote before Order was placed</comment>
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <depends>
+                        <field id="*/*/active">1</field>
+                    </depends>
+                </field>
+                <field id="create_abandonedcart_automation" translate="button_label" type="button" sortOrder="130" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <attribute type="button_label">Create Abandoned Cart Automation</attribute>
+                    <comment>Must be logged in to MailChimp's website previously to see the automation wizard, re-open if not</comment>
+                    <frontend_model>Ebizmarts\MailChimp\Block\Adminhtml\System\Config\CreateAbandonedCart</frontend_model>
                     <depends>
                         <field id="*/*/active">1</field>
                     </depends>
