@@ -663,7 +663,10 @@ class Product
             \Ebizmarts\MailChimp\Helper\Data::IS_PRODUCT,
             $sync_delta,
             $sync_error,
-            $sync_modified
+            $sync_modified,
+            null,
+            null,
+            \Ebizmarts\MailChimp\Helper\Data::WAITINGSYNC
         );
     }
 }
