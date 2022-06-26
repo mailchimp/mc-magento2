@@ -359,7 +359,7 @@ class Cart
         if ($this->_firstDate) {
             $newCarts->addFieldToFilter('created_at', ['gt' => $this->_firstDate]);
         }
-        $newCarts->getSelect()->reset(\Zend_Db_Select::COLUMNS)->columns(['entity_id']);
+        $newCarts->getSelect()->reset(\Zend_Db_Select::COLUMNS)->columns(['entity_id', 'updated_at', 'customer_id', 'customer_email']);
 
         //join with mailchimp_ecommerce_sync_data table to filter by sync data.
         $newCarts->getSelect()->joinLeft(
