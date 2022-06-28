@@ -115,9 +115,9 @@ class Customers extends Column
                                     $params
                                 );
                                 $text = __('Error');
-                                $orderError = $this->_getError($customer->getId(), $customer->getStoreId());
-                                if ($orderError) {
-                                    $alt = $orderError->getErrors();
+                                $customerError = $this->_getError($customer->getId(), $customer->getStoreId());
+                                if ($customerError) {
+                                    $alt = $customerError->getErrors();
                                 }
                                 break;
                             case \Ebizmarts\MailChimp\Helper\Data::NEEDTORESYNC:
