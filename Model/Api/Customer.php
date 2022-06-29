@@ -256,7 +256,10 @@ class Customer
             \Ebizmarts\MailChimp\Helper\Data::IS_CUSTOMER,
             $sync_delta,
             $sync_error,
-            $sync_modified
+            $sync_modified,
+            null,
+            null,
+            \Ebizmarts\MailChimp\Helper\Data::WAITINGSYNC
         );
     }
 }
