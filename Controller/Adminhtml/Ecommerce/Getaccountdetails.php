@@ -81,9 +81,9 @@ class Getaccountdetails extends Action
                     $options['total_orders'] = ['label' => __('Total orders:'), 'value' => $totalOrders['total_items']];
                     $totalCarts = $api->ecommerce->carts->getAll($store, 'total_items');
                     $options['total_carts'] = ['label' => __('Total Carts:'), 'value' => $totalCarts['total_items']];
-                    $options['notsaved'] = ['label' => __('This MailChimp account is not connected to Magento.'), 'value' => ''];
+                    $options['notsaved'] = ['label' => __('Ecommerce disabled, save configuration to enable.'), 'value' => ''];
                 } else {
-                    $options['nostore'] = ['label' => __('This MailChimp account is not connected to Magento.'), 'value' => ''];
+                    $options['nostore'] = ['label' => __('Ecommerce disabled, only subscribers will be synchronized (your orders, products,etc will be not synchronized).'), 'value' => ''];
                 }
             }
         } catch (\Mailchimp_Error $e) {
