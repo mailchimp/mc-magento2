@@ -1,6 +1,5 @@
 <?php
-/**
-
+/*
 mc-magento2 Magento Component
 @category Ebizmarts
 @Package mc-magento2
@@ -632,7 +631,10 @@ class Product
             \Ebizmarts\MailChimp\Helper\Data::IS_PRODUCT,
             $sync_delta,
             $sync_error,
-            $sync_modified
+            $sync_modified,
+            null,
+            null,
+            \Ebizmarts\MailChimp\Helper\Data::WAITINGSYNC
         );
     }
 }
