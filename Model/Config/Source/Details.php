@@ -126,9 +126,9 @@ class Details implements \Magento\Framework\Option\ArrayInterface
                         [['label' => 'Total List Subscribers', 'value' => $this->_options['list_subscribers']]]
                     );
                 }
-                $ret = array_merge($ret, [['label' => 'Ecommerce Data uploaded to MailChimp', 'value' => '']]);
                 if (isset($this->_options['store_exists']) && $this->_options['store_exists']) {
                     $ret = array_merge($ret, [
+                        ['label' => 'Ecommerce Data uploaded to MailChimp', 'value' => ''],
                         ['label' => '  Total Customers', 'value' => $this->_options['total_customers']],
                         ['label' => '  Total Products', 'value' => $this->_options['total_products']],
                         ['label' => '  Total Orders', 'value' => $this->_options['total_orders']],
@@ -145,7 +145,7 @@ class Details implements \Magento\Framework\Option\ArrayInterface
                     }
                 } else {
                     $ret = array_merge($ret, [
-                        ['label'=>'This MailChimp account is not connected to Magento.','value'=>'']
+                        ['label'=>'Ecommerce disabled, only subscribers will be synchronized (your orders, products,etc will be not synchronized).','value'=>'']
                     ]);
                 }
             }
