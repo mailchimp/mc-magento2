@@ -70,7 +70,7 @@ class MailChimpSyncEcommerce extends AbstractDb
         $connection = $this->getConnection();
         $connection->update(
             $this->getTable('mailchimp_sync_ecommerce'),
-            ['mailchimp_sync_modified'=>1],
+            ['mailchimp_sync_modified'=>1,'mailchimp_sent'=>\Ebizmarts\MailChimp\Helper\Data::NEEDTORESYNC],
             ['related_id in (?)'=> $ids, 'type = ?'=>$type, 'mailchimp_store_id = ?'=>$mailchimpStore]
         );
         return $this;

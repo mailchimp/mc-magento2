@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<listing xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Ui:etc/ui_configuration.xsd">
+    <columns name="product_columns">
+        <column name="mailchimp_sync" class="\Ebizmarts\MailChimp\Ui\Component\Listing\Column\Products">
+            <argument name="data" xsi:type="array">
+                <item name="config" xsi:type="array">
+                    <item name="altField" xsi:type="string">mailchimp_sync</item>
+                    <item name="has_preview" xsi:type="boolean">true</item>
+                    <item name="add_field" xsi:type="boolean">true</item>
+                    <item name="label" xsi:type="string" translate="true">Type</item>
+                    <item name="bodyTmpl" xsi:type="string">ui/grid/cells/html</item>
+                    <item name="sortable" xsi:type="boolean">true</item>
+                </item>
+            </argument>
+        </column>
+    </columns>
+</listing> 
