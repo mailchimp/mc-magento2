@@ -371,7 +371,7 @@ class Order
         } else {
             $data['order_total'] = $order->getGrandTotal();
             $data['tax_total'] = $order->getTaxAmount();
-            $data['discount_total'] = abs($order->getDiscountAmount());
+            $data['discount_total'] = abs((float) $order->getDiscountAmount());
             $data['shipping_total'] = $order->getShippingAmount();
         }
 
