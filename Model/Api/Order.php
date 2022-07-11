@@ -426,7 +426,7 @@ class Order
                     "product_variant_id" => $variant,
                     "quantity" => (int)$item->getQtyOrdered(),
                     "price" => $item->getPrice(),
-                    "discount" => abs($item->getDiscountAmount())
+                    "discount" => abs((float) $item->getDiscountAmount())
                 ];
             }
         }
@@ -701,7 +701,7 @@ class Order
 
                         $promo = [[
                             'code' => $couponCode,
-                            'amount_discounted' => abs($amountDiscounted),
+                            'amount_discounted' => abs((float) $amountDiscounted),
                             'type' => $type
                         ]];
                     }
