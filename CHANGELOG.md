@@ -1,5 +1,24 @@
 # Change Log
 
+## [100.1.46](https://github.com/mailchimp/mc-magento2/tree/100.1.46) (2022-07-19)
+
+[Full Changelog](https://github.com/mailchimp/mc-magento2/compare/100.1.45...100.1.46)
+
+**Implemented enhancements:**
+
+- Rewrite "This MailChimp account is not connected to Magento" label to make it more clear [\#1448](https://github.com/mailchimp/mc-magento2/issues/1448)
+- Add a synchorization column in the customer grid [\#1439](https://github.com/mailchimp/mc-magento2/issues/1439)
+- Add a synchorization column in the product grid [\#1438](https://github.com/mailchimp/mc-magento2/issues/1438)
+- Add button on backend to create the abandoned cart automation [\#1432](https://github.com/mailchimp/mc-magento2/issues/1432)
+
+**Fixed bugs:**
+
+- Missing fields in Cart.php on db call [\#1460](https://github.com/mailchimp/mc-magento2/issues/1460)
+- Wrong field map value when is null [\#1425](https://github.com/mailchimp/mc-magento2/issues/1425)
+- Can't get the response file from a batch [\#1414](https://github.com/mailchimp/mc-magento2/issues/1414)
+- Unmark the modified flag in the ecommerce table when an object is synced [\#1408](https://github.com/mailchimp/mc-magento2/issues/1408)
+- Don't use Zend\_Db\_Select::COLUMNS [\#1405](https://github.com/mailchimp/mc-magento2/issues/1405)
+
 ## [100.1.45](https://github.com/mailchimp/mc-magento2/tree/100.1.45)
 
 [Full Changelog](https://github.com/mailchimp/mc-magento2/compare/100.1.44...100.1.45)
