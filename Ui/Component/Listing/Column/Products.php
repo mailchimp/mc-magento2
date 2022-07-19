@@ -70,6 +70,8 @@ class Products extends Column
                 $product = $this->_productFactory->create()->load($item['entity_id']);
                 $params = ['_secure' => $this->_requestInterface->isSecure()];
                 $alt = '';
+                $url = '';
+                $text = '';
                 if ($product->getTypeId() == \Magento\Catalog\Model\Product\Type::TYPE_SIMPLE ||
                     $product->getTypeId() == \Magento\Catalog\Model\Product\Type::TYPE_VIRTUAL ||
                     $product->getTypeId() == \Magento\ConfigurableProduct\Model\Product\Type\Configurable::TYPE_CODE ||
