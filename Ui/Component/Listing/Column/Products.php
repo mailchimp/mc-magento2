@@ -74,6 +74,8 @@ class Products extends Column
                     $product->getTypeId() == \Magento\Catalog\Model\Product\Type::TYPE_VIRTUAL ||
                     $product->getTypeId() == \Magento\ConfigurableProduct\Model\Product\Type\Configurable::TYPE_CODE ||
                     $product->getTypeId() == \Magento\Downloadable\Model\Product\Type::TYPE_DOWNLOADABLE) {
+                    $url = '';
+                    $text = '';
                     if ($this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_PATH_ACTIVE, $product->getStoreId())) {
                         $mailchimpStoreId = $this->_helper->getConfigValue(
                             \Ebizmarts\MailChimp\Helper\Data::XML_MAILCHIMP_STORE,
