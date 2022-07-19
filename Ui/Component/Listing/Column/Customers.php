@@ -72,6 +72,8 @@ class Customers extends Column
                 $customer = $this->_customerFactory->create()->load($item['entity_id']);
                 $params = ['_secure' => $this->_requestInterface->isSecure()];
                 $alt = '';
+                $url = '';
+                $text = '';
                 if ($this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_PATH_ACTIVE, $customer->getStoreId())) {
                     $mailchimpStoreId = $this->_helper->getConfigValue(
                         \Ebizmarts\MailChimp\Helper\Data::XML_MAILCHIMP_STORE,
