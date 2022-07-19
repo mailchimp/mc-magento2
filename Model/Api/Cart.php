@@ -135,7 +135,7 @@ class Cart
         // get only the converted quotes
         $convertedCarts->addFieldToFilter('store_id', ['eq' => $magentoStoreId]);
         $convertedCarts->addFieldToFilter('is_active', ['eq' => 0]);
-        $convertedCarts->getSelect()->reset(\Zend_Db_Select::COLUMNS)->columns(['entity_id']);
+        $convertedCarts->getSelect()->reset(\Zend_Db_Select::COLUMNS)->columns(['entity_id','customer_email']);
         //join with mailchimp_ecommerce_sync_data table to filter by sync data.
         $convertedCarts->getSelect()->joinLeft(
             ['m4m' => $this->_helper->getTableName('mailchimp_sync_ecommerce')],
@@ -194,7 +194,7 @@ class Cart
         $modifiedCarts->addFieldToFilter('is_active', ['eq'=>1]);
         // select carts for the current Magento store id
         $modifiedCarts->addFieldToFilter('store_id', ['eq' => $magentoStoreId]);
-        $modifiedCarts->getSelect()->reset(\Zend_Db_Select::COLUMNS)->columns(['entity_id']);
+        $modifiedCarts->getSelect()->reset(\Zend_Db_Select::COLUMNS)->columns(['entity_id','customer_id','customer_email','mailchimp_campaign_id','quote_currency_code','grand_total']);
         //join with mailchimp_ecommerce_sync_data table to filter by sync data.
         $modifiedCarts->getSelect()->joinLeft(
             ['m4m' => $this->_helper->getTableName('mailchimp_sync_ecommerce')],
@@ -306,7 +306,7 @@ class Cart
         if ($this->_firstDate) {
             $newCarts->addFieldToFilter('created_at', ['gt' => $this->_firstDate]);
         }
-        $newCarts->getSelect()->reset(\Zend_Db_Select::COLUMNS)->columns(['entity_id']);
+        $newCarts->getSelect()->reset(\Zend_Db_Select::COLUMNS)->columns(['entity_id','customer_id','customer_email','mailchimp_campaign_id','updated_at','quote_currency_code','grand_total']);
         //join with mailchimp_ecommerce_sync_data table to filter by sync data.
         $newCarts->getSelect()->joinLeft(
             ['m4m' => $this->_helper->getTableName('mailchimp_sync_ecommerce')],
