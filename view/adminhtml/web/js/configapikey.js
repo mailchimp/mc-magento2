@@ -24,6 +24,7 @@ define(
                 "getInterestUrl": "",
                 "resyncSubscribersUrl": "",
                 "resyncProductsUrl": "",
+                "cleanEcommerceUrl": "",
                 "scope": "",
                 "scopeId": ""
             },
@@ -54,6 +55,27 @@ define(
                 $('#mailchimp_ecommerce_resync_products').click(function () {
                     var mailchimpStoreId = $('#mailchimp_general_monkeystore').find(':selected').val();
                     self._resyncProducts(mailchimpStoreId);
+                });
+                $('#mailchimp_general_clean_ecommerce').click(function () {
+                    self._cleanEcommerce();
+                });
+
+
+            },
+            _cleanEcommerce: function () {
+                var cleanEcommerceUrl = this.options.cleanEcommerceUrl;
+                $.ajax({
+                    url: cleanEcommerceUrl,
+                    data: {'form_key': window.FORM_KEY},
+                    type: 'GET',
+                    dataType: 'json',
+                    showLoader: true
+                }).done(function (data) {
+                    if (data.valid == 0) {
+                        alert({content: 'Error: can\'t remove the unused registers'});
+                    } else if (data.valid == 1) {
+                        alert({content: 'All unused registers are deleted'});
+                    }
                 });
 
             },
