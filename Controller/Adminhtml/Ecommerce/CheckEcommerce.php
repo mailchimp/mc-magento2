@@ -18,7 +18,7 @@ use Magento\Framework\Controller\Result\JsonFactory;
 use Magento\Framework\Exception\ValidatorException;
 use Symfony\Component\Config\Definition\Exception\Exception;
 
-class cleanEcommerce extends \Magento\Backend\App\Action
+class CheckEcommerce extends \Magento\Backend\App\Action
 {
     /**
      * @var JsonFactory
@@ -74,17 +74,10 @@ class cleanEcommerce extends \Magento\Backend\App\Action
             $collection->getSelect()->reset(\Magento\Framework\DB\Select::COLUMNS)->columns(['mailchimp_store_id']);
             $collection->getSelect()->where('value is null');
             $collection->getSelect()->group('mailchimp_store_id');
-            foreach($collection as $item) {
-                $mailchimpStoreId = $item->getMailchimpStoreId();
-                $connection = $this->chimpSyncEcommerce->getResource()->getConnection();
-                $tableName = $this->chimpSyncEcommerce->getResource()->getMainTable();
-                $connection->delete(
-                    $tableName,
-                    "mailchimp_store_id = '$mailchimpStoreId'"
-                );
-            }
+            $valid = $collection->count();
+
         } catch (ValidatorException $e) {
-            $valid = 0;
+            $valid = -1;
             $message = $e->getMessage();
         }
         return $resultJson->setData([
