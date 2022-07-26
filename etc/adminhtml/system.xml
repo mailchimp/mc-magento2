@@ -124,6 +124,13 @@
                         <field id="*/*/active">1</field>
                     </depends>
                 </field>
+                <field id="clean_ecommerce" translate="button_label" type="button" sortOrder="87" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <button_label>Remove Unused Registers</button_label>
+                    <frontend_model>Ebizmarts\MailChimp\Block\Adminhtml\System\Config\CleanEcommerce</frontend_model>
+                    <depends>
+                        <field id="*/*/active">1</field>
+                    </depends>
+                </field>
                 <field id="interest" translate="label" type="multiselect" sortOrder="90" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Available Groups</label>
                     <source_model>Ebizmarts\MailChimp\Model\Config\Source\Interest</source_model>
@@ -243,10 +250,10 @@
                         <field id="*/*/active">1</field>
                     </depends>
                 </field>
-                <field id="create_abandonedcart_automation" translate="button_label" type="button" sortOrder="130" showInDefault="1" showInWebsite="1" showInStore="1">
+                <field id="create_abandonedcart_automation" translate="label" sortOrder="60" showInDefault="1" showInStore="1" showInWebsite="1">
                     <attribute type="button_label">Create Abandoned Cart Automation</attribute>
-                    <comment>Must be logged in to MailChimp's website previously to see the automation wizard, re-open if not</comment>
                     <frontend_model>Ebizmarts\MailChimp\Block\Adminhtml\System\Config\CreateAbandonedCart</frontend_model>
+                    <comment>Must be logged in to MailChimp's website previously to see the automation wizard, re-open if not</comment>
                     <depends>
                         <field id="*/*/active">1</field>
                     </depends>
