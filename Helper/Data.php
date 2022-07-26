@@ -695,7 +695,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
                 }
                 else {
                     $value = $customer->getData($map['customer_field']);
-                    if ($value) {
+                    if (!is_null($value)) {
                         if ($map['isDate']) {
                             $format = $this->getDateFormat();
                             if ($map['customer_field'] == 'dob') {
