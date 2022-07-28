@@ -1,0 +1,31 @@
+<div class="block newsletter">
+    <div class="title"><strong><?= $block->escapeHtml(__('Newsletter')) ?></strong></div>
+    <div class="content">
+        <button class="action subscribe primary"
+                id="mailchimp-subscribe"
+                title="<?= $block->escapeHtmlAttr(__('Subscribe')) ?>"
+                aria-label="Subscribe">
+            <span><?= $block->escapeHtml(__('Subscribe')) ?></span>
+        </button>
+    </div>
+</div>
+
+<script>
+    require([
+        'jquery',
+        'popupWindow'
+    ], function ($) {
+        'use strict';
+
+        $("#mailchimp-subscribe").popupWindow({
+            "windowURL": "<?php echo $block->getPopupUrl(); ?>",
+            "windowName": "Subscribe",
+            "width": 800,
+            "height": 800,
+            "left": 0,
+            "top": 0,
+            "resizable": 1,
+            "scrollbars": 1
+        });
+    });
+</script>
