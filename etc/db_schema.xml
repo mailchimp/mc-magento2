@@ -39,8 +39,7 @@
         <column xsi:type="int" name="subscriber_id" padding="10" nullable="false" comment="subscriber id"/>
         <column xsi:type="smallint" name="store_id" padding="5" nullable="false" default="0"
                 comment="Store Id"/>
-        <column xsi:type="datetime" name="updated_at" on_update="true" nullable="false" default="CURRENT_TIMESTAMP"
-                comment=""/>
+        <column xsi:type="datetime" name="updated_at" on_update="true" nullable="false" default="CURRENT_TIMESTAMP"/>
         <column xsi:type="text" name="groupdata" nullable="false" comment="data"/>
         <constraint xsi:type="primary" referenceId="PRIMARY">
             <column name="id"/>
