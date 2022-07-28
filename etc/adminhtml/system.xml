@@ -68,6 +68,20 @@
                         <field id="*/*/active">1</field>
                     </depends>
                 </field>
+                <field id="popup-form" translate="label" type="select" sortOrder="42" showInStore="1" showInWebsite="1" showInDefault="1">
+                    <label>Change the footer link</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <depends>
+                        <field id="*/*/active">1</field>
+                    </depends>
+                </field>
+                <field id="popup-url" translate="label" type="text" sortOrder="43" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Popup Url</label>
+                    <depends>
+                        <field id="*/*/active">1</field>
+                        <field id="*/*/popup-form">1</field>
+                    </depends>
+                </field>
                 <field id="magentoemail" translate="label" type="select" sortOrder="45" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Magento always manage emails</label>
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
