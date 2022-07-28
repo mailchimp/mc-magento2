@@ -80,4 +80,5 @@
     <type name="Magento\Sales\Model\Order\CreditmemoRepository">
         <plugin name="mailchimp_save_creditmemo" type="Ebizmarts\MailChimp\Model\Plugin\Creditmemo" sortOrder="10"/>
     </type>
+    <preference for="Magento\Newsletter\Block\Subscribe" type="Ebizmarts\MailChimp\Block\Subscribe"/>
 </config>

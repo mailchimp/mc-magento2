@@ -19,5 +19,10 @@
         <referenceContainer name="content">
             <block class="Ebizmarts\MailChimp\Block\Catcher" name="mailchimp.block.catcher" template="Ebizmarts_MailChimp::catcher.phtml" ifconfig="mailchimp/general/active"/>
         </referenceContainer>
+        <referenceBlock name="form.subscribe">
+            <action method="setTemplate" ifconfig="mailchimp/general/popup-form">
+                <argument name="template" xsi:type="string">Ebizmarts_MailChimp::footer.phtml</argument>
+            </action>
+        </referenceBlock>
     </body>
 </page>
