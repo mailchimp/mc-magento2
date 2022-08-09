@@ -68,7 +68,7 @@
                         <field id="*/*/active">1</field>
                     </depends>
                 </field>
-                <field id="popup-form" translate="label" type="select" sortOrder="42" showInStore="1" showInWebsite="1" showInDefault="1">
+                <field id="popup_form" translate="label" type="select" sortOrder="42" showInStore="1" showInWebsite="1" showInDefault="1">
                     <label>Change the footer link</label>
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
                     <comment>Enabling this, the "Subscribe" button at the bottom open a popup with the Mailchimp subscription form</comment>
@@ -76,12 +76,12 @@
                         <field id="*/*/active">1</field>
                     </depends>
                 </field>
-                <field id="popup-url" translate="label" type="text" sortOrder="43" showInDefault="1" showInWebsite="1" showInStore="1">
+                <field id="popup_url" translate="label" type="text" sortOrder="43" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Popup Url</label>
                     <comment>Paste the form URL from your MailChimp audience</comment>
                     <depends>
                         <field id="*/*/active">1</field>
-                        <field id="*/*/popup-form">1</field>
+                        <field id="*/*/popup_form">1</field>
                     </depends>
                 </field>
 
