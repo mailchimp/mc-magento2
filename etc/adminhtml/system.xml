@@ -182,32 +182,32 @@
             </group>
             <group id="ecommerce" translate="label" type="text" sortOrder="110" showInDefault="1" showInWebsite="1" showInStore="1">
                 <label>Ecommerce Configuration</label>
-                <field id="active" translate="label" type="select" sortOrder="112" showInDefault="1" showInWebsite="1" showInStore="1">
+                <field id="active" translate="label" type="select" sortOrder="110" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Enabled</label>
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
                 </field>
-                <field id="customer_optin" translate="label" type="select" sortOrder="114" showInDefault="1" showInWebsite="1" showInStore="1">
+                <field id="customer_optin" translate="label" type="select" sortOrder="120" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Subscribe all customers to the newsletter</label>
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
                     <depends>
                         <field id="*/*/active">1</field>
                     </depends>
                 </field>
-                <field id="firstdate" translate="label" type="date" showInDefault="1" sortOrder="116" showInWebsite="1" showInStore="1">
+                <field id="firstdate" translate="label" type="date" showInDefault="1" sortOrder="130" showInWebsite="1" showInStore="1">
                     <label>First Date</label>
                     <frontend_model>Ebizmarts\MailChimp\Block\Adminhtml\System\Config\Date</frontend_model>
                     <depends>
                         <field id="*/*/active">1</field>
                     </depends>
                 </field>
-                <field id="send_promo" translate="label" type="select" sortOrder="118" showInDefault="1" showInWebsite="1" showInStore="1">
+                <field id="send_promo" translate="label" type="select" sortOrder="140" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Send Promo Rules and Promo Codes</label>
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
                     <depends>
                         <field id="*/*/active">1</field>
                     </depends>
                 </field>
-                <field id="including_taxes" translate="label" type="select" sortOrder="120" showInDefault="1" showInWebsite="1" showInStore="1">
+                <field id="including_taxes" translate="label" type="select" sortOrder="150" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Prices including taxes</label>
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
                     <comment><![CDATA[You must configure Price Display Settings in Sales/Tax to "including taxes"]]></comment>
@@ -216,14 +216,23 @@
                         <field id="*/*/active">1</field>
                     </depends>
                 </field>
-                <field id="reset_errors" translate="button_label" type="button" sortOrder="130" showInDefault="1" showInWebsite="1" showInStore="1">
-                    <button_label>Reset Errors</button_label>
+                <field id="reset_errors_retry" translate="button_label" type="button" sortOrder="160" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <button_label>Reset Errors and retry</button_label>
                     <frontend_model>Ebizmarts\MailChimp\Block\Adminhtml\System\Config\ResetErrors</frontend_model>
+                    <comment>Truncate the errors table and retry all the registers with error</comment>
                     <depends>
                         <field id="*/*/active">1</field>
                     </depends>
                 </field>
-                <field id="delete_store" translate="button_label" type="button" sortOrder="130" showInDefault="1" showInWebsite="1" showInStore="1">
+                <field id="reset_errors_noretry" translate="button_label" type="button" sortOrder="170" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <button_label>Reset Errors and no retry</button_label>
+                    <frontend_model>Ebizmarts\MailChimp\Block\Adminhtml\System\Config\ResetErrorsNoRetry</frontend_model>
+                    <comment>Truncate the errors table and retry all the registers with error</comment>
+                    <depends>
+                        <field id="*/*/active">1</field>
+                    </depends>
+                </field>
+                <field id="delete_store" translate="button_label" type="button" sortOrder="180" showInDefault="1" showInWebsite="1" showInStore="1">
                     <button_label>Delete Store</button_label>
                     <comment>Proceed with caution, this delete the mailchimp store for all the connected magento stores</comment>
                     <frontend_model>Ebizmarts\MailChimp\Block\Adminhtml\System\Config\DeleteStore</frontend_model>
@@ -231,7 +240,7 @@
                         <field id="*/*/active">1</field>
                     </depends>
                 </field>
-                <field id="resync_products" translate="button_label" type="button" sortOrder="130" showInDefault="1" showInWebsite="1" showInStore="1">
+                <field id="resync_products" translate="button_label" type="button" sortOrder="190" showInDefault="1" showInWebsite="1" showInStore="1">
                     <button_label>Resync all products</button_label>
                     <frontend_model>Ebizmarts\MailChimp\Block\Adminhtml\System\Config\ResyncProducts</frontend_model>
                     <depends>
