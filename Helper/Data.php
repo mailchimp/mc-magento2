@@ -831,7 +831,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         $date = date('Y-m-d-H-i-s') . '-' . $msecArray[1];
         return $date;
     }
-    public function resetErrors($mailchimpStore)
+    public function resetErrors($mailchimpStore, $retry)
     {
         try {
             // clean the errors table
@@ -839,12 +839,14 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
             $tableName = $this->_mailChimpErrors->getResource()->getMainTable();
             $connection->delete($tableName, "mailchimp_store_id = '".$mailchimpStore."'");
             // clean the syncecommerce table with errors
-            $connection = $this->_mailChimpSyncE->getResource()->getConnection();
-            $tableName = $this->_mailChimpSyncE->getResource()->getMainTable();
-            $connection->delete(
-                $tableName,
-                "mailchimp_store_id = '".$mailchimpStore."' and mailchimp_sync_error is not null"
-            );
+            if ($retry) {
+                $connection = $this->_mailChimpSyncE->getResource()->getConnection();
+                $tableName = $this->_mailChimpSyncE->getResource()->getMainTable();
+                $connection->delete(
+                    $tableName,
+                    "mailchimp_store_id = '" . $mailchimpStore . "' and mailchimp_sync_error is not null"
+                );
+            }
         } catch (\Zend_Db_Exception $e) {
             throw new ValidatorException(__($e->getMessage()));
         }
