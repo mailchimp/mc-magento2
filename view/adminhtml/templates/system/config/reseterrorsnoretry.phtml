@@ -1,0 +1,8 @@
+<div id="monkey_errorconfirmation" style="display:none;" data-mage-init='{"mailchimpconfirmation":{}}'>
+</div>
+<div class="actions actions-reset-errors">
+    <div id="validation_result" class="message-validation hidden"></div>
+    <button onclick="mailchimpdeleteconfirmation('<?php echo $this->getAjaxCheckUrl() ?>')" class="action-reset-errors" type="button" id="<?php echo $block->getHtmlId() ?>">
+        <span><?php echo $block->escapeHtml($block->getButtonLabel()) ?></span>
+    </button>
+</div>
