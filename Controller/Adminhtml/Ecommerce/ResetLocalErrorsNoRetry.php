@@ -17,7 +17,7 @@ use Magento\Framework\Controller\Result\JsonFactory;
 use Magento\Framework\Exception\ValidatorException;
 use Symfony\Component\Config\Definition\Exception\Exception;
 
-class ResetLocalErrors extends \Magento\Backend\App\Action
+class ResetLocalErrorsNoRetry extends \Magento\Backend\App\Action
 {
     /**
      * @var JsonFactory
@@ -78,7 +78,7 @@ class ResetLocalErrors extends \Magento\Backend\App\Action
 
         $resultJson = $this->resultJsonFactory->create();
         try {
-            $this->helper->resetErrors($mailchimpStore, true);
+            $this->helper->resetErrors($mailchimpStore, false);
         } catch (ValidatorException $e) {
             $valid = 0;
             $message = $e->getMessage();
