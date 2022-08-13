@@ -204,23 +204,33 @@ class Ecommerce
         $countCustomers = 0;
         $countProducts = 0;
         $countOrders = 0;
+
         $batchArray = [];
+
         $this->_helper->resetCounters();
+
         $results = $this->_apiSubscribers->sendSubscribers($storeId, $listId);
+
+        $this->_helper->log($results);
+
         if ($this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_PATH_ECOMMERCE_ACTIVE, $storeId)) {
+            
             $this->_helper->log('Generate Products payload');
             $products = $this->_apiProduct->_sendProducts($storeId);
             $countProducts = count($products);
+            $this->_helper->log($products);
             $results = array_merge($results, $products);
 
             $this->_helper->log('Generate Customers payload');
             $customers = $this->_apiCustomer->sendCustomers($storeId);
             $countCustomers = count($customers);
+            $this->_helper->log($customers);
             $results = array_merge($results, $customers);
 
             $this->_helper->log('Generate Orders payload');
             $orders = $this->_apiOrder->sendOrders($storeId);
             $countOrders = count($orders);
+            $this->_helper->log($orders);
             $results = array_merge($results, $orders);
 
             if ($this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_PATH_IS_SYNC, $storeId)) {
@@ -434,5 +444,34 @@ class Ecommerce
                 }
             }
         }
+    }
+
+    private function filterOrdersBatch($ordersbatch) {
+
+        $ordersCount = 0;
+
+        foreach ($ordersbatch as &$order){
+
+            if(str_starts_with($order['operation_id'], "ORD")) {
+
+                $ordersCount++ ;
+            } 
+
+        }
+
+        return $ordersCount;
+    }
+
+    private function  filterCustomersBatch($customersbatch) {
+
+        foreach($customersbatch as $customer){
+            if(str_ends_with($customer['operation_id'], "SUB"))
+            unset($customer);
+        }
+
+
+        return count($customersbatch);
+
+
     }
 }

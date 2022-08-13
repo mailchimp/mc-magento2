@@ -93,6 +93,41 @@ class InstallSchema implements InstallSchemaInterface
                 10,
                 [],
                 'Status'
+            )
+            ->addColumn(
+                'carts_count',
+                \Magento\Framework\DB\Ddl\Table::TYPE_SMALLINT,
+                null,
+                [],
+                'Number of carts'
+            )
+            ->addColumn(
+                'customers_count',
+                \Magento\Framework\DB\Ddl\Table::TYPE_SMALLINT,
+                null,
+                [],
+                'Number of customers'
+            )
+            ->addColumn(
+                'orders_count',
+                \Magento\Framework\DB\Ddl\Table::TYPE_SMALLINT,
+                null,
+                [],
+                'Number of orders'
+            )
+            ->addColumn(
+                'products_count',
+                \Magento\Framework\DB\Ddl\Table::TYPE_SMALLINT,
+                null,
+                [],
+                'Number of products'
+            )
+            ->addColumn(
+                'subscribers_count',
+                \Magento\Framework\DB\Ddl\Table::TYPE_SMALLINT,
+                null,
+                [],
+                'Number of carts'
             );
 
         $connection->createTable($table);
