@@ -1,4 +1,18 @@
 # Change Log
+## [103.4.47](https://github.com/mailchimp/mc-magento2/tree/103.4.47) (2022-08-15)
+
+[Full Changelog](https://github.com/mailchimp/mc-magento2/compare/103.4.46...103.4.47)
+
+**Implemented enhancements:**
+
+- Add a button to truncate the error table BUT not to retry the objects with erros [\#1498](https://github.com/mailchimp/mc-magento2/issues/1498)
+- Change the footer subscribe button and open a popup with the mailchimp form to subscribe [\#1487](https://github.com/mailchimp/mc-magento2/issues/1487)
+- Large mailchimp\_sync\_ecommerce table with unused registers [\#1475](https://github.com/mailchimp/mc-magento2/issues/1475)
+
+**Fixed bugs:**
+
+- Custom boolean customer attribute not synced correctly to Mailchimp [\#1474](https://github.com/mailchimp/mc-magento2/issues/1474)
+- Migrate the update data to the patches approach [\#1472](https://github.com/mailchimp/mc-magento2/issues/1472)
 
 ## [103.4.46](https://github.com/mailchimp/mc-magento2/tree/103.4.46) (2022-07-19)
 
