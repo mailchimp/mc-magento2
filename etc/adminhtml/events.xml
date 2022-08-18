@@ -1,21 +1,21 @@
 <?xml version="1.0"?>
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:Event/etc/events.xsd">
     <event name="sales_order_save_after">
-        <observer name="sales_order_save_after" instance="\Ebizmarts\MailChimp\Observer\Sales\Order\SaveAfter"/>
+        <observer name="mailchimp_admin_order_save_after" instance="\Ebizmarts\MailChimp\Observer\Sales\Order\SaveAfter"/>
     </event>
     <event name="admin_system_config_changed_section_mailchimp">
         <observer name="mailchimp_admin_system_config_changed_section_mailchimp" instance="Ebizmarts\MailChimp\Observer\ConfigObserver"/>
     </event>
     <event name="salesrule_rule_save_after">
-        <observer name="mailchimp_salesrule_rule_save_after" instance="\Ebizmarts\MailChimp\Observer\SalesRule\Rule\SaveAfter"/>
+        <observer name="mailchimp_admin_salesrule_rule_save_after" instance="\Ebizmarts\MailChimp\Observer\SalesRule\Rule\SaveAfter"/>
     </event>
     <event name="salesrule_rule_delete_after">
-        <observer name="mailchimp_salesrule_rule_delete_after" instance="\Ebizmarts\MailChimp\Observer\SalesRule\Rule\DeleteAfter"/>
+        <observer name="mailchimp_admin_salesrule_rule_delete_after" instance="\Ebizmarts\MailChimp\Observer\SalesRule\Rule\DeleteAfter"/>
     </event>
     <event name="adminhtml_customer_save_after">
-        <observer name="mailchimp_adminhtml_customer_save_after" instance="\Ebizmarts\MailChimp\Observer\Adminhtml\Customer\SaveAfter" />
+        <observer name="mailchimp_admin_customer_save_after" instance="\Ebizmarts\MailChimp\Observer\Adminhtml\Customer\SaveAfter" />
     </event>
     <event name="catalog_product_delete_after">
-        <observer name="mailchimp_product_delete_after" instance="\Ebizmarts\MailChimp\Observer\Adminhtml\Product\DeleteAfter" />
+        <observer name="mailchimp_admin_product_delete_after" instance="\Ebizmarts\MailChimp\Observer\Adminhtml\Product\DeleteAfter" />
     </event>
 </config>
