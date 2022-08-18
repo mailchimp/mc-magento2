@@ -1,5 +1,18 @@
 # Change Log
 
+## [101.2.48](https://github.com/mailchimp/mc-magento2/tree/101.2.48) (2022-08-18)
+
+[Full Changelog](https://github.com/mailchimp/mc-magento2/compare/101.2.47...101.2.48)
+
+**Implemented enhancements:**
+
+- Point the wiki to the github wiki [\#1522](https://github.com/mailchimp/mc-magento2/issues/1522)
+
+**Fixed bugs:**
+
+- Observer name "sales\_order\_save\_after" is too generic. [\#1516](https://github.com/mailchimp/mc-magento2/issues/1516)
+- Error saving configuration when install the extension for the first time [\#1510](https://github.com/mailchimp/mc-magento2/issues/1510)
+
 ## [101.2.47](https://github.com/mailchimp/mc-magento2/tree/101.2.47) (2022-08-15)
 
 [Full Changelog](https://github.com/mailchimp/mc-magento2/compare/101.2.46...101.2.47)
