@@ -132,7 +132,7 @@ class MonkeyStore extends \Magento\Framework\App\Config\Value
             }
             if ($found==1) {
                 $this->_helper->cancelAllPendingBatches($mailchimpStore);
-                $this->_helper->resetErrors($mailchimpStore);
+                $this->_helper->resetErrors($mailchimpStore, true);
             }
             $this->_helper->restoreAllCanceledBatches($this->getValue());
             if ($createWebhook) {
