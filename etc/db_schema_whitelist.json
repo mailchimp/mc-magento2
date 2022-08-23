@@ -56,6 +56,7 @@
       "id": true,
       "apikey": true,
       "storeid": true,
+      "store_id": true,
       "list_id": true,
       "name": true,
       "platform": true,

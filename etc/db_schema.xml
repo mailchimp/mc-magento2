@@ -48,7 +48,7 @@
     <table name="mailchimp_stores">
         <column xsi:type="int" name="id" padding="10" nullable="false" identity="true" comment="Table Id"/>
         <column xsi:type="varchar" name="apikey" length="128" comment="API Key"/>
-        <column xsi:type="varchar" name="store_id" length="50" comment="Store Id"/>
+        <column xsi:type="varchar" name="storeid" length="50" comment="Store Id"/>
         <column xsi:type="varchar" name="list_id" length="50" comment="List Id"/>
         <column xsi:type="varchar" name="name" length="128" comment="Name"/>
         <column xsi:type="varchar" name="platform" length="50" comment="Platform"/>
