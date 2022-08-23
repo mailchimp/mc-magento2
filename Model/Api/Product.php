@@ -212,6 +212,7 @@ class Product
             " and mc.mailchimp_sync_delta <  at_special_from_date.value"
         );
         $collection->getSelect()->where('mc.mailchimp_sync_delta is not null');
+        $collection->getSelect()->reset(\Magento\Framework\DB\Select::COLUMNS)->columns(['entity_id']);
         foreach ($collection as $item) {
             $this->_updateProduct($mailchimpStoreId, $item->getEntityId(), null, null, 1);
         }
@@ -239,6 +240,7 @@ class Product
             []
         );
         $collection2->getSelect()->where('mc.mailchimp_sync_delta is not null');
+        $collection2->getSelect()->reset(\Magento\Framework\DB\Select::COLUMNS)->columns(['entity_id']);
         foreach ($collection2 as $item) {
             $this->_updateProduct($mailchimpStoreId, $item->getEntityId(), null, null, 1);
         }
