@@ -183,7 +183,6 @@ class Product
          */
         $collection = $this->_getCollection();
         $collection->addStoreFilter($magentoStoreId);
-//        $collection->getSelect()->reset(\Magento\Framework\DB\Select::COLUMNS)->columns(['entity_id']);
         $collection->addAttributeToFilter(
             'special_price',
             ['gt'=>0],
@@ -221,7 +220,6 @@ class Product
          */
         $collection2 = $this->_getCollection();
         $collection2->addStoreFilter($magentoStoreId);
-//        $collection2->getSelect()->reset(\Magento\Framework\DB\Select::COLUMNS)->columns(['entity_id']);
         $collection2->addAttributeToFilter(
             'special_price',
             ['gt'=>0],
