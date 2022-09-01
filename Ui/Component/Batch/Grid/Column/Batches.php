@@ -28,6 +28,11 @@ class Batches extends Column
      * @var Helper
      */
     protected $mailChimpSyncB;
+    /**
+     * @var Helper
+     */
+    protected $helper;
+    
 
     /**
      * Batch constructor.
@@ -38,6 +43,7 @@ class Batches extends Column
      * @param array $data
      */
     public function __construct(
+        \Ebizmarts\MailChimp\Helper\Data $helper,
         \Ebizmarts\MailChimp\Model\MailChimpSyncBatches $mailChimpSyncB,
         ContextInterface $context,
         UiComponentFactory $uiComponentFactory,
@@ -45,6 +51,7 @@ class Batches extends Column
         array $components = [],
         array $data = []
     ) {
+        $this->_helper = $helper;
         $this->mailChimpSyncB = $mailChimpSyncB;
         $this->urlBuilder = $urlBuilder;
         parent::__construct($context, $uiComponentFactory, $components, $data);
@@ -84,9 +91,8 @@ class Batches extends Column
   
 
         }
-        //var_dump($dataSource);
 
-            return $dataSource;
+        return $dataSource;
         
     }
 

@@ -115,7 +115,6 @@
             </argument>
         </actionsColumn>
 
-<!--
         <column name="customers_count">
                 <argument name="data" xsi:type="array">
                     <item name="config" xsi:type="array">
@@ -160,7 +159,7 @@
                         <item name="label" xsi:type="string" translate="true">#Subscribers</item>
                     </item>
                 </argument>
-        </column>-->
+        </column>
 
     </columns>
 

@@ -78,7 +78,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     const NEEDTORESYNC  = 2;
     const WAITINGSYNC   = 3;
     const SYNCERROR     = 4;
-    const NOTSYNCED = 5;
+    const NOTSYNCED     = 5;
 
     const NEVERSYNC     = 6;
 
@@ -569,7 +569,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     }
 
     /**
-     * @return \Psr\Log\LoggerInterface
+     * @return \Psr\|\LoggerInterface
      */
     public function getLogger()
     {
@@ -1302,6 +1302,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     public function resetCounters()
     {
         $this->counters = [];
+
     }
     public function getCounters()
     {

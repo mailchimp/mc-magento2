@@ -13,6 +13,8 @@
 
 namespace Ebizmarts\MailChimp\Cron;
 
+use Ebizmarts\MailChimp\Helper\Data;
+
 class Ecommerce
 {
     /**
@@ -201,9 +203,6 @@ class Ecommerce
     protected function _processStore($storeId, $mailchimpStoreId, $listId)
     {
         $batchId = null;
-        $countCustomers = 0;
-        $countProducts = 0;
-        $countOrders = 0;
 
         $batchArray = [];
 
@@ -217,20 +216,14 @@ class Ecommerce
             
             $this->_helper->log('Generate Products payload');
             $products = $this->_apiProduct->_sendProducts($storeId);
-            $countProducts = count($products);
-            $this->_helper->log($products);
             $results = array_merge($results, $products);
 
             $this->_helper->log('Generate Customers payload');
             $customers = $this->_apiCustomer->sendCustomers($storeId);
-            $countCustomers = count($customers);
-            $this->_helper->log($customers);
             $results = array_merge($results, $customers);
 
             $this->_helper->log('Generate Orders payload');
             $orders = $this->_apiOrder->sendOrders($storeId);
-            $countOrders = count($orders);
-            $this->_helper->log($orders);
             $results = array_merge($results, $orders);
 
             if ($this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_PATH_IS_SYNC, $storeId)) {
@@ -264,12 +257,43 @@ class Ecommerce
                     if (!isset($batchResponse['id'])) {
                         $this->_helper->log('error in the call to batch');
                     } else {
+                        $batchCounters = $this->_helper->getCounters();
                         $syncBatches = $this->_mailChimpSyncBatchesFactory->create();
                         $syncBatches->setStoreId($storeId);
                         $syncBatches->setBatchId($batchResponse['id']);
                         $syncBatches->setStatus(\Ebizmarts\MailChimp\Helper\Data::BATCH_PENDING);
                         $syncBatches->setMailchimpStoreId($mailchimpStoreId);
                         $syncBatches->setModifiedDate($this->_helper->getGmtDate());
+
+                        if(array_key_exists(\Ebizmarts\MailChimp\Helper\Data::SUB_MOD, $batchCounters) || array_key_exists(\Ebizmarts\MailChimp\Helper\Data::SUB_NEW, $batchCounters)) {
+                            $this->_helper->log('Hola :)');
+                            $syncBatches->setSubscribersCount($batchCounters[\Ebizmarts\MailChimp\Helper\Data::SUB_MOD] + $batchCounters[\Ebizmarts\MailChimp\Helper\Data::SUB_NEW]);
+                        }
+
+                        if($this->_helper->getConfigValue(Data::XML_PATH_ECOMMERCE_ACTIVE) === 1){
+
+                            if(array_key_exists(\Ebizmarts\MailChimp\Helper\Data::PRO_MOD, $batchCounters) || array_key_exists(\Ebizmarts\MailChimp\Helper\Data::PRO_NEW, $batchCounters)) {
+                                $syncBatches->setProductsCount($batchCounters[\Ebizmarts\MailChimp\Helper\Data::PRO_MOD] + $batchCounters[\Ebizmarts\MailChimp\Helper\Data::PRO_NEW]);
+                            }
+
+                            if(array_key_exists(\Ebizmarts\MailChimp\Helper\Data::CUS_MOD, $batchCounters) || array_key_exists(\Ebizmarts\MailChimp\Helper\Data::CUS_NEW, $batchCounters)) {
+                                $this->_helper->log('Hola :)');
+                                $syncBatches->setCustomersCount($batchCounters[\Ebizmarts\MailChimp\Helper\Data::CUS_MOD] + $batchCounters[\Ebizmarts\MailChimp\Helper\Data::CUS_NEW]);
+                            }
+
+                            if(array_key_exists(\Ebizmarts\MailChimp\Helper\Data::ORD_MOD, $batchCounters) || array_key_exists(\Ebizmarts\MailChimp\Helper\Data::ORD_NEW, $batchCounters)) {
+                                $syncBatches->setCustomersCount($batchCounters[\Ebizmarts\MailChimp\Helper\Data::ORD_MOD] + $batchCounters[\Ebizmarts\MailChimp\Helper\Data::ORD_NEW]);
+                            }
+                            
+                            if($this->_helper->getConfigValue(Data::XML_ABANDONEDCART_ACTIVE) === 1){
+
+                                if(array_key_exists(\Ebizmarts\MailChimp\Helper\Data::QUO_MOD, $batchCounters) || array_key_exists(\Ebizmarts\MailChimp\Helper\Data::QUO_NEW, $batchCounters)) {
+                                    $syncBatches->setCartsCount($batchCounters[\Ebizmarts\MailChimp\Helper\Data::QUO_MOD] + $batchCounters[\Ebizmarts\MailChimp\Helper\Data::QUO_NEW]);
+                                }
+
+                            }
+                        }
+                                             
                         $syncBatches->getResource()->save($syncBatches);
                         $batchId = $batchResponse['id'];
                         $this->_showResume($batchId, $storeId);
@@ -474,4 +498,6 @@ class Ecommerce
 
 
     }
+
+
 }
