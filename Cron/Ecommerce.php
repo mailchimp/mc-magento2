@@ -258,7 +258,6 @@ class Ecommerce
                         $this->_helper->log('error in the call to batch');
                     } else {
                         $batchCounters = $this->_helper->getCounters();
-                        $this->_helper->log($batchCounters);
                         $syncBatches = $this->_mailChimpSyncBatchesFactory->create();
                         $syncBatches->setStoreId($storeId);
                         $syncBatches->setBatchId($batchResponse['id']);
