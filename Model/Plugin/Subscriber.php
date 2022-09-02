@@ -67,7 +67,7 @@ class Subscriber
         $customerId
     ) {
         $storeId = $this->getStoreIdFromSubscriber($subscriber);
-        if ($this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_PATH_ACTIVE, $storeId)) {
+        if ($this->_helper->isMailChimpEnabled($storeId)) {
             if (!$this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_MAGENTO_MAIL, $storeId)) {
                 $subscriber->setImportMode(true);
             }
@@ -97,7 +97,7 @@ class Subscriber
         $customerId
     ) {
         $storeId = $this->getStoreIdFromSubscriber($subscriber);
-        if ($this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_PATH_ACTIVE, $storeId)) {
+        if ($this->_helper->isMailChimpEnabled($storeId)) {
             $subscriber->loadByCustomerId($customerId);
             if (!$subscriber->isSubscribed()) {
                 if (!$this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_MAGENTO_MAIL, $storeId)) {
@@ -137,7 +137,7 @@ class Subscriber
         $email
     ) {
         $storeId = $this->getStoreIdFromSubscriber($subscriber);
-        if ($this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_PATH_ACTIVE, $storeId)) {
+        if ($this->_helper->isMailChimpEnabled($storeId)) {
             if (!$this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_MAGENTO_MAIL, $storeId)) {
                 $subscriber->setImportMode(true);
             }
@@ -170,7 +170,7 @@ class Subscriber
         \Magento\Newsletter\Model\Subscriber $subscriber
     ) {
         $storeId = $this->getStoreIdFromSubscriber($subscriber);
-        if ($this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_PATH_ACTIVE, $storeId)) {
+        if ($this->_helper->isMailChimpEnabled($storeId)) {
             if (!$this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_MAGENTO_MAIL, $storeId)) {
                 $subscriber->setImportMode(true);
             }
@@ -194,7 +194,7 @@ class Subscriber
         \Magento\Newsletter\Model\Subscriber $subscriber
     ) {
         $storeId = $this->getStoreIdFromSubscriber($subscriber);
-        if ($this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_PATH_ACTIVE, $storeId)) {
+        if ($this->_helper->isMailChimpEnabled($storeId)) {
             $api = $this->_helper->getApi($storeId);
             if ($subscriber->isSubscribed()) {
                 try {
