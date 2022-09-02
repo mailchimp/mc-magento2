@@ -48,7 +48,7 @@ class Subscriber
     ) {
 
         $storeId = $this->getStoreIdFromSubscriber($subscriber);
-        if ($this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_PATH_ACTIVE, $storeId)) {
+        if ($this->_helper->isMailChimpEnabled($storeId)) {
             $api = $this->_helper->getApi($storeId);
             if ($subscriber->isSubscribed()) {
                 try {
@@ -88,17 +88,18 @@ class Subscriber
      */
     public function afterLoadBySubscriberEmail(\Magento\Newsletter\Model\Subscriber $subscriber, $email, $websiteId)
     {
-        try {
-            if (!$this->_helper->getConfigValue(
-                \Ebizmarts\MailChimp\Helper\Data::XML_MAGENTO_MAIL,
-                $subscriber->getStoreId()
-            )) {
-                $subscriber->setImportMode(true);
+        if ($this->_helper->isMailChimpEnabled($subscriber->getStoreId())) {
+            try {
+                if (!$this->_helper->getConfigValue(
+                    \Ebizmarts\MailChimp\Helper\Data::XML_MAGENTO_MAIL,
+                    $subscriber->getStoreId()
+                )) {
+                    $subscriber->setImportMode(true);
+                }
+            } catch (\Exception $exception) {
+                $this->_helper->log($exception->getMessage());
             }
-        } catch (\Exception $exception) {
-            $this->_helper->log($exception->getMessage());
         }
-
         return $subscriber;
     }
 }

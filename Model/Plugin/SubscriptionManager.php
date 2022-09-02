@@ -72,7 +72,7 @@ class SubscriptionManager
         $customerId,
         $storeId
     ) {
-        if ($this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_PATH_ACTIVE, $storeId)) {
+        if ($this->_helper->isMailChimpEnabled($storeId)) {
 
             $subscriber = $this->_subscriberFactory->create()->loadByCustomerId($customerId);
             if ($subscriber->isSubscribed()) {
@@ -105,7 +105,7 @@ class SubscriptionManager
         $customerId,
         $storeId
     ) {
-        if ($this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_PATH_ACTIVE, $storeId)) {
+        if ($this->_helper->isMailChimpEnabled($storeId)) {
 
             $subscriber = $this->_subscriberFactory->create()->loadByCustomerId($customerId);
             if (!$subscriber->isSubscribed()) {
@@ -158,7 +158,7 @@ class SubscriptionManager
         $email,
         $storeId
     ) {
-        if ($this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_PATH_ACTIVE, $storeId)) {
+        if ($this->_helper->isMailChimpEnabled($storeId)) {
             $websiteId = (int)$this->_storeManager->getStore($storeId)->getWebsiteId();
 
             $subscriber = $this->_subscriberFactory->create()->loadBySubscriberEmail($email, $websiteId);
@@ -205,7 +205,7 @@ class SubscriptionManager
         $storeId,
         $confirmCode
     ) {
-        if ($this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_PATH_ACTIVE, $storeId)) {
+        if ($this->_helper->isMailChimpEnabled($storeId)) {
             $api = $this->_helper->getApi($storeId);
             try {
                 $md5HashEmail = hash('md5', strtolower($email));
