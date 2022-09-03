@@ -2,6 +2,9 @@
   "name": "mailchimp/mc-magento2",
   "autoload": {
     "psr-4": {"Ebizmarts\\MailChimp\\":""},
+    "psr-0": {
+      "Mailchimp" : "Api/"
+    },
     "files": ["registration.php"]
   },
   "description": "Connect MailChimp with Magento",
@@ -25,7 +28,6 @@
   },
   "require" : {
     "magento/framework": "102.0.*",
-    "ebizmarts/mailchimp-lib": ">=3.0.35",
     "ext-json": "*"
   }
 }
