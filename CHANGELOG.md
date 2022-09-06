@@ -1,5 +1,20 @@
 # Change Log
 
+## [103.4.49](https://github.com/mailchimp/mc-magento2/tree/103.4.49)
+
+[Full Changelog](https://github.com/mailchimp/mc-magento2/compare/103.4.48...103.4.49)
+
+**Implemented enhancements:**
+
+- Query optimization for special prices [\#1535](https://github.com/mailchimp/mc-magento2/issues/1535)
+
+**Fixed bugs:**
+
+- Wrong query when load the configuration page and use db prefix [\#1557](https://github.com/mailchimp/mc-magento2/issues/1557)
+- The subcribe at the bottom doesn't work [\#1551](https://github.com/mailchimp/mc-magento2/issues/1551)
+- "Magento always manage emails" configuration blocking default Magento newsletter confirm email sending [\#1545](https://github.com/mailchimp/mc-magento2/issues/1545)
+- Wrong column name in mailchimp\_stores [\#1533](https://github.com/mailchimp/mc-magento2/issues/1533)
+
 ## [103.4.48](https://github.com/mailchimp/mc-magento2/tree/103.4.48) (2022-08-18)
 
 [Full Changelog](https://github.com/mailchimp/mc-magento2/compare/103.4.47...103.4.48)
