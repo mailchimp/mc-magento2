@@ -68,7 +68,7 @@ class CheckEcommerce extends \Magento\Backend\App\Action
         try {
             $collection = $this->collectionFactory->create();
             $collection->getSelect()->joinLeft(
-                ['core_config' => 'core_config_data'],
+                ['core_config' => $this->helper->getTableName('core_config_data')],
                 'value = mailchimp_store_id'
             );
             $collection->getSelect()->reset(\Magento\Framework\DB\Select::COLUMNS)->columns(['mailchimp_store_id']);
