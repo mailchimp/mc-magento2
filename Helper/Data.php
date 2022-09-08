@@ -73,6 +73,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     const ORD_NEW       = "OrderNew";
     const QUO_MOD       = "QuoteModified";
     const QUO_NEW       = "QuoteNew";
+    const ITE_ERR       = "ItemErroneous";
 
     const SYNCED        = 1;
     const NEEDTORESYNC  = 2;
