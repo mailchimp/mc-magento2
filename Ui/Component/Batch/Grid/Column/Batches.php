@@ -77,6 +77,16 @@ class Batches extends Column
 
                 $batch['store_name'] = $store_name;
 
+                $batch['subscribers'] = $batch['subscribers_new_count'] . " new;" . $batch["subscribers_modified_count"] . " modified";
+
+                $batch['customers'] = $batch['customers_new_count'] . " new;" . $batch["customers_modified_count"] . " modified";
+
+                $batch['orders'] = $batch['orders_new_count'] . " new;" . $batch["orders_modified_count"] . " modified";
+
+                $batch['products'] = $batch['products_new_count'] . " new;" . $batch["products_modified_count"] . " modified";
+
+                $batch['carts'] = $batch['carts_new_count'] . " new;" . $batch["carts_modified_count"] . " modified";
+
                 $batch[$this->getData('name')] = [
                     'download' => [
                         'href' => $this->urlBuilder->getUrl(
@@ -86,11 +96,13 @@ class Batches extends Column
                         'label' => 'Download'
                     ]
                 ];
-                
-
-  
 
         }
+
+        /*foreach($dataSource['data']['items'] as $batch){
+
+   
+        }*/
 
         return $dataSource;
         
