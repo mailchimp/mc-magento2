@@ -277,6 +277,7 @@ class Ecommerce
                         $syncBatches->setCustomersModifiedCount($batchCounters[Data::CUS_MOD]);
                         $syncBatches->setCartsModifiedCount($batchCounters[Data::QUO_MOD]);
                         $syncBatches->setOrdersModifiedCount($batchCounters[Data::ORD_MOD]);
+                        $syncBatches->serItemsErroneous($batchCounters[Data::ITE_ERR];
 
                         $syncBatches->getResource()->save($syncBatches);
                         $batchId = $batchResponse['id'];
