@@ -95,39 +95,74 @@ class InstallSchema implements InstallSchemaInterface
                 'Status'
             )
             ->addColumn(
-                'carts_count',
+                'carts_new_count',
                 \Magento\Framework\DB\Ddl\Table::TYPE_SMALLINT,
                 null,
                 [],
-                'Number of carts'
+                'Number of new carts'
             )
             ->addColumn(
-                'customers_count',
+                'customers_new_count',
                 \Magento\Framework\DB\Ddl\Table::TYPE_SMALLINT,
                 null,
                 [],
-                'Number of customers'
+                'Number of new customers'
             )
             ->addColumn(
-                'orders_count',
+                'orders_new_count',
                 \Magento\Framework\DB\Ddl\Table::TYPE_SMALLINT,
                 null,
                 [],
-                'Number of orders'
+                'Number of new orders'
             )
             ->addColumn(
-                'products_count',
+                'products_new_count',
                 \Magento\Framework\DB\Ddl\Table::TYPE_SMALLINT,
                 null,
                 [],
-                'Number of products'
+                'Number of new products'
             )
             ->addColumn(
-                'subscribers_count',
+                'subscribers_new_count',
                 \Magento\Framework\DB\Ddl\Table::TYPE_SMALLINT,
                 null,
                 [],
-                'Number of carts'
+                'Number of new carts'
+            )
+            ->addColumn(
+                'carts_modified_count',
+                \Magento\Framework\DB\Ddl\Table::TYPE_SMALLINT,
+                null,
+                [],
+                'Number of modified carts'
+            )
+            ->addColumn(
+                'customers_modified_count',
+                \Magento\Framework\DB\Ddl\Table::TYPE_SMALLINT,
+                null,
+                [],
+                'Number of modified customers'
+            )
+            ->addColumn(
+                'orders_modified_count',
+                \Magento\Framework\DB\Ddl\Table::TYPE_SMALLINT,
+                null,
+                [],
+                'Number of modified orders'
+            )
+            ->addColumn(
+                'products_modified_count',
+                \Magento\Framework\DB\Ddl\Table::TYPE_SMALLINT,
+                null,
+                [],
+                'Number of modified products'
+            )
+            ->addColumn(
+                'subscribers_modified_count',
+                \Magento\Framework\DB\Ddl\Table::TYPE_SMALLINT,
+                null,
+                [],
+                'Number of modified carts'
             );
 
         $connection->createTable($table);
