@@ -277,7 +277,6 @@ class Ecommerce
                         $syncBatches->setCustomersModifiedCount($batchCounters[Data::CUS_MOD]);
                         $syncBatches->setCartsModifiedCount($batchCounters[Data::QUO_MOD]);
                         $syncBatches->setOrdersModifiedCount($batchCounters[Data::ORD_MOD]);
-                        $syncBatches->serItemsErroneous($batchCounters[Data::ITE_ERR];
 
                         $syncBatches->getResource()->save($syncBatches);
                         $batchId = $batchResponse['id'];
@@ -453,35 +452,6 @@ class Ecommerce
                 }
             }
         }
-    }
-
-    private function filterOrdersBatch($ordersbatch) {
-
-        $ordersCount = 0;
-
-        foreach ($ordersbatch as &$order){
-
-            if(str_starts_with($order['operation_id'], "ORD")) {
-
-                $ordersCount++ ;
-            }
-
-        }
-
-        return $ordersCount;
-    }
-
-    private function  filterCustomersBatch($customersbatch) {
-
-        foreach($customersbatch as $customer){
-            if(str_ends_with($customer['operation_id'], "SUB"))
-            unset($customer);
-        }
-
-
-        return count($customersbatch);
-
-
     }
 
 
