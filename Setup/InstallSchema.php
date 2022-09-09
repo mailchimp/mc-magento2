@@ -163,13 +163,6 @@ class InstallSchema implements InstallSchemaInterface
                 null,
                 [],
                 'Number of modified carts'
-            )
-            ->addColumn(
-                'items_erroneous',
-                \Magento\Framework\DB\Ddl\Table::TYPE_SMALLINT,
-                null,
-                [],
-                'Number of erroneous items'
             );
 
         $connection->createTable($table);
