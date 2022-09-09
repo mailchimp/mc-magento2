@@ -99,11 +99,6 @@ class Batches extends Column
 
         }
 
-        /*foreach($dataSource['data']['items'] as $batch){
-
-   
-        }*/
-
         return $dataSource;
         
     }
