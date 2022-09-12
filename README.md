@@ -90,4 +90,4 @@ Additional information is often requested when the bug report is processed, you 
 
 ## Pull requests
 
-Before creating a pull request please make sure to follow this [guidelines](https://github.com/mailchimp/mc-magento2/wiki/Pull-Request-guideliness) or it will be rejected.
+Before creating a pull request please make sure to follow this [guidelines](https://github.com/mailchimp/mc-magento2/wiki/Pull-Request-guideliness) or it will be rejected. 
