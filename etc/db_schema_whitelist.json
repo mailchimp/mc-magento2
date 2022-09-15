@@ -30,7 +30,8 @@
       "regtype": true,
       "original_id": true,
       "batch_id": true,
-      "store_id": true
+      "store_id": true,
+      "added_at": true
     },
     "index": {
       "MAILCHIMP_ERRORS_STORE_ID_REGTYPE_ORIGINAL_ID": true
