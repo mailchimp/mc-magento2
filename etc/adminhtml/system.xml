@@ -211,7 +211,6 @@
                     <label>Prices including taxes</label>
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
                     <comment><![CDATA[You must configure Price Display Settings in Sales/Tax to "including taxes"]]></comment>
-
                     <depends>
                         <field id="*/*/active">1</field>
                     </depends>
@@ -227,7 +226,15 @@
                 <field id="reset_errors_noretry" translate="button_label" type="button" sortOrder="170" showInDefault="1" showInWebsite="1" showInStore="1">
                     <button_label>Reset Errors and no retry</button_label>
                     <frontend_model>Ebizmarts\MailChimp\Block\Adminhtml\System\Config\ResetErrorsNoRetry</frontend_model>
-                    <comment>Truncate the errors table and retry all the registers with error</comment>
+                    <comment>Truncate the errors table and no retry all the registers with error</comment>
+                    <depends>
+                        <field id="*/*/active">1</field>
+                    </depends>
+                </field>
+                <field id="clean_errors_months" translate="label" type="select" sortOrder="175" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Months to clear the error table</label>
+                    <source_model>Ebizmarts\MailChimp\Model\Config\Source\Months</source_model>
+                    <comment><![CDATA[How many month before clean the error from the error table automatically and not retry]]></comment>
                     <depends>
                         <field id="*/*/active">1</field>
                     </depends>
