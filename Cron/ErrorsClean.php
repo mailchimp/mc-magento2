@@ -27,7 +27,7 @@ class ErrorsClean
      * @var \Magento\Store\Model\StoreManager
      */
     protected $storeManager;
-
+    const LIMIT = 1000;
     /**
      * @param \Ebizmarts\MailChimp\Helper\Data $helper
      * @param \Ebizmarts\MailChimp\Model\MailChimpErrors $chimpErrors
@@ -51,15 +51,7 @@ class ErrorsClean
             if ($period > 0) {
                 try {
                     $this->helper->log("Cleaning errors for store [$storeId] older than $period months");
-                    $connection = $this->chimpErrors->getResource()->getConnection();
-                    $tableName = $this->chimpErrors->getResource()->getMainTable();
-                    $quoteInto = $connection->quoteInto("date_add(added_at, interval ? month) < now()", $period);
-                    $result = $connection->delete($tableName, $quoteInto);
-                    if ($result) {
-                        $this->helper->log("$result records cleaned");
-                    } else {
-                        $this->helper->log("No records to clean");
-                    }
+                    $this->chimpErrors->deleteByStorePeriod($storeId,$period,self::LIMIT);
                 } catch (\Exception $e) {
                     $this->helper->log($e->getMessage());
                 }
