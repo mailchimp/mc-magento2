@@ -50,6 +50,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     const XML_INCLUDING_TAXES = 'mailchimp/ecommerce/including_taxes';
     const XML_POPUP_FORM             = 'mailchimp/general/popup_form';
     const XML_POPUP_URL              = 'mailchimp/general/popup_url';
+    const XML_CLEAN_ERROR_MONTHS     = 'mailchimp/ecommerce/clean_errors_months';
 
 
     const ORDER_STATE_OK = 'complete';
