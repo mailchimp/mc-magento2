@@ -25,6 +25,8 @@
         <column xsi:type="int" name="original_id" padding="11" nullable="false" comment="Associated object ID"/>
         <column xsi:type="varchar" name="batch_id" length="64" comment="Mailchimp Batch ID"/>
         <column xsi:type="int" name="store_id" padding="11" nullable="false" comment="Magento Store Id"/>
+        <column xsi:type="timestamp" name="added_at" on_update="true" nullable="false" default="CURRENT_TIMESTAMP"
+                comment="Added at date"/>
         <constraint xsi:type="primary" referenceId="PRIMARY">
             <column name="id"/>
         </constraint>
