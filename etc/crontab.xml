@@ -26,5 +26,8 @@
         <job name="ebizmarts_clean_batches" instance="Ebizmarts\MailChimp\Cron\BatchesClean" method="execute">
             <schedule>0 * * * *</schedule>
         </job>
+        <job name="ebizmarts_clean_errors" instance="Ebizmarts\MailChimp\Cron\ErrorsClean" method="execute">
+            <schedule>0 * * * *</schedule>
+        </job>
     </group>
 </config>
