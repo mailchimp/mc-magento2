@@ -554,7 +554,7 @@ class UpgradeSchema implements UpgradeSchemaInterface
                 'mailchimp_sync_modified'
             );
         }
-        if (version_compare($context->getVersion(), '101.2.49') < 0) {
+        if (version_compare($context->getVersion(), '101.2.50') < 0) {
             $connection->addColumn(
                 $setup->getTable('mailchimp_errors'),
                 'added_at',
