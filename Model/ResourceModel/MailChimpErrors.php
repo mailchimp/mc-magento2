@@ -36,4 +36,11 @@ class MailChimpErrors extends AbstractDb
         }
         return $errors;
     }
+    public function deleteByStorePeriod(\Ebizmarts\MailChimp\Model\MailChimpErrors $errors, $storeId, $interval, $limit)
+    {
+        $connection = $this->getConnection();
+        $table = $this->getTable('mailchimp_errors');
+        $ret = $connection->query("DELETE FROM $table WHERE date_add(added_at, interval $interval month) < now() AND store_id = $storeId LIMIT $limit");
+        return $ret;
+    }
 }
