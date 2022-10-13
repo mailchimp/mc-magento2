@@ -26,6 +26,7 @@ define(
                 "resyncProductsUrl": "",
                 "cleanEcommerceUrl": "",
                 "checkEcommerceUrl": "",
+                "fixMailchimpjsUrl": "",
                 "scope": "",
                 "scopeId": ""
             },
@@ -61,8 +62,9 @@ define(
                 $('#mailchimp_general_clean_ecommerce').click(function () {
                     self._cleanEcommerce();
                 });
-
-
+                $('#mailchimp_general_fix_mailchimpjs').click(function () {
+                    self._fixMailchimpJS();
+                });
             },
             _checkCleanButton: function () {
                 var checkEcommerceUrl = this.options.checkEcommerceUrl;
@@ -98,6 +100,26 @@ define(
                     }
                 });
 
+            },
+            _fixMailchimpJS: function ()
+            {
+                var fixMailchimpjsUrl = this.options.fixMailchimpjsUrl;
+                var scope = this.options.scope;
+                var scopeId = this.options.scopeId;
+
+                $.ajax({
+                    url: fixMailchimpjsUrl,
+                    data: {'form_key': window.FORM_KEY,'scope': scope, 'scopeId': scopeId},
+                    type: 'GET',
+                    dataType: 'json',
+                    showLoader: true
+                }).done(function (data) {
+                    if (data.valid == 0) {
+                        alert({content: 'Error: can\'t fix it'});
+                    } else if (data.valid == 1) {
+                        alert({content: 'Frontend fixed, please refresh your cache'});
+                    }
+                });
             },
             _resyncSubscribers: function (mailchimpStoreId) {
                 var resyncSubscribersUrl = this.options.resyncSubscribersUrl;
