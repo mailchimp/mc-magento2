@@ -155,7 +155,7 @@ class Cart
             ['m4m.*']
         );
         // be sure that the quotes are already in mailchimp and not deleted
-        $convertedCarts->getSelect()->where("m4m.mailchimp_sync_deleted is null and m4m.related_id is not null");
+        $convertedCarts->getSelect()->where("m4m.mailchimp_sync_deleted = 0 and m4m.related_id is not null");
         // limit the collection
         $convertedCarts->getSelect()->limit(self::BATCH_LIMIT);
         /**
