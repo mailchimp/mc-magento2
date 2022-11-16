@@ -41,11 +41,18 @@
             <argument name="resourceModel" xsi:type="string">Ebizmarts\MailChimp\Model\ResourceModel\MailChimpErrors</argument>
         </arguments>
     </virtualType>
+    <virtualType name="Ebizmarts\MailChimp\Model\ResourceModel\MailChimpSyncBatchesGrid\Collection" type="Magento\Framework\View\Element\UiComponent\DataProvider\SearchResult">
+        <arguments>
+            <argument name="mainTable" xsi:type="string">mailchimp_sync_batches</argument>
+            <argument name="resourceModel" xsi:type="string">Ebizmarts\MailChimp\Model\ResourceModel\MailChimpSyncBatches</argument>
+        </arguments>
+    </virtualType>
     <type name="Magento\Framework\View\Element\UiComponent\DataProvider\CollectionFactory">
         <arguments>
             <argument name="collections" xsi:type="array">
                 <item name="mailchimp_errors_grid_data_source" xsi:type="string">Ebizmarts\MailChimp\Model\ResourceModel\MailChimpErrors\Collection</item>
                 <item name="mailchimp_stores_grid_data_source" xsi:type="string">Ebizmarts\MailChimp\Model\ResourceModel\MailChimpStores\Grid\Collection</item>
+                <item name="mailchimp_batch_grid_data_source" xsi:type="string">Ebizmarts\MailChimp\Model\ResourceModel\MailChimpSyncBatchesGrid\Collection</item>
             </argument>
         </arguments>
     </type>

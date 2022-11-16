@@ -91,7 +91,17 @@
       "mailchimp_store_id": true,
       "batch_id": true,
       "status": true,
-      "modified_date": true
+      "modified_date": true,
+      "carts_new_count" : true,
+      "customers_new_count" : true,
+      "orders_new_count" : true,
+      "products_new_count" : true,
+      "subscribers_new_count" : true,
+      "carts_modified_count" : true,
+      "customers_modified_count" : true,
+      "orders_modified_count" : true,
+      "products_modified_count" : true,
+      "subscribers_modified_count" : true
     },
     "constraint": {
       "PRIMARY": true
