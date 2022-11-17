@@ -70,7 +70,6 @@ class Getresponse extends \Magento\Backend\App\Action
         $batchId = $batches->getBatchId();
         $fileContent = [];
         $counter = 0;
-
         do {
             $counter++;
             $files = $this->_result->getBatchResponse($batchId, $batches->getStoreId());
@@ -79,23 +78,17 @@ class Getresponse extends \Magento\Backend\App\Action
                 break;
             }
             foreach ($files as &$file) {
-
                 $items = json_decode($this->_driver->fileGetContents($file));
-
                 foreach ($items as &$item) {
-
                     $content = [
                         'status_code' => $item->status_code,
                         'operation_id' => $item->operation_id,
                         'response' => json_decode($item->response)
                     ];
                     $fileContent[] = $content;
-
                 }
-
                 $this->_driver->deleteFile($file);
             }
-
             $baseDir = $this->_helper->getBaseDir();
             if ($this->_driver->isDirectory($baseDir . DIRECTORY_SEPARATOR . 'var' . DIRECTORY_SEPARATOR .
                 \Ebizmarts\MailChimp\Model\Api\Result::MAILCHIMP_TEMP_DIR . DIRECTORY_SEPARATOR . $batchId)) {
@@ -104,9 +97,7 @@ class Getresponse extends \Magento\Backend\App\Action
                     \Ebizmarts\MailChimp\Model\Api\Result::MAILCHIMP_TEMP_DIR . DIRECTORY_SEPARATOR . $batchId
                 );
             }
-
         } while (!count($fileContent) && $counter<self::MAX_RETRIES);
-        
         $resultJson =$this->_resultFactory->create(ResultFactory::TYPE_JSON);
         $resultJson->setHeader('Content-disposition', 'attachment; filename='.$batchId.'.json');
         $resultJson->setHeader('Content-type', 'application/json');
