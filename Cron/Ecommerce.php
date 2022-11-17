@@ -261,9 +261,6 @@ class Ecommerce
                         $syncBatches->setStatus(\Ebizmarts\MailChimp\Helper\Data::BATCH_PENDING);
                         $syncBatches->setMailchimpStoreId($mailchimpStoreId);
                         $syncBatches->setModifiedDate($this->_helper->getGmtDate());
-                        /**
-                        *@var Data is \Ebizmarts\MailChimp\Helper\Data
-                        */
                         $syncBatches->setSubscribersNewCount($batchCounters[\Ebizmarts\MailChimp\Helper\Data::SUB_NEW]);
                         $syncBatches->setProductsNewCount($batchCounters[\Ebizmarts\MailChimp\Helper\Data::PRO_NEW]);
                         $syncBatches->setCustomersNewCount($batchCounters[\Ebizmarts\MailChimp\Helper\Data::CUS_NEW]);
