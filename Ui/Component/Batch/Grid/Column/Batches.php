@@ -61,32 +61,19 @@ class Batches extends Column
         return $this->getContext()->getDataProvider()->getData();
     }
 
-    public function prepareDataSource(array $dataSource) {   
-        
+   public function prepareDataSource(array $dataSource) {   
         if(isset($dataSource['data']['items'])){
-
             foreach($dataSource['data']['items'] as &$batch){
-
                 $batch_status = &$batch['status'];
-
                 $batch_status = ucfirst($batch_status);
-
-                
                 $batch_store_id = $batch['mailchimp_store_id'];
                 $store_name = $this->getMCStoreNameById($batch_store_id);
-
                 $batch['store_name'] = $store_name;
-
                 $batch['subscribers'] = $batch['subscribers_new_count'] . " new;" . $batch["subscribers_modified_count"] . " modified";
-
                 $batch['customers'] = $batch['customers_new_count'] . " new;" . $batch["customers_modified_count"] . " modified";
-
                 $batch['orders'] = $batch['orders_new_count'] . " new;" . $batch["orders_modified_count"] . " modified";
-
                 $batch['products'] = $batch['products_new_count'] . " new;" . $batch["products_modified_count"] . " modified";
-
                 $batch['carts'] = $batch['carts_new_count'] . " new;" . $batch["carts_modified_count"] . " modified";
-
                 $batch[$this->getData('name')] = [
                     'download' => [
                         'href' => $this->urlBuilder->getUrl(
@@ -96,23 +83,16 @@ class Batches extends Column
                         'label' => 'Download'
                     ]
                 ];
-
         }
-
-        return $dataSource;
-        
+        return $dataSource;     
     }
-
-
 }
-
+    
     private function getMCStoreNameById ($mailchimp_store_id) {
-
         $connection = $this->mailChimpSyncB->getResource()->getConnection();
         $query = $connection->select()->from('mailchimp_stores', 'name')->where('storeid = ? ', $mailchimp_store_id);
         $chimpStore = $connection->fetchRow($query);
         
         return $chimpStore["name"];
     }
-
 }?>
