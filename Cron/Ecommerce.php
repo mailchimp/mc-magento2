@@ -228,9 +228,6 @@ class Ecommerce
                         $syncBatches->setStatus(\Ebizmarts\MailChimp\Helper\Data::BATCH_PENDING);
                         $syncBatches->setMailchimpStoreId($mailchimpStoreId);
                         $syncBatches->setModifiedDate($this->_helper->getGmtDate());
-                        /**
-                        *@var Data is \Ebizmarts\MailChimp\Helper\Data
-                        */
                         $syncBatches->setSubscribersNewCount($batchCounters[Data::SUB_NEW]);
                         $syncBatches->setProductsNewCount($batchCounters[Data::PRO_NEW]);
                         $syncBatches->setCustomersNewCount($batchCounters[Data::CUS_NEW]);
@@ -241,7 +238,6 @@ class Ecommerce
                         $syncBatches->setCustomersModifiedCount($batchCounters[Data::CUS_MOD]);
                         $syncBatches->setCartsModifiedCount($batchCounters[Data::QUO_MOD]);
                         $syncBatches->setOrdersModifiedCount($batchCounters[Data::ORD_MOD]);
-
                         $syncBatches->getResource()->save($syncBatches);
                         $batchId = $batchResponse['id'];
                         $this->_showResume($batchId, $storeId);
