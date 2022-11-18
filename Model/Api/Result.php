@@ -130,7 +130,7 @@ class Result
                 }
                 // get the tar.gz file with the results
                 // for AWS S3 use urldecode, for google drive use without urldecode
-                // $fileUrl = urldecode($response['response_body_url']);
+                //$fileUrl = urldecode($response['response_body_url']);
                 $fileUrl = $response['response_body_url'];
                 $fileName = $baseDir . DIRECTORY_SEPARATOR . 'var' . DIRECTORY_SEPARATOR .
                     self::MAILCHIMP_TEMP_DIR . DIRECTORY_SEPARATOR . $batchId;

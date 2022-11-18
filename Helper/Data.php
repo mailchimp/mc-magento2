@@ -81,7 +81,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     const NEEDTORESYNC  = 2;
     const WAITINGSYNC   = 3;
     const SYNCERROR     = 4;
-    const NOTSYNCED = 5;
+    const NOTSYNCED     = 5;
 
     const NEVERSYNC     = 6;
 
@@ -572,7 +572,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     }
 
     /**
-     * @return \Psr\Log\LoggerInterface
+     * @return \Psr\|\LoggerInterface
      */
     public function getLogger()
     {
@@ -1298,15 +1298,23 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     }
     public function modifyCounter($index, $increment = 1)
     {
-        if (array_key_exists($index, $this->counters)) {
-            $this->counters[$index] = $this->counters[$index] + $increment;
-        } else {
-            $this->counters[$index] = 1;
-        }
+        $this->counters[$index] = $this->counters[$index] + $increment;
     }
     public function resetCounters()
     {
-        $this->counters = [];
+        $this->counters = [
+            self::SUB_NEW => 0,
+            self::SUB_MOD => 0,
+            self::ORD_NEW => 0,
+            self::ORD_MOD => 0,
+            self::PRO_NEW => 0,
+            self::PRO_MOD => 0,
+            self::CUS_NEW => 0,
+            self::CUS_MOD => 0,
+            self::QUO_NEW => 0,
+            self::QUO_MOD => 0
+        ];
+
     }
     public function getCounters()
     {
