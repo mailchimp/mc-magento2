@@ -1,0 +1,161 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<listing xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Ui:etc/ui_configuration.xsd">
+    <argument name="data" xsi:type="array">
+        <item name="js_config" xsi:type="array">
+            <item name="provider" xsi:type="string">mailchimp_batch_grid.mailchimp_batch_grid_data_source</item>
+            <item name="deps" xsi:type="string">mailchimp_batch_grid.mailchimp_batch_grid_data_source</item>
+            <!--Declare the data source name which will be defined below-->
+        </item>
+        <item name="spinner" xsi:type="string">mailchimp_batch_columns</item>
+        <item name="buttons" xsi:type="array">
+        </item>
+    </argument>
+    <dataSource name="mailchimp_batch_grid_data_source">
+        <!--The data source-->
+        <argument name="dataProvider" xsi:type="configurableObject">
+            <argument name="class" xsi:type="string">Magento\Framework\View\Element\UiComponent\DataProvider\DataProvider</argument>
+            <argument name="name" xsi:type="string">mailchimp_batch_grid_data_source</argument>
+            <argument name="primaryFieldName" xsi:type="string">id</argument>
+            <argument name="requestFieldName" xsi:type="string">id</argument>
+            <argument name="data" xsi:type="array">
+                <item name="config" xsi:type="array">
+                    <item name="component" xsi:type="string">Magento_Ui/js/grid/provider</item>
+                    <item name="update_url" xsi:type="url" path="mui/index/render"/>
+                    <item name="storageConfig" xsi:type="array">
+                        <item name="indexField" xsi:type="string">id</item>
+                    </item>
+                </item>
+            </argument>
+        </argument>
+    </dataSource>
+
+    <container name="listing_top">
+        <argument name="data" xsi:type="array">
+            <item name="config" xsi:type="array">
+                <item name="template" xsi:type="string">ui/grid/toolbar</item>
+                <item name="stickyTmpl" xsi:type="string">ui/grid/sticky/toolbar</item>
+            </item>
+        </argument>
+    </container>
+
+    <listingToolbar name="listing_top">
+        <argument name="data" xsi:type="array">
+            <item name="config" xsi:type="array">
+                <item name="sticky" xsi:type="boolean">true</item>
+            </item>
+        </argument>
+        <bookmark name="bookmarks"/>
+        <columnsControls name="columns_controls"/>
+        <filters name="listing_filters">
+            <filterSelect name="store_id">
+                <argument name="optionsProvider" xsi:type="configurableObject">
+                    <argument name="class" xsi:type="string">Magento\Store\Ui\Component\Listing\Column\Store\Options</argument>
+                </argument>
+                <argument name="data" xsi:type="array">
+                    <item name="config" xsi:type="array">
+                        <item name="provider" xsi:type="string">${ $.parentName }</item>
+                        <item name="dataScope" xsi:type="string">store_id</item>
+                        <item name="caption" xsi:type="string" translate="true">All Store Views</item>
+                        <item name="label" xsi:type="string" translate="true">Store View</item>
+                    </item>
+                </argument>
+            </filterSelect>
+        </filters>
+        <paging name="listing_paging"/>
+    </listingToolbar>
+
+    <columns name="mailchimp_batch_columns">
+
+        <column name="batch_id">
+                <argument name="data" xsi:type="array">
+                    <item name="config" xsi:type="array">
+                        <item name="filter" xsi:type="string">text</item>
+                        <item name="sorting" xsi:type="string">asc</item>
+                        <item name="label" xsi:type="string" translate="true">ID</item>
+                    </item>
+                </argument>
+        </column>
+
+        <column name="status">
+                <argument name="data" xsi:type="array">
+                    <item name="config" xsi:type="array">
+                        <item name="filter" xsi:type="string">text</item>
+                        <item name="sorting" xsi:type="string">asc</item>
+                        <item name="label" xsi:type="string" translate="true">Status</item>
+                    </item>
+                </argument>
+        </column>
+
+
+        <column name="modified_date">
+                <argument name="data" xsi:type="array">
+                    <item name="config" xsi:type="array">
+                        <item name="filter" xsi:type="string">text</item>
+                        <item name="sorting" xsi:type="string">asc</item>
+                        <item name="label" xsi:type="string" translate="true">Last modified</item>
+                    </item>
+                </argument>
+        </column>
+
+
+        <column name="store_name" class="\Ebizmarts\MailChimp\Ui\Component\Batch\Grid\Column\Batches">
+            <settings>
+                <label translate="true">Mailchimp Store</label>
+                <bodyTmpl>ui/grid/cells/html</bodyTmpl>
+                <sortable>false</sortable>
+            </settings>
+        </column>
+
+        <column name="customers" class="\Ebizmarts\MailChimp\Ui\Component\Batch\Grid\Column\Batches">
+            <settings>
+                <label translate="true">#Customers</label>
+                <bodyTmpl>ui/grid/cells/html</bodyTmpl>
+                <sortable>false</sortable>
+            </settings>
+        </column>
+
+        
+        <column name="orders" class="\Ebizmarts\MailChimp\Ui\Component\Batch\Grid\Column\Batches">
+            <settings>
+                <label translate="true">#Orders</label>
+                <bodyTmpl>ui/grid/cells/html</bodyTmpl>
+                <sortable>false</sortable>
+            </settings>
+        </column>
+
+        <column name="products" class="\Ebizmarts\MailChimp\Ui\Component\Batch\Grid\Column\Batches">
+            <settings>
+                <label translate="true">#Products</label>
+                <bodyTmpl>ui/grid/cells/html</bodyTmpl>
+                <sortable>false</sortable>
+            </settings>
+        </column>
+
+        <column name="carts" class="\Ebizmarts\MailChimp\Ui\Component\Batch\Grid\Column\Batches">
+            <settings>
+                <label translate="true">#Carts</label>
+                <bodyTmpl>ui/grid/cells/html</bodyTmpl>
+                <sortable>false</sortable>
+            </settings>
+        </column>
+
+        <column name="subscribers" class="\Ebizmarts\MailChimp\Ui\Component\Batch\Grid\Column\Batches">
+            <settings>
+                <label translate="true">#Subscribers</label>
+                <bodyTmpl>ui/grid/cells/html</bodyTmpl>
+                <sortable>false</sortable>
+            </settings>
+        </column>
+
+        <actionsColumn name="actions" class="\Ebizmarts\MailChimp\Ui\Component\Batch\Grid\Column\Batches">
+            <argument name="data" xsi:type="array">
+                <item name="config" xsi:type="array">
+                    <item name="indexField" xsi:type="string">id</item>
+                    <item name="label" xsi:type="string" translate="true">Batch JSON</item>
+                </item>
+            </argument>
+        </actionsColumn>
+
+    </columns>
+
+</listing>

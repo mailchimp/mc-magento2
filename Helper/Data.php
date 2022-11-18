@@ -1309,7 +1309,18 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     }
     public function resetCounters()
     {
-        $this->counters = [];
+        $this->counters = [
+            self::SUB_NEW => 0,
+            self::SUB_MOD => 0,
+            self::ORD_NEW => 0,
+            self::ORD_MOD => 0,
+            self::PRO_NEW => 0,
+            self::PRO_MOD => 0,
+            self::CUS_NEW => 0,
+            self::CUS_MOD => 0,
+            self::QUO_NEW => 0,
+            self::QUO_MOD => 0
+        ];
     }
     public function getCounters()
     {
