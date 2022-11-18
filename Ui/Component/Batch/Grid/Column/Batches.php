@@ -62,8 +62,8 @@ class Batches extends Column
     }
 
    public function prepareDataSource(array $dataSource) {   
-        if(isset($dataSource['data']['items'])){
-            foreach($dataSource['data']['items'] as &$batch) {
+        if (isset($dataSource['data']['items'])) {
+            foreach ($dataSource['data']['items'] as &$batch) {
                 $batch_status = &$batch['status'];
                 $batch_status = ucfirst($batch_status);
                 $batch_store_id = $batch['mailchimp_store_id'];
