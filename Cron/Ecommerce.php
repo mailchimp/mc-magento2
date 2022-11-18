@@ -254,12 +254,23 @@ class Ecommerce
                     if (!isset($batchResponse['id'])) {
                         $this->_helper->log('error in the call to batch');
                     } else {
+                        $batchCounters = $this->_helper->getCounters();
                         $syncBatches = $this->_mailChimpSyncBatchesFactory->create();
                         $syncBatches->setStoreId($storeId);
                         $syncBatches->setBatchId($batchResponse['id']);
                         $syncBatches->setStatus(\Ebizmarts\MailChimp\Helper\Data::BATCH_PENDING);
                         $syncBatches->setMailchimpStoreId($mailchimpStoreId);
                         $syncBatches->setModifiedDate($this->_helper->getGmtDate());
+                        $syncBatches->setSubscribersNewCount($batchCounters[\Ebizmarts\MailChimp\Helper\Data::SUB_NEW]);
+                        $syncBatches->setProductsNewCount($batchCounters[\Ebizmarts\MailChimp\Helper\Data::PRO_NEW]);
+                        $syncBatches->setCustomersNewCount($batchCounters[\Ebizmarts\MailChimp\Helper\Data::CUS_NEW]);
+                        $syncBatches->setCartsNewCount($batchCounters[\Ebizmarts\MailChimp\Helper\Data::QUO_NEW]);
+                        $syncBatches->setOrdersNewCount($batchCounters[\Ebizmarts\MailChimp\Helper\Data::ORD_NEW]);
+                        $syncBatches->setSubscribersModifiedCount($batchCounters[\Ebizmarts\MailChimp\Helper\Data::SUB_MOD]);
+                        $syncBatches->setProductsModifiedCount($batchCounters[\Ebizmarts\MailChimp\Helper\Data::PRO_MOD]);
+                        $syncBatches->setCustomersModifiedCount($batchCounters[\Ebizmarts\MailChimp\Helper\Data::CUS_MOD]);
+                        $syncBatches->setCartsModifiedCount($batchCounters[\Ebizmarts\MailChimp\Helper\Data::QUO_MOD]);
+                        $syncBatches->setOrdersModifiedCount($batchCounters[\Ebizmarts\MailChimp\Helper\Data::ORD_MOD]);
                         $syncBatches->getResource()->save($syncBatches);
                         $batchId = $batchResponse['id'];
                         $this->_showResume($batchId, $storeId);

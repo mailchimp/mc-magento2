@@ -84,6 +84,16 @@
         <column xsi:type="varchar" name="status" length="10" comment="Status"/>
         <column xsi:type="datetime" name="modified_date" on_update="true" nullable="false" default="CURRENT_TIMESTAMP"
                 comment="Sync Delta"/>
+        <column xsi:type="smallint" name="carts_new_count" comment="Carts New Count"/>
+        <column xsi:type="smallint" name="customers_new_count" comment="Customers New Count"/>
+        <column xsi:type="smallint" name="orders_new_count" comment="Orders New Count"/>
+        <column xsi:type="smallint" name="products_new_count" comment="Products New Count"/>
+        <column xsi:type="smallint" name="subscribers_new_count" comment="Subscribers New Count"/>
+        <column xsi:type="smallint" name="carts_modified_count" comment="Carts Modified Count"/>
+        <column xsi:type="smallint" name="customers_modified_count" comment="Customers Modified Count"/>
+        <column xsi:type="smallint" name="orders_modified_count" comment="Orders Modified Count"/>
+        <column xsi:type="smallint" name="products_modified_count" comment="Products Modified Count"/>
+        <column xsi:type="smallint" name="subscribers_modified_count" comment="Subscribers Modified Count"/>
         <constraint xsi:type="primary" referenceId="PRIMARY">
             <column name="id"/>
         </constraint>
