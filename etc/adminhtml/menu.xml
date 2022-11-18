@@ -32,6 +32,14 @@
              parent="Ebizmarts_MailChimp::mailchimp_menu"
              action="mailchimp/errors"
         />
+        <add id="Ebizmarts_MailChimp::batch_menu"
+             title="Batches"
+             module="Ebizmarts_MailChimp"
+             sortOrder="40"
+             resource="Ebizmarts_MailChimp::batch_grid"
+             parent="Ebizmarts_MailChimp::mailchimp_menu"
+             action="mailchimp/batch"
+        />
     </menu>
 </config>
 
