@@ -6,7 +6,7 @@
   },
   "description": "Connect MailChimp with Magento",
   "type": "magento2-module",
-  "version": "101.2.49",
+  "version": "101.2.50",
   "authors": [
     {
       "name": "Ebizmarts Corp",
