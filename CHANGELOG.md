@@ -1,5 +1,20 @@
 # Change Log
 
+## [100.1.50](https://github.com/mailchimp/mc-magento2/tree/100.1.50)
+
+[Full Changelog](https://github.com/mailchimp/mc-magento2/compare/100.1.49...100.1.50)
+
+**Implemented enhancements:**
+
+- Clean the error table automatically based on a configuration setting [\#1577](https://github.com/mailchimp/mc-magento2/issues/1577)
+- Slow-query optimization for product special prices [\#1569](https://github.com/mailchimp/mc-magento2/issues/1569)
+- Create grid in admin that shows batch information [\#1465](https://github.com/mailchimp/mc-magento2/issues/1465)
+
+**Fixed bugs:**
+
+- The carts are not deleted from mailchimp when are converted in an order [\#1595](https://github.com/mailchimp/mc-magento2/issues/1595)
+- Add a button to fix the chimpstatic js in the frontend [\#1584](https://github.com/mailchimp/mc-magento2/issues/1584)
+
 ## [100.1.49](https://github.com/mailchimp/mc-magento2/tree/100.1.49)
 
 [Full Changelog](https://github.com/mailchimp/mc-magento2/compare/100.1.48...100.1.49)
