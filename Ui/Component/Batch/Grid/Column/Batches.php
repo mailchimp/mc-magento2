@@ -83,9 +83,9 @@ class Batches extends Column
                         'label' => 'Download'
                     ]
                 ];
-            }
-            return $dataSource;     
+            }  
         }
+        return $dataSource;   
     }
 
     private function getMCStoreNameById ($mailchimp_store_id) {
