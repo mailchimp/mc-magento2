@@ -84,7 +84,7 @@ class Batches extends Column
                     ]
                 ];
             }
-        return $dataSource;     
+            return $dataSource;     
         }
     }
 
