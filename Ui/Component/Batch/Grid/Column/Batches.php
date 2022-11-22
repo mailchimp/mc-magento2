@@ -61,7 +61,7 @@ class Batches extends Column
         return $this->getContext()->getDataProvider()->getData();
     }
 
-   public function prepareDataSource(array $dataSource) {   
+    public function prepareDataSource(array $dataSource) {   
         if (isset($dataSource['data']['items'])) {
             foreach ($dataSource['data']['items'] as &$batch) {
                 $batch_status = &$batch['status'];
@@ -83,11 +83,11 @@ class Batches extends Column
                         'label' => 'Download'
                     ]
                 ];
-        }
+            }
         return $dataSource;     
+        }
     }
-}
-    
+
     private function getMCStoreNameById ($mailchimp_store_id) {
         $connection = $this->mailChimpSyncB->getResource()->getConnection();
         $query = $connection->select()->from('mailchimp_stores', 'name')->where('storeid = ? ', $mailchimp_store_id);
@@ -95,4 +95,4 @@ class Batches extends Column
         
         return $chimpStore["name"];
     }
-}?>
+}
