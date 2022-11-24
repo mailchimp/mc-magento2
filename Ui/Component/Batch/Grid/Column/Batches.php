@@ -1,4 +1,5 @@
 <?php
+
 /**
  * mc-magento2 Magento Component
  *
@@ -33,7 +34,6 @@ class Batches extends Column
      */
     protected $helper;
     
-
     /**
      * Batch constructor.
      * @param ContextInterface $context
@@ -86,8 +86,8 @@ class Batches extends Column
                     ]
                 ];
             }
-            return $dataSource;
         }
+        return $dataSource;
     }
 
     private function getMCStoreNameById($mailchimp_store_id)
