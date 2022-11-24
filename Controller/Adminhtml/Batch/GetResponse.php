@@ -15,7 +15,7 @@ namespace Ebizmarts\MailChimp\Controller\Adminhtml\Batch;
 
 use Magento\Framework\Controller\ResultFactory;
 
-class Getresponse extends \Magento\Backend\App\Action
+class GetResponse extends \Magento\Backend\App\Action
 {
     const MAX_RETRIES = 5;
     /**
