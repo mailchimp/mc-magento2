@@ -1,4 +1,5 @@
 <?php
+
 /**
  * mc-magento2 Magento Component
  *
@@ -33,7 +34,6 @@ class Batches extends Column
      */
     protected $helper;
     
-
     /**
      * Batch constructor.
      * @param ContextInterface $context
@@ -57,11 +57,13 @@ class Batches extends Column
         parent::__construct($context, $uiComponentFactory, $components, $data);
     }
 
-    public function getDataSourceData(){
+    public function getDataSourceData()
+    {
         return $this->getContext()->getDataProvider()->getData();
     }
 
-    public function prepareDataSource(array $dataSource) {   
+    public function prepareDataSource(array $dataSource)
+    {
         if (isset($dataSource['data']['items'])) {
             foreach ($dataSource['data']['items'] as &$batch) {
                 $batch_status = &$batch['status'];
@@ -84,11 +86,12 @@ class Batches extends Column
                     ]
                 ];
             }
-        return $dataSource;     
         }
+        return $dataSource;
     }
 
-    private function getMCStoreNameById ($mailchimp_store_id) {
+    private function getMCStoreNameById($mailchimp_store_id)
+    {
         $connection = $this->mailChimpSyncB->getResource()->getConnection();
         $query = $connection->select()->from('mailchimp_stores', 'name')->where('storeid = ? ', $mailchimp_store_id);
         $chimpStore = $connection->fetchRow($query);
