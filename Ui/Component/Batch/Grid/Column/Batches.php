@@ -86,8 +86,8 @@ class Batches extends Column
                     ]
                 ];
             }
-            return $dataSource;
         }
+        return $dataSource;
     }
 
     private function getMCStoreNameById($mailchimp_store_id)
