@@ -33,7 +33,7 @@ class Batches extends Column
      * @var Helper
      */
     protected $helper;
-    
+
     /**
      * Batch constructor.
      * @param ContextInterface $context
@@ -79,7 +79,7 @@ class Batches extends Column
                 $batch[$this->getData('name')] = [
                     'download' => [
                         'href' => $this->urlBuilder->getUrl(
-                            'mailchimp/batch/getresponse',
+                            'mailchimp/batch/getResponse',
                             ['id' => $batch['id']]
                         ),
                         'label' => 'Download'
@@ -95,7 +95,7 @@ class Batches extends Column
         $connection = $this->mailChimpSyncB->getResource()->getConnection();
         $query = $connection->select()->from('mailchimp_stores', 'name')->where('storeid = ? ', $mailchimp_store_id);
         $chimpStore = $connection->fetchRow($query);
-        
+
         return $chimpStore["name"];
     }
 }
