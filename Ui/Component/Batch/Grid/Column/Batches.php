@@ -79,7 +79,7 @@ class Batches extends Column
                 $batch[$this->getData('name')] = [
                     'download' => [
                         'href' => $this->urlBuilder->getUrl(
-                            'mailchimp/batch/getresponse',
+                            'mailchimp/batch/getResponse',
                             ['id' => $batch['id']]
                         ),
                         'label' => 'Download'
