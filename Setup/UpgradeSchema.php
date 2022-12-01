@@ -568,6 +568,86 @@ class UpgradeSchema implements UpgradeSchemaInterface
                     'comment' => 'added at date'
                 ]
             );
+            $connection->addColumn(
+                $setup->getTable('mailchimp_sync_batches'),
+                'carts_modified_count',
+                [
+                    'type' => \Magento\Framework\DB\Ddl\Table::TYPE_SMALLINT,
+                    'default' => null
+                ]
+            );
+            $connection->addColumn(
+                $setup->getTable('mailchimp_sync_batches'),
+                'customers_modified_count',
+                [
+                    'type' => \Magento\Framework\DB\Ddl\Table::TYPE_SMALLINT,
+                    'default' => null
+                ]
+            );
+            $connection->addColumn(
+                $setup->getTable('mailchimp_sync_batches'),
+                'orders_modified_count',
+                [
+                    'type' => \Magento\Framework\DB\Ddl\Table::TYPE_SMALLINT,
+                    'default' => null
+                ]
+            );
+            $connection->addColumn(
+                $setup->getTable('mailchimp_sync_batches'),
+                'products_modified_count',
+                [
+                    'type' => \Magento\Framework\DB\Ddl\Table::TYPE_SMALLINT,
+                    'default' => null
+                ]
+            );
+            $connection->addColumn(
+                $setup->getTable('mailchimp_sync_batches'),
+                'subscribers_modified_count',
+                [
+                    'type' => \Magento\Framework\DB\Ddl\Table::TYPE_SMALLINT,
+                    'default' => null
+                ]
+            );
+            $connection->addColumn(
+                $setup->getTable('mailchimp_sync_batches'),
+                'carts_new_count',
+                [
+                    'type' => \Magento\Framework\DB\Ddl\Table::TYPE_SMALLINT,
+                    'default' => null
+                ]
+            );
+            $connection->addColumn(
+                $setup->getTable('mailchimp_sync_batches'),
+                'customers_new_count',
+                [
+                    'type' => \Magento\Framework\DB\Ddl\Table::TYPE_SMALLINT,
+                    'default' => null
+                ]
+            );
+            $connection->addColumn(
+                $setup->getTable('mailchimp_sync_batches'),
+                'orders_new_count',
+                [
+                    'type' => \Magento\Framework\DB\Ddl\Table::TYPE_SMALLINT,
+                    'default' => null
+                ]
+            );
+            $connection->addColumn(
+                $setup->getTable('mailchimp_sync_batches'),
+                'products_new_count',
+                [
+                    'type' => \Magento\Framework\DB\Ddl\Table::TYPE_SMALLINT,
+                    'default' => null
+                ]
+            );
+            $connection->addColumn(
+                $setup->getTable('mailchimp_sync_batches'),
+                'subscribers_new_count',
+                [
+                    'type' => \Magento\Framework\DB\Ddl\Table::TYPE_SMALLINT,
+                    'default' => null
+                ]
+            );
         }
     }
 }
