@@ -1,4 +1,5 @@
 <?php
+
 /**
  * mc-magento2 Magento Component
  *
@@ -10,6 +11,7 @@
  * @date: 10/31/16 5:23 PM
  * @file: UpgradeSchema.php
  */
+
 namespace Ebizmarts\MailChimp\Setup;
 
 use Magento\Framework\Setup\UpgradeSchemaInterface;
@@ -522,7 +524,6 @@ class UpgradeSchema implements UpgradeSchemaInterface
                     'comment' => 'Sent to Mailchimp'
                 ]
             );
-
         }
         if (version_compare($context->getVersion(),'101.2.35') < 0) {
             $connection->changeColumn(
