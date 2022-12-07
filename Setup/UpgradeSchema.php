@@ -566,7 +566,8 @@ class UpgradeSchema implements UpgradeSchemaInterface
                 'carts_modified_count',
                 [
                     'type' => \Magento\Framework\DB\Ddl\Table::TYPE_SMALLINT,
-                    'default' => null
+                    'default' => null,
+                    'comment' => 'counter of modified carts'
                 ]
             );
             $connection->addColumn(
@@ -574,7 +575,8 @@ class UpgradeSchema implements UpgradeSchemaInterface
                 'customers_modified_count',
                 [
                     'type' => \Magento\Framework\DB\Ddl\Table::TYPE_SMALLINT,
-                    'default' => null
+                    'default' => null,
+                    'comment' => 'counter of modified customers'
                 ]
             );
             $connection->addColumn(
@@ -582,7 +584,8 @@ class UpgradeSchema implements UpgradeSchemaInterface
                 'orders_modified_count',
                 [
                     'type' => \Magento\Framework\DB\Ddl\Table::TYPE_SMALLINT,
-                    'default' => null
+                    'default' => null,
+                    'comment' => 'counter of modified orders'
                 ]
             );
             $connection->addColumn(
@@ -590,7 +593,8 @@ class UpgradeSchema implements UpgradeSchemaInterface
                 'products_modified_count',
                 [
                     'type' => \Magento\Framework\DB\Ddl\Table::TYPE_SMALLINT,
-                    'default' => null
+                    'default' => null,
+                    'comment' => 'counter of modified products'
                 ]
             );
             $connection->addColumn(
@@ -598,7 +602,8 @@ class UpgradeSchema implements UpgradeSchemaInterface
                 'subscribers_modified_count',
                 [
                     'type' => \Magento\Framework\DB\Ddl\Table::TYPE_SMALLINT,
-                    'default' => null
+                    'default' => null,
+                    'comment' => 'counter of modified subscribers'
                 ]
             );
             $connection->addColumn(
@@ -606,7 +611,8 @@ class UpgradeSchema implements UpgradeSchemaInterface
                 'carts_new_count',
                 [
                     'type' => \Magento\Framework\DB\Ddl\Table::TYPE_SMALLINT,
-                    'default' => null
+                    'default' => null,
+                    'comment' => 'counter of new carts'
                 ]
             );
             $connection->addColumn(
@@ -614,7 +620,8 @@ class UpgradeSchema implements UpgradeSchemaInterface
                 'customers_new_count',
                 [
                     'type' => \Magento\Framework\DB\Ddl\Table::TYPE_SMALLINT,
-                    'default' => null
+                    'default' => null,
+                    'comment' => 'counter of new customers'
                 ]
             );
             $connection->addColumn(
@@ -622,7 +629,8 @@ class UpgradeSchema implements UpgradeSchemaInterface
                 'orders_new_count',
                 [
                     'type' => \Magento\Framework\DB\Ddl\Table::TYPE_SMALLINT,
-                    'default' => null
+                    'default' => null,
+                    'comment' => 'counter of new orders'
                 ]
             );
             $connection->addColumn(
@@ -630,7 +638,8 @@ class UpgradeSchema implements UpgradeSchemaInterface
                 'products_new_count',
                 [
                     'type' => \Magento\Framework\DB\Ddl\Table::TYPE_SMALLINT,
-                    'default' => null
+                    'default' => null,
+                    'comment' => 'counter of new products'
                 ]
             );
             $connection->addColumn(
@@ -638,7 +647,8 @@ class UpgradeSchema implements UpgradeSchemaInterface
                 'subscribers_new_count',
                 [
                     'type' => \Magento\Framework\DB\Ddl\Table::TYPE_SMALLINT,
-                    'default' => null
+                    'default' => null,
+                    'comment' => 'counter of new subscribers'
                 ]
             );
         }
