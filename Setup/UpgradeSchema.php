@@ -562,5 +562,97 @@ class UpgradeSchema implements UpgradeSchemaInterface
                 ]
             );
         }
+        if (version_compare($context->getVersion(), '100.1.51') < 0) {
+            $connection->addColumn(
+                $setup->getTable('mailchimp_sync_batches'),
+                'carts_modified_count',
+                [
+                    'type' => \Magento\Framework\DB\Ddl\Table::TYPE_SMALLINT,
+                    'default' => null,
+                    'comment' => 'counter of modified carts'
+                ]
+            );
+            $connection->addColumn(
+                $setup->getTable('mailchimp_sync_batches'),
+                'customers_modified_count',
+                [
+                    'type' => \Magento\Framework\DB\Ddl\Table::TYPE_SMALLINT,
+                    'default' => null,
+                    'comment' => 'counter of modified customers'
+                ]
+            );
+            $connection->addColumn(
+                $setup->getTable('mailchimp_sync_batches'),
+                'orders_modified_count',
+                [
+                    'type' => \Magento\Framework\DB\Ddl\Table::TYPE_SMALLINT,
+                    'default' => null,
+                    'comment' => 'counter of modified orders'
+                ]
+            );
+            $connection->addColumn(
+                $setup->getTable('mailchimp_sync_batches'),
+                'products_modified_count',
+                [
+                    'type' => \Magento\Framework\DB\Ddl\Table::TYPE_SMALLINT,
+                    'default' => null,
+                    'comment' => 'counter of modified products'
+                ]
+            );
+            $connection->addColumn(
+                $setup->getTable('mailchimp_sync_batches'),
+                'subscribers_modified_count',
+                [
+                    'type' => \Magento\Framework\DB\Ddl\Table::TYPE_SMALLINT,
+                    'default' => null,
+                    'comment' => 'counter of modified subscribers'
+                ]
+            );
+            $connection->addColumn(
+                $setup->getTable('mailchimp_sync_batches'),
+                'carts_new_count',
+                [
+                    'type' => \Magento\Framework\DB\Ddl\Table::TYPE_SMALLINT,
+                    'default' => null,
+                    'comment' => 'counter of new carts'
+                ]
+            );
+            $connection->addColumn(
+                $setup->getTable('mailchimp_sync_batches'),
+                'customers_new_count',
+                [
+                    'type' => \Magento\Framework\DB\Ddl\Table::TYPE_SMALLINT,
+                    'default' => null,
+                    'comment' => 'counter of new customers'
+                ]
+            );
+            $connection->addColumn(
+                $setup->getTable('mailchimp_sync_batches'),
+                'orders_new_count',
+                [
+                    'type' => \Magento\Framework\DB\Ddl\Table::TYPE_SMALLINT,
+                    'default' => null,
+                    'comment' => 'counter of new orders'
+                ]
+            );
+            $connection->addColumn(
+                $setup->getTable('mailchimp_sync_batches'),
+                'products_new_count',
+                [
+                    'type' => \Magento\Framework\DB\Ddl\Table::TYPE_SMALLINT,
+                    'default' => null,
+                    'comment' => 'counter of new products'
+                ]
+            );
+            $connection->addColumn(
+                $setup->getTable('mailchimp_sync_batches'),
+                'subscribers_new_count',
+                [
+                    'type' => \Magento\Framework\DB\Ddl\Table::TYPE_SMALLINT,
+                    'default' => null,
+                    'comment' => 'counter of new subscribers'
+                ]
+            );
+        }
     }
 }
