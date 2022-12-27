@@ -57,25 +57,7 @@ class ResyncSubscribers extends \Magento\Backend\App\Action
         $valid = 1;
         $message = '';
         $params = $this->getRequest()->getParams();
-        if (isset($params['website'])) {
-            $mailchimpList = $this->helper->getConfigValue(
-                \Ebizmarts\MailChimp\Helper\Data::XML_PATH_LIST,
-                $params['website'],
-                'website'
-            );
-        } elseif (isset($params['store'])) {
-            $mailchimpList = $this->helper->getConfigValue(
-                \Ebizmarts\MailChimp\Helper\Data::XML_PATH_LIST,
-                $params['store'],
-                'store'
-            );
-        } else {
-            $mailchimpList = $this->helper->getConfigValue(
-                \Ebizmarts\MailChimp\Helper\Data::XML_PATH_LIST,
-                $this->storeManager->getStore()
-            );
-        }
-
+        $mailchimpList = $params['listId'];
         $resultJson = $this->resultJsonFactory->create();
         try {
             $this->helper->resyncAllSubscribers($mailchimpList);
