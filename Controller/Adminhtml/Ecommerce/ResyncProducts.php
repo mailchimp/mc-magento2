@@ -57,25 +57,7 @@ class ResyncProducts extends \Magento\Backend\App\Action
         $valid = 1;
         $message = '';
         $params = $this->getRequest()->getParams();
-        if (isset($params['website'])) {
-            $mailchimpStore = $this->helper->getConfigValue(
-                \Ebizmarts\MailChimp\Helper\Data::XML_MAILCHIMP_STORE,
-                $params['website'],
-                'website'
-            );
-        } elseif (isset($params['store'])) {
-            $mailchimpStore = $this->helper->getConfigValue(
-                \Ebizmarts\MailChimp\Helper\Data::XML_MAILCHIMP_STORE,
-                $params['store'],
-                'store'
-            );
-        } else {
-            $mailchimpStore = $this->helper->getConfigValue(
-                \Ebizmarts\MailChimp\Helper\Data::XML_MAILCHIMP_STORE,
-                $this->storeManager->getStore()
-            );
-        }
-
+        $mailchimpStore = $params['mailchimpStoreId'];
         $resultJson = $this->resultJsonFactory->create();
         try {
             $this->helper->resyncProducts($mailchimpStore);
