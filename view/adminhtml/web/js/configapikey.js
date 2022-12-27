@@ -52,8 +52,8 @@ define(
                     self._createWebhook(apiKey, listId);
                 });
                 $('#mailchimp_general_resync_subscribers').click(function () {
-                    var mailchimpStoreId = $('#mailchimp_general_monkeystore').find(':selected').val();
-                    self._resyncSubscribers(mailchimpStoreId);
+                    var listId = $('#mailchimp_general_monkeylist').find(':selected').val();
+                    self._resyncSubscribers(listId);
                 });
                 $('#mailchimp_ecommerce_resync_products').click(function () {
                     var mailchimpStoreId = $('#mailchimp_general_monkeystore').find(':selected').val();
@@ -85,40 +85,40 @@ define(
             },
             _changeEcommerce: function () {
                 var self = this;
-              confirmation( {
-                  content: "If you disable Ecommerce, we will disable Abandoned Cart",
-                  actions: {
-                      confirm: function () {
-                          var tag = '#mailchimp_abandonedcart_active'
-                          $(tag).empty();
-                          $(tag).append($('<option>', {
-                              value: "0",
-                              text: 'No',
-                              selected: "selected"
-                          }));
-                          $(tag).append($('<option>', {
-                              value: "1",
-                              text: 'Yes'
-                          }));
-                          self._hideAbandonedCart();
-                      },
-                      cancel: function () {
-                          var tag = '#mailchimp_ecommerce_active'
-                          $(tag).empty();
-                          $(tag).append($('<option>', {
-                              value: "0",
-                              text: 'No',
-                          }));
-                          $(tag).append($('<option>', {
-                              value: "1",
-                              text: 'Yes',
-                              selected: "selected"
-                          }));
-                          self._showEcommerce();
-                      }
+                confirmation( {
+                        content: "If you disable Ecommerce, we will disable Abandoned Cart",
+                        actions: {
+                            confirm: function () {
+                                var tag = '#mailchimp_abandonedcart_active'
+                                $(tag).empty();
+                                $(tag).append($('<option>', {
+                                    value: "0",
+                                    text: 'No',
+                                    selected: "selected"
+                                }));
+                                $(tag).append($('<option>', {
+                                    value: "1",
+                                    text: 'Yes'
+                                }));
+                                self._hideAbandonedCart();
+                            },
+                            cancel: function () {
+                                var tag = '#mailchimp_ecommerce_active'
+                                $(tag).empty();
+                                $(tag).append($('<option>', {
+                                    value: "0",
+                                    text: 'No',
+                                }));
+                                $(tag).append($('<option>', {
+                                    value: "1",
+                                    text: 'Yes',
+                                    selected: "selected"
+                                }));
+                                self._showEcommerce();
+                            }
+                        }
                     }
-                  }
-              );
+                );
             },
             _changeAbandonedCart: function () {
                 var self = this;
@@ -236,11 +236,11 @@ define(
                     }
                 });
             },
-            _resyncSubscribers: function (mailchimpStoreId) {
+            _resyncSubscribers: function (listId) {
                 var resyncSubscribersUrl = this.options.resyncSubscribersUrl;
                 $.ajax({
                     url: resyncSubscribersUrl,
-                    data: {'form_key': window.FORM_KEY, 'mailchimpStoreId': mailchimpStoreId},
+                    data: {'form_key': window.FORM_KEY, 'listId': listId},
                     type: 'GET',
                     dataType: 'json',
                     showLoader: true
