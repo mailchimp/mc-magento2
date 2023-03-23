@@ -946,7 +946,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
             }
 
             foreach ($apiStores['stores'] as $store) {
-                if ($store['platform']!=self::PLATFORM||array_key_exists($store['list_id'],$allStores)) {
+                if ($store['platform']!=self::PLATFORM||in_array($store['id'],$allStores)) {
                     continue;
                 }
                 if (isset($store['connected_site'])) {
@@ -954,7 +954,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
                 } else {
                     $name = $store['name'].' (Warning: not connected)';
                 }
-                $allStores['list_id'] = $store['list_id'];
+                $allStores[] = $store['id'];
                 $mstore = $this->_mailChimpStoresFactory->create();
                 $mstore->setApikey($this->_encryptor->encrypt(trim($apiKey)));
                 $mstore->setStoreid($store['id']);
