@@ -32,7 +32,7 @@ class Batches extends Column
      * @var Helper
      */
     protected $helper;
-    
+
 
     /**
      * Batch constructor.
@@ -61,7 +61,7 @@ class Batches extends Column
         return $this->getContext()->getDataProvider()->getData();
     }
 
-    public function prepareDataSource(array $dataSource) {   
+    public function prepareDataSource(array $dataSource) {
         if (isset($dataSource['data']['items'])) {
             foreach ($dataSource['data']['items'] as &$batch) {
                 $batch_status = &$batch['status'];
@@ -84,7 +84,7 @@ class Batches extends Column
                     ]
                 ];
         }
-        return $dataSource;     
+        return $dataSource;
     }
 }
 
@@ -92,8 +92,8 @@ class Batches extends Column
         $connection = $this->mailChimpSyncB->getResource()->getConnection();
         $query = $connection->select()->from('mailchimp_stores', 'name')->where('storeid = ? ', $mailchimp_store_id);
         $chimpStore = $connection->fetchRow($query);
-        
-        return $chimpStore["name"];
+
+        return $chimpStore;
     }
 
 }?>
