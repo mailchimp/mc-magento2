@@ -10,9 +10,10 @@
 define(
     [
         'jquery',
-        'Magento_Ui/js/modal/alert'
+        'Magento_Ui/js/modal/alert',
+        'Magento_Ui/js/modal/confirm'
     ],
-    function ($, alert) {
+    function ($, alert, confirmation) {
         "use strict";
 
         $.widget('mage.configmonkeyapikey', {
@@ -51,8 +52,8 @@ define(
                     self._createWebhook(apiKey, listId);
                 });
                 $('#mailchimp_general_resync_subscribers').click(function () {
-                    var mailchimpStoreId = $('#mailchimp_general_monkeystore').find(':selected').val();
-                    self._resyncSubscribers(mailchimpStoreId);
+                    var listId = $('#mailchimp_general_monkeylist').find(':selected').val();
+                    self._resyncSubscribers(listId);
                 });
                 $('#mailchimp_ecommerce_resync_products').click(function () {
                     var mailchimpStoreId = $('#mailchimp_general_monkeystore').find(':selected').val();
@@ -65,8 +66,122 @@ define(
                 $('#mailchimp_general_fix_mailchimpjs').click(function () {
                     self._fixMailchimpJS();
                 });
+                $('#mailchimp_ecommerce_active').change(function () {
+                    var ecommerceEnabled = $('#mailchimp_ecommerce_active').find(':selected').val();
+                    var abandonedCartEnabled = $('#mailchimp_abandonedcart_active').find(':selected').val();
+                    if (ecommerceEnabled == 0 && abandonedCartEnabled == 1) {
+                        self._changeEcommerce();
+                    }
+                });
+                $('#mailchimp_abandonedcart_active').change(function () {
+                    var ecommerceEnabled = $('#mailchimp_ecommerce_active').find(':selected').val();
+                    var abandonedCartEnabled = $('#mailchimp_abandonedcart_active').find(':selected').val();
+                    if (ecommerceEnabled == 0 && abandonedCartEnabled == 1) {
+                        self._changeAbandonedCart();
+                    }
+                });
 
 
+            },
+            _changeEcommerce: function () {
+                var self = this;
+                confirmation( {
+                        content: "If you disable Ecommerce, we will disable Abandoned Cart",
+                        actions: {
+                            confirm: function () {
+                                var tag = '#mailchimp_abandonedcart_active'
+                                $(tag).empty();
+                                $(tag).append($('<option>', {
+                                    value: "0",
+                                    text: 'No',
+                                    selected: "selected"
+                                }));
+                                $(tag).append($('<option>', {
+                                    value: "1",
+                                    text: 'Yes'
+                                }));
+                                self._hideAbandonedCart();
+                            },
+                            cancel: function () {
+                                var tag = '#mailchimp_ecommerce_active'
+                                $(tag).empty();
+                                $(tag).append($('<option>', {
+                                    value: "0",
+                                    text: 'No',
+                                }));
+                                $(tag).append($('<option>', {
+                                    value: "1",
+                                    text: 'Yes',
+                                    selected: "selected"
+                                }));
+                                self._showEcommerce();
+                            }
+                        }
+                    }
+                );
+            },
+            _changeAbandonedCart: function () {
+                var self = this;
+                confirmation( {
+                        content: "If you enable Abandoned Cart we need to enable Ecommerce",
+                        actions: {
+                            confirm: function () {
+                                var tag = '#mailchimp_ecommerce_active'
+                                $(tag).empty();
+                                $(tag).append($('<option>', {
+                                    value: "0",
+                                    text: 'No'
+                                }));
+                                $(tag).append($('<option>', {
+                                    value: "1",
+                                    text: 'Yes',
+                                    selected: "selected"
+                                }));
+                                self._showEcommerce();
+                            },
+                            cancel: function () {
+                                var tag = '#mailchimp_abandonedcart_active'
+                                $(tag).empty();
+                                $(tag).append($('<option>', {
+                                    value: "0",
+                                    text: 'No',
+                                    selected: "selected"
+                                }));
+                                $(tag).append($('<option>', {
+                                    value: "1",
+                                    text: 'Yes'
+                                }));
+                                self._hideAbandonedCart();
+                            }
+                        }
+                    }
+                );
+            },
+            _hideAbandonedCart: function () {
+                $("#row_mailchimp_abandonedcart_firstdate").hide();
+                $("#row_mailchimp_abandonedcart_page").hide();
+                $("#row_mailchimp_abandonedcart_save_email_in_quote").hide();
+                $("#row_mailchimp_abandonedcart_create_abandonedcart_automation").hide();
+            },
+            _showEcommerce: function () {
+                $("#row_mailchimp_ecommerce_customer_optin").show();
+                $("#mailchimp_ecommerce_customer_optin").show();
+                $("#row_mailchimp_ecommerce_firstdate").show();
+                $("#mailchimp_ecommerce_firstdate").show();
+                $("#row_mailchimp_ecommerce_send_promo").show();
+                $("#mailchimp_ecommerce_send_promo").show();
+                $("#row_mailchimp_ecommerce_including_taxes").show();
+                $("#mailchimp_ecommerce_including_taxes").show();
+                $("#row_mailchimp_ecommerce_reset_errors_retry").show();
+                $("#mailchimp_ecommerce_reset_errors_retry").show();
+                $("#row_mailchimp_ecommerce_reset_errors_noretry").show();
+                $("#mailchimp_ecommerce_reset_errors_noretry").show();
+                $("#row_mailchimp_ecommerce_clean_errors_months").show();
+                $("#mailchimp_ecommerce_clean_errors_months").show();
+                $("#row_mailchimp_ecommerce_delete_store").show();
+                $("#mailchimp_ecommerce_delete_store").show();
+                $("#row_mailchimp_ecommerce_resync_products").show();
+                $("#mailchimp_ecommerce_resync_products").show();
             },
             _checkCleanButton: function () {
                 var checkEcommerceUrl = this.options.checkEcommerceUrl;
@@ -121,11 +236,11 @@ define(
                     }
                 });
             },
-            _resyncSubscribers: function (mailchimpStoreId) {
+            _resyncSubscribers: function (listId) {
                 var resyncSubscribersUrl = this.options.resyncSubscribersUrl;
                 $.ajax({
                     url: resyncSubscribersUrl,
-                    data: {'form_key': window.FORM_KEY, 'mailchimpStoreId': mailchimpStoreId},
+                    data: {'form_key': window.FORM_KEY, 'listId': listId},
                     type: 'GET',
                     dataType: 'json',
                     showLoader: true

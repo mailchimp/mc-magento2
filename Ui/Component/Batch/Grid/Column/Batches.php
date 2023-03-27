@@ -33,6 +33,7 @@ class Batches extends Column
      * @var Helper
      */
     protected $helper;
+    
     private $stores=[];
 
     /**
