@@ -53,6 +53,7 @@
                 <item name="mailchimp_errors_grid_data_source" xsi:type="string">Ebizmarts\MailChimp\Model\ResourceModel\MailChimpErrors\Collection</item>
                 <item name="mailchimp_stores_grid_data_source" xsi:type="string">Ebizmarts\MailChimp\Model\ResourceModel\MailChimpStores\Grid\Collection</item>
                 <item name="mailchimp_batch_grid_data_source" xsi:type="string">Ebizmarts\MailChimp\Model\ResourceModel\MailChimpSyncBatchesGrid\Collection</item>
+                <item name="mailchimp_cron_grid_data_source" xsi:type="string">Ebizmarts\MailChimp\Model\ResourceModel\MailchimpCron\Collection</item>
             </argument>
         </arguments>
     </type>
