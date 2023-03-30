@@ -70,9 +70,9 @@ class Batches extends Column
             foreach ($dataSource['data']['items'] as &$batch) {
                 $batch_status = &$batch['status'];
                 $batch_status = ucfirst($batch_status);
-                $batch_store_id = $batch['mailchimp_store_id'];
+                $mailchimp_store_id = $batch['mailchimp_store_id'];
                 $magentoStoreId = $batch['store_id'];
-                $store_name = $this->getMCStoreNameById($batch_store_id, $magentoStoreId);
+                $store_name = $this->getMCStoreNameById($mailchimp_store_id, $magentoStoreId);
                 $batch['store_name'] = $store_name;
                 $batch['subscribers'] = $batch['subscribers_new_count'] . " new;" . $batch["subscribers_modified_count"] . " modified";
                 $batch['customers'] = $batch['customers_new_count'] . " new;" . $batch["customers_modified_count"] . " modified";
