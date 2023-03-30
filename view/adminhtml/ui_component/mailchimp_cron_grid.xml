@@ -16,6 +16,9 @@
         <!--The data source-->
         <settings>
             <updateUrl path="mui/index/render"/>
+            <storageConfig>
+                <param name="indexField" xsi:type="string">schedule_id</param>
+            </storageConfig>
         </settings>
         <dataProvider class="Magento\Framework\View\Element\UiComponent\DataProvider\DataProvider" name="mailchimp_cron_grid_data_source">
             <settings>
@@ -26,9 +29,6 @@
     </dataSource>
 
     <listingToolbar name="listing_top">
-        <settings>
-            <sticky>true</sticky>
-        </settings>
         <columnsControls name="columns_controls"/>
         <exportButton name="export_button"/>
         <filters name="listing_filters"/>
@@ -38,15 +38,10 @@
 
     <columns name="mailchimp_cron_columns">
         <!--The list of columns-->
-        <selectionsColumn name="ids" component="Magento_Sales/js/grid/columns/multiselect">
-            <settings>
-                <indexField>schedule_id</indexField>
-            </settings>
-        </selectionsColumn>
         <column name="schedule_id">
             <argument name="data" xsi:type="array">
                 <item name="config" xsi:type="array">
-                    <item name="filter" xsi:type="string">text</item>
+                    <item name="filter" xsi:type="string">number</item>
                     <item name="sorting" xsi:type="string">asc</item>
                     <item name="label" xsi:type="string" translate="true">schedule_id</item>
                 </item>
