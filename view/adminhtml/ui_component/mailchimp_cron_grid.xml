@@ -4,65 +4,66 @@
     <argument name="data" xsi:type="array">
         <item name="js_config" xsi:type="array">
             <item name="provider" xsi:type="string">mailchimp_cron_grid.mailchimp_cron_grid_data_source</item>
-            <item name="deps" xsi:type="string">mailchimp_cron_grid.mailchimp_cron_grid_data_source</item>
-            <!--Declare the data source name which will be defined below-->
-        </item>
-        <item name="spinner" xsi:type="string">mailchimp_cron_columns</item>
-        <item name="buttons" xsi:type="array">
         </item>
     </argument>
-    <dataSource name="mailchimp_cron_grid_data_source">
+    <settings>
+        <spinner>mailchimp_cron_columns</spinner>
+        <deps>
+            <dep>mailchimp_cron_grid.mailchimp_cron_grid_data_source</dep>
+        </deps>
+    </settings>
+    <dataSource name="mailchimp_cron_grid_data_source" component="Magento_Ui/js/grid/provider">
         <!--The data source-->
-        <argument name="dataProvider" xsi:type="configurableObject">
-            <argument name="class" xsi:type="string">Magento\Framework\View\Element\UiComponent\DataProvider\DataProvider</argument>
-            <argument name="name" xsi:type="string">mailchimp_cron_grid_data_source</argument>
-            <argument name="primaryFieldName" xsi:type="string">id</argument>
-            <argument name="requestFieldName" xsi:type="string">id</argument>
-            <argument name="data" xsi:type="array">
-                <item name="config" xsi:type="array">
-                    <item name="component" xsi:type="string">Magento_Ui/js/grid/provider</item>
-                    <item name="update_url" xsi:type="url" path="mui/index/render"/>
-                    <item name="storageConfig" xsi:type="array">
-                        <item name="indexField" xsi:type="string">schedule_id</item>
-                    </item>
-                </item>
-            </argument>
-        </argument>
+        <settings>
+            <updateUrl path="mui/index/render"/>
+        </settings>
+        <dataProvider class="Magento\Framework\View\Element\UiComponent\DataProvider\DataProvider" name="mailchimp_cron_grid_data_source">
+            <settings>
+                <requestFieldName>id</requestFieldName>
+                <primaryFieldName>main_table.schedule_id</primaryFieldName>
+            </settings>
+        </dataProvider>
     </dataSource>
 
-    <container name="listing_top">
-        <argument name="data" xsi:type="array">
-            <item name="config" xsi:type="array">
-                <item name="template" xsi:type="string">ui/grid/toolbar</item>
-                <item name="stickyTmpl" xsi:type="string">ui/grid/sticky/toolbar</item>
-            </item>
-        </argument>
-    </container>
-
     <listingToolbar name="listing_top">
-        <argument name="data" xsi:type="array">
-            <item name="config" xsi:type="array">
-                <item name="sticky" xsi:type="boolean">true</item>
-            </item>
-        </argument>
-        <bookmark name="bookmarks"/>
+        <settings>
+            <sticky>true</sticky>
+        </settings>
         <columnsControls name="columns_controls"/>
         <exportButton name="export_button"/>
+        <filters name="listing_filters">
+            <filterSelect name="schedule_id" provider="${ $.parentName }">
+                <settings>
+                    <options class="Magento\Store\Ui\Component\Listing\Column\Store\Options"/>
+                    <caption translate="true">All Store Views</caption>
+                    <label translate="true">Purchase Point</label>
+                    <dataScope>store_id</dataScope>
+                    <imports>
+                        <link name="visible">ns = ${ $.ns }, index = ${ $.index }:visible</link>
+                    </imports>
+                </settings>
+            </filterSelect>
+        </filters>
         <paging name="listing_paging"/>
     </listingToolbar>
 
 
     <columns name="mailchimp_cron_columns">
         <!--The list of columns-->
-        <selectionsColumn name="schedule_id">
+        <selectionsColumn name="ids" component="Magento_Sales/js/grid/columns/multiselect">
+            <settings>
+                <indexField>schedule_id</indexField>
+            </settings>
+        </selectionsColumn>
+        <column name="schedule_id">
             <argument name="data" xsi:type="array">
                 <item name="config" xsi:type="array">
                     <item name="filter" xsi:type="string">text</item>
                     <item name="sorting" xsi:type="string">asc</item>
-                    <item name="label" xsi:type="string" translate="true">ID</item>
+                    <item name="label" xsi:type="string" translate="true">schedule_id</item>
                 </item>
             </argument>
-        </selectionsColumn>
+        </column>
         <column name="job_code">
             <argument name="data" xsi:type="array">
                 <item name="config" xsi:type="array">
@@ -91,40 +92,36 @@
             </argument>
         </column>
         <column name="created_at">
-            <argument name="data" xsi:type="array">
-                <item name="config" xsi:type="array">
-                    <item name="filter" xsi:type="string">text</item>
-                    <item name="sorting" xsi:type="string">asc</item>
-                    <item name="label" xsi:type="string" translate="true">Created at</item>
-                </item>
-            </argument>
+            <settings>
+                <filter>dateRange</filter>
+                <dataType>date</dataType>
+                <label translate="true">Created at</label>
+                <sorting>desc</sorting>
+            </settings>
         </column>
         <column name="scheduled_at">
-            <argument name="data" xsi:type="array">
-                <item name="config" xsi:type="array">
-                    <item name="filter" xsi:type="string">text</item>
-                    <item name="sorting" xsi:type="string">asc</item>
-                    <item name="label" xsi:type="string" translate="true">Scheduled at</item>
-                </item>
-            </argument>
+            <settings>
+                <filter>dateRange</filter>
+                <dataType>date</dataType>
+                <label translate="true">Scheduled at</label>
+                <sorting>desc</sorting>
+            </settings>
         </column>
         <column name="executed_at">
-            <argument name="data" xsi:type="array">
-                <item name="config" xsi:type="array">
-                    <item name="filter" xsi:type="string">text</item>
-                    <item name="sorting" xsi:type="string">asc</item>
-                    <item name="label" xsi:type="string" translate="true">Executed at</item>
-                </item>
-            </argument>
+            <settings>
+                <filter>dateRange</filter>
+                <dataType>date</dataType>
+                <label translate="true">Executed at</label>
+                <sorting>desc</sorting>
+            </settings>
         </column>
         <column name="finished_at">
-            <argument name="data" xsi:type="array">
-                <item name="config" xsi:type="array">
-                    <item name="filter" xsi:type="string">text</item>
-                    <item name="sorting" xsi:type="string">asc</item>
-                    <item name="label" xsi:type="string" translate="true">Finished at</item>
-                </item>
-            </argument>
+            <settings>
+                <filter>dateRange</filter>
+                <dataType>date</dataType>
+                <label translate="true">Executed at</label>
+                <sorting>desc</sorting>
+            </settings>
         </column>
     </columns>
 </listing>
