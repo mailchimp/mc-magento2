@@ -29,7 +29,8 @@ class Collection extends SearchResult
     {
         parent::_initSelect();
         $this->getSelect()
-            ->where("job_code IN ('ebizmarts_webhooks', 'ebizmarts_ecommerce')");
+            ->where("job_code IN ('ebizmarts_webhooks', 'ebizmarts_ecommerce', 'ebizmarts_clean_webhooks', 'ebizmarts_clean_batches', 'ebizmarts_clean_errors')");
+        $this->addOrder('schedule_id', 'DESC');
         return $this;
 
     }//end _initSelect()
