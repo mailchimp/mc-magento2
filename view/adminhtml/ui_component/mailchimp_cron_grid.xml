@@ -19,8 +19,8 @@
         </settings>
         <dataProvider class="Magento\Framework\View\Element\UiComponent\DataProvider\DataProvider" name="mailchimp_cron_grid_data_source">
             <settings>
-                <requestFieldName>id</requestFieldName>
-                <primaryFieldName>main_table.schedule_id</primaryFieldName>
+                <requestFieldName>schedule_id</requestFieldName>
+                <primaryFieldName>schedule_id</primaryFieldName>
             </settings>
         </dataProvider>
     </dataSource>
@@ -31,19 +31,7 @@
         </settings>
         <columnsControls name="columns_controls"/>
         <exportButton name="export_button"/>
-        <filters name="listing_filters">
-            <filterSelect name="schedule_id" provider="${ $.parentName }">
-                <settings>
-                    <options class="Magento\Store\Ui\Component\Listing\Column\Store\Options"/>
-                    <caption translate="true">All Store Views</caption>
-                    <label translate="true">Purchase Point</label>
-                    <dataScope>store_id</dataScope>
-                    <imports>
-                        <link name="visible">ns = ${ $.ns }, index = ${ $.index }:visible</link>
-                    </imports>
-                </settings>
-            </filterSelect>
-        </filters>
+        <filters name="listing_filters"/>
         <paging name="listing_paging"/>
     </listingToolbar>
 
