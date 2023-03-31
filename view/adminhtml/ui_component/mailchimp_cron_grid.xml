@@ -60,7 +60,30 @@
         <column name="job_code">
             <argument name="data" xsi:type="array">
                 <item name="config" xsi:type="array">
-                    <item name="filter" xsi:type="string">text</item>
+                    <item name="filter" xsi:type="string">select</item>
+                    <item name="options" xsi:type="array">
+                        <item name="ebizmarts_ecommerce_filter" xsi:type="array">
+                            <item name="label" xsi:type="string">ebizmarts_ecommerce</item>
+                            <item name="value" xsi:type="string">ebizmarts_ecommerce</item>
+                        </item>
+                        <item name="ebizmarts_webhooks_filter" xsi:type="array">
+                            <item name="label" xsi:type="string">ebizmarts_webhooks</item>
+                            <item name="value" xsi:type="string">ebizmarts_webhooks</item>
+                        </item>
+                        <item name="ebizmarts_clean_batches_filter" xsi:type="array">
+                            <item name="label" xsi:type="string">ebizmarts_clean_batches</item>
+                            <item name="value" xsi:type="string">ebizmarts_clean_batches</item>
+                        </item>
+                        <item name="ebizmarts_clean_webhooks_filter" xsi:type="array">
+                            <item name="label" xsi:type="string">ebizmarts_clean_webhooks</item>
+                            <item name="value" xsi:type="string">ebizmarts_clean_webhooks</item>
+                        </item>
+                        <item name="ebizmarts_clean_errors_filter" xsi:type="array">
+                            <item name="label" xsi:type="string">ebizmarts_clean_errors</item>
+                            <item name="value" xsi:type="string">ebizmarts_clean_errors</item>
+                        </item>
+                    </item>
+                    <item name="dataType" xsi:type="string">select</item>
                     <item name="label" xsi:type="string" translate="true">Job Code</item>
                 </item>
             </argument>
@@ -68,7 +91,34 @@
         <column name="status">
             <argument name="data" xsi:type="array">
                 <item name="config" xsi:type="array">
-                    <item name="filter" xsi:type="string">text</item>
+                    <item name="filter" xsi:type="string">select</item>
+                    <item name="options" xsi:type="array">
+                        <item name="success_filter" xsi:type="array">
+                            <item name="label" xsi:type="string">success</item>
+                            <item name="value" xsi:type="string">success</item>
+                        </item>
+                        <item name="pending_filter" xsi:type="array">
+                            <item name="label" xsi:type="string">pending</item>
+                            <item name="value" xsi:type="string">pending</item>
+                        </item>
+                        <item name="running_filter" xsi:type="array">
+                            <item name="label" xsi:type="string">running</item>
+                            <item name="value" xsi:type="string">running</item>
+                        </item>
+                        <item name="missed_filter" xsi:type="array">
+                            <item name="label" xsi:type="string">missed</item>
+                            <item name="value" xsi:type="string">missed</item>
+                        </item>
+                        <item name="scheduled_filter" xsi:type="array">
+                            <item name="label" xsi:type="string">scheduled</item>
+                            <item name="value" xsi:type="string">scheduled</item>
+                        </item>
+                        <item name="error_filter" xsi:type="array">
+                            <item name="label" xsi:type="string">error</item>
+                            <item name="value" xsi:type="string">error</item>
+                        </item>
+                    </item>
+                    <item name="dataType" xsi:type="string">select</item>
                     <item name="label" xsi:type="string" translate="true">Status</item>
                 </item>
             </argument>
