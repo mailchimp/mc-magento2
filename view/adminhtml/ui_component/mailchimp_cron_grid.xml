@@ -42,7 +42,6 @@
             <argument name="data" xsi:type="array">
                 <item name="config" xsi:type="array">
                     <item name="filter" xsi:type="string">number</item>
-                    <item name="sorting" xsi:type="string">asc</item>
                     <item name="indexField" xsi:type="string">schedule_id</item>
                 </item>
             </argument>
@@ -52,6 +51,8 @@
                 <item name="config" xsi:type="array">
                     <item name="filter" xsi:type="string">text</item>
                     <item name="sorting" xsi:type="string">desc</item>
+                    <item name="sortable" xsi:type="boolean">true</item>
+                    <item name="sortOrder" xsi:type="string">1</item>
                     <item name="label" xsi:type="string" translate="true">ID</item>
                 </item>
             </argument>
@@ -60,7 +61,6 @@
             <argument name="data" xsi:type="array">
                 <item name="config" xsi:type="array">
                     <item name="filter" xsi:type="string">text</item>
-                    <item name="sorting" xsi:type="string">asc</item>
                     <item name="label" xsi:type="string" translate="true">Job Code</item>
                 </item>
             </argument>
@@ -69,7 +69,6 @@
             <argument name="data" xsi:type="array">
                 <item name="config" xsi:type="array">
                     <item name="filter" xsi:type="string">text</item>
-                    <item name="sorting" xsi:type="string">asc</item>
                     <item name="label" xsi:type="string" translate="true">Status</item>
                 </item>
             </argument>
@@ -78,7 +77,6 @@
             <argument name="data" xsi:type="array">
                 <item name="config" xsi:type="array">
                     <item name="filter" xsi:type="string">text</item>
-                    <item name="sorting" xsi:type="string">asc</item>
                     <item name="label" xsi:type="string" translate="true">Messages</item>
                 </item>
             </argument>
@@ -88,7 +86,6 @@
                 <filter>dateRange</filter>
                 <dataType>date</dataType>
                 <label translate="true">Created at</label>
-                <sorting>desc</sorting>
             </settings>
         </column>
         <column name="scheduled_at">
@@ -96,7 +93,6 @@
                 <filter>dateRange</filter>
                 <dataType>date</dataType>
                 <label translate="true">Scheduled at</label>
-                <sorting>desc</sorting>
             </settings>
         </column>
         <column name="executed_at">
@@ -104,15 +100,13 @@
                 <filter>dateRange</filter>
                 <dataType>date</dataType>
                 <label translate="true">Executed at</label>
-                <sorting>desc</sorting>
             </settings>
         </column>
         <column name="finished_at">
             <settings>
                 <filter>dateRange</filter>
                 <dataType>date</dataType>
-                <label translate="true">Executed at</label>
-                <sorting>desc</sorting>
+                <label translate="true">Finished at</label>
             </settings>
         </column>
     </columns>
