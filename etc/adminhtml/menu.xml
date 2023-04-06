@@ -40,5 +40,13 @@
              parent="Ebizmarts_MailChimp::mailchimp_menu"
              action="mailchimp/batch"
         />
+        <add id="Ebizmarts_MailChimp::cron_menu"
+             title="Cron"
+             module="Ebizmarts_MailChimp"
+             sortOrder="50"
+             resource="Ebizmarts_MailChimp::cron_grid"
+             parent="Ebizmarts_MailChimp::mailchimp_menu"
+             action="mailchimp/cron"
+        />
     </menu>
 </config>
