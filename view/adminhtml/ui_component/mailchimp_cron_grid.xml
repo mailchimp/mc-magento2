@@ -1,0 +1,164 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<listing xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Ui:etc/ui_configuration.xsd">
+    <!--Declare data source, columns list, button...-->
+    <argument name="data" xsi:type="array">
+        <item name="js_config" xsi:type="array">
+            <item name="provider" xsi:type="string">mailchimp_cron_grid.mailchimp_cron_grid_data_source</item>
+        </item>
+    </argument>
+    <settings>
+        <spinner>mailchimp_cron_columns</spinner>
+        <deps>
+            <dep>mailchimp_cron_grid.mailchimp_cron_grid_data_source</dep>
+        </deps>
+    </settings>
+    <dataSource name="mailchimp_cron_grid_data_source" component="Magento_Ui/js/grid/provider">
+        <!--The data source-->
+        <settings>
+            <updateUrl path="mui/index/render"/>
+            <storageConfig>
+                <param name="indexField" xsi:type="string">schedule_id</param>
+            </storageConfig>
+        </settings>
+        <dataProvider class="Magento\Framework\View\Element\UiComponent\DataProvider\DataProvider" name="mailchimp_cron_grid_data_source">
+            <settings>
+                <requestFieldName>schedule_id</requestFieldName>
+                <primaryFieldName>schedule_id</primaryFieldName>
+            </settings>
+        </dataProvider>
+    </dataSource>
+
+    <listingToolbar name="listing_top">
+        <columnsControls name="columns_controls"/>
+        <exportButton name="export_button"/>
+        <filters name="listing_filters"/>
+        <paging name="listing_paging"/>
+    </listingToolbar>
+
+
+    <columns name="mailchimp_cron_columns">
+        <!--The list of columns-->
+        <selectionsColumn name="ids">
+            <argument name="data" xsi:type="array">
+                <item name="config" xsi:type="array">
+                    <item name="filter" xsi:type="string">number</item>
+                    <item name="indexField" xsi:type="string">schedule_id</item>
+                </item>
+            </argument>
+        </selectionsColumn>
+        <column name="schedule_id">
+            <argument name="data" xsi:type="array">
+                <item name="config" xsi:type="array">
+                    <item name="filter" xsi:type="string">text</item>
+                    <item name="sorting" xsi:type="string">desc</item>
+                    <item name="sortable" xsi:type="boolean">true</item>
+                    <item name="sortOrder" xsi:type="string">1</item>
+                    <item name="label" xsi:type="string" translate="true">ID</item>
+                </item>
+            </argument>
+        </column>
+        <column name="job_code">
+            <argument name="data" xsi:type="array">
+                <item name="config" xsi:type="array">
+                    <item name="filter" xsi:type="string">select</item>
+                    <item name="options" xsi:type="array">
+                        <item name="ebizmarts_clean_batches_filter" xsi:type="array">
+                            <item name="label" xsi:type="string">ebizmarts_clean_batches</item>
+                            <item name="value" xsi:type="string">ebizmarts_clean_batches</item>
+                        </item>
+                        <item name="ebizmarts_clean_errors_filter" xsi:type="array">
+                            <item name="label" xsi:type="string">ebizmarts_clean_errors</item>
+                            <item name="value" xsi:type="string">ebizmarts_clean_errors</item>
+                        </item>
+                        <item name="ebizmarts_clean_webhooks_filter" xsi:type="array">
+                            <item name="label" xsi:type="string">ebizmarts_clean_webhooks</item>
+                            <item name="value" xsi:type="string">ebizmarts_clean_webhooks</item>
+                        </item>
+                        <item name="ebizmarts_ecommerce_filter" xsi:type="array">
+                            <item name="label" xsi:type="string">ebizmarts_ecommerce</item>
+                            <item name="value" xsi:type="string">ebizmarts_ecommerce</item>
+                        </item>
+                        <item name="ebizmarts_webhooks_filter" xsi:type="array">
+                            <item name="label" xsi:type="string">ebizmarts_webhooks</item>
+                            <item name="value" xsi:type="string">ebizmarts_webhooks</item>
+                        </item>
+                    </item>
+                    <item name="dataType" xsi:type="string">select</item>
+                    <item name="label" xsi:type="string" translate="true">Job Code</item>
+                </item>
+            </argument>
+        </column>
+        <column name="status">
+            <argument name="data" xsi:type="array">
+                <item name="config" xsi:type="array">
+                    <item name="filter" xsi:type="string">select</item>
+                    <item name="options" xsi:type="array">
+                        <item name="error_filter" xsi:type="array">
+                            <item name="label" xsi:type="string">error</item>
+                            <item name="value" xsi:type="string">error</item>
+                        </item>
+                        <item name="missed_filter" xsi:type="array">
+                            <item name="label" xsi:type="string">missed</item>
+                            <item name="value" xsi:type="string">missed</item>
+                        </item>
+                        <item name="pending_filter" xsi:type="array">
+                            <item name="label" xsi:type="string">pending</item>
+                            <item name="value" xsi:type="string">pending</item>
+                        </item>
+                        <item name="running_filter" xsi:type="array">
+                            <item name="label" xsi:type="string">running</item>
+                            <item name="value" xsi:type="string">running</item>
+                        </item>
+                        <item name="scheduled_filter" xsi:type="array">
+                            <item name="label" xsi:type="string">scheduled</item>
+                            <item name="value" xsi:type="string">scheduled</item>
+                        </item>
+                        <item name="success_filter" xsi:type="array">
+                            <item name="label" xsi:type="string">success</item>
+                            <item name="value" xsi:type="string">success</item>
+                        </item>
+                    </item>
+                    <item name="dataType" xsi:type="string">select</item>
+                    <item name="label" xsi:type="string" translate="true">Status</item>
+                </item>
+            </argument>
+        </column>
+        <column name="messages">
+            <argument name="data" xsi:type="array">
+                <item name="config" xsi:type="array">
+                    <item name="filter" xsi:type="string">text</item>
+                    <item name="label" xsi:type="string" translate="true">Messages</item>
+                </item>
+            </argument>
+        </column>
+        <column name="created_at">
+            <settings>
+                <filter>dateRange</filter>
+                <dataType>date</dataType>
+                <label translate="true">Created at</label>
+            </settings>
+        </column>
+        <column name="scheduled_at">
+            <settings>
+                <filter>dateRange</filter>
+                <dataType>date</dataType>
+                <label translate="true">Scheduled at</label>
+            </settings>
+        </column>
+        <column name="executed_at">
+            <settings>
+                <filter>dateRange</filter>
+                <dataType>date</dataType>
+                <label translate="true">Executed at</label>
+            </settings>
+        </column>
+        <column name="finished_at">
+            <settings>
+                <filter>dateRange</filter>
+                <dataType>date</dataType>
+                <label translate="true">Finished at</label>
+            </settings>
+        </column>
+    </columns>
+</listing>
+
