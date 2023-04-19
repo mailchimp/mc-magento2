@@ -345,6 +345,20 @@ class Order
 
         if (isset($statusArray['fulfillment_status'])) {
             $data['fulfillment_status'] = $statusArray['fulfillment_status'];
+            $shipments = $order->getShipmentsCollection();
+            /**
+             * @var $ship \Magento\Sales\Model\Order\Shipment
+             */
+            foreach ($shipments as $ship) {
+                $tracks = $ship->getAllTracks();
+                foreach ($tracks as $track) {
+                    $title = $track->getTitle();
+                    $trackNumber = $track->getTrackNumber();
+                }
+            }
+            $data['tracking_number'] = $trackNumber;
+            $data['tracking_carrier'] = $title;
+            $data['tracking_url'] = '';
         }
 
         $data['processed_at_foreign'] = $order->getCreatedAt();
