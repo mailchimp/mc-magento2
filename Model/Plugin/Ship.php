@@ -3,7 +3,7 @@
  * Ebizmarts_mc-magento22 Magento component
  *
  * @category    Ebizmarts
- * @package     Ebizmarts_mc-magento2
+ * @package     Ebizmarts_mc-magento22
  * @author      Ebizmarts Team <info@ebizmarts.com>
  * @copyright   Ebizmarts (http://ebizmarts.com)
  * @license     http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
@@ -12,7 +12,7 @@
 namespace Ebizmarts\MailChimp\Model\Plugin;
 
 use Magento\Sales\Api\Data\ShipmentInterface;
-use Magento\Sales\Api\ShipmentRepositoryInterface as SalesShipmentRepositoryInterface;
+use Magento\Sales\Model\Order\Shipment as SalesShipment;
 
 class Ship
 {
@@ -31,15 +31,24 @@ class Ship
         $this->_helper  = $helper;
     }
     public function afterSave(
-        SalesShipmentRepositoryInterface $subject,
+        SalesShipment $subject,
         ShipmentInterface $shipment
-    )
-    {
-        $mailchimpStoreId = $this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_MAILCHIMP_STORE, $shipment->getStoreId());
-        $this->_helper->saveEcommerceData($mailchimpStoreId, $shipment->getOrderId(), \Ebizmarts\MailChimp\Helper\Data::IS_ORDER, null, null, 1,
-            null , null, \Ebizmarts\MailChimp\Helper\Data::NEEDTORESYNC);
-
+    ) {
+        $mailchimpStoreId = $this->_helper->getConfigValue(
+            \Ebizmarts\MailChimp\Helper\Data::XML_MAILCHIMP_STORE,
+            $shipment->getStoreId()
+        );
+        $this->_helper->saveEcommerceData(
+            $mailchimpStoreId,
+            $shipment->getOrderId(),
+            \Ebizmarts\MailChimp\Helper\Data::IS_ORDER,
+            null,
+            null,
+            1,
+            null,
+            null,
+            \Ebizmarts\MailChimp\Helper\Data::NEEDTORESYNC
+        );
         return $shipment;
     }
-
 }

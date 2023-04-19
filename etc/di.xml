@@ -79,10 +79,10 @@
     <type name="Magento\SalesRule\Model\Coupon">
         <plugin name="mailchimp-coupon" type="Ebizmarts\MailChimp\Model\Plugin\Coupon" sortOrder="10"/>
     </type>
-    <type name="Magento\Sales\Model\Order\ShipmentRepository">
+    <type name="Magento\Sales\Model\Order\Shipment">
         <plugin name="mailchimp_save_shipment" type="Ebizmarts\MailChimp\Model\Plugin\Ship" sortOrder="10"/>
     </type>
-    <type name="Magento\Sales\Model\Order\InvoiceRepository">
+    <type name="Magento\Sales\Model\Order\Invoice">
         <plugin name="mailchimp_save_invoice" type="Ebizmarts\MailChimp\Model\Plugin\Invoice" sortOrder="10"/>
     </type>
     <type name="Magento\Sales\Model\Order\CreditmemoRepository">
