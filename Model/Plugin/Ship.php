@@ -12,7 +12,7 @@
 namespace Ebizmarts\MailChimp\Model\Plugin;
 
 use Magento\Sales\Api\Data\ShipmentInterface;
-use Magento\Sales\Api\ShipmentRepositoryInterface as SalesShipmentRepositoryInterface;
+use Magento\Sales\Model\Order\Shipment as SalesShipment;
 
 class Ship
 {
@@ -31,7 +31,7 @@ class Ship
         $this->_helper  = $helper;
     }
     public function afterSave(
-        SalesShipmentRepositoryInterface $subject,
+        SalesShipment $subject,
         ShipmentInterface $shipment
     ) {
         $mailchimpStoreId = $this->_helper->getConfigValue(
@@ -52,3 +52,4 @@ class Ship
         return $shipment;
     }
 }
+

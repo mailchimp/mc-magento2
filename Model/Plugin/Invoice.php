@@ -12,7 +12,7 @@
 namespace Ebizmarts\MailChimp\Model\Plugin;
 
 use Magento\Sales\Api\Data\InvoiceInterface;
-use Magento\Sales\Api\InvoiceRepositoryInterface as SalesInvoiceRepositoryInterface;
+use Magento\Sales\Model\Order\Invoice as SalesInvoice;
 
 class Invoice
 {
@@ -31,7 +31,7 @@ class Invoice
         $this->_helper  = $helper;
     }
     public function afterSave(
-        SalesInvoiceRepositoryInterface $subject,
+        SalesInvoice $subject,
         InvoiceInterface $invoice
     ) {
         $mailchimpStoreId = $this->_helper->getConfigValue(
