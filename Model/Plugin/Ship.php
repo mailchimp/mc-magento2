@@ -12,7 +12,7 @@
 namespace Ebizmarts\MailChimp\Model\Plugin;
 
 use Magento\Sales\Api\Data\ShipmentInterface;
-use Magento\Sales\Api\ShipmentRepositoryInterface as SalesShipmentRepositoryInterface;
+use Magento\Sales\Model\Order\Shipment as SalesShipment;
 
 class Ship
 {
@@ -30,14 +30,25 @@ class Ship
     ) {
         $this->_helper  = $helper;
     }
-    public function afterSave(       SalesShipmentRepositoryInterface $subject,
-                                     ShipmentInterface $shipment)
-    {
-        $mailchimpStoreId = $this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_MAILCHIMP_STORE, $shipment->getStoreId());
-        $this->_helper->saveEcommerceData($mailchimpStoreId, $shipment->getOrderId(), \Ebizmarts\MailChimp\Helper\Data::IS_ORDER, null, null, 1,
-            null , null, \Ebizmarts\MailChimp\Helper\Data::NEEDTORESYNC);
-
+    public function afterSave(
+        SalesShipment $subject,
+        ShipmentInterface $shipment
+    ) {
+        $mailchimpStoreId = $this->_helper->getConfigValue(
+            \Ebizmarts\MailChimp\Helper\Data::XML_MAILCHIMP_STORE,
+            $shipment->getStoreId()
+        );
+        $this->_helper->saveEcommerceData(
+            $mailchimpStoreId,
+            $shipment->getOrderId(),
+            \Ebizmarts\MailChimp\Helper\Data::IS_ORDER,
+            null,
+            null,
+            1,
+            null,
+            null,
+            \Ebizmarts\MailChimp\Helper\Data::NEEDTORESYNC
+        );
         return $shipment;
     }
-
 }
