@@ -790,7 +790,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
             }
             if ($address->getCountry()) {
                 $country = $this->countryFactory->create()->loadByCode($address->getCountryId());
-                $addressData["country"] = $country->getName($this->resolver->getLocale());
+                $addressData["country"] = $country->getName('en_US');
             }
             if ($address->getTelephone()) {
                 $addressData['telephone'] = $address->getTelephone();
