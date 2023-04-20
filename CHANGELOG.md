@@ -1,18 +1,24 @@
-# Change Log
-## [103.4.50](https://github.com/mailchimp/mc-magento2/tree/103.4.50)
+# Changelog
 
-[Full Changelog](https://github.com/mailchimp/mc-magento2/compare/103.4.49...103.4.50)
+## [103.4.51](https://github.com/mailchimp/mc-magento2/tree/103.4.51)
+
+[Full Changelog](https://github.com/mailchimp/mc-magento2/compare/103.4.50...103.4.51)
 
 **Implemented enhancements:**
 
-- Clean the error table automatically based on a configuration setting [\#1577](https://github.com/mailchimp/mc-magento2/issues/1577)
-- Slow-query optimization for product special prices [\#1569](https://github.com/mailchimp/mc-magento2/issues/1569)
-- Create grid in admin that shows batch information [\#1465](https://github.com/mailchimp/mc-magento2/issues/1465)
+- Put tracking\_number when the order is shipped [\#1667](https://github.com/mailchimp/mc-magento2/issues/1667)
+- Create a grid to show our cronjobs in the cron\_schedule  [\#1648](https://github.com/mailchimp/mc-magento2/issues/1648)
+- Create JS code that automatically enables ecommerce syncing when abandoned cart syncing is disabled [\#1633](https://github.com/mailchimp/mc-magento2/issues/1633)
 
 **Fixed bugs:**
 
-- The carts are not deleted from mailchimp when are converted in an order [\#1595](https://github.com/mailchimp/mc-magento2/issues/1595)
-- Add a button to fix the chimpstatic js in the frontend [\#1584](https://github.com/mailchimp/mc-magento2/issues/1584)
+- Invoice and shipment pluging doesn't work [\#1668](https://github.com/mailchimp/mc-magento2/issues/1668)
+- Error fetching store ID row in batch grid [\#1656](https://github.com/mailchimp/mc-magento2/issues/1656)
+- Duplicate entries in the stores grid [\#1650](https://github.com/mailchimp/mc-magento2/issues/1650)
+- Resync subscribers and Resync products always resyncs default store [\#1640](https://github.com/mailchimp/mc-magento2/issues/1640)
+- Database schema needed for batch grid won't be created after upgrading module as opposed to installing it [\#1627](https://github.com/mailchimp/mc-magento2/issues/1627)
+- Bad class name [\#1613](https://github.com/mailchimp/mc-magento2/issues/1613)
+- Fail phpcs test [\#1607](https://github.com/mailchimp/mc-magento2/issues/1607)
 
 ## [103.4.49](https://github.com/mailchimp/mc-magento2/tree/103.4.49)
 
