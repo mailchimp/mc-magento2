@@ -345,6 +345,7 @@ class Order
 
         if (isset($statusArray['fulfillment_status'])) {
             $data['fulfillment_status'] = $statusArray['fulfillment_status'];
+            $trackNumber = $title = '';
             $shipments = $order->getShipmentsCollection();
             /**
              * @var $ship \Magento\Sales\Model\Order\Shipment
