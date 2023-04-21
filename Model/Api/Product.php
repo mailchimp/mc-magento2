@@ -205,16 +205,12 @@ class Product
                 )],]],
             'left'
         );
-        $collection->getSelect()->joinLeft(
-            ['mc' => $collection->getTable('mailchimp_sync_ecommerce')],
-            "mc.type = 'PRO' AND mc.related_id = e.entity_id AND mc.mailchimp_sync_modified = 0 ".
-            $collection->getConnection()->quoteInto(" AND  mc.mailchimp_store_id = ?", $mailchimpStoreId) .
-            " and mc.mailchimp_sync_delta <  at_special_from_date.value"
-        );
-        $collection->getSelect()->where('mc.mailchimp_sync_delta is not null');
-        $collection->getSelect()->reset(\Magento\Framework\DB\Select::COLUMNS)->columns(['entity_id']);
         foreach ($collection as $item) {
-            $this->_updateProduct($mailchimpStoreId, $item->getEntityId(), null, null, 1);
+            $productId = $this->_productRepository->get($item->getSku(),false, $magentoStoreId)->getId();
+            $mailchimpSync = $this->_helper->getChimpSyncEcommerce($mailchimpStoreId, $productId, 'PRO');
+            if ($mailchimpSync->getMailchimpSyncDelta() < $item->getSpecialFromDate()) {
+                $this->_updateProduct($mailchimpStoreId, $productId, null, null, 1);
+            }
         }
         /**
          * get the products that was synced when it have special price and have no more special price
@@ -232,17 +228,17 @@ class Product
             ]],
             'left'
         );
-        $collection2->getSelect()->joinLeft(
-            ['mc' => $collection2->getTable('mailchimp_sync_ecommerce')],
-            "mc.type = 'PRO' and mc.related_id = e.entity_id and mc.mailchimp_sync_modified = 0 ".
-            $collection->getConnection()->quoteInto(" AND  mc.mailchimp_store_id = ?", $mailchimpStoreId) .
-            " and mc.mailchimp_sync_delta < at_special_to_date.value",
-            []
-        );
-        $collection2->getSelect()->where('mc.mailchimp_sync_delta is not null');
-        $collection2->getSelect()->reset(\Magento\Framework\DB\Select::COLUMNS)->columns(['entity_id']);
         foreach ($collection2 as $item) {
-            $this->_updateProduct($mailchimpStoreId, $item->getEntityId(), null, null, 1);
+			try {
+				$productId = $this->_productRepository->get($item->getSku(),false, $magentoStoreId)->getId();
+				$mailchimpSync = $this->_helper->getChimpSyncEcommerce($mailchimpStoreId, $productId, 'PRO');
+				if ($mailchimpSync->getMailchimpSyncDelta() < $item->getSpecialToDate()) {
+					$this->_updateProduct($mailchimpStoreId, $productId, null, null, 1);
+				}
+			} catch(\Exception $e) {
+				$this->_helper->log($e->getMessage());
+                $this->_helper->log("Skip product with special price [".$this->_productRepository->get($item->getSku(),false, $magentoStoreId)->getId()."]");
+			}
         }
     }
     /**
