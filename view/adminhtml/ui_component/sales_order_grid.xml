@@ -8,7 +8,7 @@
                 <sortable>false</sortable>
             </settings>
         </column>
-        <actionsColumn name="mailchimp_status" class="\Ebizmarts\MailChimp\Ui\Component\Listing\Column\Monkey">
+        <actionsColumn name="mailchimp_links" class="\Ebizmarts\MailChimp\Ui\Component\Listing\Column\Monkey">
             <argument name="data" xsi:type="array">
                 <item name="config" xsi:type="array">
                     <item name="indexField" xsi:type="string">id</item>
