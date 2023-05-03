@@ -33,7 +33,7 @@ class Campaign extends Action
         Context $context,
         MailChimpHelper $helper,
         OrderRepository $orderRepository,
-        UrlInterface $urlBuilder,
+        UrlInterface $urlBuilder
     ) {
         parent::__construct($context);
         $this->helper = $helper;
