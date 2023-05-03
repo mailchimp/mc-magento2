@@ -183,7 +183,6 @@ class Monkey extends Column
                     if ($status) {
                         $item['mailchimp_sync'] =
                             "<div style='width: 50%;margin: 0 auto;text-align: center'><img src='".$url."' style='border: none; width: 5rem; text-align: center; max-width: 100%' title='$alt' class='freddie'/>$text</div>";
-                        //$url = $this->_assetRepository->getUrlWithParams('Ebizmarts_MailChimp::images/freddie.png', $params);
                         if ($menu) {
                             $item[$this->getData('name')] = [
                                 'campaign' => [
@@ -192,7 +191,7 @@ class Monkey extends Column
                                         ['orderId' => $item['entity_id']]
                                     ),
                                     'label' => 'View campaign',
-                                    'target' => '_blank',
+                                    'target' => '_blank'
                                 ],
                                 'member' => [
                                     'href' => $this->urlBuilder->getUrl(
@@ -200,7 +199,7 @@ class Monkey extends Column
                                         ['orderId' => $item['entity_id']]
                                     ),
                                     'label' => 'View member',
-                                    'target' => '_blank',
+                                    'target' => '_blank'
                                 ]
                             ];
                         }
