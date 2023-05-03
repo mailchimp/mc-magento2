@@ -30,6 +30,7 @@
                     <resource id="Ebizmarts_MailChimp::stores_grid" title="MailChimp Stores Grid" sortOrder="110">
                         <resource id="Ebizmarts_MailChimp::stores_edit" title="MailChimp Stores Edit" sortOrder="120"/>
                     </resource>
+                    <resource id="Ebizmarts_MailChimp::mailchimp_access" title="Access data in mailchimp" sortOrder="100"/>
                 </resource>
             </resource>
         </resources>
