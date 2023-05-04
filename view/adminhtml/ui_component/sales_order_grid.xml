@@ -1,13 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <listing xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Ui:etc/ui_configuration.xsd">
     <columns name="sales_order_columns">
-        <column name="mailchimp_status" class="\Ebizmarts\MailChimp\Ui\Component\Listing\Column\Monkey">
-            <settings>
-                <label translate="true">Mailchimp</label>
-                <bodyTmpl>ui/grid/cells/html</bodyTmpl>
-                <sortable>false</sortable>
-            </settings>
-        </column>
         <column name="mailchimp_sync">
             <settings>
                 <label translate="true">Mailchimp Sync</label>
@@ -15,5 +8,13 @@
                 <sortable>false</sortable>
             </settings>
         </column>
+        <actionsColumn name="mailchimp_links" class="\Ebizmarts\MailChimp\Ui\Component\Listing\Column\Monkey">
+            <argument name="data" xsi:type="array">
+                <item name="config" xsi:type="array">
+                    <item name="indexField" xsi:type="string">id</item>
+                    <item name="label" xsi:type="string" translate="true">MailChimp</item>
+                </item>
+            </argument>
+        </actionsColumn>
     </columns>
 </listing>
