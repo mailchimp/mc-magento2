@@ -26,6 +26,8 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     const XML_PATH_WEBHOOK_ACTIVE    = 'mailchimp/general/webhook_active';
     const XML_PATH_WEBHOOK_DELETE    = 'mailchimp/general/webhook_delete';
     const XML_PATH_LOG               = 'mailchimp/general/log';
+    const XML_PATH_TIMEOUT           = 'mailchimp/general/timeout';
+
     const XML_PATH_MAPPING           = 'mailchimp/general/mapping';
     const XML_MAILCHIMP_STORE        = 'mailchimp/general/monkeystore';
     const XML_MAILCHIMP_JS_URL       = 'mailchimp/general/mailchimpjsurl';
@@ -352,6 +354,10 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         $apiKey =$this->getConfigValue(self::XML_PATH_APIKEY, $store, $scope);
         return $this->_encryptor->decrypt($apiKey);
     }
+    public function getTimeOut($store=null, $scope=null)
+    {
+        return $this->getConfigValue(self::XML_PATH_TIMEOUT, $store, $scope);
+    }
 
     /**
      * @param null $store
@@ -360,8 +366,12 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     public function getApi($store = null, $scope = null)
     {
         $apiKey = $this->getApiKey($store, $scope);
+        $timeOut = $this->getTimeOut($store,$scope);
         $this->_api->setApiKey($apiKey);
         $this->_api->setUserAgent('Mailchimp4Magento' . (string)$this->getModuleVersion());
+        if ($timeOut) {
+            $this->_api->setTimeOut($timeOut);
+        }
         return $this->_api;
     }
     private function getBindableAttributes()
