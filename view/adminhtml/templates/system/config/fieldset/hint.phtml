@@ -11,28 +11,28 @@
 ?>
 <div id="configmonkey_apikey" class="admin__page-section-item" style="display:none;"
      data-mage-init='{"configmonkeyapikey":{
-     "storeUrl": "<?php echo $this->getUrl('mailchimp/stores/get');?>",
-     "detailsUrl": "<?php echo $this->getUrl('mailchimp/ecommerce/getaccountdetails');?>",
-     "storeGridUrl": "<?php echo $this->getUrl('mailchimp/stores/index');?>",
-     "createWebhookUrl": "<?php echo $this->getUrl('mailchimp/ecommerce/createWebhook');?>",
-     "getInterestUrl": "<?php echo $this->getUrl('mailchimp/ecommerce/getInterest');?>",
-     "resyncSubscribersUrl": "<?php echo $this->getUrl('mailchimp/ecommerce/resyncSubscribers');?>",
-     "resyncProductsUrl": "<?php echo $this->getUrl('mailchimp/ecommerce/resyncProducts');?>",
-     "cleanEcommerceUrl": "<?php echo $this->getUrl('mailchimp/ecommerce/cleanEcommerce');?>",
-     "checkEcommerceUrl": "<?php echo $this->getUrl('mailchimp/ecommerce/checkEcommerce');?>",
-     "fixMailchimpjsUrl": "<?php echo $this->getUrl('mailchimp/ecommerce/fixMailchimpJS');?>",
-     "scope": "<?php echo $this->getScope();?>",
-     "scopeId": "<?php echo $this->getScopeId(); ?>"
+     "storeUrl": "<?= $block->escapeUrl($block->getUrl('mailchimp/stores/get')); ?>",
+     "detailsUrl": "<?= $block->escapeUrl($block->getUrl('mailchimp/ecommerce/getaccountdetails')); ?>",
+     "storeGridUrl": "<?= $block->escapeUrl($block->getUrl('mailchimp/stores/index')); ?>",
+     "createWebhookUrl": "<?= $block->escapeUrl($block->getUrl('mailchimp/ecommerce/createWebhook')); ?>",
+     "getInterestUrl": "<?= $block->escapeUrl($block->getUrl('mailchimp/ecommerce/getInterest')); ?>",
+     "resyncSubscribersUrl": "<?= $block->escapeUrl($block->getUrl('mailchimp/ecommerce/resyncSubscribers')); ?>",
+     "resyncProductsUrl": "<?= $block->escapeUrl($block->getUrl('mailchimp/ecommerce/resyncProducts')); ?>",
+     "cleanEcommerceUrl": "<?= $block->escapeUrl($block->getUrl('mailchimp/ecommerce/cleanEcommerce')); ?>",
+     "checkEcommerceUrl": "<?= $block->escapeUrl($block->getUrl('mailchimp/ecommerce/checkEcommerce')); ?>",
+     "fixMailchimpjsUrl": "<?= $block->escapeUrl($block->getUrl('mailchimp/ecommerce/fixMailchimpJS')); ?>",
+     "scope": "<?= $block->escapeHtml($block->getScope()); ?>",
+     "scopeId": "<?= $block->escapeHtml($block->getScopeId()); ?>"
     }}'>
 </div>
 <div style="background:#EAF0EE;border:1px solid #CCCCCC;margin-bottom:10px;padding:11px 0 0 10px;">
     <h4>
         <img width="224px" style="padding-left: 15px;" height="60px" src="https://ebizmarts-website.s3.amazonaws.com/Logo_Ebizmarts.png"/><br><br>
         <div style="padding-left: 15px;">
-            <p> <strong style="color:#EA7601;"><?php echo __('Mailchimp v') ?><?php echo $this->getModuleVersion() ?><?php echo __(' by') ?></strong> <a target="_blank" href="http://ebizmarts.com"><strong>ebizmarts</strong></a></p>
-            <p><?php echo __('Need help? See our ') ?><a href="https://github.com/mailchimp/mc-magento2/wiki" target="_blank"><?php echo __('Wiki') ?></a><?php echo __(' Got feedback? ') ?><a href="mailto:mailchimp@ebizmarts-desk.zendesk.com?Subject=MailChimp For Magento Version <?php echo $this->getModuleVersion()?>"><?php echo __('Email us') ?></a></p>
-            <p><?php echo __('You can find more extension in our ') ?><a href="http://store.ebizmarts.com" target="_blank"><?php echo __('Store') ?></a></p>
-            <?php if (!$this->getHasApiKey() ) : ?>
+            <p> <strong style="color:#EA7601;"><?= $block->escapeHtml(__('Mailchimp v')) ?><?= $block->escapeHtml($block->getModuleVersion()) ?><?= $block->escapeHtml(__(' by')) ?></strong> <a target="_blank" href="http://ebizmarts.com"><strong>ebizmarts</strong></a></p>
+            <p><?= $block->escapeHtml(__('Need help? See our ')) ?><a href="https://github.com/mailchimp/mc-magento2/wiki" target="_blank"><?= $block->escapeHtml(__('Wiki')) ?></a><?= $block->escapeHtml(__(' Got feedback? ')) ?><a href="mailto:mailchimp@ebizmarts-desk.zendesk.com?Subject=MailChimp For Magento Version <?= $block->escapeHtml($block->getModuleVersion()) ?>"><?= $block->escapeHtml(__('Email us')) ?></a></p>
+            <p><?= $block->escapeHtml(__('You can find more extension in our ')) ?><a href="http://store.ebizmarts.com" target="_blank"><?= $block->escapeHtml(__('Store')) ?></a></p>
+            <?php if (!$block->getHasApiKey() ) : ?>
                 <p><a style="padding-top: 5px;padding-bottom:5px;padding-left: 30px;padding-right: 30px;background-color:#D75F07 ;color:white;font-weight: bold" href="https://bit.ly/2KpDH5C" target="_blank">Support Mailchimp4Magento, Subscribe for a free Mailchimp Account!</a> </p>
             <?php endif; ?>
         </div>

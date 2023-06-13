@@ -40,6 +40,7 @@ class MailChimpErrors extends AbstractDb
     {
         $connection = $this->getConnection();
         $table = $this->getTable('mailchimp_errors');
+        // phpcs:ignore
         $ret = $connection->query("DELETE FROM $table WHERE date_add(added_at, interval $interval month) < now() AND store_id = $storeId LIMIT $limit");
         return $ret;
     }

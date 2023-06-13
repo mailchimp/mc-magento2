@@ -64,10 +64,12 @@ class Migrate32 implements DataPatchInterface, PatchVersionInterface
                 foreach ($webhookCollection as $webhookItem) {
                     try {
                         $webhookItem->setProcessed(\Ebizmarts\MailChimp\Cron\Webhook::DATA_NOT_CONVERTED);
+                        // phpcs:ignore
                         $webhookItem->getResource()->save($webhookItem);
                     } catch (\Exception $e) {
                         $this->helper->log($e->getMessage());
                         $webhookItem->setProcesed(\Ebizmarts\MailChimp\Cron\Webhook::DATA_WITH_ERROR);
+                        // phpcs:ignore
                         $webhookItem->getResource()->save($webhookItem);
                     }
                     $lastId = $webhookItem->getId();

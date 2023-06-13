@@ -245,7 +245,6 @@ class Ecommerce
             list($OKOperations, $BadOperations) = $this->encodeOperations($results);
             $batchArray['operations'] = $OKOperations;
             try {
-
                 if (!count($batchArray['operations'])) {
                     $this->_helper->log('An empty operation was detected');
                 } else {
@@ -271,6 +270,7 @@ class Ecommerce
                         $syncBatches->setCustomersModifiedCount($batchCounters[\Ebizmarts\MailChimp\Helper\Data::CUS_MOD]);
                         $syncBatches->setCartsModifiedCount($batchCounters[\Ebizmarts\MailChimp\Helper\Data::QUO_MOD]);
                         $syncBatches->setOrdersModifiedCount($batchCounters[\Ebizmarts\MailChimp\Helper\Data::ORD_MOD]);
+                        // phpcs:ignore
                         $syncBatches->getResource()->save($syncBatches);
                         $batchId = $batchResponse['id'];
                         $this->_showResume($batchId, $storeId);
@@ -279,7 +279,6 @@ class Ecommerce
                 if (count($BadOperations)) {
                     $this->markWithError($BadOperations, $mailchimpStoreId, $listId);
                 }
-
             } catch (\Mailchimp_Error $e) {
                 $this->_helper->log($e->getFriendlyMessage());
             } catch (\Exception $e) {

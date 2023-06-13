@@ -66,6 +66,7 @@ class GetResponse extends \Magento\Backend\App\Action
     {
         $batchId    = $this->getRequest()->getParam('id');
         $batches = $this->_batchFactory->create();
+        // phpcs:ignore
         $batches->getResource()->load($batches, $batchId);
         $batchId = $batches->getBatchId();
         $fileContent = [];

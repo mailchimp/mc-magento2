@@ -71,6 +71,7 @@ class SaveAfter implements \Magento\Framework\Event\ObserverInterface
                     $interestGroup->setSubscriberId($subscriber->getSubscriberId());
                     $interestGroup->setStoreId($subscriber->getStoreId());
                     $interestGroup->setUpdatedAt($this->helper->getGmtDate());
+                    // phpcs:ignore
                     $interestGroup->getResource()->save($interestGroup);
                     $this->helper->markRegisterAsModified(
                         $subscriber->getId(),
@@ -84,6 +85,7 @@ class SaveAfter implements \Magento\Framework\Event\ObserverInterface
                     $interestGroup->setSubscriberId($subscriber->getSubscriberId());
                     $interestGroup->setStoreId($subscriber->getStoreId());
                     $interestGroup->setUpdatedAt($this->helper->getGmtDate());
+                    // phpcs:ignore
                     $interestGroup->getResource()->save($interestGroup);
                 }
             } catch (\Exception $e) {

@@ -18,7 +18,7 @@
         'use strict';
 
         $("#mailchimp-subscribe").popupWindow({
-            "windowURL": "<?php echo $block->getPopupUrl(); ?>",
+            "windowURL": "<?= $block->escapeUrl($block->getPopupUrl()); ?>",
             "windowName": "Subscribe",
             "width": 800,
             "height": 800,

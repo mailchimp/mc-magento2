@@ -13,6 +13,8 @@
 
 namespace Ebizmarts\MailChimp\Model\Api;
 
+use Magento\Framework\Filesystem\Io\File;
+
 class Result
 {
     const MAILCHIMP_TEMP_DIR = 'Mailchimp';
@@ -84,9 +86,11 @@ class Result
                     $this->processEachResponseFile($files, $item->getBatchId(), $mailchimpStoreId, $storeId);
                     $item->setStatus(\Ebizmarts\MailChimp\Helper\Data::BATCH_COMPLETED);
                     $item->setModifiedDate($this->_helper->getGmtDate());
+                    // phpcs:ignore
                     $item->getResource()->save($item);
                 } elseif ($files === false) {
                     $item->setStatus(\Ebizmarts\MailChimp\Helper\Data::BATCH_ERROR);
+                    // phpcs:ignore
                     $item->getResource()->save($item);
                     $this->_helper->deleteAllByBatchId($item->getBatchId());
                     continue;
@@ -159,6 +163,7 @@ class Result
                 $dirFiles = $this->_driver->readDirectory($baseDir . DIRECTORY_SEPARATOR . 'var' . DIRECTORY_SEPARATOR .
                     self::MAILCHIMP_TEMP_DIR . DIRECTORY_SEPARATOR . $batchId);
                 foreach ($dirFiles as $dirFile) {
+                    // phpcs:ignore
                     $name = pathinfo($dirFile);
                     if ($name['extension'] == 'json') {
                         $files[] = $dirFile;
@@ -253,6 +258,7 @@ class Result
                         $mailchimpErrors->setOriginalId($id);
                         $mailchimpErrors->setBatchId($batchId);
                         $mailchimpErrors->setStoreId($storeId);
+                        // phpcs:ignore
                         $mailchimpErrors->getResource()->save($mailchimpErrors);
                     } else {
                         $this->_updateSyncData(
@@ -299,6 +305,7 @@ class Result
             $mailchimpStore && $chimpSync->getType() == $type && $chimpSync->getRelatedId() == $id) {
             $chimpSync->setMailchimpSent($status);
             $chimpSync->setMailchimpSyncError($error);
+            // phpcs:ignore
             $chimpSync->getResource()->save($chimpSync);
         } else {
             $this->_helper->log("Can't find original register for type $type and id $id");

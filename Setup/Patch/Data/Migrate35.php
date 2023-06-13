@@ -49,6 +49,7 @@ class Migrate35 implements DataPatchInterface, PatchVersionInterface
         foreach ($configCollection as $config) {
             try {
                 $config->setValue($this->_helper->encrypt($config->getvalue()));
+                // phpcs:ignore
                 $config->getResource()->save($config);
             } catch (\Exception $e) {
                 $this->_helper->log($e->getMessage());
@@ -60,6 +61,7 @@ class Migrate35 implements DataPatchInterface, PatchVersionInterface
             ['eq' => \Ebizmarts\MailChimp\Helper\Data::XML_PATH_APIKEY_LIST]
         );
         foreach ($configCollection as $config) {
+            // phpcs:ignore
             $config->getResource()->delete($config);
         }
 

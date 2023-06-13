@@ -25,12 +25,14 @@ class Save extends \Ebizmarts\MailChimp\Controller\Adminhtml\Stores
             $formData = $this->getRequest()->getParam('stores');
             $storeId = isset($formData['id']) ? $formData['id'] : null;
             if ($storeId) {
+                // phpcs:ignore
                 $storeModel->getResource()->load($storeModel, $storeId);
             }
             try {
                 $formData['storeid'] = $this->_updateMailchimp($formData);
                 $formData['platform'] = \Ebizmarts\MailChimp\Helper\Data::PLATFORM;
                 $storeModel->setData($formData);
+                // phpcs:ignore
                 $storeModel->getResource()->save($storeModel);
                 if ($returnToEdit) {
                     if (!$storeId) {

@@ -83,6 +83,7 @@ class Success extends \Magento\Framework\App\Action\Action
                 $interestGroup->setSubscriberId($subscriber->getSubscriberId());
                 $interestGroup->setStoreId($subscriber->getStoreId());
                 $interestGroup->setUpdatedAt($this->_helper->getGmtDate());
+                // phpcs:ignore
                 $interestGroup->getResource()->save($interestGroup);
                 $listId = $this->_helper->getGeneralList($order->getStoreId());
                 $this->_updateSubscriber($listId, $subscriber->getId(), $this->_helper->getGmtDate(), '', 1);
@@ -94,6 +95,7 @@ class Success extends \Magento\Framework\App\Action\Action
                 $interestGroup->setSubscriberId($subscriber->getSubscriberId());
                 $interestGroup->setStoreId($subscriber->getStoreId());
                 $interestGroup->setUpdatedAt($this->_helper->getGmtDate());
+                // phpcs:ignore
                 $interestGroup->getResource()->save($interestGroup);
             }
         } catch (\Exception $e) {

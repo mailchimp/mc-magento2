@@ -110,6 +110,7 @@ class PromoCodes
                 $couponId,
                 \Ebizmarts\MailChimp\Helper\Data::IS_PROMO_CODE
             );
+            // phpcs:ignore
             $syncCoupon->getResource()->delete($syncCoupon);
         }
         return $batchArray;

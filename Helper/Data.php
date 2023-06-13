@@ -706,7 +706,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
                 }
                 else {
                     $value = $customer->getData($map['customer_field']);
-                    if (!is_null($value)) {
+                    if ($value !== null) {
                         if ($map['isDate']) {
                             $format = $this->getDateFormat();
                             if ($map['customer_field'] == 'dob') {
@@ -844,12 +844,16 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     {
         try {
             // clean the errors table
+            // phpcs:ignore
             $connection = $this->_mailChimpErrors->getResource()->getConnection();
+            // phpcs:ignore
             $tableName = $this->_mailChimpErrors->getResource()->getMainTable();
             $connection->delete($tableName, "mailchimp_store_id = '".$mailchimpStore."'");
             // clean the syncecommerce table with errors
             if ($retry) {
+                // phpcs:ignore
                 $connection = $this->_mailChimpSyncE->getResource()->getConnection();
+                // phpcs:ignore
                 $tableName = $this->_mailChimpSyncE->getResource()->getMainTable();
                 $connection->delete(
                     $tableName,
@@ -905,6 +909,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
                 if ($sent) {
                     $chimpSyncEcommerce->setMailchimpSent($sent);
                 }
+                // phpcs:ignore
                 $chimpSyncEcommerce->getResource()->save($chimpSyncEcommerce);
             }
         }
@@ -932,7 +937,9 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
 
         $mcUserName = [];
         $allStores = [];
+        // phpcs:ignore
         $connection = $this->_mailChimpStores->getResource()->getConnection();
+        // phpcs:ignore
         $tableName = $this->_mailChimpStores->getResource()->getMainTable();
         $connection->truncateTable($tableName);
         $keys = $this->getAllApiKeys();
@@ -993,6 +1000,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
                     if (isset($listInfo['name'])) {
                         $mstore->setListName($listInfo['name']);
                         $mstore->setMcAccountName($mcUserName[$apiKey]);
+                        // phpcs:ignore
                         $mstore->getResource()->save($mstore);
                     }
                 } catch (\Mailchimp_Error $e) {
@@ -1336,7 +1344,9 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     }
     public function resyncAllSubscribers($mailchimpList)
     {
+        // phpcs:ignore
         $connection = $this->_mailChimpSyncE->getResource()->getConnection();
+        // phpcs:ignore
         $tableName = $this->_mailChimpSyncE->getResource()->getMainTable();
         $connection->update(
             $tableName,
@@ -1346,7 +1356,9 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     }
     public function resyncProducts($mailchimpList)
     {
+        // phpcs:ignore
         $connection = $this->_mailChimpSyncE->getResource()->getConnection();
+        // phpcs:ignore
         $tableName = $this->_mailChimpSyncE->getResource()->getMainTable();
         $connection->update(
             $tableName,

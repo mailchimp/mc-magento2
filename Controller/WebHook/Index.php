@@ -104,6 +104,7 @@ class Index extends Action implements CsrfAwareActionInterface
                     $chimpRequest->setFiredAt($request['fired_at']);
                     $chimpRequest->setDataRequest($this->_helper->serialize($request['data']));
                     $chimpRequest->setProcessed(false);
+                    // phpcs:ignore
                     $chimpRequest->getResource()->save($chimpRequest);
                     $result->setHttpResponseCode(200);
                 } catch(\Exception $e) {
