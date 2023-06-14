@@ -93,6 +93,7 @@ class Loadquote extends Action
         $params     = $this->getRequest()->getParams();
         if (isset($params['id'])) {
             $quote = $this->_quote->create();
+            // phpcs:ignore
             $quote->getResource()->load($quote, $params['id']);
             $magentoStoreId = $quote->getStoreId();
             $mailchimpStoreId = $this->_helper->getConfigValue(
@@ -134,6 +135,7 @@ class Loadquote extends Action
                 }
                 $quote->setData('mailchimp_abandonedcart_flag', true);
 
+                // phpcs:ignore
                 $quote->getResource()->save($quote);
                 if (!$quote->getCustomerId()) {
                     $this->_checkoutSession->setQuoteId($quote->getId());

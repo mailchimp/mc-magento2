@@ -75,7 +75,6 @@ class CheckEcommerce extends \Magento\Backend\App\Action
             $collection->getSelect()->where('value is null');
             $collection->getSelect()->group('mailchimp_store_id');
             $valid = $collection->count();
-
         } catch (ValidatorException $e) {
             $valid = -1;
             $message = $e->getMessage();

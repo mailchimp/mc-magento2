@@ -21,6 +21,7 @@ class Delete extends \Ebizmarts\MailChimp\Controller\Adminhtml\Stores
         $storeId = (int) $this->getRequest()->getParam('id');
         if ($storeId) {
             $storeModel = $this->_mailchimpStoresFactory->create();
+            // phpcs:ignore
             $storeModel->getResource()->load($storeModel, $storeId);
             try {
                 $api = $this->_mhelper->getApiByApiKey($storeModel->getApikey(), true);

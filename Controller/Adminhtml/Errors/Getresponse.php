@@ -66,6 +66,7 @@ class Getresponse extends \Magento\Backend\App\Action
     {
         $errorId    = $this->getRequest()->getParam('id');
         $errors = $this->_errorsFactory->create();
+        // phpcs:ignore
         $errors->getResource()->load($errors, $errorId);
         $batchId = $errors->getBatchId();
         $fileContent = [];

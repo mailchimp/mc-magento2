@@ -79,6 +79,7 @@ class Save
                 $interestGroup->setSubscriberId($subscriber->getSubscriberId());
                 $interestGroup->setStoreId($subscriber->getStoreId());
                 $interestGroup->setUpdatedAt($this->helper->getGmtDate());
+                // phpcs:ignore
                 $interestGroup->getResource()->save($interestGroup);
                 $listId = $this->helper->getGeneralList($subscriber->getStoreId());
                 $this->_updateSubscriber($listId, $subscriber->getId(), $this->helper->getGmtDate(), null, 1);
@@ -90,6 +91,7 @@ class Save
                 $interestGroup->setSubscriberId($subscriber->getSubscriberId());
                 $interestGroup->setStoreId($subscriber->getStoreId());
                 $interestGroup->setUpdatedAt($this->helper->getGmtDate());
+                // phpcs:ignore
                 $interestGroup->getResource()->save($interestGroup);
             }
         } catch (\Exception $e) {

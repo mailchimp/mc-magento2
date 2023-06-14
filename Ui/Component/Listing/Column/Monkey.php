@@ -207,7 +207,6 @@ class Monkey extends Column
                         $item['mailchimp_sync'] =
                             "<div style='width: 50%;margin: 0 auto;text-align: center'><img src='".$url."' style='border: none; width: 5rem; text-align: center; max-width: 100%' title='$alt'/>$text</div>";
                     }
-
                 }
             }
         }

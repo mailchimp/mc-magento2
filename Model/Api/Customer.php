@@ -110,6 +110,7 @@ class Customer
 
         foreach ($collection as $item) {
             $customer = $this->_customerFactory->create();
+            // phpcs:ignore
             $customer->getResource()->load($customer, $item->getId());
             $data           = $this->_buildCustomerData($customer);
             $customerJson   = '';

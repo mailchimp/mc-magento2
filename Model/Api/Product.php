@@ -279,7 +279,6 @@ class Product
             $this->_helper->log("");
             $this->_helper->log("$jsonErrorMsg for product [".$product->getId()."]");
             return [];
-
         } else {
             $this->_helper->modifyCounter(\Ebizmarts\MailChimp\Helper\Data::PRO_NEW);
             $data = [];

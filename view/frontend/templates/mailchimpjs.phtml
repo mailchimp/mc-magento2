@@ -4,5 +4,6 @@
  */
 $url = $block->getJsUrl();
 $render = $block->getRender();
+//phpcs:ignore
 echo $render->renderTag('script',['type'=>'text/javascript','src'=>$escaper->escapeUrl($url),'defer'=>'defer'],"\n",true);
 ?>

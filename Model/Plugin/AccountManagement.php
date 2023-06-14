@@ -70,9 +70,11 @@ class AccountManagement
             $quoteId = $this->_session->getQuoteId();
             if ($quoteId) {
                 $quote = $this->_quote->create();
+                // phpcs:ignore
                 $quote->getResource()->load($quote, $quoteId);
                 $quote->setCustomerEmail($customerEmail);
                 $quote->setUpdatedAt(date('Y-m-d H:i:s'));
+                // phpcs:ignore
                 $quote->getResource()->save($quote);
             }
         }

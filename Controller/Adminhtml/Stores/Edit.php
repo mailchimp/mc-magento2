@@ -28,6 +28,7 @@ class Edit extends \Ebizmarts\MailChimp\Controller\Adminhtml\Stores
         $model = $this->_mailchimpStoresFactory->create();
 
         if ($storeId) {
+            // phpcs:ignore
             $model->getResource()->load($model, $storeId);
             if (!$model->getId()) {
                 $this->messageManager->addError(__('This store no longer exists.'));

@@ -145,9 +145,7 @@ class Customers extends Column
                                 );
                                 $text = __('Error');
                         }
-
                     }
-
                 }
                 $item['mailchimp_sync'] =
                     "<div style='width: 100%;margin: 0 auto;text-align: center'><div><img src='".$url."' style='border: none; width: 5rem; text-align: center; max-width: 100%' title='$alt' /></div><div>$text</div></div>";

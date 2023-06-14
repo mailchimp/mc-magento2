@@ -127,6 +127,7 @@ class Webhook
                 $processed = self::PROCESSED_WITH_ERROR;
             }
             $item->setProcessed($processed);
+            // phpcs:ignore
             $item->getResource()->save($item);
         }
     }
@@ -142,6 +143,7 @@ class Webhook
             foreach ($subscribers as $sub) {
                 if ($sub->getSubscriberStatus() != \Magento\Newsletter\Model\Subscriber::STATUS_SUBSCRIBED) {
                     $sub->setSubscriberStatus(\Magento\Newsletter\Model\Subscriber::STATUS_SUBSCRIBED);
+                    // phpcs:ignore
                     $sub->getResource()->save($sub);
                 }
             }
@@ -175,6 +177,7 @@ class Webhook
                 switch ($action) {
                     case self::ACTION_DELETE:
                         if ($this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_PATH_WEBHOOK_DELETE)) {
+                            // phpcs:ignore
                             $sub->getResource()->delete($sub);
                         } elseif ($sub->getSubscriberStatus()!=\Magento\Newsletter\Model\Subscriber::STATUS_UNSUBSCRIBED) {
                             $this->_subscribeMember($sub, \Magento\Newsletter\Model\Subscriber::STATUS_UNSUBSCRIBED);
@@ -198,6 +201,7 @@ class Webhook
          * @var $sub \Magento\Newsletter\Model\Subscriber
          */
         foreach ($subscribers as $sub) {
+            // phpcs:ignore
             $sub->getResource()->delete($sub);
         }
     }
@@ -215,6 +219,7 @@ class Webhook
             if ($oldSubscribers->count()) {
                 foreach ($oldSubscribers as $sub) {
                     $sub->setSubscriberEmail($newEmail);
+                    // phpcs:ignore
                     $sub->getResource()->save($sub);
                 }
             } else {
@@ -235,8 +240,10 @@ class Webhook
              */
             foreach ($customers as $c) {
                 $customer = $this->_customer->create();
+                // phpcs:ignore
                 $customer->getResource()->load($customer, $c->getEntityId());
                 $this->_processMerges($customer,$data);
+                // phpcs:ignore
                 $customer->getResource()->save($customer);
             }
         } else {
@@ -292,6 +299,7 @@ class Webhook
                         $interestGroup->setSubscriberId($subscriber->getSubscriberId());
                         $interestGroup->setStoreId($subscriber->getStoreId());
                         $interestGroup->setUpdatedAt($this->_helper->getGmtDate());
+                        // phpcs:ignore
                         $interestGroup->getResource()->save($interestGroup);
                         $listId = $this->_helper->getGeneralList($subscriber->getStoreId());
                     } else {
@@ -302,6 +310,7 @@ class Webhook
                         $interestGroup->setSubscriberId($subscriber->getSubscriberId());
                         $interestGroup->setStoreId($subscriber->getStoreId());
                         $interestGroup->setUpdatedAt($this->_helper->getGmtDate());
+                        // phpcs:ignore
                         $interestGroup->getResource()->save($interestGroup);
                     }
                 } else {
@@ -338,6 +347,7 @@ class Webhook
         $subscriber->setStatus($status);
         $subscriber->setSubscriberConfirmCode($subscriber->randomSequence());
         $subscriber->setIsStatusChanged(true);
+        // phpcs:ignore
         $subscriber->getResource()->save($subscriber);
     }
     protected function _loadGroups()
