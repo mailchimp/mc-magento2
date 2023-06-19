@@ -105,7 +105,6 @@ class Monkey extends Column
     {
         if (isset($dataSource['data']['items'])) {
             foreach ($dataSource['data']['items'] as & $item) {
-                $this->_helper->log($item);
                 $status = $item['mailchimp_flag'];
                 $orderId = $item['increment_id'];
                 $sync = $item['mailchimp_sent'];
@@ -115,10 +114,8 @@ class Monkey extends Column
                 $menu = false;
                 $params = ['_secure' => $this->_requestInterfase->isSecure()];
                 $storeId = $order->getStoreId();
-                $this->_helper->log("Store [$storeId]");
                 if ($this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_PATH_ACTIVE, $storeId)) {
                     $alt = '';
-                    $this->_helper->log("Order [$orderId] Status [$sync] Error [$error]");
                     switch ($sync) {
                         case \Ebizmarts\MailChimp\Helper\Data::NEVERSYNC:
                             $url = $this->_assetRepository->getUrlWithParams(
