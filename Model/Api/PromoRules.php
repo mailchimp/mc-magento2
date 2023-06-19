@@ -14,6 +14,8 @@
 namespace Ebizmarts\MailChimp\Model\Api;
 
 use Magento\Cms\Test\Unit\Controller\Adminhtml\Page\MassEnableTest;
+use Ebizmarts\MailChimp\Helper\Sync as SyncHelper;
+
 
 class PromoRules
 {
@@ -48,10 +50,14 @@ class PromoRules
      * @var \Ebizmarts\MailChimp\Model\ResourceModel\MailChimpSyncEcommerce\CollectionFactory
      */
     protected $_syncCollection;
+    /**
+     * @var SyncHelper
+     */
+    private $syncHelper;
 
     /**
-     * PromoRules constructor.
      * @param \Ebizmarts\MailChimp\Helper\Data $helper
+     * @param SyncHelper $syncHelper
      * @param \Magento\SalesRule\Model\ResourceModel\Rule\CollectionFactory $collection
      * @param \Magento\SalesRule\Model\RuleRepository $ruleRepo
      * @param \Ebizmarts\MailChimp\Model\MailChimpSyncEcommerceFactory $chimpSyncEcommerce
@@ -59,13 +65,15 @@ class PromoRules
      */
     public function __construct(
         \Ebizmarts\MailChimp\Helper\Data $helper,
+        SyncHelper $syncHelper,
         \Magento\SalesRule\Model\ResourceModel\Rule\CollectionFactory $collection,
         \Magento\SalesRule\Model\RuleRepository $ruleRepo,
         \Ebizmarts\MailChimp\Model\MailChimpSyncEcommerceFactory $chimpSyncEcommerce,
         \Ebizmarts\MailChimp\Model\ResourceModel\MailChimpSyncEcommerce\CollectionFactory $syncCollection
     ) {
-    
+
         $this->_helper              = $helper;
+        $this->syncHelper           = $syncHelper;
         $this->_collection          = $collection;
         $this->_chimpSyncEcommerce  = $chimpSyncEcommerce;
         $this->_ruleRepo             = $ruleRepo;
@@ -103,7 +111,7 @@ class PromoRules
             try {
                 $mailchimpRule = $api->ecommerce->promoCodes->getAll($mailchimpStoreId, $ruleId);
                 foreach ($mailchimpRule['promo_codes'] as $promoCode) {
-                    $this->_helper->ecommerceDeleteAllByIdType(
+                    $this->syncHelper->ecommerceDeleteAllByIdType(
                         $promoCode['id'],
                         \Ebizmarts\MailChimp\Helper\Data::IS_PROMO_CODE,
                         $mailchimpStoreId
@@ -116,7 +124,7 @@ class PromoRules
             } catch (\Mailchimp_Error $e) {
                 $this->_helper->log($e->getFriendlyMessage());
             }
-            $this->_helper->ecommerceDeleteAllByIdType(
+            $this->syncHelper->ecommerceDeleteAllByIdType(
                 $ruleId,
                 \Ebizmarts\MailChimp\Helper\Data::IS_PROMO_RULE,
                 $mailchimpStoreId
@@ -152,7 +160,7 @@ class PromoRules
             try {
                 $mailchimpRule = $api->ecommerce->promoCodes->getAll($mailchimpStoreId, $ruleId);
                 foreach ($mailchimpRule['promo_codes'] as $promoCode) {
-                    $this->_helper->ecommerceDeleteAllByIdType(
+                    $this->syncHelper->ecommerceDeleteAllByIdType(
                         $promoCode['id'],
                         \Ebizmarts\MailChimp\Helper\Data::IS_PROMO_CODE,
                         $mailchimpStoreId
@@ -161,7 +169,7 @@ class PromoRules
             } catch (\Mailchimp_Error $e) {
                 $this->_helper->log($e->getFriendlyMessage());
             }
-            $this->_helper->ecommerceDeleteAllByIdType(
+            $this->syncHelper->ecommerceDeleteAllByIdType(
                 $rule->getRuleId(),
                 \Ebizmarts\MailChimp\Helper\Data::IS_PROMO_RULE,
                 $mailchimpStoreId
@@ -320,7 +328,7 @@ class PromoRules
      */
     protected function _updateSyncData($storeId, $entityId, $sync_delta = null, $sync_error = '', $sync_modified = 0)
     {
-        $this->_helper->saveEcommerceData(
+        $this->syncHelper->saveEcommerceData(
             $storeId,
             $entityId,
             \Ebizmarts\MailChimp\Helper\Data::IS_PROMO_RULE,

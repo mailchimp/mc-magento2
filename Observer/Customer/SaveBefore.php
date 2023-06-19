@@ -13,6 +13,8 @@
 namespace Ebizmarts\MailChimp\Observer\Customer;
 
 use Magento\Framework\Event\Observer;
+use Ebizmarts\MailChimp\Helper\Sync as SyncHelper;
+
 
 class SaveBefore implements \Magento\Framework\Event\ObserverInterface
 {
@@ -21,21 +23,27 @@ class SaveBefore implements \Magento\Framework\Event\ObserverInterface
      */
     protected $_helper;
     /**
+     * @var SyncHelper
+     */
+    private $syncHelper;
+    /**
      * @var \Magento\Newsletter\Model\SubscriberFactory
      */
     protected $subscriberFactory;
 
     /**
-     * SaveBefore constructor.
      * @param \Ebizmarts\MailChimp\Helper\Data $helper
+     * @param SyncHelper $syncHelper
      * @param \Magento\Newsletter\Model\SubscriberFactory $subscriberFactory
      */
     public function __construct(
         \Ebizmarts\MailChimp\Helper\Data $helper,
+        SyncHelper $syncHelper,
         \Magento\Newsletter\Model\SubscriberFactory $subscriberFactory
     ) {
 
         $this->_helper              = $helper;
+        $this->syncHelper           = $syncHelper;
         $this->subscriberFactory    = $subscriberFactory;
     }
 
@@ -52,7 +60,7 @@ class SaveBefore implements \Magento\Framework\Event\ObserverInterface
                     \Ebizmarts\MailChimp\Helper\Data::XML_MAILCHIMP_STORE,
                     $storeId
                 );
-                $this->_helper->saveEcommerceData(
+                $this->syncHelper->saveEcommerceData(
                     $mailchimpStoreId,
                     $customer->getId(),
                     \Ebizmarts\MailChimp\Helper\Data::IS_CUSTOMER,

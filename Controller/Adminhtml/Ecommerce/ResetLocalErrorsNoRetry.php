@@ -16,6 +16,7 @@ namespace Ebizmarts\MailChimp\Controller\Adminhtml\Ecommerce;
 use Magento\Framework\Controller\Result\JsonFactory;
 use Magento\Framework\Exception\ValidatorException;
 use Symfony\Component\Config\Definition\Exception\Exception;
+use Ebizmarts\MailChimp\Helper\Sync as SyncHelper;
 
 class ResetLocalErrorsNoRetry extends \Magento\Backend\App\Action
 {
@@ -28,28 +29,34 @@ class ResetLocalErrorsNoRetry extends \Magento\Backend\App\Action
      */
     protected $helper;
     /**
+     * @var SyncHelper
+     */
+    private $syncHelper;
+    /**
      * @var \Magento\Store\Model\StoreManagerInterface
      */
     protected $storeManager;
 
     /**
-     * ResetLocalErrors constructor.
      * @param \Magento\Backend\App\Action\Context $context
      * @param JsonFactory $resultJsonFactory
      * @param \Magento\Store\Model\StoreManagerInterface $storeManagerInterface
      * @param \Ebizmarts\MailChimp\Helper\Data $helper
+     * @param SyncHelper $syncHelper
      */
     public function __construct(
         \Magento\Backend\App\Action\Context $context,
         JsonFactory $resultJsonFactory,
         \Magento\Store\Model\StoreManagerInterface $storeManagerInterface,
-        \Ebizmarts\MailChimp\Helper\Data $helper
+        \Ebizmarts\MailChimp\Helper\Data $helper,
+        SyncHelper $syncHelper
     ) {
-    
+
         parent::__construct($context);
         $this->resultJsonFactory    = $resultJsonFactory;
         $this->helper               = $helper;
         $this->storeManager         = $storeManagerInterface;
+        $this->syncHelper           = $syncHelper;
     }
 
     public function execute()
@@ -78,7 +85,7 @@ class ResetLocalErrorsNoRetry extends \Magento\Backend\App\Action
 
         $resultJson = $this->resultJsonFactory->create();
         try {
-            $this->helper->resetErrors($mailchimpStore, false);
+            $this->syncHelper->resetErrors($mailchimpStore, false);
         } catch (ValidatorException $e) {
             $valid = 0;
             $message = $e->getMessage();

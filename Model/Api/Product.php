@@ -12,6 +12,8 @@ mc-magento2 Magento Component
 
 namespace Ebizmarts\MailChimp\Model\Api;
 
+use Ebizmarts\MailChimp\Helper\Sync as SyncHelper;
+
 class Product
 {
     const DOWNLOADABLE = 'downloadable';
@@ -69,13 +71,17 @@ class Product
      * @var \Magento\Catalog\Model\ResourceModel\Category\CollectionFactory
      */
     protected $_categoryCollection;
+    /**
+     * @var SyncHelper
+     */
+    private $syncHelper;
     protected $includingTaxes;
 
     /**
-     * Product constructor.
      * @param \Magento\Catalog\Model\ResourceModel\Product\CollectionFactory $productCollection
      * @param \Magento\Catalog\Model\ProductRepository $productRepository
      * @param \Ebizmarts\MailChimp\Helper\Data $helper
+     * @param SyncHelper $syncHelper
      * @param \Magento\Catalog\Helper\Image $imageHelper
      * @param \Magento\CatalogInventory\Api\StockRegistryInterface $stockRegistry
      * @param \Magento\Catalog\Model\CategoryRepository $categoryRepository
@@ -89,6 +95,7 @@ class Product
         \Magento\Catalog\Model\ResourceModel\Product\CollectionFactory $productCollection,
         \Magento\Catalog\Model\ProductRepository $productRepository,
         \Ebizmarts\MailChimp\Helper\Data $helper,
+        SyncHelper $syncHelper,
         \Magento\Catalog\Helper\Image $imageHelper,
         \Magento\CatalogInventory\Api\StockRegistryInterface $stockRegistry,
         \Magento\Catalog\Model\CategoryRepository $categoryRepository,
@@ -101,6 +108,7 @@ class Product
 
         $this->_productRepository   = $productRepository;
         $this->_helper              = $helper;
+        $this->syncHelper           = $syncHelper;
         $this->_productCollection   = $productCollection;
         $this->_imageHelper         = $imageHelper;
         $this->_stockRegistry       = $stockRegistry;
@@ -206,7 +214,7 @@ class Product
         );
         foreach ($collection as $item) {
             $productId = $this->_productRepository->get($item->getSku(),false, $magentoStoreId)->getId();
-            $mailchimpSync = $this->_helper->getChimpSyncEcommerce($mailchimpStoreId, $productId, 'PRO');
+            $mailchimpSync = $this->syncHelper->getChimpSyncEcommerce($mailchimpStoreId, $productId, 'PRO');
             if ($mailchimpSync->getMailchimpSyncDelta() < $item->getSpecialFromDate()) {
                 $this->_updateProduct($mailchimpStoreId, $productId, null, null, 1);
             }
@@ -229,7 +237,7 @@ class Product
         );
         foreach ($collection2 as $item) {
             $productId = $this->_productRepository->get($item->getSku(),false, $magentoStoreId)->getId();
-            $mailchimpSync = $this->_helper->getChimpSyncEcommerce($mailchimpStoreId, $productId, 'PRO');
+            $mailchimpSync = $this->syncHelper->getChimpSyncEcommerce($mailchimpStoreId, $productId, 'PRO');
             if ($mailchimpSync->getMailchimpSyncDelta() < $item->getSpecialToDate()) {
                 $this->_updateProduct($mailchimpStoreId, $productId, null, null, 1);
             }
@@ -654,7 +662,7 @@ class Product
         $sync_error = null,
         $sync_modified = null
     ) {
-        $this->_helper->saveEcommerceData(
+        $this->syncHelper->saveEcommerceData(
             $storeId,
             $entityId,
             \Ebizmarts\MailChimp\Helper\Data::IS_PRODUCT,

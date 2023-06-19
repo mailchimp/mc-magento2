@@ -13,6 +13,7 @@
 namespace Ebizmarts\MailChimp\Model\Api;
 
 use Symfony\Component\Config\Definition\Exception\Exception;
+use Ebizmarts\MailChimp\Helper\Sync as SyncHelper;
 
 class Cart
 {
@@ -57,10 +58,14 @@ class Cart
      * @var \Magento\Framework\Url
      */
     protected $_urlHelper;
+    /**
+     * @var SyncHelper
+     */
+    private $syncHelper;
 
     /**
-     * Cart constructor.
      * @param \Ebizmarts\MailChimp\Helper\Data $helper
+     * @param SyncHelper $syncHelper
      * @param \Magento\Quote\Model\ResourceModel\Quote\CollectionFactory $quoteColletcion
      * @param \Magento\Customer\Model\CustomerFactory $customerFactory
      * @param Product $apiProduct
@@ -71,6 +76,7 @@ class Cart
      */
     public function __construct(
         \Ebizmarts\MailChimp\Helper\Data $helper,
+        SyncHelper $syncHelper,
         \Magento\Quote\Model\ResourceModel\Quote\CollectionFactory $quoteColletcion,
         \Magento\Customer\Model\CustomerFactory $customerFactory,
         \Ebizmarts\MailChimp\Model\Api\Product $apiProduct,
@@ -79,7 +85,7 @@ class Cart
         \Magento\Sales\Model\ResourceModel\Order\CollectionFactory $orderCollectionFactory,
         \Magento\Framework\Url $urlHelper
     ) {
-    
+
         $this->_helper                  = $helper;
         $this->_quoteCollection         = $quoteColletcion;
         $this->_customerFactory         = $customerFactory;
@@ -88,6 +94,7 @@ class Cart
         $this->_orderCollectionFactory  = $orderCollectionFactory;
         $this->_countryFactory          = $countryFactory;
         $this->_urlHelper               = $urlHelper;
+        $this->syncHelper               = $syncHelper;
     }
 
         /**
@@ -643,12 +650,6 @@ class Cart
                 $customer['address'] = $address;
             }
         }
-
-        //company
-//        if ($billingAddress->getCompany()) {
-//            $customer["company"] = $billingAddress->getCompany();
-//        }
-
         return $customer;
     }
 
@@ -684,7 +685,7 @@ class Cart
         $sync_modified = null,
         $sync_deleted = null
     ) {
-        $this->_helper->saveEcommerceData(
+        $this->syncHelper->saveEcommerceData(
             $storeId,
             $entityId,
             \Ebizmarts\MailChimp\Helper\Data::IS_QUOTE,
