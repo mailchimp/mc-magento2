@@ -70,22 +70,25 @@ class ResetLocalErrors extends \Magento\Backend\App\Action
                 $params['website'],
                 'website'
             );
+            $storeId = $params['website'];
         } elseif (isset($params['store'])) {
             $mailchimpStore = $this->helper->getConfigValue(
                 \Ebizmarts\MailChimp\Helper\Data::XML_MAILCHIMP_STORE,
                 $params['store'],
                 'store'
             );
+            $storeId = $params['store'];
         } else {
+            $storeId = $this->storeManager->getStore()->getId();
             $mailchimpStore = $this->helper->getConfigValue(
                 \Ebizmarts\MailChimp\Helper\Data::XML_MAILCHIMP_STORE,
-                $this->storeManager->getStore()
+                $storeId
             );
         }
 
         $resultJson = $this->resultJsonFactory->create();
         try {
-            $this->syncHelper->resetErrors($mailchimpStore, true);
+            $this->syncHelper->resetErrors($mailchimpStore, $storeId, true);
         } catch (ValidatorException $e) {
             $valid = 0;
             $message = $e->getMessage();

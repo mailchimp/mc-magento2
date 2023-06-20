@@ -4,11 +4,12 @@ namespace Ebizmarts\MailChimp\Helper;
 
 use Magento\Framework\App\Helper\AbstractHelper;
 use Magento\Framework\App\Helper\Context;
+use Magento\Framework\Exception\ValidatorException;
+use Magento\Sales\Model\OrderFactory;
+use Magento\Sales\Model\ResourceModel\Order\CollectionFactory as OrderCollectionFactory;
 use Ebizmarts\MailChimp\Model\MailChimpSyncEcommerceFactory;
 use Ebizmarts\MailChimp\Model\MailChimpSyncEcommerce;
 use Ebizmarts\MailChimp\Model\MailChimpErrors;
-use Magento\Framework\Exception\ValidatorException;
-use Magento\Sales\Model\OrderFactory;
 
 class Sync extends AbstractHelper
 {
@@ -28,6 +29,10 @@ class Sync extends AbstractHelper
      * @var OrderFactory
      */
     private $orderFactory;
+    /**
+     * @var OrderCollectionFactory
+     */
+    private $orderCollectionFactory;
 
     /**
      * @param Context $context
@@ -35,18 +40,21 @@ class Sync extends AbstractHelper
      * @param MailChimpErrors $mailChimpErrors
      * @param MailChimpSyncEcommerce $chimpSyncEcommerce
      * @param OrderFactory $orderFactory
+     * @param OrderCollectionFactory $orderCollectionFactory
      */
     public function __construct(
         Context $context,
         MailChimpSyncEcommerceFactory $chimpSyncEcommerceFactory,
         MailChimpErrors $mailChimpErrors,
         MailChimpSyncEcommerce $chimpSyncEcommerce,
-        OrderFactory $orderFactory
+        OrderFactory $orderFactory,
+        OrderCollectionFactory $orderCollectionFactory
     ) {
         $this->chimpSyncEcommerceFactory = $chimpSyncEcommerceFactory;
         $this->mailChimpErrors = $mailChimpErrors;
         $this->chimpSyncEcommerce = $chimpSyncEcommerce;
         $this->orderFactory = $orderFactory;
+        $this->orderCollectionFactory = $orderCollectionFactory;
         parent::__construct($context);
     }
     public function saveEcommerceData(
@@ -123,7 +131,7 @@ class Sync extends AbstractHelper
     {
         $this->chimpSyncEcommerce->deleteAllByBatchid($batchId);
     }
-    public function resetErrors($mailchimpStore, $retry)
+    public function resetErrors($mailchimpStore, $storeId, $retry)
     {
         try {
             // clean the errors table
@@ -138,6 +146,15 @@ class Sync extends AbstractHelper
                     $tableName,
                     "mailchimp_store_id = '" . $mailchimpStore . "' and mailchimp_sync_error is not null"
                 );
+                // clean the order table
+                $orderCollection = $this->orderCollectionFactory->create();
+                $orderCollection->addFieldToFilter('store_id', ['eq' => $storeId]);
+                $orderCollection->addFieldToFilter('mailchimp_sync_error', ['notnull' => true]);
+                foreach ($orderCollection as $item) {
+                    $item->setMailchimpSent(\Ebizmarts\MailChimp\Helper\Data::NEVERSYNC);
+                    $item->setMailchimpSyncError('');
+                    $item->save();
+                }
             }
         } catch (\Zend_Db_Exception $e) {
             throw new ValidatorException(__($e->getMessage()));

@@ -70,22 +70,25 @@ class ResetLocalErrorsNoRetry extends \Magento\Backend\App\Action
                 $params['website'],
                 'website'
             );
+            $storeId = $params['website'];
         } elseif (isset($params['store'])) {
             $mailchimpStore = $this->helper->getConfigValue(
                 \Ebizmarts\MailChimp\Helper\Data::XML_MAILCHIMP_STORE,
                 $params['store'],
                 'store'
             );
+            $storeId = $params['store'];
         } else {
             $mailchimpStore = $this->helper->getConfigValue(
                 \Ebizmarts\MailChimp\Helper\Data::XML_MAILCHIMP_STORE,
                 $this->storeManager->getStore()
             );
+            $storeId = $this->storeManager->getStore();
         }
 
         $resultJson = $this->resultJsonFactory->create();
         try {
-            $this->syncHelper->resetErrors($mailchimpStore, false);
+            $this->syncHelper->resetErrors($mailchimpStore, $storeId, false);
         } catch (ValidatorException $e) {
             $valid = 0;
             $message = $e->getMessage();
