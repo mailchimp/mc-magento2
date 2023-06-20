@@ -303,13 +303,17 @@ class Result
             $mailchimpStore = $mailchimpStoreId;
         }
         $chimpSync = $this->syncHelper->getChimpSyncEcommerce($mailchimpStore, $id, $type);
-        if ($chimpSync->getMailchimpStoreId() ==
-            $mailchimpStore && $chimpSync->getType() == $type && $chimpSync->getRelatedId() == $id) {
-            $chimpSync->setMailchimpSent($status);
-            $chimpSync->setMailchimpSyncError($error);
-            $chimpSync->getResource()->save($chimpSync);
-        } else {
-            $this->_helper->log("Can't find original register for type $type and id $id");
-        }
+
+        $this->syncHelper->saveEcommerceData(
+            $mailchimpStore,
+            $id,
+            $type,
+            null,
+            $error,
+            null,
+            null,
+            null,
+            $status
+        );
     }
 }

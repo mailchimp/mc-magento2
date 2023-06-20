@@ -92,17 +92,17 @@ class Sync extends AbstractHelper
                 }
                 $chimpSyncEcommerce->getResource()->save($chimpSyncEcommerce);
             }
-        }
-        if ($type==\Ebizmarts\MailChimp\Helper\Data::IS_ORDER) {
-            if ($sent||$error) {
-                $order = $this->orderFactory->create()->loadByAttribute('entity_id', $entityId);
-                if ($sent) {
-                    $order->setMailchimpSent($sent);
+            if ($type==\Ebizmarts\MailChimp\Helper\Data::IS_ORDER) {
+                if ($sent||$error) {
+                    $order = $this->orderFactory->create()->loadByAttribute('entity_id', $entityId);
+                    if ($sent) {
+                        $order->setMailchimpSent($sent);
+                    }
+                    if ($error) {
+                        $order->setMailchimpSyncError($error);
+                    }
+                    $order->save();
                 }
-                if ($error) {
-                    $order->setMailchimpSyncError($error);
-                }
-                $order->save();
             }
         }
     }
