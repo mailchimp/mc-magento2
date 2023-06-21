@@ -103,10 +103,6 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
      */
     private $_mlogger;
     /**
-     * @var \Magento\Customer\Model\GroupRegistry
-     */
-    private $_groupRegistry;
-    /**
      * @var \Magento\Framework\App\Config\ScopeConfigInterface
      */
     private $_scopeConfig;
@@ -114,10 +110,6 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
      * @var \Magento\Framework\App\RequestInterface
      */
     protected $_request;
-    /**
-     * @var \Magento\Framework\App\State
-     */
-    private $_state;
     /**
      * @var \Magento\Framework\Module\ModuleList\Loader
      */
@@ -131,10 +123,6 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
      */
     private $_api;
 
-    /**
-     * @var \Magento\Customer\Model\ResourceModel\Customer\CustomerRepository
-     */
-    private $_customer;
     /**
      * @var \Ebizmarts\MailChimp\Model\MailChimpSyncBatches
      */
@@ -159,11 +147,6 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
      * @var \Magento\Customer\Model\ResourceModel\Customer\CollectionFactory
      */
     private $_customerCollection;
-    private $_addressRepositoryInterface;
-    /**
-     * @var \Magento\Framework\DB\Adapter\AdapterInterface
-     */
-    private $connection;
     /**
      * @var \Magento\Framework\App\ResourceConnection
      */
@@ -213,20 +196,13 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     private $_mapFields     = null;
 
     /**
-     * Data constructor.
      * @param \Magento\Framework\App\Helper\Context $context
      * @param \Magento\Store\Model\StoreManagerInterface $storeManager
      * @param \Ebizmarts\MailChimp\Model\Logger\Logger $logger
-     * @param \Magento\Customer\Model\GroupRegistry $groupRegistry
-     * @param \Magento\Framework\App\State $state
      * @param \Magento\Framework\Module\ModuleList\Loader $loader
      * @param \Magento\Config\Model\ResourceModel\Config $config
      * @param \Mailchimp $api
      * @param \Magento\Framework\App\Cache\TypeListInterface $cacheTypeList
-     * @param \Magento\Customer\Model\ResourceModel\CustomerRepository $customer
-     * @param \Ebizmarts\MailChimp\Model\MailChimpErrors $mailChimpErrors
-     * @param \Ebizmarts\MailChimp\Model\MailChimpSyncEcommerceFactory $mailChimpSyncEcommerce
-     * @param \Ebizmarts\MailChimp\Model\MailChimpSyncEcommerce $mailChimpSyncE
      * @param \Ebizmarts\MailChimp\Model\MailChimpSyncBatches $syncBatches
      * @param \Ebizmarts\MailChimp\Model\MailChimpStoresFactory $mailChimpStoresFactory
      * @param \Ebizmarts\MailChimp\Model\MailChimpStores $mailChimpStores
@@ -234,7 +210,6 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
      * @param \Magento\Framework\Encryption\Encryptor $encryptor
      * @param \Magento\Newsletter\Model\ResourceModel\Subscriber\CollectionFactory $subscriberCollection
      * @param \Magento\Customer\Model\ResourceModel\Customer\CollectionFactory $customerCollection
-     * @param \Magento\Customer\Api\AddressRepositoryInterface $addressRepositoryInterface
      * @param \Magento\Customer\Model\CustomerFactory $customerFactory
      * @param \Magento\Directory\Api\CountryInformationAcquirerInterface $countryInformation
      * @param ResourceConnection $resource
@@ -249,13 +224,10 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         \Magento\Framework\App\Helper\Context $context,
         \Magento\Store\Model\StoreManagerInterface $storeManager,
         \Ebizmarts\MailChimp\Model\Logger\Logger $logger,
-        \Magento\Customer\Model\GroupRegistry $groupRegistry,
-        \Magento\Framework\App\State $state,
         \Magento\Framework\Module\ModuleList\Loader $loader,
         \Magento\Config\Model\ResourceModel\Config $config,
         \Mailchimp $api,
         \Magento\Framework\App\Cache\TypeListInterface $cacheTypeList,
-        \Magento\Customer\Model\ResourceModel\CustomerRepository $customer,
         \Ebizmarts\MailChimp\Model\MailChimpSyncBatches $syncBatches,
         \Ebizmarts\MailChimp\Model\MailChimpStoresFactory $mailChimpStoresFactory,
         \Ebizmarts\MailChimp\Model\MailChimpStores $mailChimpStores,
@@ -263,7 +235,6 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         \Magento\Framework\Encryption\Encryptor $encryptor,
         \Magento\Newsletter\Model\ResourceModel\Subscriber\CollectionFactory $subscriberCollection,
         \Magento\Customer\Model\ResourceModel\Customer\CollectionFactory $customerCollection,
-        \Magento\Customer\Api\AddressRepositoryInterface $addressRepositoryInterface,
         \Magento\Customer\Model\CustomerFactory $customerFactory,
         \Magento\Directory\Api\CountryInformationAcquirerInterface $countryInformation,
         \Magento\Framework\App\ResourceConnection $resource,
@@ -277,23 +248,18 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
 
         $this->_storeManager  = $storeManager;
         $this->_mlogger       = $logger;
-        $this->_groupRegistry = $groupRegistry;
         $this->_scopeConfig   = $context->getScopeConfig();
         $this->_request       = $context->getRequest();
-        $this->_state         = $state;
         $this->_loader        = $loader;
         $this->_config        = $config;
         $this->_api           = $api;
-        $this->_customer      = $customer;
         $this->_syncBatches             = $syncBatches;
         $this->_mailChimpStores         = $mailChimpStores;
         $this->_mailChimpStoresFactory  = $mailChimpStoresFactory;
         $this->_encryptor               = $encryptor;
         $this->_subscriberCollection    = $subscriberCollection;
         $this->_customerCollection      = $customerCollection;
-        $this->_addressRepositoryInterface = $addressRepositoryInterface;
         $this->_resource                = $resource;
-        $this->connection               = $resource->getConnection();
         $this->_cacheTypeList           = $cacheTypeList;
         $this->_attCollection           = $attCollection;
         $this->_customerFactory         = $customerFactory;
