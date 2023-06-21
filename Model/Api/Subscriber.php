@@ -12,6 +12,8 @@
  */
 namespace Ebizmarts\MailChimp\Model\Api;
 
+use Ebizmarts\MailChimp\Helper\Sync as SyncHelper;
+
 class Subscriber
 {
     const BATCH_LIMIT = 100;
@@ -32,25 +34,31 @@ class Subscriber
      */
     protected $_subscriberFactory;
     protected $_interest=null;
+    /**
+     * @var SyncHelper
+     */
+    private $syncHelper;
 
     /**
-     * Subscriber constructor.
      * @param \Ebizmarts\MailChimp\Helper\Data $helper
      * @param \Magento\Newsletter\Model\ResourceModel\Subscriber\CollectionFactory $subscriberCollection
      * @param \Magento\Newsletter\Model\SubscriberFactory $subscriberFactory
      * @param \Magento\Framework\Message\ManagerInterface $message
+     * @param SyncHelper $syncHelper
      */
     public function __construct(
         \Ebizmarts\MailChimp\Helper\Data $helper,
         \Magento\Newsletter\Model\ResourceModel\Subscriber\CollectionFactory $subscriberCollection,
         \Magento\Newsletter\Model\SubscriberFactory $subscriberFactory,
-        \Magento\Framework\Message\ManagerInterface $message
+        \Magento\Framework\Message\ManagerInterface $message,
+        SyncHelper $syncHelper
     ) {
-    
+
         $this->_helper                  = $helper;
         $this->_subscriberCollection    = $subscriberCollection;
         $this->_message                 = $message;
         $this->_subscriberFactory       = $subscriberFactory;
+        $this->syncHelper               = $syncHelper;
     }
 
     public function sendSubscribers($storeId, $listId)
@@ -202,7 +210,7 @@ class Subscriber
         $sync_error = null,
         $sync_modified = null
     ) {
-        $this->_helper->saveEcommerceData(
+        $this->syncHelper->saveEcommerceData(
             $listId,
             $entityId,
             \Ebizmarts\MailChimp\Helper\Data::IS_SUBSCRIBER,

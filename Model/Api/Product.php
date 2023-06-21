@@ -11,6 +11,7 @@ mc-magento2 Magento Component
  */
 namespace Ebizmarts\MailChimp\Model\Api;
 
+use Ebizmarts\MailChimp\Helper\Sync as SyncHelper;
 class Product
 {
     const DOWNLOADABLE = 'downloadable';
@@ -65,13 +66,16 @@ class Product
      */
     protected $_option;
     /**
+     * @var SyncHelper
+     */
+    private $syncHelper;
+    /**
      * @var \Magento\Catalog\Model\ResourceModel\Category\CollectionFactory
      */
     protected $_categoryCollection;
     protected $includingTaxes;
 
     /**
-     * Product constructor.
      * @param \Magento\Catalog\Model\ResourceModel\Product\CollectionFactory $productCollection
      * @param \Magento\Catalog\Model\ProductRepository $productRepository
      * @param \Ebizmarts\MailChimp\Helper\Data $helper
@@ -83,6 +87,7 @@ class Product
      * @param \Magento\Catalog\Model\ResourceModel\Category\CollectionFactory $categoryCollection
      * @param \Magento\Catalog\Helper\Data $taxHelper
      * @param \Magento\Catalog\Model\Product\Option $option
+     * @param SyncHelper $syncHelper
      */
     public function __construct(
         \Magento\Catalog\Model\ResourceModel\Product\CollectionFactory $productCollection,
@@ -95,9 +100,9 @@ class Product
         \Magento\ConfigurableProduct\Model\Product\Type\Configurable $configurable,
         \Magento\Catalog\Model\ResourceModel\Category\CollectionFactory $categoryCollection,
         \Magento\Catalog\Helper\Data $taxHelper,
-        \Magento\Catalog\Model\Product\Option $option
+        \Magento\Catalog\Model\Product\Option $option,
+        SyncHelper $syncHelper
     ) {
-
         $this->_productRepository   = $productRepository;
         $this->_helper              = $helper;
         $this->_productCollection   = $productCollection;
@@ -111,6 +116,7 @@ class Product
         $this->taxHelper            = $taxHelper;
         $this->_batchId             = \Ebizmarts\MailChimp\Helper\Data::IS_PRODUCT. '_' .
             $this->_helper->getGmtTimeStamp();
+        $this->syncHelper           = $syncHelper;
     }
     public function _sendProducts($magentoStoreId)
     {
@@ -647,7 +653,7 @@ class Product
         $sync_error = null,
         $sync_modified = null
     ) {
-        $this->_helper->saveEcommerceData(
+        $this->syncHelper->saveEcommerceData(
             $storeId,
             $entityId,
             \Ebizmarts\MailChimp\Helper\Data::IS_PRODUCT,

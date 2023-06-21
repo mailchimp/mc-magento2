@@ -13,23 +13,27 @@
 
 namespace Ebizmarts\MailChimp\Model\Plugin;
 
+use Ebizmarts\MailChimp\Helper\Sync as SyncHelper;
+
 class Coupon
 {
-    protected $_helper;
+    /**
+     * @var SyncHelper
+     */
+    protected $syncHelper;
 
     /**
-     * Coupon constructor.
-     * @param \Ebizmarts\MailChimp\Helper\Data $helper
+     * @param SyncHelper $syncHelper
      */
     public function __construct(
-        \Ebizmarts\MailChimp\Helper\Data $helper
+        SyncHelper $syncHelper
     ) {
 
-        $this->_helper  = $helper;
+        $this->syncHelper  = $syncHelper;
     }
     public function afterAfterDelete(\Magento\SalesRule\Model\Coupon $coupon)
     {
-        $this->_helper->markEcommerceAsDeleted(
+        $this->syncHelper->markEcommerceAsDeleted(
             $coupon->getCouponId(),
             \Ebizmarts\MailChimp\Helper\Data::IS_PROMO_CODE,
             $coupon->getRuleId()

@@ -13,6 +13,7 @@
 namespace Ebizmarts\MailChimp\Observer\Customer;
 
 use Magento\Framework\Event\Observer;
+use Ebizmarts\MailChimp\Helper\Sync as SyncHelper;
 
 class SaveBefore implements \Magento\Framework\Event\ObserverInterface
 {
@@ -24,19 +25,24 @@ class SaveBefore implements \Magento\Framework\Event\ObserverInterface
      * @var \Magento\Newsletter\Model\SubscriberFactory
      */
     protected $subscriberFactory;
+    /**
+     * @var SyncHelper
+     */
+    private $syncHelper;
 
     /**
-     * SaveBefore constructor.
      * @param \Ebizmarts\MailChimp\Helper\Data $helper
      * @param \Magento\Newsletter\Model\SubscriberFactory $subscriberFactory
+     * @param SyncHelper $syncHelper
      */
     public function __construct(
         \Ebizmarts\MailChimp\Helper\Data $helper,
-        \Magento\Newsletter\Model\SubscriberFactory $subscriberFactory
+        \Magento\Newsletter\Model\SubscriberFactory $subscriberFactory,
+        SyncHelper $syncHelper
     ) {
-
         $this->_helper              = $helper;
         $this->subscriberFactory    = $subscriberFactory;
+        $this->syncHelper           = $syncHelper;
     }
 
     public function execute(\Magento\Framework\Event\Observer $observer)
@@ -52,7 +58,7 @@ class SaveBefore implements \Magento\Framework\Event\ObserverInterface
                     \Ebizmarts\MailChimp\Helper\Data::XML_MAILCHIMP_STORE,
                     $storeId
                 );
-                $this->_helper->saveEcommerceData(
+                $this->syncHelper->saveEcommerceData(
                     $mailchimpStoreId,
                     $customer->getId(),
                     \Ebizmarts\MailChimp\Helper\Data::IS_CUSTOMER,
@@ -64,7 +70,7 @@ class SaveBefore implements \Magento\Framework\Event\ObserverInterface
             $subscriber = $this->subscriberFactory->create();
             $subscriber->loadByEmail($customer->getEmail());
             if ($subscriber->getEmail() == $customer->getEmail()) {
-                $this->_helper->markRegisterAsModified(
+                $this->syncHelper->markRegisterAsModified(
                     $subscriber->getId(),
                     \Ebizmarts\MailChimp\Helper\Data::IS_SUBSCRIBER
                 );

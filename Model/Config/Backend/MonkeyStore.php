@@ -13,6 +13,8 @@
 
 namespace Ebizmarts\MailChimp\Model\Config\Backend;
 
+use Ebizmarts\MailChimp\Helper\Sync as SyncHelper;
+
 class MonkeyStore extends \Magento\Framework\App\Config\Value
 {
     /**
@@ -31,15 +33,18 @@ class MonkeyStore extends \Magento\Framework\App\Config\Value
      * @var \Magento\Store\Model\StoreManager
      */
     private $_storeManager;
+    /**
+     * @var SyncHelper
+     */
+    private $syncHelper;
 
     private $oldListId = null;
     const MAX_LISTS = 200;
 
     /**
-     * ApiKey constructor.
      * @param \Magento\Framework\Model\Context $context
      * @param \Magento\Framework\Registry $registry
-     * @param ScopeConfigInterface $config
+     * @param \Magento\Framework\App\Config\ScopeConfigInterface $config
      * @param \Magento\Framework\App\Cache\TypeListInterface $cacheTypeList
      * @param \Magento\Config\Model\ResourceModel\Config $resourceConfig
      * @param \Magento\Framework\Model\ResourceModel\AbstractResource|null $resource
@@ -47,6 +52,7 @@ class MonkeyStore extends \Magento\Framework\App\Config\Value
      * @param \Magento\Framework\Stdlib\DateTime\DateTime $date
      * @param \Ebizmarts\MailChimp\Helper\Data $helper
      * @param \Magento\Store\Model\StoreManager $storeManager
+     * @param SyncHelper $syncHelper
      * @param array $data
      */
     public function __construct(
@@ -60,12 +66,14 @@ class MonkeyStore extends \Magento\Framework\App\Config\Value
         \Magento\Framework\Stdlib\DateTime\DateTime $date,
         \Ebizmarts\MailChimp\Helper\Data $helper,
         \Magento\Store\Model\StoreManager $storeManager,
+        SyncHelper $syncHelper,
         array $data = []
     ) {
         $this->_helper          = $helper;
         $this->resourceConfig   = $resourceConfig;
         $this->_date            = $date;
         $this->_storeManager    = $storeManager;
+        $this->syncHelper       = $syncHelper;
         parent::__construct($context, $registry, $config, $cacheTypeList, $resource, $resourceCollection, $data);
     }
 
@@ -132,7 +140,7 @@ class MonkeyStore extends \Magento\Framework\App\Config\Value
             }
             if ($found==1) {
                 $this->_helper->cancelAllPendingBatches($mailchimpStore);
-                $this->_helper->resetErrors($mailchimpStore, true);
+                $this->syncHelper->resetErrors($mailchimpStore, $this->getScopeId(), true);
             }
             $this->_helper->restoreAllCanceledBatches($this->getValue());
             if ($createWebhook) {

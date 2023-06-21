@@ -12,6 +12,8 @@
  */
 namespace Ebizmarts\MailChimp\Observer\Adminhtml\Product;
 
+use Ebizmarts\MailChimp\Helper\Sync as SyncHelper;
+
 class SaveAfter implements \Magento\Framework\Event\ObserverInterface
 {
     /**
@@ -22,19 +24,25 @@ class SaveAfter implements \Magento\Framework\Event\ObserverInterface
      * @var \Magento\ConfigurableProduct\Model\ResourceModel\Product\Type\Configurable
      */
     protected $configurable;
+    /**
+     * @var SyncHelper
+     */
+    private $syncHelper;
 
     /**
-     * SaveAfter constructor.
      * @param \Ebizmarts\MailChimp\Helper\Data $helper
      * @param \Magento\ConfigurableProduct\Model\ResourceModel\Product\Type\Configurable $configurable
+     * @param SyncHelper $syncHelper
      */
     public function __construct(
         \Ebizmarts\MailChimp\Helper\Data $helper,
-        \Magento\ConfigurableProduct\Model\ResourceModel\Product\Type\Configurable $configurable
+        \Magento\ConfigurableProduct\Model\ResourceModel\Product\Type\Configurable $configurable,
+        SyncHelper $syncHelper
     ) {
 
         $this->helper               = $helper;
         $this->configurable         = $configurable;
+        $this->syncHelper           = $syncHelper;
     }
 
     public function execute(\Magento\Framework\Event\Observer $observer)
@@ -61,6 +69,6 @@ class SaveAfter implements \Magento\Framework\Event\ObserverInterface
     }
     protected function _updateProduct($entityId)
     {
-        $this->helper->markRegisterAsModified($entityId, \Ebizmarts\MailChimp\Helper\Data::IS_PRODUCT);
+        $this->syncHelper->markRegisterAsModified($entityId, \Ebizmarts\MailChimp\Helper\Data::IS_PRODUCT);
     }
 }

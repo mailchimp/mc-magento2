@@ -17,7 +17,8 @@ use Magento\Framework\Setup\ModuleDataSetupInterface;
 use Magento\Framework\Setup\UpgradeDataInterface;
 use Magento\Framework\App\ResourceConnection;
 use Magento\Framework\App\DeploymentConfig;
-
+use Magento\Sales\Model\OrderFactory;
+use Ebizmarts\MailChimp\Model\ResourceModel\MailChimpSyncEcommerce\CollectionFactory as SyncCollectionFactory;
 class UpgradeData implements UpgradeDataInterface
 {
     /**
@@ -44,14 +45,23 @@ class UpgradeData implements UpgradeDataInterface
      * @var \Magento\Config\Model\ResourceModel\Config\Data\CollectionFactory
      */
     protected $configFactory;
+    /**
+     * @var SyncCollectionFactory
+     */
+    private $syncCollectionFactory;
+    /**
+     * @var OrderFactory
+     */
+    private $orderFactory;
 
     /**
-     * UpgradeData constructor.
      * @param ResourceConnection $resource
      * @param DeploymentConfig $deploymentConfig
      * @param \Ebizmarts\MailChimp\Model\ResourceModel\MailChimpInterestGroup\CollectionFactory $interestGroupCollectionFactory
      * @param \Ebizmarts\MailChimp\Model\ResourceModel\MailChimpWebhookRequest\CollectionFactory $webhookCollectionFactory
      * @param \Magento\Config\Model\ResourceModel\Config\Data\CollectionFactory $configFactory
+     * @param SyncCollectionFactory $syncCollectionFactory
+     * @param OrderFactory $orderFactory
      * @param \Ebizmarts\MailChimp\Helper\Data $helper
      */
     public function __construct(
@@ -60,14 +70,17 @@ class UpgradeData implements UpgradeDataInterface
         \Ebizmarts\MailChimp\Model\ResourceModel\MailChimpInterestGroup\CollectionFactory $interestGroupCollectionFactory,
         \Ebizmarts\MailChimp\Model\ResourceModel\MailChimpWebhookRequest\CollectionFactory $webhookCollectionFactory,
         \Magento\Config\Model\ResourceModel\Config\Data\CollectionFactory $configFactory,
+        SyncCollectionFactory $syncCollectionFactory,
+        OrderFactory $orderFactory,
         \Ebizmarts\MailChimp\Helper\Data $helper
     ) {
-    
         $this->_resource            = $resource;
         $this->_deploymentConfig    = $deploymentConfig;
         $this->_insterestGroupCollectionFactory = $interestGroupCollectionFactory;
         $this->_webhookCollectionFactory        = $webhookCollectionFactory;
         $this->configFactory                    = $configFactory;
+        $this->syncCollectionFactory            = $syncCollectionFactory;
+        $this->orderFactory                     = $orderFactory;
         $this->_helper              = $helper;
     }
 
@@ -171,6 +184,20 @@ class UpgradeData implements UpgradeDataInterface
             );
             foreach ($configCollection as $config) {
                 $config->getResource()->delete($config);
+            }
+        }
+        if (version_compare($context->getVersion(), '102.3.52') < 0) {
+            $syncCollection = $this->syncCollectionFactory->create();
+            $syncCollection->addFieldToFilter('type', ['eq'=>'ORD']);
+            foreach($syncCollection as $item) {
+                try {
+                    $order = $this->orderFactory->create()->loadByAttribute('entity_id', $item->getRelatedId());
+                    $order->setMailchimpSent($item->getMailchimpSent());
+                    $order->setMailchimpSyncError($item->getMailchimpSyncError());
+                    $order->save();
+                } catch (\Exception $e) {
+                    $this->_helper->log($e->getMessage());
+                }
             }
         }
     }
