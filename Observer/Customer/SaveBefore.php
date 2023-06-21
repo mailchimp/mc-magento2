@@ -72,7 +72,7 @@ class SaveBefore implements \Magento\Framework\Event\ObserverInterface
             $subscriber = $this->subscriberFactory->create();
             $subscriber->loadByEmail($customer->getEmail());
             if ($subscriber->getEmail() == $customer->getEmail()) {
-                $this->_helper->markRegisterAsModified(
+                $this->syncHelper->markRegisterAsModified(
                     $subscriber->getId(),
                     \Ebizmarts\MailChimp\Helper\Data::IS_SUBSCRIBER
                 );

@@ -16,6 +16,7 @@ namespace Ebizmarts\MailChimp\Controller\Adminhtml\Ecommerce;
 use Magento\Framework\Controller\Result\JsonFactory;
 use Magento\Framework\Exception\ValidatorException;
 use Symfony\Component\Config\Definition\Exception\Exception;
+use Ebizmarts\MailChimp\Helper\Sync as SyncHelper;
 
 class ResyncProducts extends \Magento\Backend\App\Action
 {
@@ -24,32 +25,30 @@ class ResyncProducts extends \Magento\Backend\App\Action
      */
     protected $resultJsonFactory;
     /**
-     * @var \Ebizmarts\MailChimp\Helper\Data
-     */
-    protected $helper;
-    /**
      * @var \Magento\Store\Model\StoreManagerInterface
      */
     protected $storeManager;
+    /**
+     * @var SyncHelper
+     */
+    private $syncHelper;
 
     /**
-     * ResetLocalErrors constructor.
      * @param \Magento\Backend\App\Action\Context $context
      * @param JsonFactory $resultJsonFactory
      * @param \Magento\Store\Model\StoreManagerInterface $storeManagerInterface
-     * @param \Ebizmarts\MailChimp\Helper\Data $helper
+     * @param SyncHelper $syncHelper
      */
     public function __construct(
         \Magento\Backend\App\Action\Context $context,
         JsonFactory $resultJsonFactory,
         \Magento\Store\Model\StoreManagerInterface $storeManagerInterface,
-        \Ebizmarts\MailChimp\Helper\Data $helper
+        SyncHelper $syncHelper
     ) {
-
         parent::__construct($context);
         $this->resultJsonFactory    = $resultJsonFactory;
-        $this->helper               = $helper;
         $this->storeManager         = $storeManagerInterface;
+        $this->syncHelper           = $syncHelper;
     }
 
     public function execute()
@@ -60,7 +59,7 @@ class ResyncProducts extends \Magento\Backend\App\Action
         $mailchimpStore = $params['mailchimpStoreId'];
         $resultJson = $this->resultJsonFactory->create();
         try {
-            $this->helper->resyncProducts($mailchimpStore);
+            $this->syncHelper->resyncProducts($mailchimpStore);
         } catch (ValidatorException $e) {
             $valid = 0;
             $message = $e->getMessage();

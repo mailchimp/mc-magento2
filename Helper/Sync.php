@@ -131,6 +131,37 @@ class Sync extends AbstractHelper
     {
         $this->chimpSyncEcommerce->deleteAllByBatchid($batchId);
     }
+    public function markRegisterAsModified($registerId, $type)
+    {
+        if (!empty($registerId)) {
+            $this->chimpSyncEcommerce->markAllAsModified($registerId, $type);
+        }
+    }
+    public function markAllAsModifiedByIds($mailchimpStoreId, $ids, $type)
+    {
+        $this->chimpSyncEcommerce->markAllAsModifiedByIds($mailchimpStoreId, $ids, $type);
+    }
+    public function resyncAllSubscribers($mailchimpList)
+    {
+        $connection = $this->chimpSyncEcommerce->getResource()->getConnection();
+        $tableName = $this->chimpSyncEcommerce->getResource()->getMainTable();
+        $connection->update(
+            $tableName,
+            ['mailchimp_sync_modified' => 1],
+            "type = '" . \Ebizmarts\MailChimp\Helper\Data::IS_SUBSCRIBER . "' and mailchimp_store_id = '$mailchimpList'"
+        );
+    }
+    public function resyncProducts($mailchimpList)
+    {
+        $connection = $this->chimpSyncEcommerce->getResource()->getConnection();
+        $tableName = $this->chimpSyncEcommerce->getResource()->getMainTable();
+        $connection->update(
+            $tableName,
+            ['mailchimp_sync_modified' => 1],
+            "type = '" . \Ebizmarts\MailChimp\Helper\Data::IS_PRODUCT . "' and mailchimp_store_id = '$mailchimpList'"
+        );
+    }
+
     public function resetErrors($mailchimpStore, $storeId, $retry)
     {
         try {

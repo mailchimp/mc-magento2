@@ -626,16 +626,6 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         $this->markAllBatchesAs($mailchimpStore, self::BATCH_CANCELED, self::BATCH_PENDING);
     }
 
-    public function markRegisterAsModified($registerId, $type)
-    {
-        if (!empty($registerId)) {
-            $this->_mailChimpSyncE->markAllAsModified($registerId, $type);
-        }
-    }
-    public function markAllAsModifiedByIds($mailchimpStoreId, $ids, $type)
-    {
-        $this>$this->_mailChimpSyncE->markAllAsModifiedByIds($mailchimpStoreId, $ids, $type);
-    }
     public function getMCStoreName($storeId)
     {
         return $this->_storeManager->getStore($storeId)->getFrontendName();
