@@ -85,7 +85,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     const SYNCERROR     = 4;
     const NOTSYNCED = 5;
 
-    const NEVERSYNC     = 6;
+    const NEVERSYNC     = 0;
 
     const BATCH_CANCELED = 'canceled';
     const BATCH_COMPLETED = 'completed';
