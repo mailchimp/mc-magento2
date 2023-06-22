@@ -14,6 +14,7 @@
 namespace Ebizmarts\MailChimp\Observer\Sales\Order;
 
 use Magento\Framework\Event\Observer;
+use Ebizmarts\MailChimp\Helper\Sync as SyncHelper;
 
 class SaveAfter implements \Magento\Framework\Event\ObserverInterface
 {
@@ -21,23 +22,28 @@ class SaveAfter implements \Magento\Framework\Event\ObserverInterface
      * @var \Ebizmarts\MailChimp\Helper\Data
      */
     protected $_helper;
+    /**
+     * @var SyncHelper
+     */
+    private $syncHelper;
 
     /**
-     * SaveAfter constructor.
      * @param \Ebizmarts\MailChimp\Helper\Data $helper
+     * @param SyncHelper $syncHelper
      */
     public function __construct(
-        \Ebizmarts\MailChimp\Helper\Data $helper
+        \Ebizmarts\MailChimp\Helper\Data $helper,
+        SyncHelper $syncHelper
     ) {
-    
         $this->_helper      = $helper;
+        $this->syncHelper   = $syncHelper;
     }
 
     public function execute(\Magento\Framework\Event\Observer $observer)
     {
         $order = $observer->getEvent()->getOrder();
         $mailchimpStoreId = $this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_MAILCHIMP_STORE, $order->getStoreId());
-        $this->_helper->saveEcommerceData($mailchimpStoreId, $order->getId(), \Ebizmarts\MailChimp\Helper\Data::IS_ORDER, null, null, 1,
+        $this->syncHelper->saveEcommerceData($mailchimpStoreId, $order->getId(), \Ebizmarts\MailChimp\Helper\Data::IS_ORDER, null, null, 1,
             null , null, \Ebizmarts\MailChimp\Helper\Data::NEEDTORESYNC);
     }
 }

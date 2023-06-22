@@ -16,6 +16,7 @@ namespace Ebizmarts\MailChimp\Controller\Adminhtml\Ecommerce;
 use Magento\Framework\Controller\Result\JsonFactory;
 use Magento\Framework\Exception\ValidatorException;
 use Symfony\Component\Config\Definition\Exception\Exception;
+use Ebizmarts\MailChimp\Helper\Sync as SyncHelper;
 
 class ResetLocalErrors extends \Magento\Backend\App\Action
 {
@@ -28,27 +29,33 @@ class ResetLocalErrors extends \Magento\Backend\App\Action
      */
     protected $helper;
     /**
+     * @var SyncHelper
+     */
+    private $syncHelper;
+    /**
      * @var \Magento\Store\Model\StoreManagerInterface
      */
     protected $storeManager;
 
     /**
-     * ResetLocalErrors constructor.
      * @param \Magento\Backend\App\Action\Context $context
      * @param JsonFactory $resultJsonFactory
      * @param \Magento\Store\Model\StoreManagerInterface $storeManagerInterface
      * @param \Ebizmarts\MailChimp\Helper\Data $helper
+     * @param SyncHelper $syncHelper
      */
     public function __construct(
         \Magento\Backend\App\Action\Context $context,
         JsonFactory $resultJsonFactory,
         \Magento\Store\Model\StoreManagerInterface $storeManagerInterface,
-        \Ebizmarts\MailChimp\Helper\Data $helper
+        \Ebizmarts\MailChimp\Helper\Data $helper,
+        SyncHelper $syncHelper
     ) {
     
         parent::__construct($context);
         $this->resultJsonFactory    = $resultJsonFactory;
         $this->helper               = $helper;
+        $this->syncHelper           = $syncHelper;
         $this->storeManager         = $storeManagerInterface;
     }
 
@@ -63,22 +70,25 @@ class ResetLocalErrors extends \Magento\Backend\App\Action
                 $params['website'],
                 'website'
             );
+            $storeId = $params['website'];
         } elseif (isset($params['store'])) {
             $mailchimpStore = $this->helper->getConfigValue(
                 \Ebizmarts\MailChimp\Helper\Data::XML_MAILCHIMP_STORE,
                 $params['store'],
                 'store'
             );
+            $storeId = $params['store'];
         } else {
+            $storeId = $this->storeManager->getStore()->getId();
             $mailchimpStore = $this->helper->getConfigValue(
                 \Ebizmarts\MailChimp\Helper\Data::XML_MAILCHIMP_STORE,
-                $this->storeManager->getStore()
+                $storeId
             );
         }
 
         $resultJson = $this->resultJsonFactory->create();
         try {
-            $this->helper->resetErrors($mailchimpStore, true);
+            $this->syncHelper->resetErrors($mailchimpStore, $storeId, true);
         } catch (ValidatorException $e) {
             $valid = 0;
             $message = $e->getMessage();

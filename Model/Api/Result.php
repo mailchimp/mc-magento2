@@ -13,6 +13,8 @@
 
 namespace Ebizmarts\MailChimp\Model\Api;
 
+use Ebizmarts\MailChimp\Helper\Sync as SyncHelper;
+
 class Result
 {
     const MAILCHIMP_TEMP_DIR = 'Mailchimp';
@@ -25,6 +27,10 @@ class Result
      */
     private $_helper;
     /**
+     * @var SyncHelper
+     */
+    private $syncHelper;
+    /**
      * @var \Magento\Framework\Archive
      */
     private $_archive;
@@ -34,14 +40,15 @@ class Result
     private $_chimpErrors;
 
     /**
-     * Result constructor.
      * @param \Ebizmarts\MailChimp\Helper\Data $helper
-     * @param \Ebizmarts\MailChimp\Model\ResourceModel\MailChimpSyncBatches\Collection $batchCollection
+     * @param SyncHelper $syncHelper
+     * @param \Ebizmarts\MailChimp\Model\ResourceModel\MailChimpSyncBatches\CollectionFactory $batchCollection
      * @param \Ebizmarts\MailChimp\Model\MailChimpErrorsFactory $chimpErrors
      * @param \Magento\Framework\Archive $archive
      */
     public function __construct(
         \Ebizmarts\MailChimp\Helper\Data $helper,
+        SyncHelper $syncHelper,
         \Ebizmarts\MailChimp\Model\ResourceModel\MailChimpSyncBatches\CollectionFactory $batchCollection,
         \Ebizmarts\MailChimp\Model\MailChimpErrorsFactory $chimpErrors,
         \Magento\Framework\Archive $archive
@@ -49,6 +56,7 @@ class Result
     
         $this->_batchCollection     = $batchCollection;
         $this->_helper              = $helper;
+        $this->syncHelper           = $syncHelper;
         $this->_archive             = $archive;
         $this->_chimpErrors         = $chimpErrors;
     }
@@ -74,7 +82,7 @@ class Result
                 } elseif ($files === false) {
                     $item->setStatus(\Ebizmarts\MailChimp\Helper\Data::BATCH_ERROR);
                     $item->getResource()->save($item);
-                    $this->_helper->deleteAllByBatchId($item->getBatchId());
+                    $this->syncHelper->deleteAllByBatchId($item->getBatchId());
                     continue;
                 }
                 $baseDir = $this->_helper->getBaseDir();
@@ -222,7 +230,7 @@ class Result
         } else {
             $mailchimpStore = $mailchimpStoreId;
         }
-        $chimpSync = $this->_helper->getChimpSyncEcommerce($mailchimpStore, $id, $type);
+        $chimpSync = $this->syncHelper->getChimpSyncEcommerce($mailchimpStore, $id, $type);
         if ($chimpSync->getMailchimpStoreId() == $mailchimpStore && $chimpSync->getType() == $type && $chimpSync->getRelatedId() == $id) {
             $chimpSync->setMailchimpSent($status);
             $chimpSync->setMailchimpSyncError($error);

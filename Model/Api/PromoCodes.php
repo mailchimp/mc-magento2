@@ -13,7 +13,7 @@
 namespace Ebizmarts\MailChimp\Model\Api;
 
 use Magento\TestFramework\Inspection\Exception;
-
+use Ebizmarts\MailChimp\Helper\Sync as SyncHelper;
 class PromoCodes
 {
     const MAX = 100;
@@ -23,6 +23,10 @@ class PromoCodes
      * @var \Ebizmarts\MailChimp\Helper\Data
      */
     private $_helper;
+    /**
+     * @var SyncHelper
+     */
+    private $syncHelper;
     /**
      * @var \Magento\SalesRule\Model\ResourceModel\Coupon\CollectionFactory
      */
@@ -45,8 +49,8 @@ class PromoCodes
     private $_syncCollection;
 
     /**
-     * PromoCodes constructor.
      * @param \Ebizmarts\MailChimp\Helper\Data $helper
+     * @param SyncHelper $syncHelper
      * @param \Magento\SalesRule\Model\ResourceModel\Coupon\CollectionFactory $couponCollection
      * @param \Magento\SalesRule\Model\ResourceModel\Rule\CollectionFactory $ruleCollection
      * @param \Ebizmarts\MailChimp\Model\MailChimpSyncEcommerceFactory $chimpSyncEcommerce
@@ -55,14 +59,15 @@ class PromoCodes
      */
     public function __construct(
         \Ebizmarts\MailChimp\Helper\Data $helper,
+        SyncHelper $syncHelper,
         \Magento\SalesRule\Model\ResourceModel\Coupon\CollectionFactory $couponCollection,
         \Magento\SalesRule\Model\ResourceModel\Rule\CollectionFactory $ruleCollection,
         \Ebizmarts\MailChimp\Model\MailChimpSyncEcommerceFactory $chimpSyncEcommerce,
         \Ebizmarts\MailChimp\Model\Api\PromoRules $promoRules,
         \Ebizmarts\MailChimp\Model\ResourceModel\MailChimpSyncEcommerce\CollectionFactory $syncCollection
     ) {
-    
         $this->_helper              = $helper;
+        $this->syncHelper           = $syncHelper;
         $this->_couponCollection    = $couponCollection;
         $this->_ruleCollection      = $ruleCollection;
         $this->_chimpSyncEcommerce  = $chimpSyncEcommerce;
@@ -100,7 +105,7 @@ class PromoCodes
             $batchArray[$counter]['operation_id'] = $this->_batchId . '_' . $couponId;
             $batchArray[$counter]['path'] = "/ecommerce/stores/$mailchimpStoreId/promo-rules/$ruleId/promo-codes/$couponId";
             $counter++;
-            $syncCoupon =$this->_helper->getChimpSyncEcommerce($mailchimpStoreId, $couponId, \Ebizmarts\MailChimp\Helper\Data::IS_PROMO_CODE);
+            $syncCoupon =$this->syncHelper->getChimpSyncEcommerce($mailchimpStoreId, $couponId, \Ebizmarts\MailChimp\Helper\Data::IS_PROMO_CODE);
             $syncCoupon->getResource()->delete($syncCoupon);
         }
         return $batchArray;
@@ -142,7 +147,7 @@ class PromoCodes
                 $ruleId = $item->getRuleId();
                 $couponId = $item->getCouponId();
                 try {
-                    $promoRule = $this->_helper->getChimpSyncEcommerce($mailchimpStoreId, $ruleId, \Ebizmarts\MailChimp\Helper\Data::IS_PROMO_RULE);
+                    $promoRule = $this->syncHelper->getChimpSyncEcommerce($mailchimpStoreId, $ruleId, \Ebizmarts\MailChimp\Helper\Data::IS_PROMO_RULE);
                     if (!$promoRule->getMailchimpSyncDelta() || $promoRule->getMailchimpSyncDelta() < $this->_helper->getMCMinSyncDateFlag($magentoStoreId)) {
                         // must send the promorule before the promocode
                         $newPromoRule = $this->_promoRules->getNewPromoRule($ruleId, $mailchimpStoreId, $magentoStoreId);
@@ -205,7 +210,7 @@ class PromoCodes
     }
     protected function _updateSyncData($storeId, $entityId, $sync_delta = null, $sync_error = null, $sync_modified = null, $sync_deleted = null)
     {
-        $this->_helper->saveEcommerceData(
+        $this->syncHelper->saveEcommerceData(
             $storeId,
             $entityId,
             \Ebizmarts\MailChimp\Helper\Data::IS_PROMO_CODE,

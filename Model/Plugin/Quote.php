@@ -12,6 +12,8 @@
  */
 namespace Ebizmarts\MailChimp\Model\Plugin;
 
+use Ebizmarts\MailChimp\Helper\Sync as SyncHelper;
+
 class Quote
 {
     /**
@@ -22,19 +24,24 @@ class Quote
      * @var \Ebizmarts\MailChimp\Helper\Data
      */
     protected $_helper;
+    /**
+     * @var SyncHelper
+     */
+    private $syncHelper;
 
     /**
-     * Quote constructor.
      * @param \Magento\Framework\Stdlib\CookieManagerInterface $cookieManager
      * @param \Ebizmarts\MailChimp\Helper\Data $helper
+     * @param SyncHelper $syncHelper
      */
     public function __construct(
         \Magento\Framework\Stdlib\CookieManagerInterface $cookieManager,
-        \Ebizmarts\MailChimp\Helper\Data $helper
+        \Ebizmarts\MailChimp\Helper\Data $helper,
+        SyncHelper $syncHelper
     ) {
-    
         $this->_cookieManager = $cookieManager;
         $this->_helper  = $helper;
+        $this->syncHelper = $syncHelper;
     }
 
     public function beforeBeforeSave(\Magento\Quote\Model\Quote $quote)
@@ -51,7 +58,7 @@ class Quote
             \Ebizmarts\MailChimp\Helper\Data::XML_MAILCHIMP_STORE,
             $quote->getStoreId()
         );
-        $this->_helper->saveEcommerceData(
+        $this->syncHelper->saveEcommerceData(
             $mailchimpStoreId,
             $quote->getId(),
             \Ebizmarts\MailChimp\Helper\Data::IS_QUOTE,

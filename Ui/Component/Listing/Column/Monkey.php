@@ -18,7 +18,7 @@ use \Magento\Framework\View\Element\UiComponentFactory;
 use \Magento\Ui\Component\Listing\Columns\Column;
 use \Magento\Framework\Api\SearchCriteriaBuilder;
 use Magento\Framework\UrlInterface;
-
+use Ebizmarts\MailChimp\Helper\Sync as SyncHelper;
 class Monkey extends Column
 {
     /**
@@ -41,6 +41,10 @@ class Monkey extends Column
      * @var \Ebizmarts\MailChimp\Helper\Data
      */
     protected $_helper;
+    /**
+     * @var SyncHelper
+     */
+    private $syncHelper;
     /**
      * @var \Ebizmarts\MailChimp\Model\ResourceModel\MailChimpSyncEcommerce\CollectionFactory
      */
@@ -66,6 +70,7 @@ class Monkey extends Column
      * @param \Magento\Framework\App\RequestInterface $requestInterface
      * @param SearchCriteriaBuilder $criteria
      * @param \Ebizmarts\MailChimp\Helper\Data $helper
+     * @param SyncHelper $syncHelper
      * @param \Ebizmarts\MailChimp\Model\ResourceModel\MailChimpSyncEcommerce\CollectionFactory $syncCommerceCF
      * @param \Ebizmarts\MailChimp\Model\MailChimpErrorsFactory $mailChimpErrorsFactory
      * @param \Magento\Sales\Model\OrderFactory $orderFactory
@@ -81,6 +86,7 @@ class Monkey extends Column
         \Magento\Framework\App\RequestInterface $requestInterface,
         SearchCriteriaBuilder $criteria,
         \Ebizmarts\MailChimp\Helper\Data $helper,
+        SyncHelper $syncHelper,
         \Ebizmarts\MailChimp\Model\ResourceModel\MailChimpSyncEcommerce\CollectionFactory $syncCommerceCF,
         \Ebizmarts\MailChimp\Model\MailChimpErrorsFactory $mailChimpErrorsFactory,
         \Magento\Sales\Model\OrderFactory $orderFactory,
@@ -88,12 +94,12 @@ class Monkey extends Column
         array $components = [],
         array $data = []
     ) {
-
         $this->_orderRepository = $orderRepository;
         $this->_searchCriteria  = $criteria;
         $this->_assetRepository = $assetRepository;
         $this->_requestInterfase= $requestInterface;
         $this->_helper          = $helper;
+        $this->syncHelper       = $syncHelper;
         $this->_syncCommerceCF  = $syncCommerceCF;
         $this->_orderFactory    = $orderFactory;
         $this->_mailChimpErrorsFactory  = $mailChimpErrorsFactory;
@@ -114,7 +120,7 @@ class Monkey extends Column
                         \Ebizmarts\MailChimp\Helper\Data::XML_MAILCHIMP_STORE,
                         $order->getStoreId()
                     );
-                    $syncData = $this->_helper->getChimpSyncEcommerce(
+                    $syncData = $this->syncHelper->getChimpSyncEcommerce(
                         $mailchimpStoreId,
                         $order->getId(),
                         \Ebizmarts\MailChimp\Helper\Data::IS_ORDER
