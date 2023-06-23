@@ -197,6 +197,19 @@ class UpgradeData implements UpgradeDataInterface
                 $config->getResource()->delete($config);
             }
         }
-
+        if (version_compare($context->getVersion(), '100.1.52') < 0) {
+            $syncCollection = $this->syncCollectionFactory->create();
+            $syncCollection->addFieldToFilter('type', ['eq'=>'ORD']);
+            foreach($syncCollection as $item) {
+                try {
+                    $order = $this->orderFactory->create()->loadByAttribute('entity_id', $item->getRelatedId());
+                    $order->setMailchimpSent($item->getMailchimpSent());
+                    $order->setMailchimpSyncError($item->getMailchimpSyncError());
+                    $order->save();
+                } catch (\Exception $e) {
+                    $this->_helper->log($e->getMessage());
+                }
+            }
+        }
     }
 }

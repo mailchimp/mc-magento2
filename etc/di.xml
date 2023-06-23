@@ -73,6 +73,8 @@
         <arguments>
             <argument name="columns" xsi:type="array">
                 <item name="mailchimp_flag" xsi:type="string">sales_order.mailchimp_flag</item>
+                <item name="mailchimp_sync_error" xsi:type="string">sales_order.mailchimp_sync_error</item>
+                <item name="mailchimp_sent" xsi:type="string">sales_order.mailchimp_sent</item>
             </argument>
         </arguments>
     </virtualType>
