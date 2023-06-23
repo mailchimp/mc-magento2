@@ -14,6 +14,7 @@
 namespace Ebizmarts\MailChimp\Observer\SalesRule\Rule;
 
 use Magento\Framework\Event\Observer;
+use Ebizmarts\MailChimp\Helper\Sync as SyncHelper;
 
 class SaveAfter implements \Magento\Framework\Event\ObserverInterface
 {
@@ -22,25 +23,24 @@ class SaveAfter implements \Magento\Framework\Event\ObserverInterface
      */
     protected $_ecommerce;
     /**
-     * @var \Ebizmarts\MailChimp\Helper\Data
+     * @var SyncHelper
      */
-    protected $_helper;
+    protected $syncHelper;
     protected $_date;
 
     /**
-     * SaveAfter constructor.
      * @param \Ebizmarts\MailChimp\Model\MailChimpSyncEcommerce $ecommerce
-     * @param \Ebizmarts\MailChimp\Helper\Data $helper
+     * @param SyncHelper $syncHelper
      * @param \Magento\Framework\Stdlib\DateTime\DateTime $date
      */
     public function __construct(
         \Ebizmarts\MailChimp\Model\MailChimpSyncEcommerce $ecommerce,
-        \Ebizmarts\MailChimp\Helper\Data $helper,
+        SyncHelper $syncHelper,
         \Magento\Framework\Stdlib\DateTime\DateTime $date
     ) {
 
         $this->_ecommerce   = $ecommerce;
-        $this->_helper      = $helper;
+        $this->syncHelper   = $syncHelper;
         $this->_date        = $date;
     }
 
@@ -51,6 +51,6 @@ class SaveAfter implements \Magento\Framework\Event\ObserverInterface
          */
         $rule = $observer->getEvent()->getRule();
         $ruleId = $rule->getRuleId();
-        $this->_helper->markRegisterAsModified($ruleId, \Ebizmarts\MailChimp\Helper\Data::IS_PROMO_RULE);
+        $this->syncHelper->markRegisterAsModified($ruleId, \Ebizmarts\MailChimp\Helper\Data::IS_PROMO_RULE);
     }
 }

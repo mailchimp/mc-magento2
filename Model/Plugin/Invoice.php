@@ -13,6 +13,7 @@ namespace Ebizmarts\MailChimp\Model\Plugin;
 
 use Magento\Sales\Api\Data\InvoiceInterface;
 use Magento\Sales\Model\Order\Invoice as SalesInvoice;
+use Ebizmarts\MailChimp\Helper\Sync as SyncHelper;
 
 class Invoice
 {
@@ -20,15 +21,21 @@ class Invoice
      * @var \Ebizmarts\MailChimp\Helper\Data
      */
     private $_helper;
+    /**
+     * @var SyncHelper
+     */
+    private $syncHelper;
 
     /**
-     * Ship constructor.
      * @param \Ebizmarts\MailChimp\Helper\Data $helper
+     * @param SyncHelper $syncHelper
      */
     public function __construct(
-        \Ebizmarts\MailChimp\Helper\Data $helper
+        \Ebizmarts\MailChimp\Helper\Data $helper,
+        SyncHelper $syncHelper
     ) {
         $this->_helper  = $helper;
+        $this->syncHelper   = $syncHelper;
     }
     public function afterSave(
         SalesInvoice $subject,
@@ -38,7 +45,7 @@ class Invoice
             \Ebizmarts\MailChimp\Helper\Data::XML_MAILCHIMP_STORE,
             $invoice->getStoreId()
         );
-        $this->_helper->saveEcommerceData(
+        $this->syncHelper->saveEcommerceData(
             $mailchimpStoreId,
             $invoice->getOrderId(),
             \Ebizmarts\MailChimp\Helper\Data::IS_ORDER,
