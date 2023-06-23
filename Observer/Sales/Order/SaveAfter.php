@@ -43,7 +43,18 @@ class SaveAfter implements \Magento\Framework\Event\ObserverInterface
     {
         $order = $observer->getEvent()->getOrder();
         $mailchimpStoreId = $this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_MAILCHIMP_STORE, $order->getStoreId());
-        $this->syncHelper->saveEcommerceData($mailchimpStoreId, $order->getId(), \Ebizmarts\MailChimp\Helper\Data::IS_ORDER, null, null, 1,
-            null , null, \Ebizmarts\MailChimp\Helper\Data::NEEDTORESYNC);
+        if ($order->getMailchimpSent() != \Ebizmarts\MailChimp\Helper\Data::NEVERSYNC) {
+            $this->syncHelper->saveEcommerceData(
+                $mailchimpStoreId,
+                $order->getId(),
+                \Ebizmarts\MailChimp\Helper\Data::IS_ORDER,
+                null,
+                null,
+                1,
+                null,
+                null,
+                \Ebizmarts\MailChimp\Helper\Data::NEEDTORESYNC
+            );
+        }
     }
 }
