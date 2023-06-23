@@ -183,7 +183,7 @@ class UpgradeData implements UpgradeDataInterface
                 $config->getResource()->delete($config);
             }
         }
-        if (version_compare($context->getVersion(), '102.3.52') < 0) {
+        if (version_compare($context->getVersion(), '101.2.52') < 0) {
             $syncCollection = $this->syncCollectionFactory->create();
             $syncCollection->addFieldToFilter('type', ['eq'=>'ORD']);
             foreach($syncCollection as $item) {
