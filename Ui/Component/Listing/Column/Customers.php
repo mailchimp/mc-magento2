@@ -7,6 +7,7 @@ use Magento\Framework\View\Element\UiComponent\ContextInterface;
 use Magento\Framework\View\Element\UiComponentFactory;
 use \Magento\Ui\Component\Listing\Columns\Column;
 use Magento\Customer\Model\CustomerFactory;
+use Ebizmarts\MailChimp\Helper\Sync as SyncHelper;
 
 class Customers extends Column
 {
@@ -27,6 +28,10 @@ class Customers extends Column
      */
     protected $_helper;
     /**
+     * @var SyncHelper
+     */
+    private $syncHelper;
+    /**
      * @var \Ebizmarts\MailChimp\Model\MailChimpErrorsFactory
      */
     protected $_mailChimpErrorsFactory;
@@ -38,6 +43,7 @@ class Customers extends Column
      * @param \Magento\Framework\View\Asset\Repository $assetRepository
      * @param CustomerFactory $customerFactory
      * @param \Ebizmarts\MailChimp\Helper\Data $helper
+     * @param SyncHelper $syncHelper
      * @param \Ebizmarts\MailChimp\Model\MailChimpErrorsFactory $mailChimpErrorsFactory
      * @param array $components
      * @param array $data
@@ -49,6 +55,7 @@ class Customers extends Column
         \Magento\Framework\View\Asset\Repository $assetRepository,
         CustomerFactory $customerFactory,
         \Ebizmarts\MailChimp\Helper\Data $helper,
+        SyncHelper $syncHelper,
         \Ebizmarts\MailChimp\Model\MailChimpErrorsFactory $mailChimpErrorsFactory,
         array $components = [],
         array $data = [])
@@ -57,6 +64,7 @@ class Customers extends Column
         $this->_assetRepository = $assetRepository;
         $this->_customerFactory = $customerFactory;
         $this->_helper          = $helper;
+        $this->syncHelper       = $syncHelper;
         $this->_mailChimpErrorsFactory = $mailChimpErrorsFactory;
         parent::__construct($context, $uiComponentFactory, $components, $data);
     }
@@ -79,7 +87,7 @@ class Customers extends Column
                         \Ebizmarts\MailChimp\Helper\Data::XML_MAILCHIMP_STORE,
                         $customer->getStoreId()
                     );
-                    $syncData = $this->_helper->getChimpSyncEcommerce(
+                    $syncData = $this->syncHelper->getChimpSyncEcommerce(
                         $mailchimpStoreId,
                         $customer->getId(),
                         \Ebizmarts\MailChimp\Helper\Data::IS_CUSTOMER

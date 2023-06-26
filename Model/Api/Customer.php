@@ -16,6 +16,7 @@ namespace Ebizmarts\MailChimp\Model\Api;
 use Magento\Directory\Model\CountryFactory;
 use Magento\Framework\Exception\State\ExpiredException;
 use Symfony\Component\Config\Definition\Exception\Exception;
+use Ebizmarts\MailChimp\Helper\Sync as SyncHelper;
 
 class Customer
 {
@@ -24,6 +25,10 @@ class Customer
      * @var \Ebizmarts\MailChimp\Helper\Data
      */
     protected $_helper;
+    /**
+     * @var SyncHelper
+     */
+    private $syncHelper;
     /**
      * @var \Magento\Customer\Model\ResourceModel\Customer\CollectionFactory
      */
@@ -49,15 +54,14 @@ class Customer
      */
     protected $subscriberFactory;
 
-
     /**
      * @var string
      */
     protected $_batchId;
 
     /**
-     * Customer constructor.
      * @param \Ebizmarts\MailChimp\Helper\Data $helper
+     * @param SyncHelper $syncHelper
      * @param \Magento\Customer\Model\CustomerFactory $customerFactory
      * @param \Magento\Customer\Model\ResourceModel\Customer\CollectionFactory $collection
      * @param \Magento\Sales\Model\ResourceModel\Order\CollectionFactory $orderCollection
@@ -67,6 +71,7 @@ class Customer
      */
     public function __construct(
         \Ebizmarts\MailChimp\Helper\Data $helper,
+        SyncHelper $syncHelper,
         \Magento\Customer\Model\CustomerFactory $customerFactory,
         \Magento\Customer\Model\ResourceModel\Customer\CollectionFactory $collection,
         \Magento\Sales\Model\ResourceModel\Order\CollectionFactory $orderCollection,
@@ -74,8 +79,8 @@ class Customer
         \Magento\Customer\Model\Address $address,
         \Magento\Newsletter\Model\SubscriberFactory $subscriberFactory
     ) {
-    
         $this->_helper              = $helper;
+        $this->syncHelper           = $syncHelper;
         $this->_collection          = $collection;
         $this->_orderCollection     = $orderCollection;
         $this->_batchId             = \Ebizmarts\MailChimp\Helper\Data::IS_CUSTOMER. '_' . $this->_helper->getGmtTimeStamp();
@@ -250,7 +255,7 @@ class Customer
     }
     protected function _updateCustomer($storeId, $entityId, $sync_delta = null, $sync_error = null, $sync_modified = null)
     {
-        $this->_helper->saveEcommerceData(
+        $this->syncHelper->saveEcommerceData(
             $storeId,
             $entityId,
             \Ebizmarts\MailChimp\Helper\Data::IS_CUSTOMER,
