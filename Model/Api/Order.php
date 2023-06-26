@@ -14,6 +14,7 @@
 namespace Ebizmarts\MailChimp\Model\Api;
 
 use Magento\SalesRule\Model\RuleRepository;
+use Ebizmarts\MailChimp\Helper\Sync as SyncHelper;
 use Symfony\Component\Config\Definition\Exception\Exception;
 
 class Order
@@ -75,6 +76,10 @@ class Order
      * @var \Magento\Framework\Url
      */
     protected $_urlHelper;
+    /**
+     * @var SyncHelper
+     */
+    private $syncHelper;
     protected $_chimpSyncEcommerce;
     protected $_firstDate;
     protected $_counter;
@@ -82,8 +87,8 @@ class Order
     protected $_batchId;
 
     /**
-     * Order constructor.
      * @param \Ebizmarts\MailChimp\Helper\Data $helper
+     * @param SyncHelper $syncHelper
      * @param \Magento\Sales\Model\OrderRepository $order
      * @param \Magento\Sales\Model\ResourceModel\Order\CollectionFactory $orderCollectionFactory
      * @param \Magento\Catalog\Model\ResourceModel\Product $product
@@ -98,6 +103,7 @@ class Order
      */
     public function __construct(
         \Ebizmarts\MailChimp\Helper\Data $helper,
+        SyncHelper $syncHelper,
         \Magento\Sales\Model\OrderRepository $order,
         \Magento\Sales\Model\ResourceModel\Order\CollectionFactory $orderCollectionFactory,
         \Magento\Catalog\Model\ResourceModel\Product $product,
@@ -112,6 +118,7 @@ class Order
     ) {
 
         $this->_helper          = $helper;
+        $this->syncHelper       = $syncHelper;
         $this->_order           = $order;
         $this->_orderCollectionFactory = $orderCollectionFactory;
         $this->_apiProduct      = $apiProduct;
@@ -406,7 +413,7 @@ class Order
         foreach ($items as $item) {
             $variant = null;
             try {
-                $productSyncData = $this->_helper->getChimpSyncEcommerce(
+                $productSyncData = $this->syncHelper->getChimpSyncEcommerce(
                     $mailchimpStoreId,
                     $item->getProductId(),
                     \Ebizmarts\MailChimp\Helper\Data::IS_PRODUCT
@@ -735,7 +742,7 @@ class Order
         } else {
             $sent = \Ebizmarts\MailChimp\Helper\Data::WAITINGSYNC;
         }
-        $this->_helper->saveEcommerceData(
+        $this->syncHelper->saveEcommerceData(
             $storeId,
             $entityId,
             \Ebizmarts\MailChimp\Helper\Data::IS_ORDER,

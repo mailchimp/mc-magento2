@@ -13,6 +13,8 @@
 namespace Ebizmarts\MailChimp\Observer\SalesRule\Rule;
 
 use Magento\Framework\Event\Observer;
+use Ebizmarts\MailChimp\Helper\Sync as SyncHelper;
+
 
 class DeleteAfter implements \Magento\Framework\Event\ObserverInterface
 {
@@ -21,28 +23,27 @@ class DeleteAfter implements \Magento\Framework\Event\ObserverInterface
      */
     protected $_ecommerce;
     /**
-     * @var \Ebizmarts\MailChimp\Helper\Data
+     * @var SyncHelper
      */
-    protected $_helper;
+    protected $syncHelper;
 
     /**
-     * SaveAfter constructor.
      * @param \Ebizmarts\MailChimp\Model\MailChimpSyncEcommerce $ecommerce
-     * @param \Ebizmarts\MailChimp\Helper\Data $helper
+     * @param SyncHelper $syncHelper
      */
     public function __construct(
         \Ebizmarts\MailChimp\Model\MailChimpSyncEcommerce $ecommerce,
-        \Ebizmarts\MailChimp\Helper\Data $helper
+        SyncHelper $syncHelper
     ) {
 
         $this->_ecommerce   = $ecommerce;
-        $this->_helper      = $helper;
+        $this->syncHelper   = $syncHelper;
     }
 
     public function execute(\Magento\Framework\Event\Observer $observer)
     {
         $rule = $observer->getEvent()->getRule();
         $ruleId = $rule->getRuleId();
-        $this->_helper->markEcommerceAsDeleted($ruleId, \Ebizmarts\MailChimp\Helper\Data::IS_PROMO_RULE);
+        $this->syncHelper->markEcommerceAsDeleted($ruleId, \Ebizmarts\MailChimp\Helper\Data::IS_PROMO_RULE);
     }
 }

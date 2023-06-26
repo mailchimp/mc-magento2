@@ -5,9 +5,15 @@
         <column xsi:type="varchar" name="mailchimp_campaign_id" length="16" comment="Campaign"/>
         <column xsi:type="text" name="mailchimp_landing_page" nullable="false" comment="Landing Page"/>
         <column xsi:type="boolean" name="mailchimp_flag" nullable="false" comment="Retrieved from Mailchimp"/>
+        <column xsi:type="varchar" name="mailchimp_sync_error" length="128" comment="Error on synchronization"/>
+        <column xsi:type="smallint" name="mailchimp_sent" padding="6" nullable="false" default="0"
+                comment="Sent to Mailchimp"/>
     </table>
     <table name="sales_order_grid">
         <column xsi:type="boolean" name="mailchimp_flag" nullable="false" comment="Retrieved from Mailchimp"/>
+        <column xsi:type="varchar" name="mailchimp_sync_error" length="128" comment="Error on synchronization"/>
+        <column xsi:type="smallint" name="mailchimp_sent" padding="6" nullable="false" default="0"
+                comment="Sent to Mailchimp"/>
     </table>
     <table name="quote">
         <column xsi:type="boolean" name="mailchimp_abandonedcart_flag" nullable="false" comment="Retrieved from Mailchimp"/>

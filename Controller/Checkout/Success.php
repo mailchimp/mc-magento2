@@ -13,6 +13,8 @@
 
 namespace Ebizmarts\MailChimp\Controller\Checkout;
 
+use Ebizmarts\MailChimp\Helper\Sync as SyncHelper;
+
 class Success extends \Magento\Framework\App\Action\Action
 {
     /**
@@ -35,15 +37,19 @@ class Success extends \Magento\Framework\App\Action\Action
      * @var \Ebizmarts\MailChimp\Model\MailChimpInterestGroupFactory
      */
     protected $_interestGroupFactory;
+    /**
+     * @var SyncHelper
+     */
+    private $syncHelper;
 
     /**
-     * Success constructor.
      * @param \Magento\Framework\App\Action\Context $context
      * @param \Magento\Framework\View\Result\PageFactory $pageFactory
      * @param \Ebizmarts\MailChimp\Helper\Data $helper
      * @param \Magento\Checkout\Model\Session $checkoutSession
      * @param \Magento\Newsletter\Model\SubscriberFactory $subscriberFactory
      * @param \Ebizmarts\MailChimp\Model\MailChimpInterestGroupFactory $interestGroupFactory
+     * @param SyncHelper $syncHelper
      */
     public function __construct(
         \Magento\Framework\App\Action\Context $context,
@@ -51,14 +57,16 @@ class Success extends \Magento\Framework\App\Action\Action
         \Ebizmarts\MailChimp\Helper\Data $helper,
         \Magento\Checkout\Model\Session $checkoutSession,
         \Magento\Newsletter\Model\SubscriberFactory $subscriberFactory,
-        \Ebizmarts\MailChimp\Model\MailChimpInterestGroupFactory $interestGroupFactory
+        \Ebizmarts\MailChimp\Model\MailChimpInterestGroupFactory $interestGroupFactory,
+        SyncHelper $syncHelper
     ) {
-    
+
         $this->_pageFactory         =$pageFactory;
         $this->_helper              = $helper;
         $this->_checkoutSession     = $checkoutSession;
         $this->_subscriberFactory   = $subscriberFactory;
         $this->_interestGroupFactory= $interestGroupFactory;
+        $this->syncHelper           = $syncHelper;
         parent::__construct($context);
     }
 
@@ -112,7 +120,7 @@ class Success extends \Magento\Framework\App\Action\Action
         $sync_error = null,
         $sync_modified = null
     ) {
-        $this->_helper->saveEcommerceData(
+        $this->syncHelper->saveEcommerceData(
             $listId,
             $entityId,
             \Ebizmarts\MailChimp\Helper\Data::IS_SUBSCRIBER,
