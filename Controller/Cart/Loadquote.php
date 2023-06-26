@@ -12,6 +12,7 @@ use Magento\Framework\App\Action\Action;
 use Magento\Framework\Controller\ResultFactory;
 use Magento\Framework\View\Result\PageFactory;
 use Magento\Framework\App\Action\Context;
+use Ebizmarts\MailChimp\Helper\Sync as SyncHelper;
 
 class Loadquote extends Action
 {
@@ -32,6 +33,10 @@ class Loadquote extends Action
      */
     protected $_helper;
     /**
+     * @var SyncHelper
+     */
+    private $syncHelper;
+    /**
      * @var \Magento\Framework\Url
      */
     protected $_urlHelper;
@@ -49,13 +54,13 @@ class Loadquote extends Action
     protected $_checkoutSession;
 
     /**
-     * Loadquote constructor.
      * @param Context $context
      * @param PageFactory $pageFactory
      * @param \Magento\Quote\Model\QuoteFactory $quote
      * @param \Magento\Customer\Model\Session $customerSession
      * @param \Magento\Checkout\Model\Session $checkoutSession
      * @param \Ebizmarts\MailChimp\Helper\Data $helper
+     * @param SyncHelper $syncHelper
      * @param \Magento\Framework\Url $urlHelper
      * @param \Magento\Customer\Model\Url $customerUrl
      */
@@ -66,6 +71,7 @@ class Loadquote extends Action
         \Magento\Customer\Model\Session $customerSession,
         \Magento\Checkout\Model\Session $checkoutSession,
         \Ebizmarts\MailChimp\Helper\Data $helper,
+        SyncHelper $syncHelper,
         \Magento\Framework\Url $urlHelper,
         \Magento\Customer\Model\Url $customerUrl
     ) {
@@ -74,6 +80,7 @@ class Loadquote extends Action
         $this->_quote           = $quote;
         $this->_customerSession = $customerSession;
         $this->_helper          = $helper;
+        $this->syncHelper       = $syncHelper;
         $this->_urlHelper       = $urlHelper;
         $this->_message         = $context->getMessageManager();
         $this->_customerUrl     = $customerUrl;
@@ -99,7 +106,7 @@ class Loadquote extends Action
                 \Ebizmarts\MailChimp\Helper\Data::XML_MAILCHIMP_STORE,
                 $magentoStoreId
             );
-            $syncCommerce = $this->_helper->getChimpSyncEcommerce(
+            $syncCommerce = $this->syncHelper->getChimpSyncEcommerce(
                 $mailchimpStoreId,
                 $params['id'],
                 \Ebizmarts\MailChimp\Helper\Data::IS_QUOTE

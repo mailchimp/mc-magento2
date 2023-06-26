@@ -4,7 +4,7 @@ namespace Ebizmarts\MailChimp\Observer\Adminhtml\Product;
 
 use Magento\Framework\Event\Observer;
 use Magento\Catalog\Model\ResourceModel\Product\CollectionFactory;
-
+use Ebizmarts\MailChimp\Helper\Sync as SyncData;
 class ImportAfter implements \Magento\Framework\Event\ObserverInterface
 {
     /**
@@ -12,20 +12,27 @@ class ImportAfter implements \Magento\Framework\Event\ObserverInterface
      */
     protected $helper;
     /**
+     * @var SyncData
+     */
+    private $syncHelper;
+    /**
      * @var CollectionFactory
      */
     protected $productCollectionFactory;
 
     /**
      * @param \Ebizmarts\MailChimp\Helper\Data $helper
+     * @param SyncData $syncHelper
      * @param CollectionFactory $productCollectionFactory
      */
     public function __construct(
         \Ebizmarts\MailChimp\Helper\Data $helper,
+        SyncData $syncHelper,
         CollectionFactory $productCollectionFactory
     )
     {
         $this->helper = $helper;
+        $this->syncHelper = $syncHelper;
         $this->productCollectionFactory = $productCollectionFactory;
     }
     public function execute(Observer $observer)
@@ -79,7 +86,7 @@ class ImportAfter implements \Magento\Framework\Event\ObserverInterface
             \Ebizmarts\MailChimp\Helper\Data::XML_MAILCHIMP_STORE,
             $storeId
         );
-        $this->helper->markAllAsModifiedByIds($mailchimpStoreId, $productsIds, \Ebizmarts\MailChimp\Helper\Data::IS_PRODUCT);
+        $this->syncHelper->markAllAsModifiedByIds($mailchimpStoreId, $productsIds, \Ebizmarts\MailChimp\Helper\Data::IS_PRODUCT);
 
     }
 }

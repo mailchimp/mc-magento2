@@ -13,12 +13,17 @@
 
 namespace Ebizmarts\MailChimp\Model\Plugin\Newsletter;
 
+use Ebizmarts\MailChimp\Helper\Sync as SyncHelper;
 class Save
 {
     /**
      * @var \Ebizmarts\MailChimp\Helper\Data
      */
     protected $helper;
+    /**
+     * @var SyncHelper
+     */
+    private $syncHelper;
     /**
      * @var \Magento\Customer\Model\Session
      */
@@ -37,8 +42,8 @@ class Save
     protected $interestGroupFactory;
 
     /**
-     * Save constructor.
      * @param \Ebizmarts\MailChimp\Helper\Data $helper
+     * @param SyncHelper $syncHelper
      * @param \Magento\Customer\Model\Session $customerSession
      * @param \Magento\Newsletter\Model\SubscriberFactory $subscriberFactory
      * @param \Ebizmarts\MailChimp\Model\MailChimpInterestGroupFactory $interestGroupFactory
@@ -46,13 +51,14 @@ class Save
      */
     public function __construct(
         \Ebizmarts\MailChimp\Helper\Data $helper,
+        SyncHelper $syncHelper,
         \Magento\Customer\Model\Session $customerSession,
         \Magento\Newsletter\Model\SubscriberFactory $subscriberFactory,
         \Ebizmarts\MailChimp\Model\MailChimpInterestGroupFactory $interestGroupFactory,
         \Magento\Framework\App\Request\Http $request
     ) {
-    
         $this->helper               = $helper;
+        $this->syncHelper           = $syncHelper;
         $this->customerSession      = $customerSession;
         $this->subscriberFactory    = $subscriberFactory;
         $this->request              = $request;
@@ -99,7 +105,7 @@ class Save
     }
     protected function _updateSubscriber($listId, $entityId, $sync_delta = null, $sync_error = null, $sync_modified = null)
     {
-        $this->helper->saveEcommerceData(
+        $this->syncHelper->saveEcommerceData(
             $listId,
             $entityId,
             \Ebizmarts\MailChimp\Helper\Data::IS_SUBSCRIBER,
