@@ -13,6 +13,8 @@
 
 namespace Ebizmarts\MailChimp\Model\Api;
 
+use Ebizmarts\MailChimp\Helper\Sync as SyncHelper;
+
 class Result
 {
     const MAILCHIMP_TEMP_DIR = 'Mailchimp';
@@ -40,15 +42,19 @@ class Result
      * @var \Magento\Framework\HTTP\Client\CurlFactory
      */
     private $_curlFactory;
+    /**
+     * @var SyncHelper
+     */
+    private $syncHelper;
 
     /**
-     * Result constructor.
      * @param \Ebizmarts\MailChimp\Helper\Data $helper
      * @param \Ebizmarts\MailChimp\Model\ResourceModel\MailChimpSyncBatches\CollectionFactory $batchCollection
      * @param \Ebizmarts\MailChimp\Model\MailChimpErrorsFactory $chimpErrors
      * @param \Magento\Framework\Archive $archive
      * @param \Magento\Framework\Filesystem\Driver\File $driver
      * @param \Magento\Framework\HTTP\Client\CurlFactory $curlFactory
+     * @param SyncHelper $syncHelper
      */
     public function __construct(
         \Ebizmarts\MailChimp\Helper\Data $helper,
@@ -56,15 +62,16 @@ class Result
         \Ebizmarts\MailChimp\Model\MailChimpErrorsFactory $chimpErrors,
         \Magento\Framework\Archive $archive,
         \Magento\Framework\Filesystem\Driver\File $driver,
-        \Magento\Framework\HTTP\Client\CurlFactory $curlFactory
+        \Magento\Framework\HTTP\Client\CurlFactory $curlFactory,
+        SyncHelper $syncHelper
     ) {
-    
         $this->_batchCollection     = $batchCollection;
         $this->_helper              = $helper;
         $this->_archive             = $archive;
         $this->_chimpErrors         = $chimpErrors;
         $this->_driver              = $driver;
         $this->_curlFactory         = $curlFactory;
+        $this->syncHelper           = $syncHelper;
     }
     public function processResponses($storeId, $isMailChimpStoreId = false, $mailchimpStoreId)
     {
@@ -88,7 +95,7 @@ class Result
                 } elseif ($files === false) {
                     $item->setStatus(\Ebizmarts\MailChimp\Helper\Data::BATCH_ERROR);
                     $item->getResource()->save($item);
-                    $this->_helper->deleteAllByBatchId($item->getBatchId());
+                    $this->syncHelper->deleteAllByBatchId($item->getBatchId());
                     continue;
                 }
                 $baseDir = $this->_helper->getBaseDir();
@@ -282,14 +289,16 @@ class Result
         } else {
             $mailchimpStore = $mailchimpStoreId;
         }
-        $chimpSync = $this->_helper->getChimpSyncEcommerce($mailchimpStore, $id, $type);
-        if ($chimpSync->getMailchimpStoreId() ==
-            $mailchimpStore && $chimpSync->getType() == $type && $chimpSync->getRelatedId() == $id) {
-            $chimpSync->setMailchimpSent($status);
-            $chimpSync->setMailchimpSyncError($error);
-            $chimpSync->getResource()->save($chimpSync);
-        } else {
-            $this->_helper->log("Can't find original register for type $type and id $id");
-        }
+        $this->syncHelper->saveEcommerceData(
+            $mailchimpStore,
+            $id,
+            $type,
+            null,
+            $error,
+            null,
+            null,
+            null,
+            $status
+        );
     }
 }

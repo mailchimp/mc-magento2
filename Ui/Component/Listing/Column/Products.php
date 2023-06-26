@@ -5,7 +5,9 @@ use Magento\Catalog\Model\ProductFactory;
 use Magento\Framework\App\RequestInterface;
 use Magento\Framework\View\Element\UiComponent\ContextInterface;
 use Magento\Framework\View\Element\UiComponentFactory;
-use \Magento\Ui\Component\Listing\Columns\Column;
+use Magento\Ui\Component\Listing\Columns\Column;
+use Ebizmarts\MailChimp\Helper\Sync as SyncHelper;
+
 
 class Products extends Column
 {
@@ -29,6 +31,10 @@ class Products extends Column
      * @var \Ebizmarts\MailChimp\Model\MailChimpErrorsFactory
      */
     protected $_mailChimpErrorsFactory;
+    /**
+     * @var SyncHelper
+     */
+    private $syncHelper;
 
     /**
      * @param ContextInterface $context
@@ -36,6 +42,7 @@ class Products extends Column
      * @param ProductFactory $productFactory
      * @param RequestInterface $requestInterface
      * @param \Ebizmarts\MailChimp\Helper\Data $helper
+     * @param SyncHelper $syncHelper
      * @param \Magento\Framework\View\Asset\Repository $assetRepository
      * @param \Ebizmarts\MailChimp\Model\MailChimpErrorsFactory $mailChimpErrorsFactory
      * @param array $components
@@ -47,6 +54,7 @@ class Products extends Column
         ProductFactory $productFactory,
         RequestInterface $requestInterface,
         \Ebizmarts\MailChimp\Helper\Data $helper,
+        SyncHelper $syncHelper,
         \Magento\Framework\View\Asset\Repository $assetRepository,
         \Ebizmarts\MailChimp\Model\MailChimpErrorsFactory $mailChimpErrorsFactory,
         array $components = [],
@@ -55,6 +63,7 @@ class Products extends Column
         $this->_productFactory = $productFactory;
         $this->_requestInterface = $requestInterface;
         $this->_helper = $helper;
+        $this->syncHelper = $syncHelper;
         $this->_assetRepository = $assetRepository;
         $this->_mailChimpErrorsFactory = $mailChimpErrorsFactory;
         parent::__construct($context, $uiComponentFactory, $components, $data);
@@ -81,7 +90,7 @@ class Products extends Column
                             \Ebizmarts\MailChimp\Helper\Data::XML_MAILCHIMP_STORE,
                             $product->getStoreId()
                         );
-                        $syncData = $this->_helper->getChimpSyncEcommerce(
+                        $syncData = $this->syncHelper->getChimpSyncEcommerce(
                             $mailchimpStoreId,
                             $product->getId(),
                             \Ebizmarts\MailChimp\Helper\Data::IS_PRODUCT
@@ -171,4 +180,4 @@ class Products extends Column
         $error = $this->_mailChimpErrorsFactory->create();
         return $error->getByStoreIdType($storeId, $productId, \Ebizmarts\MailChimp\Helper\Data::IS_PRODUCT);
     }
-} 
+}

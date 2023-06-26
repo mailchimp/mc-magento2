@@ -16,7 +16,7 @@ namespace Ebizmarts\MailChimp\Model\Api;
 use Magento\Directory\Model\CountryFactory;
 use Magento\Framework\Exception\State\ExpiredException;
 use Symfony\Component\Config\Definition\Exception\Exception;
-
+use Ebizmarts\MailChimp\Helper\Sync as SyncHelper;
 class Customer
 {
     const MAX           = 100;
@@ -48,14 +48,16 @@ class Customer
      * @var \Magento\Newsletter\Model\SubscriberFactory
      */
     protected $subscriberFactory;
-
     /**
      * @var string
      */
     protected $_batchId;
+    /**
+     * @var SyncHelper
+     */
+    private $syncHelper;
 
     /**
-     * Customer constructor.
      * @param \Ebizmarts\MailChimp\Helper\Data $helper
      * @param \Magento\Customer\Model\CustomerFactory $customerFactory
      * @param \Magento\Customer\Model\ResourceModel\Customer\CollectionFactory $collection
@@ -63,6 +65,7 @@ class Customer
      * @param CountryFactory $countryFactory
      * @param \Magento\Customer\Model\Address $address
      * @param \Magento\Newsletter\Model\SubscriberFactory $subscriberFactory
+     * @param SyncHelper $syncHelper
      */
     public function __construct(
         \Ebizmarts\MailChimp\Helper\Data $helper,
@@ -71,9 +74,9 @@ class Customer
         \Magento\Sales\Model\ResourceModel\Order\CollectionFactory $orderCollection,
         \Magento\Directory\Model\CountryFactory $countryFactory,
         \Magento\Customer\Model\Address $address,
-        \Magento\Newsletter\Model\SubscriberFactory $subscriberFactory
+        \Magento\Newsletter\Model\SubscriberFactory $subscriberFactory,
+        SyncHelper $syncHelper
     ) {
-    
         $this->_helper              = $helper;
         $this->_collection          = $collection;
         $this->_orderCollection     = $orderCollection;
@@ -83,6 +86,7 @@ class Customer
         $this->_customerFactory     = $customerFactory;
         $this->_countryFactory      = $countryFactory;
         $this->subscriberFactory    = $subscriberFactory;
+        $this->syncHelper           = $syncHelper;
     }
     public function sendCustomers($storeId)
     {
@@ -273,7 +277,7 @@ class Customer
         $sync_error = null,
         $sync_modified = null
     ) {
-        $this->_helper->saveEcommerceData(
+        $this->syncHelper->saveEcommerceData(
             $storeId,
             $entityId,
             \Ebizmarts\MailChimp\Helper\Data::IS_CUSTOMER,

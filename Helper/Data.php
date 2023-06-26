@@ -85,7 +85,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     const SYNCERROR     = 4;
     const NOTSYNCED     = 5;
 
-    const NEVERSYNC     = 6;
+    const NEVERSYNC     = 0;
 
     const BATCH_CANCELED = 'canceled';
     const BATCH_COMPLETED = 'completed';
@@ -136,18 +136,6 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
      * @var \Magento\Customer\Model\ResourceModel\Customer\CustomerRepository
      */
     private $_customer;
-    /**
-     * @var \Ebizmarts\MailChimp\Model\MailChimpErrors
-     */
-    private $_mailChimpErrors;
-    /**
-     * @var \Ebizmarts\MailChimp\Model\MailChimpSyncEcommerceFactory
-     */
-    private $_mailChimpSyncEcommerce;
-    /**
-     * @var \Ebizmarts\MailChimp\Model\MailChimpSyncEcommerce
-     */
-    private $_mailChimpSyncE;
     /**
      * @var \Ebizmarts\MailChimp\Model\MailChimpSyncBatches
      */
@@ -226,7 +214,6 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     private $_mapFields     = null;
 
     /**
-     * Data constructor.
      * @param \Magento\Framework\App\Helper\Context $context
      * @param \Magento\Store\Model\StoreManagerInterface $storeManager
      * @param \Ebizmarts\MailChimp\Model\Logger\Logger $logger
@@ -237,9 +224,6 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
      * @param \Mailchimp $api
      * @param \Magento\Framework\App\Cache\TypeListInterface $cacheTypeList
      * @param \Magento\Customer\Model\ResourceModel\CustomerRepository $customer
-     * @param \Ebizmarts\MailChimp\Model\MailChimpErrors $mailChimpErrors
-     * @param \Ebizmarts\MailChimp\Model\MailChimpSyncEcommerceFactory $mailChimpSyncEcommerce
-     * @param \Ebizmarts\MailChimp\Model\MailChimpSyncEcommerce $mailChimpSyncE
      * @param \Ebizmarts\MailChimp\Model\MailChimpSyncBatches $syncBatches
      * @param \Ebizmarts\MailChimp\Model\MailChimpStoresFactory $mailChimpStoresFactory
      * @param \Ebizmarts\MailChimp\Model\MailChimpStores $mailChimpStores
@@ -269,9 +253,6 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         \Mailchimp $api,
         \Magento\Framework\App\Cache\TypeListInterface $cacheTypeList,
         \Magento\Customer\Model\ResourceModel\CustomerRepository $customer,
-        \Ebizmarts\MailChimp\Model\MailChimpErrors $mailChimpErrors,
-        \Ebizmarts\MailChimp\Model\MailChimpSyncEcommerceFactory $mailChimpSyncEcommerce,
-        \Ebizmarts\MailChimp\Model\MailChimpSyncEcommerce $mailChimpSyncE,
         \Ebizmarts\MailChimp\Model\MailChimpSyncBatches $syncBatches,
         \Ebizmarts\MailChimp\Model\MailChimpStoresFactory $mailChimpStoresFactory,
         \Ebizmarts\MailChimp\Model\MailChimpStores $mailChimpStores,
@@ -301,9 +282,6 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         $this->_config        = $config;
         $this->_api           = $api;
         $this->_customer      = $customer;
-        $this->_mailChimpErrors         = $mailChimpErrors;
-        $this->_mailChimpSyncEcommerce  = $mailChimpSyncEcommerce;
-        $this->_mailChimpSyncE          = $mailChimpSyncE;
         $this->_syncBatches             = $syncBatches;
         $this->_mailChimpStores         = $mailChimpStores;
         $this->_mailChimpStoresFactory  = $mailChimpStoresFactory;
@@ -646,16 +624,6 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         $this->markAllBatchesAs($mailchimpStore, self::BATCH_CANCELED, self::BATCH_PENDING);
     }
 
-    public function markRegisterAsModified($registerId, $type)
-    {
-        if (!empty($registerId)) {
-            $this->_mailChimpSyncE->markAllAsModified($registerId, $type);
-        }
-    }
-    public function markAllAsModifiedByIds($mailchimpStoreId, $ids, $type)
-    {
-        $this>$this->_mailChimpSyncE->markAllAsModifiedByIds($mailchimpStoreId, $ids, $type);
-    }
     public function getMCStoreName($storeId)
     {
         return $this->_storeManager->getStore($storeId)->getFrontendName();
@@ -870,93 +838,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         $date = date('Y-m-d-H-i-s') . '-' . $msecArray[1];
         return $date;
     }
-    public function resetErrors($mailchimpStore, $retry)
-    {
-        try {
-            // clean the errors table
-            $connection = $this->_mailChimpErrors->getResource()->getConnection();
-            $tableName = $this->_mailChimpErrors->getResource()->getMainTable();
-            $connection->delete($tableName, "mailchimp_store_id = '".$mailchimpStore."'");
-            // clean the syncecommerce table with errors
-            if ($retry) {
-                $connection = $this->_mailChimpSyncE->getResource()->getConnection();
-                $tableName = $this->_mailChimpSyncE->getResource()->getMainTable();
-                $connection->delete(
-                    $tableName,
-                    "mailchimp_store_id = '" . $mailchimpStore . "' and mailchimp_sync_error is not null"
-                );
-            }
-        } catch (\Zend_Db_Exception $e) {
-            throw new ValidatorException(__($e->getMessage()));
-        }
-    }
-    public function resetEcommerce()
-    {
-        $this->resetErrors();
-    }
-    public function saveEcommerceData(
-        $storeId,
-        $entityId,
-        $type,
-        $date = null,
-        $error = null,
-        $modified = null,
-        $deleted = null,
-        $token = null,
-        $sent = null
-    ) {
-        if (!empty($entityId)) {
-            $chimpSyncEcommerce = $this->getChimpSyncEcommerce($storeId, $entityId, $type);
-            if ($chimpSyncEcommerce->getRelatedId() == $entityId ||
-                !$chimpSyncEcommerce->getRelatedId() && $modified != 1) {
-                $chimpSyncEcommerce->setMailchimpStoreId($storeId);
-                $chimpSyncEcommerce->setType($type);
-                $chimpSyncEcommerce->setRelatedId($entityId);
-                if ($modified!==null) {
-                    $chimpSyncEcommerce->setMailchimpSyncModified($modified);
-                } else {
-                    $chimpSyncEcommerce->setMailchimpSyncModified(0);
-                }
-                if ($date) {
-                    $chimpSyncEcommerce->setMailchimpSyncDelta($date);
-                } elseif ($modified != 1) {
-                    $chimpSyncEcommerce->setBatchId(null);
-                }
-                if ($error) {
-                    $chimpSyncEcommerce->setMailchimpSyncError($error);
-                }
-                if ($deleted) {
-                    $chimpSyncEcommerce->setMailchimpSyncDeleted($deleted);
-                    $chimpSyncEcommerce->setMailchimpSyncModified(0);
-                }
-                if ($token) {
-                    $chimpSyncEcommerce->setMailchimpToken($token);
-                }
-                if ($sent) {
-                    $chimpSyncEcommerce->setMailchimpSent($sent);
-                }
-                $chimpSyncEcommerce->getResource()->save($chimpSyncEcommerce);
-            }
-        }
-    }
 
-    public function markEcommerceAsDeleted($relatedId, $type, $relatedDeletedId = null)
-    {
-        $this->_mailChimpSyncE->markAllAsDeleted($relatedId, $type, $relatedDeletedId);
-    }
-    public function ecommerceDeleteAllByIdType($id, $type, $mailchimpStoreId)
-    {
-        $this->_mailChimpSyncE->deleteAllByIdType($id, $type, $mailchimpStoreId);
-    }
-    public function deleteAllByBatchId($batchId)
-    {
-        $this->_mailChimpSyncE->deleteAllByBatchid($batchId);
-    }
-    public function getChimpSyncEcommerce($storeId, $id, $type)
-    {
-        $chimp = $this->_mailChimpSyncEcommerce->create();
-        return $chimp->getByStoreIdType($storeId, $id, $type);
-    }
     public function loadStores()
     {
 
@@ -1359,26 +1241,6 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
             self::XML_ABANDONEDCART_EMAIL,
             \Magento\Store\Model\ScopeInterface::SCOPE_STORES,
             $storeId
-        );
-    }
-    public function resyncAllSubscribers($mailchimpList)
-    {
-        $connection = $this->_mailChimpSyncE->getResource()->getConnection();
-        $tableName = $this->_mailChimpSyncE->getResource()->getMainTable();
-        $connection->update(
-            $tableName,
-            ['mailchimp_sync_modified' => 1],
-            "type = '" . self::IS_SUBSCRIBER . "' and mailchimp_store_id = '$mailchimpList'"
-        );
-    }
-    public function resyncProducts($mailchimpList)
-    {
-        $connection = $this->_mailChimpSyncE->getResource()->getConnection();
-        $tableName = $this->_mailChimpSyncE->getResource()->getMainTable();
-        $connection->update(
-            $tableName,
-            ['mailchimp_sync_modified' => 1],
-            "type = '" . self::IS_PRODUCT . "' and mailchimp_store_id = '$mailchimpList'"
         );
     }
     public function decrypt($value)

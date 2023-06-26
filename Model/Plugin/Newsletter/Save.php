@@ -13,6 +13,8 @@
 
 namespace Ebizmarts\MailChimp\Model\Plugin\Newsletter;
 
+use Ebizmarts\MailChimp\Helper\Sync as SyncHelper;
+
 class Save
 {
     /**
@@ -35,28 +37,34 @@ class Save
      * @var \Ebizmarts\MailChimp\Model\MailChimpInterestGroupFactory
      */
     protected $interestGroupFactory;
+    /**
+     * @var SyncHelper
+     */
+    private $syncHelper;
 
     /**
-     * Save constructor.
      * @param \Ebizmarts\MailChimp\Helper\Data $helper
      * @param \Magento\Customer\Model\Session $customerSession
      * @param \Magento\Newsletter\Model\SubscriberFactory $subscriberFactory
      * @param \Ebizmarts\MailChimp\Model\MailChimpInterestGroupFactory $interestGroupFactory
      * @param \Magento\Framework\App\Request\Http $request
+     * @param SyncHelper $syncHelper
      */
     public function __construct(
         \Ebizmarts\MailChimp\Helper\Data $helper,
         \Magento\Customer\Model\Session $customerSession,
         \Magento\Newsletter\Model\SubscriberFactory $subscriberFactory,
         \Ebizmarts\MailChimp\Model\MailChimpInterestGroupFactory $interestGroupFactory,
-        \Magento\Framework\App\Request\Http $request
+        \Magento\Framework\App\Request\Http $request,
+        SyncHelper $syncHelper
     ) {
-    
+
         $this->helper               = $helper;
         $this->customerSession      = $customerSession;
         $this->subscriberFactory    = $subscriberFactory;
         $this->request              = $request;
         $this->interestGroupFactory = $interestGroupFactory;
+        $this->syncHelper           = $syncHelper;
     }
     public function afterExecute()
     {
@@ -104,7 +112,7 @@ class Save
         $sync_error = null,
         $sync_modified = null
     ) {
-        $this->helper->saveEcommerceData(
+        $this->syncHelper->saveEcommerceData(
             $listId,
             $entityId,
             \Ebizmarts\MailChimp\Helper\Data::IS_SUBSCRIBER,

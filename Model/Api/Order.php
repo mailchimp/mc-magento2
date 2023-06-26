@@ -15,6 +15,7 @@ namespace Ebizmarts\MailChimp\Model\Api;
 
 use Magento\SalesRule\Model\RuleRepository;
 use Symfony\Component\Config\Definition\Exception\Exception;
+use Ebizmarts\MailChimp\Helper\Sync as SyncHelper;
 
 class Order
 {
@@ -30,7 +31,6 @@ class Order
     const COMPLETE = 'complete';
 
     protected $_api = null;
-
     /**
      * @var \Ebizmarts\MailChimp\Helper\Data
      */
@@ -75,6 +75,10 @@ class Order
      * @var \Magento\Framework\Url
      */
     protected $_urlHelper;
+    /**
+     * @var SyncHelper
+     */
+    private $syncHelper;
     protected $_chimpSyncEcommerce;
     protected $_firstDate;
     protected $_counter;
@@ -82,7 +86,6 @@ class Order
     protected $_batchId;
 
     /**
-     * Order constructor.
      * @param \Ebizmarts\MailChimp\Helper\Data $helper
      * @param \Magento\Sales\Model\OrderRepository $order
      * @param \Magento\Sales\Model\ResourceModel\Order\CollectionFactory $orderCollectionFactory
@@ -95,6 +98,7 @@ class Order
      * @param \Magento\SalesRule\Model\Coupon $couponRepository
      * @param RuleRepository $ruleRepository
      * @param \Magento\Framework\Url $urlHelper
+     * @param SyncHelper $syncHelper
      */
     public function __construct(
         \Ebizmarts\MailChimp\Helper\Data $helper,
@@ -108,9 +112,9 @@ class Order
         \Ebizmarts\MailChimp\Model\MailChimpSyncEcommerce $chimpSyncEcommerce,
         \Magento\SalesRule\Model\Coupon $couponRepository,
         \Magento\SalesRule\Model\RuleRepository $ruleRepository,
-        \Magento\Framework\Url $urlHelper
+        \Magento\Framework\Url $urlHelper,
+        SyncHelper $syncHelper
     ) {
-
         $this->_helper          = $helper;
         $this->_order           = $order;
         $this->_orderCollectionFactory = $orderCollectionFactory;
@@ -123,6 +127,7 @@ class Order
         $this->_batchId         = \Ebizmarts\MailChimp\Helper\Data::IS_ORDER. '_' . $this->_helper->getGmtTimeStamp();
         $this->_counter = 0;
         $this->_urlHelper    = $urlHelper;
+        $this->syncHelper    = $syncHelper;
         $this->couponRepository = $couponRepository;
         $this->ruleRepository = $ruleRepository;
     }
@@ -736,7 +741,7 @@ class Order
         } else {
             $sent = \Ebizmarts\MailChimp\Helper\Data::WAITINGSYNC;
         }
-        $this->_helper->saveEcommerceData(
+        $this->syncHelper->saveEcommerceData(
             $storeId,
             $entityId,
             \Ebizmarts\MailChimp\Helper\Data::IS_ORDER,

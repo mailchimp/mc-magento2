@@ -13,6 +13,7 @@
 namespace Ebizmarts\MailChimp\Model\Api;
 
 use Magento\TestFramework\Inspection\Exception;
+use Ebizmarts\MailChimp\Helper\Sync as SyncHelper;
 
 class PromoCodes
 {
@@ -43,15 +44,19 @@ class PromoCodes
      * @var \Ebizmarts\MailChimp\Model\ResourceModel\MailChimpSyncEcommerce\CollectionFactory
      */
     private $_syncCollection;
+    /**
+     * @var SyncHelper
+     */
+    private $syncHelper;
 
     /**
-     * PromoCodes constructor.
      * @param \Ebizmarts\MailChimp\Helper\Data $helper
      * @param \Magento\SalesRule\Model\ResourceModel\Coupon\CollectionFactory $couponCollection
      * @param \Magento\SalesRule\Model\ResourceModel\Rule\CollectionFactory $ruleCollection
      * @param \Ebizmarts\MailChimp\Model\MailChimpSyncEcommerceFactory $chimpSyncEcommerce
      * @param PromoRules $promoRules
      * @param \Ebizmarts\MailChimp\Model\ResourceModel\MailChimpSyncEcommerce\CollectionFactory $syncCollection
+     * @param SyncHelper $syncHelper
      */
     public function __construct(
         \Ebizmarts\MailChimp\Helper\Data $helper,
@@ -59,9 +64,9 @@ class PromoCodes
         \Magento\SalesRule\Model\ResourceModel\Rule\CollectionFactory $ruleCollection,
         \Ebizmarts\MailChimp\Model\MailChimpSyncEcommerceFactory $chimpSyncEcommerce,
         \Ebizmarts\MailChimp\Model\Api\PromoRules $promoRules,
-        \Ebizmarts\MailChimp\Model\ResourceModel\MailChimpSyncEcommerce\CollectionFactory $syncCollection
+        \Ebizmarts\MailChimp\Model\ResourceModel\MailChimpSyncEcommerce\CollectionFactory $syncCollection,
+        SyncHelper $syncHelper
     ) {
-    
         $this->_helper              = $helper;
         $this->_couponCollection    = $couponCollection;
         $this->_ruleCollection      = $ruleCollection;
@@ -70,6 +75,7 @@ class PromoCodes
             $this->_helper->getGmtTimeStamp();
         $this->_promoRules          = $promoRules;
         $this->_syncCollection      = $syncCollection;
+        $this->syncHelper           = $syncHelper;
     }
     public function sendCoupons($magentoStoreId)
     {
@@ -255,7 +261,7 @@ class PromoCodes
         $sync_modified = null,
         $sync_deleted = null
     ) {
-        $this->_helper->saveEcommerceData(
+        $this->syncHelper->saveEcommerceData(
             $storeId,
             $entityId,
             \Ebizmarts\MailChimp\Helper\Data::IS_PROMO_CODE,

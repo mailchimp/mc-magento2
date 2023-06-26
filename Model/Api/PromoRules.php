@@ -14,6 +14,7 @@
 namespace Ebizmarts\MailChimp\Model\Api;
 
 use Magento\Cms\Test\Unit\Controller\Adminhtml\Page\MassEnableTest;
+use Ebizmarts\MailChimp\Helper\Sync as SyncHelper;
 
 class PromoRules
 {
@@ -48,23 +49,28 @@ class PromoRules
      * @var \Ebizmarts\MailChimp\Model\ResourceModel\MailChimpSyncEcommerce\CollectionFactory
      */
     protected $_syncCollection;
+    /**
+     * @var SyncHelper
+     */
+    private $syncHelper;
 
     /**
-     * PromoRules constructor.
      * @param \Ebizmarts\MailChimp\Helper\Data $helper
      * @param \Magento\SalesRule\Model\ResourceModel\Rule\CollectionFactory $collection
      * @param \Magento\SalesRule\Model\RuleRepository $ruleRepo
      * @param \Ebizmarts\MailChimp\Model\MailChimpSyncEcommerceFactory $chimpSyncEcommerce
      * @param \Ebizmarts\MailChimp\Model\ResourceModel\MailChimpSyncEcommerce\CollectionFactory $syncCollection
+     * @param SyncHelper $syncHelper
      */
     public function __construct(
         \Ebizmarts\MailChimp\Helper\Data $helper,
         \Magento\SalesRule\Model\ResourceModel\Rule\CollectionFactory $collection,
         \Magento\SalesRule\Model\RuleRepository $ruleRepo,
         \Ebizmarts\MailChimp\Model\MailChimpSyncEcommerceFactory $chimpSyncEcommerce,
-        \Ebizmarts\MailChimp\Model\ResourceModel\MailChimpSyncEcommerce\CollectionFactory $syncCollection
+        \Ebizmarts\MailChimp\Model\ResourceModel\MailChimpSyncEcommerce\CollectionFactory $syncCollection,
+        SyncHelper $syncHelper
     ) {
-    
+
         $this->_helper              = $helper;
         $this->_collection          = $collection;
         $this->_chimpSyncEcommerce  = $chimpSyncEcommerce;
@@ -72,6 +78,7 @@ class PromoRules
         $this->_batchId             = \Ebizmarts\MailChimp\Helper\Data::IS_PROMO_RULE. '_' .
             $this->_helper->getGmtTimeStamp();
         $this->_syncCollection      = $syncCollection;
+        $this->syncHelper           = $syncHelper;
     }
     public function sendRules($magentoStoreId)
     {
@@ -320,7 +327,7 @@ class PromoRules
      */
     protected function _updateSyncData($storeId, $entityId, $sync_delta = null, $sync_error = '', $sync_modified = 0)
     {
-        $this->_helper->saveEcommerceData(
+        $this->syncHelper->saveEcommerceData(
             $storeId,
             $entityId,
             \Ebizmarts\MailChimp\Helper\Data::IS_PROMO_RULE,

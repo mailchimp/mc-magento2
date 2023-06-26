@@ -13,6 +13,7 @@
 namespace Ebizmarts\MailChimp\Model\Api;
 
 use Symfony\Component\Config\Definition\Exception\Exception;
+use Ebizmarts\MailChimp\Helper\Sync as SyncHelper;
 
 class Cart
 {
@@ -57,9 +58,12 @@ class Cart
      * @var \Magento\Framework\Url
      */
     protected $_urlHelper;
+    /**
+     * @var SyncHelper
+     */
+    private $syncHelper;
 
     /**
-     * Cart constructor.
      * @param \Ebizmarts\MailChimp\Helper\Data $helper
      * @param \Magento\Quote\Model\ResourceModel\Quote\CollectionFactory $quoteColletcion
      * @param \Magento\Customer\Model\CustomerFactory $customerFactory
@@ -68,6 +72,7 @@ class Cart
      * @param \Magento\Directory\Model\CountryFactory $countryFactory
      * @param \Magento\Sales\Model\ResourceModel\Order\CollectionFactory $orderCollectionFactory
      * @param \Magento\Framework\Url $urlHelper
+     * @param SyncHelper $syncHelper
      */
     public function __construct(
         \Ebizmarts\MailChimp\Helper\Data $helper,
@@ -77,9 +82,9 @@ class Cart
         \Ebizmarts\MailChimp\Model\Api\Customer $apiCustomer,
         \Magento\Directory\Model\CountryFactory $countryFactory,
         \Magento\Sales\Model\ResourceModel\Order\CollectionFactory $orderCollectionFactory,
-        \Magento\Framework\Url $urlHelper
+        \Magento\Framework\Url $urlHelper,
+        SyncHelper $syncHelper
     ) {
-    
         $this->_helper                  = $helper;
         $this->_quoteCollection         = $quoteColletcion;
         $this->_customerFactory         = $customerFactory;
@@ -88,6 +93,7 @@ class Cart
         $this->_orderCollectionFactory  = $orderCollectionFactory;
         $this->_countryFactory          = $countryFactory;
         $this->_urlHelper               = $urlHelper;
+        $this->syncHelper               = $syncHelper;
     }
 
         /**
@@ -684,7 +690,7 @@ class Cart
         $sync_modified = null,
         $sync_deleted = null
     ) {
-        $this->_helper->saveEcommerceData(
+        $this->syncHelper->saveEcommerceData(
             $storeId,
             $entityId,
             \Ebizmarts\MailChimp\Helper\Data::IS_QUOTE,

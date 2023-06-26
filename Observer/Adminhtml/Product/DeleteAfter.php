@@ -6,7 +6,7 @@ use Magento\ConfigurableProduct\Model\ResourceModel\Product\Type\ConfigurableFac
 use Magento\Framework\Event\Observer;
 use Magento\Framework\Event\ObserverInterface;
 use Magento\ConfigurableProduct\Model\ResourceModel\Product\Type\Configurable;
-
+use Ebizmarts\MailChimp\Helper\Sync as SyncHelper;
 
 class DeleteAfter implements ObserverInterface
 {
@@ -18,18 +18,16 @@ class DeleteAfter implements ObserverInterface
      * @var Configurable
      */
     protected $configurable;
+    private $syncHelper;
 
-    /**
-     * @param \Ebizmarts\MailChimp\Helper\Data $helper
-     * @param Configurable $configurable
-     */
     public function __construct(
         \Ebizmarts\MailChimp\Helper\Data $helper,
-        Configurable $configurable
-
+        Configurable $configurable,
+        SyncHelper $syncHelper
     ) {
         $this->helper               = $helper;
         $this->configurable         = $configurable;
+        $this->syncHelper           = $syncHelper;
     }
     function execute(Observer $observer)
     {
@@ -52,7 +50,7 @@ class DeleteAfter implements ObserverInterface
     }
     protected function _updateProduct($entityId)
     {
-        $this->helper->markEcommerceAsDeleted($entityId, \Ebizmarts\MailChimp\Helper\Data::IS_PRODUCT);
+        $this->syncHelper->markEcommerceAsDeleted($entityId, \Ebizmarts\MailChimp\Helper\Data::IS_PRODUCT);
     }
 
 }
