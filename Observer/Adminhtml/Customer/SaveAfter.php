@@ -13,12 +13,18 @@
 
 namespace Ebizmarts\MailChimp\Observer\Adminhtml\Customer;
 
+use Ebizmarts\MailChimp\Helper\Sync as SyncHelper;
+
 class SaveAfter implements \Magento\Framework\Event\ObserverInterface
 {
     /**
      * @var \Ebizmarts\MailChimp\Helper\Data
      */
     protected $helper;
+    /**
+     * @var SyncHelper
+     */
+    private $syncHelper;
     /**
      * @var \Magento\Newsletter\Model\SubscriberFactory
      */
@@ -29,18 +35,20 @@ class SaveAfter implements \Magento\Framework\Event\ObserverInterface
     protected $interestGroupFactory;
 
     /**
-     * SaveAfter constructor.
      * @param \Ebizmarts\MailChimp\Helper\Data $helper
+     * @param SyncHelper $syncHelper
      * @param \Magento\Newsletter\Model\SubscriberFactory $subscriberFactory
      * @param \Ebizmarts\MailChimp\Model\MailChimpInterestGroupFactory $interestGroupFactory
      */
     public function __construct(
         \Ebizmarts\MailChimp\Helper\Data $helper,
+        SyncHelper $syncHelper,
         \Magento\Newsletter\Model\SubscriberFactory $subscriberFactory,
         \Ebizmarts\MailChimp\Model\MailChimpInterestGroupFactory $interestGroupFactory
     ) {
-    
+
         $this->helper               = $helper;
+        $this->syncHelper           = $syncHelper;
         $this->subscriberFactory    = $subscriberFactory;
         $this->interestGroupFactory = $interestGroupFactory;
     }
@@ -72,7 +80,7 @@ class SaveAfter implements \Magento\Framework\Event\ObserverInterface
                     $interestGroup->setStoreId($subscriber->getStoreId());
                     $interestGroup->setUpdatedAt($this->helper->getGmtDate());
                     $interestGroup->getResource()->save($interestGroup);
-                    $this->helper->markRegisterAsModified(
+                    $this->syncHelper->markRegisterAsModified(
                         $subscriber->getId(),
                         \Ebizmarts\MailChimp\Helper\Data::IS_SUBSCRIBER
                     );
@@ -93,12 +101,12 @@ class SaveAfter implements \Magento\Framework\Event\ObserverInterface
         } else {
             $subscriber->loadByEmail($customer->getEmail());
             if ($subscriber->getEmail() == $customer->getEmail()) {
-                $this->helper->markRegisterAsModified(
+                $this->syncHelper->markRegisterAsModified(
                     $subscriber->getId(),
                     \Ebizmarts\MailChimp\Helper\Data::IS_SUBSCRIBER
                 );
             }
         }
-        $this->helper->markRegisterAsModified($customer->getId(), \Ebizmarts\MailChimp\Helper\Data::IS_CUSTOMER);
+        $this->syncHelper->markRegisterAsModified($customer->getId(), \Ebizmarts\MailChimp\Helper\Data::IS_CUSTOMER);
     }
 }

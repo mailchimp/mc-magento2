@@ -13,6 +13,7 @@
 namespace Ebizmarts\MailChimp\Model\Api;
 
 use Symfony\Component\Config\Definition\Exception\Exception;
+use Ebizmarts\MailChimp\Helper\Sync as SyncHelper;
 
 class Cart
 {
@@ -29,6 +30,10 @@ class Cart
      * @var \Ebizmarts\MailChimp\Helper\Data
      */
     protected $_helper;
+    /**
+     * @var SyncHelper
+     */
+    private $syncHelper;
     /**
      * @var \Magento\Quote\Model\ResourceModel\Quote\CollectionFactory
      */
@@ -59,8 +64,8 @@ class Cart
     protected $_urlHelper;
 
     /**
-     * Cart constructor.
      * @param \Ebizmarts\MailChimp\Helper\Data $helper
+     * @param SyncHelper $syncHelper
      * @param \Magento\Quote\Model\ResourceModel\Quote\CollectionFactory $quoteColletcion
      * @param \Magento\Customer\Model\CustomerFactory $customerFactory
      * @param Product $apiProduct
@@ -71,6 +76,7 @@ class Cart
      */
     public function __construct(
         \Ebizmarts\MailChimp\Helper\Data $helper,
+        SyncHelper $syncHelper,
         \Magento\Quote\Model\ResourceModel\Quote\CollectionFactory $quoteColletcion,
         \Magento\Customer\Model\CustomerFactory $customerFactory,
         \Ebizmarts\MailChimp\Model\Api\Product $apiProduct,
@@ -81,6 +87,7 @@ class Cart
     ) {
 
         $this->_helper                  = $helper;
+        $this->syncHelper               = $syncHelper;
         $this->_quoteCollection         = $quoteColletcion;
         $this->_customerFactory         = $customerFactory;
         $this->_apiProduct              = $apiProduct;
@@ -684,7 +691,7 @@ class Cart
         $sync_modified = null,
         $sync_deleted = null
     ) {
-        $this->_helper->saveEcommerceData(
+        $this->syncHelper->saveEcommerceData(
             $storeId,
             $entityId,
             \Ebizmarts\MailChimp\Helper\Data::IS_QUOTE,
