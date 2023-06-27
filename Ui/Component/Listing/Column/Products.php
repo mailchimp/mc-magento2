@@ -73,6 +73,7 @@ class Products extends Column
     {
         if (isset($dataSource['data']['items'])) {
             foreach ($dataSource['data']['items'] as & $item) {
+                $this->_helper->log($item);
                 /**
                  * @var $product \Magento\Catalog\Model\Product
                  */

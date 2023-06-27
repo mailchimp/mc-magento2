@@ -154,4 +154,9 @@
             <column name="id"/>
         </constraint>
     </table>
+    <table name="catalog_product_entity">
+        <column xsi:type="varchar" name="mailchimp_sync_error" length="128" comment="Error on synchronization"/>
+        <column xsi:type="smallint" name="mailchimp_sent" padding="6" nullable="false" default="0"
+                comment="Sent to Mailchimp"/>
+    </table>
 </schema>

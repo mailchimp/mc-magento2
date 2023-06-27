@@ -149,5 +149,11 @@
     "constraint": {
       "PRIMARY": true
     }
-  }
+  },
+    "catalog_product_entity": {
+        "column": {
+            "mailchimp_sync_error": true,
+            "mailchimp_sent": true
+        }
+    }
 }
