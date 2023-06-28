@@ -80,6 +80,13 @@ class Products extends Column
                     if ($this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_PATH_ACTIVE, $product->getStoreId())) {
                         $sync = $item['mailchimp_sent'];
                         switch ($sync) {
+                            case \Ebizmarts\MailChimp\Helper\Data::NEVERSYNC:
+                                $url = $this->_assetRepository->getUrlWithParams(
+                                    'Ebizmarts_MailChimp::images/no.png',
+                                    $params
+                                );
+                                $text = __('Syncing');
+                                break;
                             case \Ebizmarts\MailChimp\Helper\Data::SYNCED:
                                 $url = $this->_assetRepository->getUrlWithParams(
                                     'Ebizmarts_MailChimp::images/yes.png',
