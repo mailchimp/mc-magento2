@@ -302,8 +302,6 @@ class Result
         } else {
             $mailchimpStore = $mailchimpStoreId;
         }
-        $chimpSync = $this->syncHelper->getChimpSyncEcommerce($mailchimpStore, $id, $type);
-
         $this->syncHelper->saveEcommerceData(
             $mailchimpStore,
             $id,
