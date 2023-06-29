@@ -187,6 +187,8 @@ class UpgradeData implements UpgradeDataInterface
             }
         }
         if (version_compare($context->getVersion(), '102.3.52') < 0) {
+            $setup->startSetup();
+            $connection = $this->_resource->getConnectionByName('default');
             $syncCollection = $this->syncCollectionFactory->create();
             $syncCollection->addFieldToFilter('type', ['eq'=>'ORD']);
             foreach($syncCollection as $item) {
@@ -199,6 +201,13 @@ class UpgradeData implements UpgradeDataInterface
                     $this->_helper->log($e->getMessage());
                 }
             }
+            $tableProducts = $setup->getTable('catalog_product_entity');
+            $tableEcommerce = $setup->getTable('mailchimp_sync_ecommerce');
+            $query = "UPDATE `$tableProducts` as A ";
+            $query.= "INNER JOIN `$tableEcommerce` as B ON A.`entity_id` = B.`related_id` ";
+            $query.= "SET A.`mailchimp_sync_error` = B.`mailchimp_sync_error`, A.`mailchimp_sent` = B.`mailchimp_sent` ";
+            $query.= "WHERE B.`type` = 'PRO'";
+            $connection->query($query);
         }
     }
 }
