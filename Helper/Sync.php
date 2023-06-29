@@ -132,7 +132,8 @@ class Sync extends AbstractHelper
                         $product->save();
                     }
                     break;
-            }        }
+            }
+        }
     }
     public function getChimpSyncEcommerce($storeId, $id, $type)
     {
