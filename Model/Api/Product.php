@@ -120,7 +120,6 @@ class Product
     public function _sendProducts($magentoStoreId)
     {
         $batchArray = [];
-        $counter = 0;
         $mailchimpStoreId = $this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_MAILCHIMP_STORE, $magentoStoreId);
         $this->includingTaxes = $this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_INCLUDING_TAXES, $magentoStoreId);
         $this->_markSpecialPrices($magentoStoreId, $mailchimpStoreId);
@@ -151,8 +150,7 @@ class Product
                 $data = $this->_buildNewProductRequest($product, $mailchimpStoreId, $magentoStoreId);
             }
             if (!empty($data)) {
-                $batchArray[$counter] = $data;
-                $counter++;
+                $batchArray[] = $data;
 
                 //update product delta
                 $this->_updateProduct($mailchimpStoreId, $product->getId());
