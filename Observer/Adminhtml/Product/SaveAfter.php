@@ -54,20 +54,23 @@ class SaveAfter implements \Magento\Framework\Event\ObserverInterface
             \Ebizmarts\MailChimp\Helper\Data::XML_MAILCHIMP_STORE,
             $product->getStoreId()
         );
+        $sync = $product->getSync();
         if ($product->getTypeId() == \Magento\Catalog\Model\Product\Type::TYPE_SIMPLE) {
             $parents = $this->configurable->getParentIdsByChild($product->getId());
             if (is_array($parents)) {
                 foreach ($parents as $parentid) {
-                    $this->_updateProduct($parentid);
+                    $this->_updateProduct($parentid, $sync);
                 }
             } elseif ($parents) {
-                $this->_updateProduct($parents);
+                $this->_updateProduct($parents, $sync);
             }
         }
-        $this->_updateProduct($product->getId());
+        $this->_updateProduct($product->getId(), $sync);
     }
-    protected function _updateProduct($entityId)
+    protected function _updateProduct($entityId ,$sync)
     {
-        $this->syncHelper->markRegisterAsModified($entityId, \Ebizmarts\MailChimp\Helper\Data::IS_PRODUCT);
+        if ($sync) {
+            $this->syncHelper->markRegisterAsModified($entityId, \Ebizmarts\MailChimp\Helper\Data::IS_PRODUCT);
+        }
     }
 }
