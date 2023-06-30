@@ -469,78 +469,82 @@ class Order
             $data["customer"]["last_name"] = $order->getCustomerLastname();
         }
         $billingAddress = $order->getBillingAddress();
-
-        if ($order->getCustomerIsGuest()) {
-            if ($billingAddress->getFirstname()) {
-                $data["customer"]["first_name"] = $billingAddress->getFirstname();
+        if ($billingAddress) {
+            if ($order->getCustomerIsGuest()) {
+                if ($billingAddress->getFirstname()) {
+                    $data["customer"]["first_name"] = $billingAddress->getFirstname();
+                }
+                if ($billingAddress->getLastname()) {
+                    $data["customer"]["last_name"] = $billingAddress->getLastname();
+                }
             }
-            if ($billingAddress->getLastname()) {
-                $data["customer"]["last_name"] = $billingAddress->getLastname();
+
+            $street = $billingAddress->getStreet();
+            $address = [];
+
+            if ($street[0]) {
+                $address["address1"] = $street[0];
+                $data['billing_address']["address1"] = $street[0];
             }
-        }
 
-        $street = $billingAddress->getStreet();
-        $address = [];
-
-        if ($street[0]) {
-            $address["address1"] = $street[0];
-            $data['billing_address']["address1"] = $street[0];
-        }
-
-        if (array_key_exists(1, $street)) {
-            $address["address2"] = $street[1];
-            $data['billing_address']["address2"] = $street[1];
-        }
-        if (array_key_exists(2, $street)) {
-            if (array_key_exists('address2',$address)) {
-                $address["address2"] = $address['address2'] . ", " . $street[2];
-                $data['billing_address']["address2"] = $data['billing_address']["address2"] . ", " . $street[2];
-            } else {
-                $address["address2"] = $street[2];
-                $data['billing_address']["address2"] = $street[2];
+            if (array_key_exists(1, $street)) {
+                $address["address2"] = $street[1];
+                $data['billing_address']["address2"] = $street[1];
             }
-        }
+            if (array_key_exists(2, $street)) {
+                if (array_key_exists('address2', $address)) {
+                    $address["address2"] = $address['address2'] . ", " . $street[2];
+                    $data['billing_address']["address2"] = $data['billing_address']["address2"] . ", " . $street[2];
+                } else {
+                    $address["address2"] = $street[2];
+                    $data['billing_address']["address2"] = $street[2];
+                }
+            }
 
-        if ($billingAddress->getCity()) {
-            $address["city"] = $billingAddress->getCity();
-            $data['billing_address']["city"] = $billingAddress->getCity();
-        }
+            if ($billingAddress->getCity()) {
+                $address["city"] = $billingAddress->getCity();
+                $data['billing_address']["city"] = $billingAddress->getCity();
+            }
 
-        if ($billingAddress->getRegion()) {
-            $address["province"] = $billingAddress->getRegion();
-            $data['billing_address']["province"] = $billingAddress->getRegion();
-        }
+            if ($billingAddress->getRegion()) {
+                $address["province"] = $billingAddress->getRegion();
+                $data['billing_address']["province"] = $billingAddress->getRegion();
+            }
 
-        if ($billingAddress->getRegionCode()) {
-            $address["province_code"] = $billingAddress->getRegionCode();
-            $data['billing_address']["province_code"] = $billingAddress->getRegionCode();
-        }
+            if ($billingAddress->getRegionCode()) {
+                $address["province_code"] = $billingAddress->getRegionCode();
+                $data['billing_address']["province_code"] = $billingAddress->getRegionCode();
+            }
 
-        if ($billingAddress->getPostcode()) {
-            $address["postal_code"] = $billingAddress->getPostcode();
-            $data['billing_address']["postal_code"] = $billingAddress->getPostcode();
-        }
+            if ($billingAddress->getPostcode()) {
+                $address["postal_code"] = $billingAddress->getPostcode();
+                $data['billing_address']["postal_code"] = $billingAddress->getPostcode();
+            }
 
-        if ($billingAddress->getCountryId()) {
-            /**
-             * @var $country \Magento\Directory\Model\Country
-             */
-            $country = $this->_countryFactory->create()->loadByCode($billingAddress->getCountryId());
-            $address["country"] = $data['billing_address']['country'] = $country->getName('en_US');
-            $address["country_code"] = $data['billing_address']['country_code'] = $billingAddress->getCountryId();
-        }
-        if (count($address)) {
-            $data["customer"]["address"] = $address;
-        }
+            if ($billingAddress->getCountryId()) {
+                /**
+                 * @var $country \Magento\Directory\Model\Country
+                 */
+                $country = $this->_countryFactory->create()->loadByCode($billingAddress->getCountryId());
+                $address["country"] = $data['billing_address']['country'] = $country->getName('en_US');
+                $address["country_code"] = $data['billing_address']['country_code'] = $billingAddress->getCountryId();
+            }
+            if (count($address)) {
+                $data["customer"]["address"] = $address;
+            }
 
-        if ($billingAddress->getName()) {
-            $data['billing_address']['name'] = $billingAddress->getName();
-        }
+            if ($billingAddress->getName()) {
+                $data['billing_address']['name'] = $billingAddress->getName();
+            }
 
-        //company
-        if ($billingAddress->getCompany()) {
-            $data["customer"]["company"] = $billingAddress->getCompany();
-            $data["billing_address"]["company"] = $billingAddress->getCompany();
+            //company
+            if ($billingAddress->getCompany()) {
+                $data["customer"]["company"] = $billingAddress->getCompany();
+                $data["billing_address"]["company"] = $billingAddress->getCompany();
+            }
+        } else {
+            $this->_helper->log("Order [".$order->getId()."] as no billing address");
+            return "";
         }
         $shippingAddress = $order->getShippingAddress();
         if ($shippingAddress) {
