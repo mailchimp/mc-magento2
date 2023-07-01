@@ -1,5 +1,21 @@
 # Change Log
 
+## [101.2.52](https://github.com/mailchimp/mc-magento2/tree/101.2.52)
+
+[Full Changelog](https://github.com/mailchimp/mc-magento2/compare/101.2.51...101.2.52)
+
+**Implemented enhancements:**
+
+- Optimize the product grid to avoid access the ecommerce table [\#1714](https://github.com/mailchimp/mc-magento2/issues/1714)
+- Optimize the order grid to avoid access the ecommerce table [\#1708](https://github.com/mailchimp/mc-magento2/issues/1708)
+- Add an option in the configuration page to modify the timeout in the Mailchimp api connections [\#1697](https://github.com/mailchimp/mc-magento2/issues/1697)
+- Add links to campaign and member in mailchimp in the order grid [\#1690](https://github.com/mailchimp/mc-magento2/issues/1690)
+
+**Fixed bugs:**
+
+- The sync of orders fails if the order has no billing address [\#1720](https://github.com/mailchimp/mc-magento2/issues/1720)
+
+
 ## [101.2.51](https://github.com/mailchimp/mc-magento2/tree/101.2.51)
 
 [Full Changelog](https://github.com/mailchimp/mc-magento2/compare/101.2.50...101.2.51)
