@@ -4,7 +4,7 @@ namespace Ebizmarts\MailChimp\Setup\Patch\Data;
 
 use Magento\Framework\Setup\ModuleDataSetupInterface;
 use Magento\Framework\Setup\Patch\DataPatchInterface;
-use Magento\Sales\Model\OrderFactory;
+use Magento\Sales\Api\OrderRepositoryInterface;
 use Ebizmarts\MailChimp\Model\ResourceModel\MailChimpSyncEcommerce\CollectionFactory as SyncFactory;
 use Ebizmarts\MailChimp\Helper\Data;
 
@@ -19,9 +19,9 @@ class Migrate452 implements DataPatchInterface
      */
     private $syncFactory;
     /**
-     * @var OrderFactory
+     * @var OrderRepositoryInterface
      */
-    private $orderFactory;
+    private $orderRepository;
     /**
      * @var Data
      */
@@ -30,19 +30,19 @@ class Migrate452 implements DataPatchInterface
     /**
      * @param ModuleDataSetupInterface $moduleDataSetup
      * @param SyncFactory $syncFactory
-     * @param OrderFactory $orderFactory
+     * @param OrderRepositoryInterface $orderRepository
      * @param Data $helper
      */
     public function __construct(
         ModuleDataSetupInterface $moduleDataSetup,
         SyncFactory $syncFactory,
-        OrderFactory $orderFactory,
+        OrderRepositoryInterface $orderRepository,
         Data $helper
     )
     {
         $this->moduleDataSetup = $moduleDataSetup;
         $this->syncFactory = $syncFactory;
-        $this->orderFactory = $orderFactory;
+        $this->orderRepository = $orderRepository;
         $this->helper = $helper;
     }
     public function apply()
@@ -53,10 +53,10 @@ class Migrate452 implements DataPatchInterface
         foreach ($syncCollection as $item) {
             $orderId = $item->getRelatedId();
             try {
-                $order = $this->orderFactory->create()->loadByAttribute('entity_id', $orderId);
+                $order = $this->orderRepository->get($orderId);
                 $order->setMailchimpSent($item->getMailchimpSent());
                 $order->setMailchimpSyncError($item->getMailchimpSyncError());
-                $order->save();
+                $this->orderRepository->save($order);
             } catch (\Exception $e) {
                 $this->helper->log($e->getMessage(). " for order [$orderId]");
             }
