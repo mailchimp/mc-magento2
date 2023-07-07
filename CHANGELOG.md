@@ -1,5 +1,13 @@
 # Changelog
 
+## [103.4.53](https://github.com/mailchimp/mc-magento2/tree/103.4.53)
+
+[Full Changelog](https://github.com/mailchimp/mc-magento2/compare/103.4.52...103.4.53)
+
+**Fixed bugs:**
+
+- Cannot upgrade to latest version due to patch error [\#1732](https://github.com/mailchimp/mc-magento2/issues/1732)
+
 ## [103.4.52](https://github.com/mailchimp/mc-magento2/tree/103.4.52)
 
 [Full Changelog](https://github.com/mailchimp/mc-magento2/compare/103.4.51...103.4.52)
