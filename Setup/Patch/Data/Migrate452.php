@@ -76,7 +76,6 @@ class Migrate452 implements DataPatchInterface
             $query .= "INNER JOIN `$tableEcommerce` as B ON A.`entity_id` = B.`related_id` ";
             $query .= "SET A.`mailchimp_sync_error` = B.`mailchimp_sync_error`, A.`mailchimp_sent` = B.`mailchimp_sent` ";
             $query .= "WHERE B.`type` = 'PRO'";
-            $this->helper->log($query);
             $this->moduleDataSetup->getConnection()->query($query);
         } catch (\Exception $e) {
             $this->helper->log($e->getMessage());
