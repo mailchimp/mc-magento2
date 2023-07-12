@@ -48,27 +48,33 @@ class Migrate452 implements DataPatchInterface
     public function apply()
     {
         $this->moduleDataSetup->getConnection()->startSetup();
-        $syncCollection = $this->syncFactory->create();
-        $syncCollection->addFieldToFilter('type', ['eq'=>'ORD']);
-        foreach ($syncCollection as $item) {
-            $orderId = $item->getRelatedId();
-            try {
-                $order = $this->orderRepository->get($orderId);
-                if ($order && $order->getEntityId()==$orderId) {
-                    $order->setMailchimpSent($item->getMailchimpSent());
-                    $order->setMailchimpSyncError($item->getMailchimpSyncError());
-                    $this->orderRepository->save($order);
-                } else {
-                    $this->helper->log("Order with id [$orderId] not found");
-                }
-            } catch (\Exception $e) {
-                $this->helper->log($e->getMessage(). " for order [$orderId]");
-            }
+        try {
+            $tableOrders = $this->moduleDataSetup->getTable('sales_order');
+            $tableEcommerce = $this->moduleDataSetup->getTable('mailchimp_sync_ecommerce');
+            $query = "UPDATE `$tableOrders` as A ";
+            $query .= "INNER JOIN `$tableEcommerce` as B ON A.`entity_id` = B.`related_id` ";
+            $query .= "SET A.`mailchimp_sync_error` = B.`mailchimp_sync_error`, A.`mailchimp_sent` = B.`mailchimp_sent` ";
+            $query .= "WHERE B.`type` = 'ORD'";
+            $this->moduleDataSetup->getConnection()->query($query);
+
+        } catch(\Exception $e) {
+            $this->helper->log($e->getMessage());
+            throw new \Exception($e->getMessage());
         }
-        // UPDATE catalog_product_entity as A
-        // INNER JOIN mailchimp_sync_ecommerce as B ON A.entity_id = B.related_id
-        // SET A.mailchimp_sync_error = B.mailchimp_sync_error, A.mailchimp_sent = B.mailchimp_sent
-        // WHERE B.type = 'PRO';
+        try {
+            $tableOrdersGrid = $this->moduleDataSetup->getTable('sales_order_grid');
+            $tableEcommerce = $this->moduleDataSetup->getTable('mailchimp_sync_ecommerce');
+            $query = "UPDATE `$tableOrdersGrid` as A ";
+            $query .= "INNER JOIN `$tableEcommerce` as B ON A.`entity_id` = B.`related_id` ";
+            $query .= "SET A.`mailchimp_sync_error` = B.`mailchimp_sync_error`, A.`mailchimp_sent` = B.`mailchimp_sent` ";
+            $query .= "WHERE B.`type` = 'ORD'";
+            $this->moduleDataSetup->getConnection()->query($query);
+
+        } catch(\Exception $e) {
+            $this->helper->log($e->getMessage());
+            throw new \Exception($e->getMessage());
+        }
+
         try {
             $tableProducts = $this->moduleDataSetup->getTable('catalog_product_entity');
             $tableEcommerce = $this->moduleDataSetup->getTable('mailchimp_sync_ecommerce');
