@@ -1,5 +1,13 @@
 # Change Log
 
+## [102.3.53-p1](https://github.com/mailchimp/mc-magento2/tree/102.3.53-p1)
+
+[Full Changelog](https://github.com/mailchimp/mc-magento2/compare/102.3.52-p1...102.3.53-p1)
+
+**Fixed bugs:**
+
+- Cannot upgrade to latest version due to patch error [\#1732](https://github.com/mailchimp/mc-magento2/issues/1732)
+
 ## [102.3.52-p1](https://github.com/mailchimp/mc-magento2/tree/102.3.52-p1)
 
 [Full Changelog](https://github.com/mailchimp/mc-magento2/compare/102.3.51-p1...102.3.52-p1)
