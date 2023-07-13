@@ -80,8 +80,11 @@ define(
                         self._changeAbandonedCart();
                     }
                 });
-
-
+                var ecommerceEnabled = $('#mailchimp_ecommerce_active').find(':selected').val();
+                var abandonedCartEnabled = $('#mailchimp_abandonedcart_active').find(':selected').val();
+                if (ecommerceEnabled == 0 && abandonedCartEnabled == 1) {
+                    self._changeAbandonedCart();
+                }
             },
             _changeEcommerce: function () {
                 var self = this;
