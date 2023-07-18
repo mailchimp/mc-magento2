@@ -89,6 +89,8 @@ class Migrate452 implements DataPatchInterface
         }
 
         $this->moduleDataSetup->getConnection()->endSetup();
+
+        return $this;
     }
 
     public static function getDependencies()

@@ -52,10 +52,10 @@ class Member extends Action
             $member = $api->lists->members->get($listId, hash('md5', strtolower($email)));
             $memberId = $member['contact_id'];
             $url = $this->urlBuilder->getUrl('https://admin.mailchimp.com/audience/contact-profile') . "?contact_id=$memberId";
-            $this->_redirect($url);
+            return $this->_redirect($url);
         } catch(\Exception $e) {
             $this->messageManager->addErrorMessage($e->getMessage());
-            $this->_redirect($this->urlBuilder->getUrl('sales/order'));
+            return $this->_redirect($this->urlBuilder->getUrl('sales/order'));
         }
     }
     protected function _isAllowed()

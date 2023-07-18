@@ -108,7 +108,8 @@ class Success extends \Magento\Framework\App\Action\Action
             $this->_helper->log($e->getMessage());
         }
         $this->messageManager->addSuccessMessage(__('Thanks for sharing your interest with us'));
-        $this->_redirect($this->_helper->getBaserUrl(
+
+        return $this->_redirect($this->_helper->getBaserUrl(
             $order->getStoreId(),
             \Magento\Framework\UrlInterface::URL_TYPE_WEB
         ));
