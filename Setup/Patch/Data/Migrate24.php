@@ -36,6 +36,8 @@ class Migrate24 implements DataPatchInterface, PatchVersionInterface
         $this->moduleDataSetup->getConnection()->query($query);
 
         $this->moduleDataSetup->getConnection()->endSetup();
+
+        return $this;
     }
     public static function getDependencies()
     {

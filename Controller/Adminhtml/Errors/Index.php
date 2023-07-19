@@ -28,9 +28,9 @@ class Index extends \Magento\Backend\App\Action
         \Magento\Backend\App\Action\Context $context,
         \Magento\Framework\View\Result\PageFactory $resultPageFactory
     ) {
-
         $this->resultPageFactory = $resultPageFactory;
-        return parent::__construct($context);
+
+        parent::__construct($context);
     }
     public function execute()
     {

@@ -48,10 +48,10 @@ class Migrate35 implements DataPatchInterface, PatchVersionInterface
          */
         foreach ($configCollection as $config) {
             try {
-                $config->setValue($this->_helper->encrypt($config->getvalue()));
+                $config->setValue($this->helper->encrypt($config->getvalue()));
                 $config->getResource()->save($config);
             } catch (\Exception $e) {
-                $this->_helper->log($e->getMessage());
+                $this->helper->log($e->getMessage());
             }
         }
         $configCollection = $this->configFactory->create();
@@ -64,6 +64,8 @@ class Migrate35 implements DataPatchInterface, PatchVersionInterface
         }
 
         $this->moduleDataSetup->getConnection()->endSetup();
+
+        return $this;
     }
     public static function getDependencies()
     {

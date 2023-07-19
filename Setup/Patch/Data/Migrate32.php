@@ -75,6 +75,8 @@ class Migrate32 implements DataPatchInterface, PatchVersionInterface
             }
         }
         $this->moduleDataSetup->getConnection()->endSetup();
+
+        return $this;
     }
     public static function getDependencies()
     {

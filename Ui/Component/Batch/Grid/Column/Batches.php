@@ -53,7 +53,7 @@ class Batches extends Column
         array $components = [],
         array $data = []
     ) {
-        $this->_helper = $helper;
+        $this->helper = $helper;
         $this->mailChimpSyncB = $mailChimpSyncB;
         $this->urlBuilder = $urlBuilder;
         parent::__construct($context, $uiComponentFactory, $components, $data);
@@ -96,7 +96,7 @@ class Batches extends Column
     private function getMCStoreNameById($mailchimp_store_id, $magentoStoreId)
     {
         if (!key_exists($mailchimp_store_id, $this->stores)) {
-            $api = $this->_helper->getApi($magentoStoreId);
+            $api = $this->helper->getApi($magentoStoreId);
             $store = $api->ecommerce->stores->get($mailchimp_store_id);
             $this->stores[$mailchimp_store_id] = $store['name'];
         }

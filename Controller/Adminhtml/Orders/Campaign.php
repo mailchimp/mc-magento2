@@ -50,10 +50,10 @@ class Campaign extends Action
             $campaign = $api->campaigns->get($order->getMailchimpCampaignId());
             $webId = $campaign['web_id'];
             $url = $this->urlBuilder->getUrl('https://admin.mailchimp.com/reports/summary') . "?id=$webId";
-            $this->_redirect($url);
+            return $this->_redirect($url);
         } catch(\Exception $e) {
             $this->messageManager->addErrorMessage($e->getMessage());
-            $this->_redirect($this->urlBuilder->getUrl('sales/order'));
+            return $this->_redirect($this->urlBuilder->getUrl('sales/order'));
         }
     }
     protected function _isAllowed()
