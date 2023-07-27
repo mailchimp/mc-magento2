@@ -33,7 +33,7 @@ class Subscriber
         \Ebizmarts\MailChimp\Helper\Data $helper,
         \Magento\Store\Model\StoreManagerInterface $storeManager
     ) {
-    
+
         $this->_helper          = $helper;
         $this->_storeManager    = $storeManager;
     }
@@ -100,6 +100,27 @@ class Subscriber
                 $this->_helper->log($exception->getMessage());
             }
         }
+        return $subscriber;
+    }
+    /**
+     * @param \Magento\Newsletter\Model\Subscriber $subscriber
+     * @param $customerId
+     * @param $websiteId
+     * @return \Magento\Newsletter\Model\Subscriber
+     */
+    public function afterLoadByCustomer(\Magento\Newsletter\Model\Subscriber $subscriber, $customerId, $websiteId)
+    {
+        try {
+            if (!$this->_helper->getConfigValue(
+                \Ebizmarts\MailChimp\Helper\Data::XML_MAGENTO_MAIL,
+                $subscriber->getStoreId()
+            )) {
+                $subscriber->setImportMode(true);
+            }
+        } catch (\Exception $exception) {
+            $this->_helper->log($exception->getMessage());
+        }
+
         return $subscriber;
     }
 }
