@@ -81,7 +81,7 @@ class Success extends \Magento\Framework\App\Action\Action
         $subscriber = $this->_subscriberFactory->create();
         $interestGroup = $this->_interestGroupFactory->create();
         try {
-            $subscriber->loadBySubscriberEmail($order->getCustomerEmail());
+            $subscriber->loadBySubscriberEmail($order->getCustomerEmail(), $order->getStoreId());
             if ($subscriber->getEmail()==$order->getCustomerEmail()) {
                 if ($subscriber->getStatus()==\Magento\Newsletter\Model\Subscriber::STATUS_UNSUBSCRIBED) {
                     $subscriber->subscribe($subscriber->getEmail());
@@ -96,7 +96,7 @@ class Success extends \Magento\Framework\App\Action\Action
                 $this->_updateSubscriber($listId, $subscriber->getId(), $this->_helper->getGmtDate(), '', 1);
             } else {
                 $this->_subscriberFactory->create()->subscribe($order->getCustomerEmail());
-                $subscriber->loadBySubscriberEmail($order->getCustomerEmail());
+                $subscriber->loadBySubscriberEmail($order->getCustomerEmail(), $order->getStoreId());
                 $interestGroup->getBySubscriberIdStoreId($subscriber->getSubscriberId(), $subscriber->getStoreId());
                 $interestGroup->setGroupdata($this->_helper->serialize($params));
                 $interestGroup->setSubscriberId($subscriber->getSubscriberId());

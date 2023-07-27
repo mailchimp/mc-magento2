@@ -68,7 +68,7 @@ class Success extends \Magento\Framework\View\Element\Template
          * @var $subscriber \Magento\Newsletter\Model\Subscriber
          */
         $subscriber = $this->_subscriberFactory->create();
-        $subscriber->loadBySubscriberEmail($order->getCustomerEmail());
+        $subscriber->loadBySubscriberEmail($order->getCustomerEmail(), $order->getStoreId());
 
         return $this->_helper->getSubscriberInterest($subscriber->getSubscriberId(), $subscriber->getStoreId());
     }
