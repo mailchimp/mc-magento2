@@ -71,7 +71,7 @@ class SaveAfter implements \Magento\Framework\Event\ObserverInterface
             }
             $interestGroup = $this->interestGroupFactory->create();
             try {
-                $subscriber->loadByEmail($customer->getEmail());
+                $subscriber->loadBySubscriberEmail($customer->getEmail());
                 if ($subscriber->getEmail() == $customer->getEmail()) {
                     $interestGroup->getBySubscriberIdStoreId($subscriber->getSubscriberId(), $subscriber->getStoreId());
                     $interestGroup->setGroupdata($this->helper->serialize($params));
@@ -85,7 +85,7 @@ class SaveAfter implements \Magento\Framework\Event\ObserverInterface
                     );
                 } else {
                     $this->subscriberFactory->create()->subscribe($customer->getEmail());
-                    $subscriber->loadByEmail($customer->getEmail());
+                    $subscriber->loadBySubscriberEmail($customer->getEmail());
                     $interestGroup->getBySubscriberIdStoreId($subscriber->getSubscriberId(), $subscriber->getStoreId());
                     $interestGroup->setGroupdata($this->helper->serialize($params));
                     $interestGroup->setSubscriberId($subscriber->getSubscriberId());
@@ -98,7 +98,7 @@ class SaveAfter implements \Magento\Framework\Event\ObserverInterface
                 $this->helper->log($params);
             }
         } else {
-            $subscriber->loadByEmail($customer->getEmail());
+            $subscriber->loadBySubscriberEmail($customer->getEmail());
             if ($subscriber->getEmail() == $customer->getEmail()) {
                 $this->syncHelper->markRegisterAsModified(
                     $subscriber->getId(),

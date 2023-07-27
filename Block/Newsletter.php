@@ -43,7 +43,7 @@ class Newsletter extends \Magento\Framework\View\Element\Template
         \Ebizmarts\MailChimp\Helper\Data $helper,
         array $data
     ) {
-    
+
         parent::__construct($context, $data);
         $this->_helper  = $helper;
         $this->subscriberFactory = $subscriberFactory;
@@ -53,7 +53,7 @@ class Newsletter extends \Magento\Framework\View\Element\Template
     public function getInterest()
     {
         $subscriber = $this->subscriberFactory->create();
-        $subscriber->loadByCustomerId($this->customerSession->getCustomerId());
+        $subscriber->loadByCustomer($this->customerSession->getCustomerId());
 //        $subscriber = $this->getSubscriptionObject();
         return $this->_helper->getSubscriberInterest($subscriber->getSubscriberId(), $subscriber->getStoreId());
     }

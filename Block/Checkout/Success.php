@@ -52,7 +52,7 @@ class Success extends \Magento\Framework\View\Element\Template
         \Ebizmarts\MailChimp\Model\MailChimpInterestGroupFactory $interestGroupFactory,
         array $data
     ) {
-    
+
         parent::__construct($context, $data);
         $this->_checkoutSession     = $checkoutSession;
         $this->_helper              = $helper;
@@ -68,7 +68,7 @@ class Success extends \Magento\Framework\View\Element\Template
          * @var $subscriber \Magento\Newsletter\Model\Subscriber
          */
         $subscriber = $this->_subscriberFactory->create();
-        $subscriber->loadByEmail($order->getCustomerEmail());
+        $subscriber->loadBySubscriberEmail($order->getCustomerEmail());
 
         return $this->_helper->getSubscriberInterest($subscriber->getSubscriberId(), $subscriber->getStoreId());
     }

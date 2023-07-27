@@ -185,7 +185,7 @@ class Customer
     protected function isSubscriber(\Magento\Customer\Model\Customer $customer)
     {
         $subscriber = $this->subscriberFactory->create();
-        $subscriber->loadByEmail($customer->getEmail());
+        $subscriber->loadBySubscriberEmail($customer->getEmail());
         if ($subscriber->getEmail() == $customer->getEmail()) {
             if ($subscriber->getStatus() === \Magento\Newsletter\Model\Subscriber::STATUS_SUBSCRIBED) {
                 return true;

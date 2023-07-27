@@ -44,7 +44,7 @@ class Customer extends \Magento\Backend\Block\Template
         \Magento\Framework\Registry $registry,
         array $data
     ) {
-    
+
         parent::__construct($context, $data);
         $this->helper               = $helper;
         $this->subscriberFactory    = $subscriberFactory;
@@ -55,7 +55,7 @@ class Customer extends \Magento\Backend\Block\Template
     {
         $subscriber = $this->subscriberFactory->create();
         $customerId = $this->registry->registry(\Magento\Customer\Controller\RegistryConstants::CURRENT_CUSTOMER_ID);
-        $subscriber->loadByCustomerId($customerId);
+        $subscriber->loadByCustomer($customerId);
         return $this->helper->getSubscriberInterest($subscriber->getSubscriberId(), $subscriber->getStoreId());
     }
 }

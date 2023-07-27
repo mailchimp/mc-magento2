@@ -284,7 +284,7 @@ class Webhook
                     }
                     $serializedGroups = $this->_helper->serialize($groups);
                     $subscriber = $this->_subscriberFactory->create();
-                    $subscriber->loadByCustomerId($customer->getId());
+                    $subscriber->loadByCustomer($customer->getId());
                     $interestGroup = $this->interestGroupFactory->create();
                     if ($subscriber->getEmail()==$customer->getEmail()) {
                         $interestGroup->getBySubscriberIdStoreId($subscriber->getSubscriberId(), $subscriber->getStoreId());
@@ -296,7 +296,7 @@ class Webhook
                         $listId = $this->_helper->getGeneralList($subscriber->getStoreId());
                     } else {
                         $this->_subscriberFactory->create()->subscribe($customer->getEmail());
-                        $subscriber->loadByEmail($customer->getEmail());
+                        $subscriber->loadBySubscriberEmail($customer->getEmail());
                         $interestGroup->getBySubscriberIdStoreId($subscriber->getSubscriberId(), $subscriber->getStoreId());
                         $interestGroup->setGroupdata($serializedGroups);
                         $interestGroup->setSubscriberId($subscriber->getSubscriberId());
