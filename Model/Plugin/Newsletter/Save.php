@@ -80,7 +80,7 @@ class Save
         $email = $customer->getEmail();
 
         try {
-            $subscriber->loadByCustomer($this->customerSession->getCustomerId());
+            $subscriber->loadByCustomer($customer->getId(), $customer->getStoreId());
             if ($subscriber->getEmail()==$email) {
                 $interestGroup->getBySubscriberIdStoreId($subscriber->getSubscriberId(), $subscriber->getStoreId());
                 $interestGroup->setGroupdata($this->helper->serialize($params));

@@ -296,7 +296,7 @@ class Webhook
                         $listId = $this->_helper->getGeneralList($subscriber->getStoreId());
                     } else {
                         $this->_subscriberFactory->create()->subscribe($customer->getEmail());
-                        $subscriber->loadBySubscriberEmail($customer->getEmail());
+                        $subscriber->loadBySubscriberEmail($customer->getEmail(), $customer->getStoreId());
                         $interestGroup->getBySubscriberIdStoreId($subscriber->getSubscriberId(), $subscriber->getStoreId());
                         $interestGroup->setGroupdata($serializedGroups);
                         $interestGroup->setSubscriberId($subscriber->getSubscriberId());
