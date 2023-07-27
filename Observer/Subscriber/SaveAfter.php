@@ -65,7 +65,7 @@ class SaveAfter implements \Magento\Framework\Event\ObserverInterface
         if ($isCustomer) {
             $subscriberOld = $factory->loadBySubscriberEmail($subscriber->getCustomerId(), $subscriber->getStoreId());
         }
-        if ($this->_helper->isMailChimpEnabled($subscriberOld->getStoreId())&&$isCustomer&&
+        if ($this->_helper->isMailChimpEnabled($subscriber->getStoreId())&&$isCustomer&&
             $subscriberOld->getEmail()&&$subscriber->getEmail()!=$subscriberOld->getEmail()) {
             $api = $this->_helper->getApi($subscriberOld->getStoreId());
             $mergeVars = $this->_helper->getMergeVarsBySubscriber($subscriberOld, $subscriberOld->getEmail());
