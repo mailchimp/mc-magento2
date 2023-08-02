@@ -80,7 +80,7 @@ class Save
         $email = $customer->getEmail();
 
         try {
-            $subscriber->loadByCustomerId($this->customerSession->getCustomerId());
+            $subscriber->loadByCustomer($customer->getId(), $customer->getStoreId());
             if ($subscriber->getEmail()==$email) {
                 $interestGroup->getBySubscriberIdStoreId($subscriber->getSubscriberId(), $subscriber->getStoreId());
                 $interestGroup->setGroupdata($this->helper->serialize($params));
@@ -92,7 +92,7 @@ class Save
                 $this->_updateSubscriber($listId, $subscriber->getId(), $this->helper->getGmtDate(), null, 1);
             } else {
                 $this->subscriberFactory->create()->subscribe($email);
-                $subscriber->loadByEmail($email);
+                $subscriber->loadBySubscriberEmail($email, $customer->getStoreId());
                 $interestGroup->getBySubscriberIdStoreId($subscriber->getSubscriberId(), $subscriber->getStoreId());
                 $interestGroup->setGroupdata($this->helper->serialize($params));
                 $interestGroup->setSubscriberId($subscriber->getSubscriberId());

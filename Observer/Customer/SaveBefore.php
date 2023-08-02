@@ -70,7 +70,7 @@ class SaveBefore implements \Magento\Framework\Event\ObserverInterface
                 );
             }
             $subscriber = $this->subscriberFactory->create();
-            $subscriber->loadByEmail($customer->getEmail());
+            $subscriber->loadBySubscriberEmail($customer->getEmail(), $customer->getStoreId());
             if ($subscriber->getEmail() == $customer->getEmail()) {
                 $this->syncHelper->markRegisterAsModified(
                     $subscriber->getId(),

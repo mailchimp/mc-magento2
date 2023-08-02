@@ -74,7 +74,7 @@ class SubscriptionManager
     ) {
         if ($this->_helper->isMailChimpEnabled($storeId)) {
 
-            $subscriber = $this->_subscriberFactory->create()->loadByCustomerId($customerId);
+            $subscriber = $this->_subscriberFactory->create()->loadByCustomer($customerId, $storeId);
             if ($subscriber->isSubscribed()) {
                 $api = $this->_helper->getApi($storeId);
                 try {
@@ -107,7 +107,7 @@ class SubscriptionManager
     ) {
         if ($this->_helper->isMailChimpEnabled($storeId)) {
 
-            $subscriber = $this->_subscriberFactory->create()->loadByCustomerId($customerId);
+            $subscriber = $this->_subscriberFactory->create()->loadByCustomer($customerId, $storeId);
             if (!$subscriber->isSubscribed()) {
                 if (!$this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_MAGENTO_MAIL, $storeId)) {
                     $subscriber->setImportMode(true);
