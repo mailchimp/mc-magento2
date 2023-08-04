@@ -122,7 +122,8 @@ class Monkey extends Column
                 $sync = $item['mailchimp_sent'];
                 $error = $item['mailchimp_sync_error'];
 
-                $order = $this->_orderFactory->create()->loadByIncrementId($orderId);
+                $order = $orderMap[$orderId]
+                    ?? $this->_orderFactory->create()->loadByIncrementId($orderId); // Backwards Compatibility
                 $menu = false;
                 $params = ['_secure' => $this->_requestInterfase->isSecure()];
                 $storeId = $order->getStoreId();
@@ -239,7 +240,7 @@ class Monkey extends Column
             return [];
         }
 
-        return array_column($dataSource['data']['items'], 'increment_id');
+        return array_filter(array_unique(array_column($dataSource['data']['items'], 'increment_id')));
     }
 
     /**
@@ -248,6 +249,10 @@ class Monkey extends Column
      */
     private function getOrderDataForIncrementIds(array $incrementIds): array
     {
+        if (empty($incrementIds)) {
+            return [];
+        }
+
         $orderCollection = $this->orderCollectionFactory->create();
         $orderCollection->getSelect()->columns(['entity_id', 'increment_id', 'store_id']);
         $orderCollection->addAttributeToFilter(
