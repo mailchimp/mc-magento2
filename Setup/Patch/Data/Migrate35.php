@@ -2,10 +2,10 @@
 namespace Ebizmarts\MailChimp\Setup\Patch\Data;
 
 use Ebizmarts\MailChimp\Helper\Data;
+use Magento\Config\Model\ResourceModel\Config\Data\CollectionFactory as ConfigFactory;
 use Magento\Framework\Setup\ModuleDataSetupInterface;
 use Magento\Framework\Setup\Patch\DataPatchInterface;
 use Magento\Framework\Setup\Patch\PatchVersionInterface;
-use Magento\Config\Model\ResourceModel\Config\Data\CollectionFactory as ConfigFactory;
 
 class Migrate35 implements DataPatchInterface, PatchVersionInterface
 {
@@ -31,8 +31,7 @@ class Migrate35 implements DataPatchInterface, PatchVersionInterface
         ModuleDataSetupInterface $moduleDataSetup,
         Data $helper,
         ConfigFactory $configFactory
-    )
-    {
+    ) {
         $this->moduleDataSetup = $moduleDataSetup;
         $this->helper = $helper;
         $this->configFactory = $configFactory;
@@ -67,14 +66,17 @@ class Migrate35 implements DataPatchInterface, PatchVersionInterface
 
         return $this;
     }
+
     public static function getDependencies()
     {
         return [];
     }
+
     public function getAliases()
     {
         return [];
     }
+
     public static function getVersion()
     {
         return '102.3.35';

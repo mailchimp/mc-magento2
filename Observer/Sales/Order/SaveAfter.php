@@ -1,21 +1,8 @@
 <?php
-/**
- * mc-magento2 Magento Component
- *
- * @category Ebizmarts
- * @package mc-magento2
- * @author Ebizmarts Team <info@ebizmarts.com>
- * @copyright Ebizmarts (http://ebizmarts.com)
- * @license     http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
- * @date: 2/15/17 3:38 PM
- * @file: SaveAfter.php
- */
 
 namespace Ebizmarts\MailChimp\Observer\Sales\Order;
 
-use Magento\Framework\Event\Observer;
 use Ebizmarts\MailChimp\Helper\Sync as SyncHelper;
-
 
 class SaveAfter implements \Magento\Framework\Event\ObserverInterface
 {
@@ -36,9 +23,8 @@ class SaveAfter implements \Magento\Framework\Event\ObserverInterface
         \Ebizmarts\MailChimp\Helper\Data $helper,
         SyncHelper $syncHelper
     ) {
-
-        $this->_helper      = $helper;
-        $this->syncHelper   = $syncHelper;
+        $this->_helper = $helper;
+        $this->syncHelper = $syncHelper;
     }
 
     public function execute(\Magento\Framework\Event\Observer $observer)

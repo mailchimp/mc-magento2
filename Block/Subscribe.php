@@ -2,8 +2,8 @@
 
 namespace Ebizmarts\MailChimp\Block;
 
+use Ebizmarts\MailChimp\Helper\Data as MailchimpHelper;
 use Magento\Framework\View\Element\Template;
-use \Ebizmarts\MailChimp\Helper\Data as MailchimpHelper;
 
 class Subscribe extends \Magento\Newsletter\Block\Subscribe
 {
@@ -25,8 +25,7 @@ class Subscribe extends \Magento\Newsletter\Block\Subscribe
         Template\Context $context,
         MailchimpHelper $helper,
         array $data = []
-    )
-    {
+    ) {
         parent::__construct($context, $data);
         $this->context = $context;
         $this->helper = $helper;
@@ -34,8 +33,8 @@ class Subscribe extends \Magento\Newsletter\Block\Subscribe
 
     public function getPopupUrl()
     {
-
         $storeId = $this->context->getStoreManager()->getStore()->getId();
-        return $this->helper->getConfigValue(MailchimpHelper::XML_POPUP_URL,$storeId);
+
+        return $this->helper->getConfigValue(MailchimpHelper::XML_POPUP_URL, $storeId);
     }
 }

@@ -1,15 +1,4 @@
 <?php
-/**
- * mc-magento2 Magento Component
- *
- * @category Ebizmarts
- * @package mc-magento2
- * @author Ebizmarts Team <info@ebizmarts.com>
- * @copyright Ebizmarts (http://ebizmarts.com)
- * @license     http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
- * @date: 4/10/17 4:04 PM
- * @file: Form.php
- */
 
 namespace Ebizmarts\MailChimp\Block\Adminhtml\Stores\Edit;
 
@@ -23,7 +12,7 @@ class Form extends Generic
         $form = $this->_formFactory->create(
             [
                 'data' => [
-                    'id'    => 'edit_form',
+                    'id' => 'edit_form',
                     'action' => $this->getData('action'),
                     'method' => 'post'
                 ]

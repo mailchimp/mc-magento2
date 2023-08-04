@@ -40,9 +40,9 @@ class Uninstall implements UninstallInterface
         foreach ($tables as $table) {
             $connection->dropTable($setup->getTable($table));
         }
-        foreach($tablesFields as $table => $columnArray) {
-            foreach($columnArray as $column) {
-                $connection->dropColumn( $setup->getTable($table), $column);
+        foreach ($tablesFields as $table => $columnArray) {
+            foreach ($columnArray as $column) {
+                $connection->dropColumn($setup->getTable($table), $column);
             }
         }
         $installer->endSetup();

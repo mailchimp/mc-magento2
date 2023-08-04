@@ -2,12 +2,12 @@
 
 namespace Ebizmarts\MailChimp\Ui\Component\Listing\Column;
 
+use Ebizmarts\MailChimp\Helper\Sync as SyncHelper;
+use Magento\Customer\Model\CustomerFactory;
 use Magento\Framework\App\RequestInterface;
 use Magento\Framework\View\Element\UiComponent\ContextInterface;
 use Magento\Framework\View\Element\UiComponentFactory;
 use Magento\Ui\Component\Listing\Columns\Column;
-use Magento\Customer\Model\CustomerFactory;
-use Ebizmarts\MailChimp\Helper\Sync as SyncHelper;
 
 class Customers extends Column
 {
@@ -58,13 +58,13 @@ class Customers extends Column
         SyncHelper $syncHelper,
         \Ebizmarts\MailChimp\Model\MailChimpErrorsFactory $mailChimpErrorsFactory,
         array $components = [],
-        array $data = [])
-    {
+        array $data = []
+    ) {
         $this->_requestInterface = $requestInterface;
         $this->_assetRepository = $assetRepository;
         $this->_customerFactory = $customerFactory;
-        $this->_helper          = $helper;
-        $this->syncHelper       = $syncHelper;
+        $this->_helper = $helper;
+        $this->syncHelper = $syncHelper;
         $this->_mailChimpErrorsFactory = $mailChimpErrorsFactory;
         parent::__construct($context, $uiComponentFactory, $components, $data);
     }
@@ -82,7 +82,10 @@ class Customers extends Column
                 $alt = '';
                 $url = '';
                 $text = '';
-                if ($this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_PATH_ACTIVE, $customer->getStoreId())) {
+                if ($this->_helper->getConfigValue(
+                    \Ebizmarts\MailChimp\Helper\Data::XML_PATH_ACTIVE,
+                    $customer->getStoreId()
+                )) {
                     $mailchimpStoreId = $this->_helper->getConfigValue(
                         \Ebizmarts\MailChimp\Helper\Data::XML_MAILCHIMP_STORE,
                         $customer->getStoreId()
@@ -153,22 +156,23 @@ class Customers extends Column
                                 );
                                 $text = __('Error');
                         }
-
                     }
-
                 }
                 $item['mailchimp_sync'] =
-                    "<div style='width: 100%;margin: 0 auto;text-align: center'><div><img src='".$url."' style='border: none; width: 5rem; text-align: center; max-width: 100%' title='$alt' /></div><div>$text</div></div>";
+                    "<div style='width: 100%;margin: 0 auto;text-align: center'><div><img src='" . $url . "' style='border: none; width: 5rem; text-align: center; max-width: 100%' title='$alt' /></div><div>$text</div></div>";
             }
         }
+
         return $dataSource;
     }
+
     private function _getError($customerId, $storeId)
     {
         /**
          * @var $error \Ebizmarts\MailChimp\Model\MailChimpErrors
          */
         $error = $this->_mailChimpErrorsFactory->create();
+
         return $error->getByStoreIdType($storeId, $customerId, \Ebizmarts\MailChimp\Helper\Data::IS_CUSTOMER);
     }
 

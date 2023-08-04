@@ -1,17 +1,7 @@
 <?php
-/**
- * MailChimp Magento Component
- *
- * @category Ebizmarts
- * @package MailChimp
- * @author Ebizmarts Team <info@ebizmarts.com>
- * @copyright Ebizmarts (http://ebizmarts.com)
- * @license     http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
- * @date: 12/1/17 2:21 PM
- * @file: SaveAfter.php
- */
 
 namespace Ebizmarts\MailChimp\Observer\Adminhtml\Customer;
+
 use Ebizmarts\MailChimp\Helper\Sync as SyncHelper;
 
 class SaveAfter implements \Magento\Framework\Event\ObserverInterface
@@ -45,17 +35,16 @@ class SaveAfter implements \Magento\Framework\Event\ObserverInterface
         \Ebizmarts\MailChimp\Model\MailChimpInterestGroupFactory $interestGroupFactory,
         SyncHelper $syncHelper
     ) {
-
-        $this->helper               = $helper;
-        $this->subscriberFactory    = $subscriberFactory;
+        $this->helper = $helper;
+        $this->subscriberFactory = $subscriberFactory;
         $this->interestGroupFactory = $interestGroupFactory;
-        $this->syncHelper           = $syncHelper;
+        $this->syncHelper = $syncHelper;
     }
 
     public function execute(\Magento\Framework\Event\Observer $observer)
     {
         $customer = $observer->getCustomer();
-        $request  = $observer->getEvent()->getRequest();
+        $request = $observer->getEvent()->getRequest();
         $allParams = $request->getParams();
         $subscriber = $this->subscriberFactory->create();
         if (isset($allParams['customer']['interestgroup'])) {

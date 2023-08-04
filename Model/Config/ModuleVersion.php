@@ -1,7 +1,6 @@
 <?php
 /**
  * Ebizmarts_MailChimp Magento JS component
- *
  * @category    Ebizmarts
  * @package     Ebizmarts_MailChimp
  * @author      Ebizmarts Team <info@ebizmarts.com>
@@ -29,7 +28,6 @@ class ModuleVersion
     private $readFactory;
 
     /**
-     * ModuleVersion constructor.
      * @param ComponentRegistrarInterface $componentRegistrar
      * @param ReadFactory $readFactory
      */
@@ -38,7 +36,8 @@ class ModuleVersion
         $this->componentRegistrar = $componentRegistrar;
         $this->readFactory = $readFactory;
     }
-    public function getModuleVersion($moduleName) : string
+
+    public function getModuleVersion($moduleName): string
     {
         $emptyVersionNumber = '';
         $composerJsonData = null;
@@ -55,6 +54,7 @@ class ModuleVersion
         if ($jsonData === null) {
             return $emptyVersionNumber;
         }
+
         return $jsonData->version ?? $emptyVersionNumber;
     }
 }

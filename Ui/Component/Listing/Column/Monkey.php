@@ -1,23 +1,13 @@
 <?php
-/**
- * mc-magento2 Magento Component
- *
- * @category Ebizmarts
- * @package mc-magento2
- * @author Ebizmarts Team <info@ebizmarts.com>
- * @copyright Ebizmarts (http://ebizmarts.com)
- * @license     http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
- * @date: 3/15/17 1:23 AM
- * @file: Monkey.php
- */
+
 namespace Ebizmarts\MailChimp\Ui\Component\Listing\Column;
 
-use \Magento\Sales\Api\OrderRepositoryInterface;
-use \Magento\Framework\View\Element\UiComponent\ContextInterface;
-use \Magento\Framework\View\Element\UiComponentFactory;
-use \Magento\Ui\Component\Listing\Columns\Column;
-use \Magento\Framework\Api\SearchCriteriaBuilder;
+use Magento\Framework\Api\SearchCriteriaBuilder;
 use Magento\Framework\UrlInterface;
+use Magento\Framework\View\Element\UiComponent\ContextInterface;
+use Magento\Framework\View\Element\UiComponentFactory;
+use Magento\Sales\Api\OrderRepositoryInterface;
+use Magento\Ui\Component\Listing\Columns\Column;
 
 class Monkey extends Column
 {
@@ -88,16 +78,15 @@ class Monkey extends Column
         array $components = [],
         array $data = []
     ) {
-
         $this->_orderRepository = $orderRepository;
-        $this->_searchCriteria  = $criteria;
+        $this->_searchCriteria = $criteria;
         $this->_assetRepository = $assetRepository;
-        $this->_requestInterfase= $requestInterface;
-        $this->_helper          = $helper;
-        $this->_syncCommerceCF  = $syncCommerceCF;
-        $this->_orderFactory    = $orderFactory;
-        $this->_mailChimpErrorsFactory  = $mailChimpErrorsFactory;
-        $this->urlBuilder       = $urlBuilder;
+        $this->_requestInterfase = $requestInterface;
+        $this->_helper = $helper;
+        $this->_syncCommerceCF = $syncCommerceCF;
+        $this->_orderFactory = $orderFactory;
+        $this->_mailChimpErrorsFactory = $mailChimpErrorsFactory;
+        $this->urlBuilder = $urlBuilder;
         parent::__construct($context, $uiComponentFactory, $components, $data);
     }
 
@@ -167,14 +156,14 @@ class Monkey extends Column
                             $alt = $item['mailchimp_sync_error'];
                             break;
                         default:
-                            $url ='';
+                            $url = '';
                             $text = '';
                     }
                     $item['mailchimp_sync'] =
-                        "<div style='width: 50%;margin: 0 auto;text-align: center'><img src='".$url."' style='border: none; width: 5rem; text-align: center; max-width: 100%' title='$alt' class='freddie'/>$text</div>";
+                        "<div style='width: 50%;margin: 0 auto;text-align: center'><img src='" . $url . "' style='border: none; width: 5rem; text-align: center; max-width: 100%' title='$alt' class='freddie'/>$text</div>";
                     if ($status) {
                         $item['mailchimp_sync'] =
-                            "<div style='width: 50%;margin: 0 auto;text-align: center'><img src='".$url."' style='border: none; width: 5rem; text-align: center; max-width: 100%' title='$alt' class='freddie'/>$text</div>";
+                            "<div style='width: 50%;margin: 0 auto;text-align: center'><img src='" . $url . "' style='border: none; width: 5rem; text-align: center; max-width: 100%' title='$alt' class='freddie'/>$text</div>";
                         if ($menu) {
                             $item[$this->getData('name')] = [
                                 'campaign' => [
@@ -197,21 +186,22 @@ class Monkey extends Column
                         }
                     } else {
                         $item['mailchimp_sync'] =
-                            "<div style='width: 50%;margin: 0 auto;text-align: center'><img src='".$url."' style='border: none; width: 5rem; text-align: center; max-width: 100%' title='$alt'/>$text</div>";
+                            "<div style='width: 50%;margin: 0 auto;text-align: center'><img src='" . $url . "' style='border: none; width: 5rem; text-align: center; max-width: 100%' title='$alt'/>$text</div>";
                     }
-
                 }
             }
         }
 
         return $dataSource;
     }
+
     private function _getError($orderId, $storeId)
     {
         /**
          * @var $error \Ebizmarts\MailChimp\Model\MailChimpErrors
          */
         $error = $this->_mailChimpErrorsFactory->create();
+
         return $error->getByStoreIdType($storeId, $orderId, \Ebizmarts\MailChimp\Helper\Data::IS_ORDER);
     }
 }

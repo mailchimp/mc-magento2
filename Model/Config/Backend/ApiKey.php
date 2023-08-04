@@ -1,15 +1,4 @@
 <?php
-/**
- * mc-magento2 Magento Component
- *
- * @category Ebizmarts
- * @package mc-magento2
- * @author Ebizmarts Team <info@ebizmarts.com>
- * @copyright Ebizmarts (http://ebizmarts.com)
- * @license     http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
- * @date: 9/30/16 12:09 PM
- * @file: Monkeylist.php
- */
 
 namespace Ebizmarts\MailChimp\Model\Config\Backend;
 
@@ -35,7 +24,6 @@ class ApiKey extends \Magento\Framework\App\Config\Value
     private $_storeManager;
 
     /**
-     * ApiKey constructor.
      * @param \Magento\Framework\Model\Context $context
      * @param \Magento\Framework\Registry $registry
      * @param ScopeConfigInterface $config
@@ -61,10 +49,10 @@ class ApiKey extends \Magento\Framework\App\Config\Value
         \Magento\Store\Model\StoreManager $storeManager,
         array $data = []
     ) {
-        $this->_helper          = $helper;
-        $this->resourceConfig   = $resourceConfig;
-        $this->_date            = $date;
-        $this->_storeManager    = $storeManager;
+        $this->_helper = $helper;
+        $this->resourceConfig = $resourceConfig;
+        $this->_date = $date;
+        $this->_storeManager = $storeManager;
         parent::__construct($context, $registry, $config, $cacheTypeList, $resource, $resourceCollection, $data);
     }
 
@@ -96,10 +84,11 @@ class ApiKey extends \Magento\Framework\App\Config\Value
                     $found++;
                 }
             }
-            if ($found==1) {
+            if ($found == 1) {
                 $this->_helper->cancelAllPendingBatches($mailchimpStore);
             }
         }
+
         return parent::beforeSave();
     }
 }

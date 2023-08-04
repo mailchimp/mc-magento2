@@ -1,19 +1,10 @@
 <?php
-/**
- * Ebizmarts_mc-magento22 Magento component
- *
- * @category    Ebizmarts
- * @package     Ebizmarts_mc-magento22
- * @author      Ebizmarts Team <info@ebizmarts.com>
- * @copyright   Ebizmarts (http://ebizmarts.com)
- * @license     http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
- *
- */
+
 namespace Ebizmarts\MailChimp\Model\Plugin;
 
-use Magento\Sales\Api\Data\CreditmemoInterface;
-use Magento\Sales\Api\CreditmemoRepositoryInterface as SalesCreditmemoRepositoryInterface;
 use Ebizmarts\MailChimp\Helper\Sync as SyncHelper;
+use Magento\Sales\Api\CreditmemoRepositoryInterface as SalesCreditmemoRepositoryInterface;
+use Magento\Sales\Api\Data\CreditmemoInterface;
 
 class Creditmemo
 {
@@ -34,9 +25,10 @@ class Creditmemo
         \Ebizmarts\MailChimp\Helper\Data $helper,
         SyncHelper $syncHelper
     ) {
-        $this->_helper  = $helper;
+        $this->_helper = $helper;
         $this->syncHelper = $syncHelper;
     }
+
     public function afterSave(
         SalesCreditmemoRepositoryInterface $subject,
         CreditmemoInterface $creditmemo

@@ -7,7 +7,6 @@ use Magento\Framework\View\Element\UiComponent\ContextInterface;
 use Magento\Framework\View\Element\UiComponentFactory;
 use Magento\Ui\Component\Listing\Columns\Column;
 
-
 class Products extends Column
 {
     /**
@@ -51,8 +50,8 @@ class Products extends Column
         \Magento\Framework\View\Asset\Repository $assetRepository,
         \Ebizmarts\MailChimp\Model\MailChimpErrorsFactory $mailChimpErrorsFactory,
         array $components = [],
-        array $data = [])
-    {
+        array $data = []
+    ) {
         $this->_productFactory = $productFactory;
         $this->_requestInterface = $requestInterface;
         $this->_helper = $helper;
@@ -77,7 +76,10 @@ class Products extends Column
                     $product->getTypeId() == \Magento\Catalog\Model\Product\Type::TYPE_VIRTUAL ||
                     $product->getTypeId() == \Magento\ConfigurableProduct\Model\Product\Type\Configurable::TYPE_CODE ||
                     $product->getTypeId() == \Magento\Downloadable\Model\Product\Type::TYPE_DOWNLOADABLE) {
-                    if ($this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_PATH_ACTIVE, $product->getStoreId())) {
+                    if ($this->_helper->getConfigValue(
+                        \Ebizmarts\MailChimp\Helper\Data::XML_PATH_ACTIVE,
+                        $product->getStoreId()
+                    )) {
                         $sync = $item['mailchimp_sent'];
                         switch ($sync) {
                             case \Ebizmarts\MailChimp\Helper\Data::NEVERSYNC:
@@ -143,17 +145,20 @@ class Products extends Column
                     $alt = "Mailchimp does not support bundled or grouped products.";
                 }
                 $item['mailchimp_sync'] =
-                    "<div style='width: 100%;margin: 0 auto;text-align: center'><div><img src='".$url."' style='border: none; width: 5rem; text-align: center; max-width: 100%' title='$alt' /></div><div>$text</div></div>";
+                    "<div style='width: 100%;margin: 0 auto;text-align: center'><div><img src='" . $url . "' style='border: none; width: 5rem; text-align: center; max-width: 100%' title='$alt' /></div><div>$text</div></div>";
             }
         }
+
         return $dataSource;
     }
+
     private function _getError($productId, $storeId)
     {
         /**
          * @var $error \Ebizmarts\MailChimp\Model\MailChimpErrors
          */
         $error = $this->_mailChimpErrorsFactory->create();
+
         return $error->getByStoreIdType($storeId, $productId, \Ebizmarts\MailChimp\Helper\Data::IS_PRODUCT);
     }
 }

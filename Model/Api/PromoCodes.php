@@ -1,19 +1,9 @@
 <?php
-/**
- * mc-magento2 Magento Component
- *
- * @category Ebizmarts
- * @package mc-magento2
- * @author Ebizmarts Team <info@ebizmarts.com>
- * @copyright Ebizmarts (http://ebizmarts.com)
- * @license     http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
- * @date: 10/6/17 1:15 PM
- * @file: Coupon.php
- */
+
 namespace Ebizmarts\MailChimp\Model\Api;
 
-use Magento\TestFramework\Inspection\Exception;
 use Ebizmarts\MailChimp\Helper\Sync as SyncHelper;
+use Magento\TestFramework\Inspection\Exception;
 
 class PromoCodes
 {
@@ -67,17 +57,17 @@ class PromoCodes
         \Ebizmarts\MailChimp\Model\Api\PromoRules $promoRules,
         \Ebizmarts\MailChimp\Model\ResourceModel\MailChimpSyncEcommerce\CollectionFactory $syncCollection
     ) {
-
-        $this->_helper              = $helper;
-        $this->syncHelper           = $syncHelper;
-        $this->_couponCollection    = $couponCollection;
-        $this->_ruleCollection      = $ruleCollection;
-        $this->_chimpSyncEcommerce  = $chimpSyncEcommerce;
-        $this->_batchId             = \Ebizmarts\MailChimp\Helper\Data::IS_PROMO_CODE. '_' .
+        $this->_helper = $helper;
+        $this->syncHelper = $syncHelper;
+        $this->_couponCollection = $couponCollection;
+        $this->_ruleCollection = $ruleCollection;
+        $this->_chimpSyncEcommerce = $chimpSyncEcommerce;
+        $this->_batchId = \Ebizmarts\MailChimp\Helper\Data::IS_PROMO_CODE . '_' .
             $this->_helper->getGmtTimeStamp();
-        $this->_promoRules          = $promoRules;
-        $this->_syncCollection      = $syncCollection;
+        $this->_promoRules = $promoRules;
+        $this->_syncCollection = $syncCollection;
     }
+
     public function sendCoupons($magentoStoreId)
     {
         $mailchimpStoreId = $this->_helper->getConfigValue(
@@ -91,14 +81,15 @@ class PromoCodes
 
         return $batchArray;
     }
+
     protected function _sendDeletedCoupons($mailchimpStoreId, $magentoStoreId)
     {
         $batchArray = [];
         $websiteId = $this->_helper->getWebsiteId($magentoStoreId);
         $collection = $this->_syncCollection->create();
-        $collection->addFieldToFilter('mailchimp_store_id', ['eq'=>$mailchimpStoreId])
-            ->addFieldToFilter('type', ['eq'=>\Ebizmarts\MailChimp\Helper\Data::IS_PROMO_CODE])
-            ->addFieldToFilter('mailchimp_sync_deleted', ['eq'=>1]);
+        $collection->addFieldToFilter('mailchimp_store_id', ['eq' => $mailchimpStoreId])
+            ->addFieldToFilter('type', ['eq' => \Ebizmarts\MailChimp\Helper\Data::IS_PROMO_CODE])
+            ->addFieldToFilter('mailchimp_sync_deleted', ['eq' => 1]);
         $collection->getSelect()->limit(self::MAX);
         $counter = 0;
         /**
@@ -112,15 +103,17 @@ class PromoCodes
             $batchArray[$counter]['path'] =
                 "/ecommerce/stores/$mailchimpStoreId/promo-rules/$ruleId/promo-codes/$couponId";
             $counter++;
-            $syncCoupon =$this->syncHelper->getChimpSyncEcommerce(
+            $syncCoupon = $this->syncHelper->getChimpSyncEcommerce(
                 $mailchimpStoreId,
                 $couponId,
                 \Ebizmarts\MailChimp\Helper\Data::IS_PROMO_CODE
             );
             $syncCoupon->getResource()->delete($syncCoupon);
         }
+
         return $batchArray;
     }
+
     protected function _sendNewCoupons($mailchimpStoreId, $magentoStoreId)
     {
         $batchArray = [];
@@ -148,7 +141,9 @@ class PromoCodes
                 ['rules' => $this->_helper->getTableName('salesrule')],
                 'main_table.rule_id = rules.rule_id'
             );
-            $collection->getSelect()->where("m4m.mailchimp_sync_delta IS null and (rules.use_auto_generation = 1 and main_table.is_primary is null or rules.use_auto_generation = 0 and main_table.is_primary = 1) and main_table.rule_id in ($inRoules)");
+            $collection->getSelect()->where(
+                "m4m.mailchimp_sync_delta IS null and (rules.use_auto_generation = 1 and main_table.is_primary is null or rules.use_auto_generation = 0 and main_table.is_primary = 1) and main_table.rule_id in ($inRoules)"
+            );
             $collection->getSelect()->limit(self::MAX);
             $counter = 0;
             /**
@@ -235,8 +230,10 @@ class PromoCodes
                 }
             }
         }
+
         return $batchArray;
     }
+
     protected function generateCodeData($item, $magentoStoreId)
     {
         $data = [];
@@ -247,13 +244,16 @@ class PromoCodes
 
         return $data;
     }
+
     protected function _getRedemptionUrl($code, $magentoStoreId)
     {
         $token = hash('md5', rand(0, 9999999));
         $url = $this->_helper->getRedemptionUrl($magentoStoreId, $code, $token);
         $this->_token = $token;
+
         return $url;
     }
+
     protected function _updateSyncData(
         $storeId,
         $entityId,

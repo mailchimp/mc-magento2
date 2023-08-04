@@ -2,11 +2,11 @@
 
 namespace Ebizmarts\MailChimp\Controller\Adminhtml\Orders;
 
+use Ebizmarts\MailChimp\Helper\Data as MailChimpHelper;
 use Magento\Backend\App\Action;
 use Magento\Backend\App\Action\Context;
 use Magento\Framework\UrlInterface;
 use Magento\Sales\Model\OrderRepository;
-use Ebizmarts\MailChimp\Helper\Data as MailChimpHelper;
 
 class Member extends Action
 {
@@ -40,6 +40,7 @@ class Member extends Action
         $this->orderRepository = $orderRepository;
         $this->urlBuilder = $urlBuilder;
     }
+
     public function execute()
     {
         $param = $this->getRequest()->getParams();
@@ -51,13 +52,18 @@ class Member extends Action
             $listId = $this->helper->getDefaultList($order->getStoreId());
             $member = $api->lists->members->get($listId, hash('md5', strtolower($email)));
             $memberId = $member['contact_id'];
-            $url = $this->urlBuilder->getUrl('https://admin.mailchimp.com/audience/contact-profile') . "?contact_id=$memberId";
+            $url = $this->urlBuilder->getUrl(
+                    'https://admin.mailchimp.com/audience/contact-profile'
+                ) . "?contact_id=$memberId";
+
             return $this->_redirect($url);
-        } catch(\Exception $e) {
+        } catch (\Exception $e) {
             $this->messageManager->addErrorMessage($e->getMessage());
+
             return $this->_redirect($this->urlBuilder->getUrl('sales/order'));
         }
     }
+
     protected function _isAllowed()
     {
         return $this->_authorization->isAllowed('Ebizmarts_MailChimp::mailchimp_access');

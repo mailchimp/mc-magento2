@@ -1,15 +1,4 @@
 <?php
-/**
- * MailChimp Magento Component
- *
- * @category Ebizmarts
- * @package MailChimp
- * @author Ebizmarts Team <info@ebizmarts.com>
- * @copyright Ebizmarts (http://ebizmarts.com)
- * @license     http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
- * @date: 5/8/17 12:00 PM
- * @file: Mailchimpjs.php
- */
 
 namespace Ebizmarts\MailChimp\Block;
 
@@ -29,7 +18,6 @@ class Mailchimpjs extends \Magento\Framework\View\Element\Template
     protected $_secureHTtmlRender;
 
     /**
-     * Mailchimpjs constructor.
      * @param \Magento\Framework\View\Element\Template\Context $context
      * @param \Ebizmarts\MailChimp\Helper\Data $helper
      * @param array $data
@@ -41,9 +29,9 @@ class Mailchimpjs extends \Magento\Framework\View\Element\Template
         array $data
     ) {
         parent::__construct($context, $data);
-        $this->_helper          = $helper;
-        $this->_storeManager    = $context->getStoreManager();
-        $this->_secureHTtmlRender   = $secureHTtmlRender;
+        $this->_helper = $helper;
+        $this->_storeManager = $context->getStoreManager();
+        $this->_secureHTtmlRender = $secureHTtmlRender;
     }
 
     public function getJsUrl()
@@ -51,11 +39,13 @@ class Mailchimpjs extends \Magento\Framework\View\Element\Template
         $storeId = $this->_storeManager->getStore()->getId();
 
         $url = $this->_scopeConfig->getValue(
-            \Ebizmarts\MailChimp\Helper\Data::XML_MAILCHIMP_JS_URL, ScopeInterface::SCOPE_STORES,
+            \Ebizmarts\MailChimp\Helper\Data::XML_MAILCHIMP_JS_URL,
+            ScopeInterface::SCOPE_STORES,
             $storeId
         );
         $active = $this->_scopeConfig->getValue(
-            \Ebizmarts\MailChimp\Helper\Data::XML_PATH_ACTIVE, ScopeInterface::SCOPE_STORES,
+            \Ebizmarts\MailChimp\Helper\Data::XML_PATH_ACTIVE,
+            ScopeInterface::SCOPE_STORES,
             $storeId
         );
 
@@ -67,6 +57,7 @@ class Mailchimpjs extends \Magento\Framework\View\Element\Template
 
         return $url;
     }
+
     public function getRender()
     {
         return $this->_secureHTtmlRender;

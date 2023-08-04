@@ -1,15 +1,4 @@
 <?php
-/**
- * mc-magento2 Magento Component
- *
- * @category Ebizmarts
- * @package mc-magento2
- * @author Ebizmarts Team <info@ebizmarts.com>
- * @copyright Ebizmarts (http://ebizmarts.com)
- * @license     http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
- * @date: 11/27/17 8:14 PM
- * @file: Save.php
- */
 
 namespace Ebizmarts\MailChimp\Model\Plugin\Newsletter;
 
@@ -58,14 +47,14 @@ class Save
         \Ebizmarts\MailChimp\Model\MailChimpInterestGroupFactory $interestGroupFactory,
         \Magento\Framework\App\Request\Http $request
     ) {
-
-        $this->helper               = $helper;
-        $this->syncHelper           = $syncHelper;
-        $this->customerSession      = $customerSession;
-        $this->subscriberFactory    = $subscriberFactory;
-        $this->request              = $request;
+        $this->helper = $helper;
+        $this->syncHelper = $syncHelper;
+        $this->customerSession = $customerSession;
+        $this->subscriberFactory = $subscriberFactory;
+        $this->request = $request;
         $this->interestGroupFactory = $interestGroupFactory;
     }
+
     public function afterExecute()
     {
         $params = $this->request->getParams();
@@ -81,7 +70,7 @@ class Save
 
         try {
             $subscriber->loadByCustomer($customer->getId(), $customer->getStoreId());
-            if ($subscriber->getEmail()==$email) {
+            if ($subscriber->getEmail() == $email) {
                 $interestGroup->getBySubscriberIdStoreId($subscriber->getSubscriberId(), $subscriber->getStoreId());
                 $interestGroup->setGroupdata($this->helper->serialize($params));
                 $interestGroup->setSubscriberId($subscriber->getSubscriberId());
@@ -105,6 +94,7 @@ class Save
             $this->helper->log($params);
         }
     }
+
     protected function _updateSubscriber(
         $listId,
         $entityId,

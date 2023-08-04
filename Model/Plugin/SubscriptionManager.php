@@ -1,22 +1,12 @@
 <?php
-/**
- * Ebizmarts_MailChimp Magento JS component
- *
- * @category    Ebizmarts
- * @package     Ebizmarts_MailChimp
- * @author      Ebizmarts Team <info@ebizmarts.com>
- * @copyright   Ebizmarts (http://ebizmarts.com)
- * @license     http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
- */
 
 namespace Ebizmarts\MailChimp\Model\Plugin;
 
+use Ebizmarts\MailChimp\Helper\Data as Helper;
+use Magento\Customer\Model\ResourceModel\CustomerRepository;
+use Magento\Customer\Model\Session;
 use Magento\Newsletter\Model\SubscriberFactory;
-use \Ebizmarts\MailChimp\Helper\Data as Helper;
-use \Magento\Customer\Model\ResourceModel\CustomerRepository;
-use \Magento\Customer\Model\Session;
-use \Magento\Store\Model\StoreManagerInterface;
-
+use Magento\Store\Model\StoreManagerInterface;
 
 class SubscriptionManager
 {
@@ -40,7 +30,6 @@ class SubscriptionManager
     protected $_api = null;
 
     /**
-     * SubscriptionManager constructor.
      * @param Helper $helper
      * @param CustomerRepository $customer
      * @param Session $customerSession
@@ -54,13 +43,13 @@ class SubscriptionManager
         StoreManagerInterface $storeManager,
         SubscriberFactory $subscriberFactory
     ) {
-
-        $this->_helper          = $helper;
-        $this->_customer        = $customer;
+        $this->_helper = $helper;
+        $this->_customer = $customer;
         $this->_customerSession = $customerSession;
-        $this->_storeManager    = $storeManager;
+        $this->_storeManager = $storeManager;
         $this->_subscriberFactory = $subscriberFactory;
     }
+
     /**
      * @param \Magento\Newsletter\Model\Subscriber $subscriber
      * @param $customerId
@@ -73,7 +62,6 @@ class SubscriptionManager
         $storeId
     ) {
         if ($this->_helper->isMailChimpEnabled($storeId)) {
-
             $subscriber = $this->_subscriberFactory->create()->loadByCustomer($customerId, $storeId);
             if ($subscriber->isSubscribed()) {
                 $api = $this->_helper->getApi($storeId);
@@ -90,7 +78,8 @@ class SubscriptionManager
                 }
             }
         }
-        return [$customerId,$storeId];
+
+        return [$customerId, $storeId];
     }
 
     /**
@@ -106,7 +95,6 @@ class SubscriptionManager
         $storeId
     ) {
         if ($this->_helper->isMailChimpEnabled($storeId)) {
-
             $subscriber = $this->_subscriberFactory->create()->loadByCustomer($customerId, $storeId);
             if (!$subscriber->isSubscribed()) {
                 if (!$this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_MAGENTO_MAIL, $storeId)) {
@@ -143,6 +131,7 @@ class SubscriptionManager
                 }
             }
         }
+
         return [$customerId, $storeId];
     }
 
@@ -191,6 +180,7 @@ class SubscriptionManager
                 }
             }
         }
+
         return [$email, $storeId];
     }
 
@@ -219,6 +209,7 @@ class SubscriptionManager
                 $this->_helper->log($e->getFriendlyMessage());
             }
         }
-        return [$email,$storeId,$confirmCode];
+
+        return [$email, $storeId, $confirmCode];
     }
- }
+}

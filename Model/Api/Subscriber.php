@@ -1,15 +1,5 @@
 <?php
-/**
- * mc-magento2 Magento Component
- *
- * @category Ebizmarts
- * @package mc-magento2
- * @author Ebizmarts Team <info@ebizmarts.com>
- * @copyright Ebizmarts (http://ebizmarts.com)
- * @license     http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
- * @date: 5/15/17 11:02 AM
- * @file: Subscriber.php
- */
+
 namespace Ebizmarts\MailChimp\Model\Api;
 
 use Ebizmarts\MailChimp\Helper\Sync as SyncHelper;
@@ -37,7 +27,7 @@ class Subscriber
      * @var SyncHelper
      */
     private $syncHelper;
-    protected $_interest=null;
+    protected $_interest = null;
 
     /**
      * @param \Ebizmarts\MailChimp\Helper\Data $helper
@@ -53,12 +43,11 @@ class Subscriber
         \Magento\Newsletter\Model\SubscriberFactory $subscriberFactory,
         \Magento\Framework\Message\ManagerInterface $message
     ) {
-
-        $this->_helper                  = $helper;
-        $this->syncHelper               = $syncHelper;
-        $this->_subscriberCollection    = $subscriberCollection;
-        $this->_message                 = $message;
-        $this->_subscriberFactory       = $subscriberFactory;
+        $this->_helper = $helper;
+        $this->syncHelper = $syncHelper;
+        $this->_subscriberCollection = $subscriberCollection;
+        $this->_message = $message;
+        $this->_subscriberFactory = $subscriberFactory;
     }
 
     public function sendSubscribers($storeId, $listId)
@@ -71,14 +60,16 @@ class Subscriber
             ->addFieldToFilter('store_id', ['eq' => $storeId]);
         $collection->getSelect()->joinLeft(
             ['m4m' => $this->_helper->getTableName('mailchimp_sync_ecommerce')],
-            "m4m.related_id = main_table.subscriber_id and m4m.type = '".
-            \Ebizmarts\MailChimp\Helper\Data::IS_SUBSCRIBER.
-            "' and m4m.mailchimp_store_id = '".$listId."'",
+            "m4m.related_id = main_table.subscriber_id and m4m.type = '" .
+            \Ebizmarts\MailChimp\Helper\Data::IS_SUBSCRIBER .
+            "' and m4m.mailchimp_store_id = '" . $listId . "'",
             ['m4m.*']
         );
-        $collection->getSelect()->where("m4m.mailchimp_sync_delta IS null ".
-            "OR (m4m.mailchimp_sync_delta > '".$this->_helper->getMCMinSyncDateFlag().
-            "' and m4m.mailchimp_sync_modified = 1)");
+        $collection->getSelect()->where(
+            "m4m.mailchimp_sync_delta IS null " .
+            "OR (m4m.mailchimp_sync_delta > '" . $this->_helper->getMCMinSyncDateFlag() .
+            "' and m4m.mailchimp_sync_modified = 1)"
+        );
         $collection->getSelect()->limit(self::BATCH_LIMIT);
         $subscriberArray = [];
         $date = $this->_helper->getDateMicrotime();
@@ -93,7 +84,7 @@ class Subscriber
             $subscriberJson = "";
             //enconde to JSON
             $subscriberJson = json_encode($data);
-            if ($subscriberJson!==false) {
+            if ($subscriberJson !== false) {
                 if (!empty($subscriberJson)) {
                     if ($subscriber->getMailchimpSyncModified() == 1) {
                         $this->_helper->modifyCounter(\Ebizmarts\MailChimp\Helper\Data::SUB_MOD);
@@ -119,6 +110,7 @@ class Subscriber
                 );
             }
         }
+
         return $subscriberArray;
     }
 
@@ -139,6 +131,7 @@ class Subscriber
 
         return $data;
     }
+
     protected function _getInterest(\Magento\Newsletter\Model\Subscriber $subscriber)
     {
         $rc = [];
@@ -154,11 +147,12 @@ class Subscriber
                 }
             }
         }
+
         return $rc;
     }
+
     /**
      * Get status to send confirmation if Need to Confirm enabled on Magento
-     *
      * @param $status
      * @param $storeId
      * @return string
@@ -176,8 +170,10 @@ class Subscriber
         } elseif ($status == \Magento\Newsletter\Model\Subscriber::STATUS_SUBSCRIBED) {
             $status = 'subscribed';
         }
+
         return $status;
     }
+
     public function deleteSubscriber(\Magento\Newsletter\Model\Subscriber $subscriber)
     {
         $storeId = $subscriber->getStoreId();
@@ -193,6 +189,7 @@ class Subscriber
             $this->_helper->log($e->getMessage(), $storeId);
         }
     }
+
     public function update(\Magento\Newsletter\Model\Subscriber $subscriber)
     {
         $storeId = $subscriber->getStoreId();
@@ -205,6 +202,7 @@ class Subscriber
             1
         );
     }
+
     protected function _updateSubscriber(
         $listId,
         $entityId,

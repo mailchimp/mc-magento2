@@ -2,11 +2,11 @@
 
 namespace Ebizmarts\MailChimp\Setup\Patch\Data;
 
+use Ebizmarts\MailChimp\Helper\Data;
+use Ebizmarts\MailChimp\Model\ResourceModel\MailChimpSyncEcommerce\CollectionFactory as SyncFactory;
 use Magento\Framework\Setup\ModuleDataSetupInterface;
 use Magento\Framework\Setup\Patch\DataPatchInterface;
 use Magento\Sales\Api\OrderRepositoryInterface;
-use Ebizmarts\MailChimp\Model\ResourceModel\MailChimpSyncEcommerce\CollectionFactory as SyncFactory;
-use Ebizmarts\MailChimp\Helper\Data;
 
 class Migrate452 implements DataPatchInterface
 {
@@ -38,13 +38,13 @@ class Migrate452 implements DataPatchInterface
         SyncFactory $syncFactory,
         OrderRepositoryInterface $orderRepository,
         Data $helper
-    )
-    {
+    ) {
         $this->moduleDataSetup = $moduleDataSetup;
         $this->syncFactory = $syncFactory;
         $this->orderRepository = $orderRepository;
         $this->helper = $helper;
     }
+
     public function apply()
     {
         $this->moduleDataSetup->getConnection()->startSetup();
@@ -56,8 +56,7 @@ class Migrate452 implements DataPatchInterface
             $query .= "SET A.`mailchimp_sync_error` = B.`mailchimp_sync_error`, A.`mailchimp_sent` = B.`mailchimp_sent` ";
             $query .= "WHERE B.`type` = 'ORD'";
             $this->moduleDataSetup->getConnection()->query($query);
-
-        } catch(\Exception $e) {
+        } catch (\Exception $e) {
             $this->helper->log($e->getMessage());
             throw new \Exception($e->getMessage());
         }
@@ -69,8 +68,7 @@ class Migrate452 implements DataPatchInterface
             $query .= "SET A.`mailchimp_sync_error` = B.`mailchimp_sync_error`, A.`mailchimp_sent` = B.`mailchimp_sent` ";
             $query .= "WHERE B.`type` = 'ORD'";
             $this->moduleDataSetup->getConnection()->query($query);
-
-        } catch(\Exception $e) {
+        } catch (\Exception $e) {
             $this->helper->log($e->getMessage());
             throw new \Exception($e->getMessage());
         }
@@ -97,6 +95,7 @@ class Migrate452 implements DataPatchInterface
     {
         return [];
     }
+
     public function getAliases()
     {
         return [];

@@ -1,16 +1,7 @@
 <?php
-/**
- * mc-magento2 Magento Component
- *
- * @category Ebizmarts
- * @package mc-magento2
- * @author Ebizmarts Team <info@ebizmarts.com>
- * @copyright Ebizmarts (http://ebizmarts.com)
- * @license     http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
- * @date: 1/18/18 12:30 PM
- * @file: SaveAfter.php
- */
+
 namespace Ebizmarts\MailChimp\Observer\Adminhtml\Product;
+
 use Ebizmarts\MailChimp\Helper\Sync as SyncHelper;
 
 class SaveAfter implements \Magento\Framework\Event\ObserverInterface
@@ -38,10 +29,9 @@ class SaveAfter implements \Magento\Framework\Event\ObserverInterface
         \Magento\ConfigurableProduct\Model\ResourceModel\Product\Type\Configurable $configurable,
         SyncHelper $syncHelper
     ) {
-
-        $this->helper               = $helper;
-        $this->configurable         = $configurable;
-        $this->syncHelper           = $syncHelper;
+        $this->helper = $helper;
+        $this->configurable = $configurable;
+        $this->syncHelper = $syncHelper;
     }
 
     public function execute(\Magento\Framework\Event\Observer $observer)
@@ -67,6 +57,7 @@ class SaveAfter implements \Magento\Framework\Event\ObserverInterface
         }
         $this->_updateProduct($product->getId(), $sync);
     }
+
     protected function _updateProduct($entityId, $sync)
     {
         if (!$sync) {

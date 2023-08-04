@@ -1,15 +1,4 @@
 <?php
-/**
- * mc-magento2 Magento Component
- *
- * @category Ebizmarts
- * @package mc-magento2
- * @author Ebizmarts Team <info@ebizmarts.com>
- * @copyright Ebizmarts (http://ebizmarts.com)
- * @license     http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
- * @date: 5/3/17 3:28 PM
- * @file: Getresponse.php
- */
 
 namespace Ebizmarts\MailChimp\Controller\Adminhtml\Batch;
 
@@ -40,7 +29,6 @@ class GetResponse extends \Magento\Backend\App\Action
     protected $_driver;
 
     /**
-     * Getresponse constructor.
      * @param \Magento\Backend\App\Action\Context $context
      * @param \Ebizmarts\MailChimp\Model\MailChimpErrorsFactory $errorsFactory
      * @param \Ebizmarts\MailChimp\Helper\Data $helper
@@ -55,16 +43,16 @@ class GetResponse extends \Magento\Backend\App\Action
         \Magento\Framework\Filesystem\Driver\File $driver
     ) {
         parent::__construct($context);
-        $this->_resultFactory       = $context->getResultFactory();
-        $this->_batchFactory        = $_batchFactory;
-        $this->_result              = $result;
-        $this->_helper              = $helper;
-        $this->_driver              = $driver;
+        $this->_resultFactory = $context->getResultFactory();
+        $this->_batchFactory = $_batchFactory;
+        $this->_result = $result;
+        $this->_helper = $helper;
+        $this->_driver = $driver;
     }
 
     public function execute()
     {
-        $batchId    = $this->getRequest()->getParam('id');
+        $batchId = $this->getRequest()->getParam('id');
         $batches = $this->_batchFactory->create();
         $batches->getResource()->load($batches, $batchId);
         $batchId = $batches->getBatchId();
@@ -73,7 +61,7 @@ class GetResponse extends \Magento\Backend\App\Action
         do {
             $counter++;
             $files = $this->_result->getBatchResponse($batchId, $batches->getStoreId());
-            if ($files===false) {
+            if ($files === false) {
                 $fileContent = "Response was deleted from MailChimp servers";
                 break;
             }
@@ -90,21 +78,25 @@ class GetResponse extends \Magento\Backend\App\Action
                 $this->_driver->deleteFile($file);
             }
             $baseDir = $this->_helper->getBaseDir();
-            if ($this->_driver->isDirectory($baseDir . DIRECTORY_SEPARATOR . 'var' . DIRECTORY_SEPARATOR .
-                \Ebizmarts\MailChimp\Model\Api\Result::MAILCHIMP_TEMP_DIR . DIRECTORY_SEPARATOR . $batchId)) {
+            if ($this->_driver->isDirectory(
+                $baseDir . DIRECTORY_SEPARATOR . 'var' . DIRECTORY_SEPARATOR .
+                \Ebizmarts\MailChimp\Model\Api\Result::MAILCHIMP_TEMP_DIR . DIRECTORY_SEPARATOR . $batchId
+            )) {
                 $this->_driver->deleteDirectory(
                     $baseDir . DIRECTORY_SEPARATOR . 'var' . DIRECTORY_SEPARATOR .
                     \Ebizmarts\MailChimp\Model\Api\Result::MAILCHIMP_TEMP_DIR . DIRECTORY_SEPARATOR . $batchId
                 );
             }
-        } while (!count($fileContent) && $counter<self::MAX_RETRIES);
-        $resultJson =$this->_resultFactory->create(ResultFactory::TYPE_JSON);
-        $resultJson->setHeader('Content-disposition', 'attachment; filename='.$batchId.'.json');
+        } while (!count($fileContent) && $counter < self::MAX_RETRIES);
+        $resultJson = $this->_resultFactory->create(ResultFactory::TYPE_JSON);
+        $resultJson->setHeader('Content-disposition', 'attachment; filename=' . $batchId . '.json');
         $resultJson->setHeader('Content-type', 'application/json');
         $data = json_encode($fileContent, JSON_PRETTY_PRINT);
         $resultJson->setJsonData($data);
+
         return $resultJson;
     }
+
     protected function _isAllowed()
     {
         return $this->_authorization->isAllowed('Ebizmarts_MailChimp::batch_grid');
