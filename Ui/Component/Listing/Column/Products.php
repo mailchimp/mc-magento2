@@ -180,6 +180,10 @@ class Products extends Column
 
     private function getProductsByEntityIds(array $productIds): array
     {
+        if (empty($productIds)) {
+            return [];
+        }
+
         /** @var \Magento\Catalog\Model\ResourceModel\Product\Collection $productsCollection */
         $productsCollection = $this->productCollectionFactory->create();
         $productsCollection->addAttributeToFilter('entity_id', ['in' => $productIds]);
@@ -198,6 +202,6 @@ class Products extends Column
             return [];
         }
 
-        return array_unique(array_column($dataSource['data']['items'], 'entity_id'));
+        return array_filter(array_unique(array_column($dataSource['data']['items'], 'entity_id')));
     }
 }
