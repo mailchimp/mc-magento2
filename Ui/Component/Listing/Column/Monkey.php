@@ -18,7 +18,7 @@ use \Magento\Framework\View\Element\UiComponentFactory;
 use \Magento\Ui\Component\Listing\Columns\Column;
 use \Magento\Framework\Api\SearchCriteriaBuilder;
 use Magento\Framework\UrlInterface;
-use Ebizmarts\MailChimp\Helper\Sync as SyncHelper;
+
 
 class Monkey extends Column
 {
@@ -43,10 +43,6 @@ class Monkey extends Column
      */
     protected $_helper;
     /**
-     * @var SyncHelper
-     */
-    private $syncHelper;
-    /**
      * @var \Ebizmarts\MailChimp\Model\ResourceModel\MailChimpSyncEcommerce\CollectionFactory
      */
     protected $_syncCommerceCF;
@@ -62,23 +58,8 @@ class Monkey extends Column
      * @var UrlInterface
      */
     protected $urlBuilder;
+    private $orderCollectionFactory;
 
-    /**
-     * @param ContextInterface $context
-     * @param UiComponentFactory $uiComponentFactory
-     * @param OrderRepositoryInterface $orderRepository
-     * @param \Magento\Framework\View\Asset\Repository $assetRepository
-     * @param \Magento\Framework\App\RequestInterface $requestInterface
-     * @param SearchCriteriaBuilder $criteria
-     * @param \Ebizmarts\MailChimp\Helper\Data $helper
-     * @param SyncHelper $syncHelper
-     * @param \Ebizmarts\MailChimp\Model\ResourceModel\MailChimpSyncEcommerce\CollectionFactory $syncCommerceCF
-     * @param \Ebizmarts\MailChimp\Model\MailChimpErrorsFactory $mailChimpErrorsFactory
-     * @param \Magento\Sales\Model\OrderFactory $orderFactory
-     * @param UrlInterface $urlBuilder
-     * @param array $components
-     * @param array $data
-     */
     public function __construct(
         ContextInterface $context,
         UiComponentFactory $uiComponentFactory,
@@ -87,23 +68,22 @@ class Monkey extends Column
         \Magento\Framework\App\RequestInterface $requestInterface,
         SearchCriteriaBuilder $criteria,
         \Ebizmarts\MailChimp\Helper\Data $helper,
-        SyncHelper $syncHelper,
         \Ebizmarts\MailChimp\Model\ResourceModel\MailChimpSyncEcommerce\CollectionFactory $syncCommerceCF,
         \Ebizmarts\MailChimp\Model\MailChimpErrorsFactory $mailChimpErrorsFactory,
         \Magento\Sales\Model\OrderFactory $orderFactory,
+        \Magento\Sales\Model\ResourceModel\Order\CollectionFactory $orderCollectionFactory,
         UrlInterface $urlBuilder,
         array $components = [],
         array $data = []
     ) {
-
         $this->_orderRepository = $orderRepository;
         $this->_searchCriteria  = $criteria;
         $this->_assetRepository = $assetRepository;
         $this->_requestInterfase= $requestInterface;
         $this->_helper          = $helper;
-        $this->syncHelper       = $syncHelper;
         $this->_syncCommerceCF  = $syncCommerceCF;
         $this->_orderFactory    = $orderFactory;
+        $this->orderCollectionFactory = $orderCollectionFactory;
         $this->_mailChimpErrorsFactory  = $mailChimpErrorsFactory;
         $this->urlBuilder       = $urlBuilder;
         parent::__construct($context, $uiComponentFactory, $components, $data);
@@ -112,13 +92,17 @@ class Monkey extends Column
     public function prepareDataSource(array $dataSource)
     {
         if (isset($dataSource['data']['items'])) {
+            $orderMap = $this->getOrderDataForIncrementIds(
+                $this->getOrderIncrementIds($dataSource)
+            );
             foreach ($dataSource['data']['items'] as & $item) {
                 $status = $item['mailchimp_flag'];
                 $orderId = $item['increment_id'];
                 $sync = $item['mailchimp_sent'];
                 $error = $item['mailchimp_sync_error'];
 
-                $order = $this->_orderFactory->create()->loadByIncrementId($item['increment_id']);
+                $order = $orderMap[$orderId]
+                    ?? $this->_orderFactory->create()->loadByIncrementId($orderId); // Backwards Compatibility
                 $menu = false;
                 $params = ['_secure' => $this->_requestInterfase->isSecure()];
                 $storeId = $order->getStoreId();
@@ -221,5 +205,45 @@ class Monkey extends Column
          */
         $error = $this->_mailChimpErrorsFactory->create();
         return $error->getByStoreIdType($storeId, $orderId, \Ebizmarts\MailChimp\Helper\Data::IS_ORDER);
+    }
+    /**
+     * Extract Order Increment IDs for a given DataSource
+     *
+     * @param array $dataSource
+     * @return array
+     */
+    private function getOrderIncrementIds(array $dataSource): array
+    {
+        if (!isset($dataSource['data']['items'])) {
+            return [];
+        }
+
+        return array_filter(array_unique(array_column($dataSource['data']['items'], 'increment_id')));
+    }
+
+    /**
+     * @param array $incrementIds
+     * @return OrderInterface[]
+     */
+    private function getOrderDataForIncrementIds(array $incrementIds): array
+    {
+        if (empty($incrementIds)) {
+            return [];
+        }
+
+        $orderCollection = $this->orderCollectionFactory->create();
+        $orderCollection->getSelect()->columns(['entity_id', 'increment_id', 'store_id']);
+        $orderCollection->addAttributeToFilter(
+            'increment_id',
+            ['in' => $incrementIds]
+        );
+
+        $ordersMap = [];
+        /** @var OrderInterface $order */
+        foreach ($orderCollection->getItems() as $order) {
+            $ordersMap[$order->getIncrementId()] = $order;
+        }
+
+        return $ordersMap;
     }
 }
