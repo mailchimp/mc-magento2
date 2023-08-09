@@ -94,10 +94,7 @@ class Products extends Column
                 $alt = '';
                 $url = '';
                 $text = '';
-                if ($product->getTypeId() == \Magento\Catalog\Model\Product\Type::TYPE_SIMPLE ||
-                    $product->getTypeId() == \Magento\Catalog\Model\Product\Type::TYPE_VIRTUAL ||
-                    $product->getTypeId() == \Magento\ConfigurableProduct\Model\Product\Type\Configurable::TYPE_CODE ||
-                    $product->getTypeId() == \Magento\Downloadable\Model\Product\Type::TYPE_DOWNLOADABLE) {
+                if (in_array($product->getTypeId(), self::SUPPORTED_PRODUCT_TYPES, true)) {
                     $url = '';
                     $text = '';
                     if ($this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_PATH_ACTIVE, $product->getStoreId())) {

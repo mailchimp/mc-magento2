@@ -57,6 +57,9 @@ class Monkey extends Column
      * @var UrlInterface
      */
     protected $urlBuilder;
+    /**
+     * @var \Magento\Sales\Model\ResourceModel\Order\CollectionFactory
+     */
     private $orderCollectionFactory;
 
     /**
