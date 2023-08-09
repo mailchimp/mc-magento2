@@ -94,7 +94,6 @@ class Monkey extends Column
         array $components = [],
         array $data = []
     ) {
-
         $this->_orderRepository = $orderRepository;
         $this->_searchCriteria  = $criteria;
         $this->_assetRepository = $assetRepository;

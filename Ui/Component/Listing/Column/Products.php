@@ -11,7 +11,6 @@ use Magento\Framework\View\Element\UiComponent\ContextInterface;
 use Magento\Framework\View\Element\UiComponentFactory;
 use Magento\Ui\Component\Listing\Columns\Column;
 
-
 class Products extends Column
 {
     private const SUPPORTED_PRODUCT_TYPES = [
