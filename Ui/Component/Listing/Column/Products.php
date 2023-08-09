@@ -2,6 +2,10 @@
 namespace Ebizmarts\MailChimp\Ui\Component\Listing\Column;
 
 use Magento\Catalog\Model\ProductFactory;
+use Magento\Catalog\Model\ResourceModel\Product\CollectionFactory as ProductCollectionFactory;
+use Magento\ConfigurableProduct\Model\Product\Type\Configurable as ProductTypeConfigurable;
+use Magento\Catalog\Model\Product\Type as ProductType;
+use Magento\Downloadable\Model\Product\Type as ProductTypeDownloadable;
 use Magento\Framework\App\RequestInterface;
 use Magento\Framework\View\Element\UiComponent\ContextInterface;
 use Magento\Framework\View\Element\UiComponentFactory;
@@ -10,6 +14,12 @@ use Magento\Ui\Component\Listing\Columns\Column;
 
 class Products extends Column
 {
+    private const SUPPORTED_PRODUCT_TYPES = [
+        ProductType::TYPE_SIMPLE,
+        ProductType::TYPE_VIRTUAL,
+        ProductTypeConfigurable::TYPE_CODE,
+        ProductTypeDownloadable::TYPE_DOWNLOADABLE
+    ];
     /**
      * @var ProductFactory
      */
@@ -30,11 +40,16 @@ class Products extends Column
      * @var \Ebizmarts\MailChimp\Model\MailChimpErrorsFactory
      */
     protected $_mailChimpErrorsFactory;
+    /**
+     * @var ProductCollectionFactory
+     */
+    private $productCollectionFactory;
 
     /**
      * @param ContextInterface $context
      * @param UiComponentFactory $uiComponentFactory
      * @param ProductFactory $productFactory
+     * @param ProductCollectionFactory $productCollectionFactory
      * @param RequestInterface $requestInterface
      * @param \Ebizmarts\MailChimp\Helper\Data $helper
      * @param \Magento\Framework\View\Asset\Repository $assetRepository
@@ -46,6 +61,7 @@ class Products extends Column
         ContextInterface $context,
         UiComponentFactory $uiComponentFactory,
         ProductFactory $productFactory,
+        ProductCollectionFactory $productCollectionFactory,
         RequestInterface $requestInterface,
         \Ebizmarts\MailChimp\Helper\Data $helper,
         \Magento\Framework\View\Asset\Repository $assetRepository,
@@ -58,17 +74,22 @@ class Products extends Column
         $this->_helper = $helper;
         $this->_assetRepository = $assetRepository;
         $this->_mailChimpErrorsFactory = $mailChimpErrorsFactory;
+        $this->productCollectionFactory = $productCollectionFactory;
         parent::__construct($context, $uiComponentFactory, $components, $data);
     }
 
     public function prepareDataSource(array $dataSource)
     {
         if (isset($dataSource['data']['items'])) {
+            $productsMap = $this->getProductsByEntityIds(
+                $this->getProductsIds($dataSource)
+            );
             foreach ($dataSource['data']['items'] as & $item) {
                 /**
                  * @var $product \Magento\Catalog\Model\Product
                  */
-                $product = $this->_productFactory->create()->load($item['entity_id']);
+                $product = $productsMap[$item['entity_id']]
+                    ?? $this->_productFactory->create()->load($item['entity_id']); // Backwards Compatibility
                 $params = ['_secure' => $this->_requestInterface->isSecure()];
                 $alt = '';
                 $url = '';
@@ -157,5 +178,31 @@ class Products extends Column
          */
         $error = $this->_mailChimpErrorsFactory->create();
         return $error->getByStoreIdType($storeId, $productId, \Ebizmarts\MailChimp\Helper\Data::IS_PRODUCT);
+    }
+    private function getProductsByEntityIds(array $productIds): array
+    {
+        if (empty($productIds)) {
+            return [];
+        }
+
+        /** @var \Magento\Catalog\Model\ResourceModel\Product\Collection $productsCollection */
+        $productsCollection = $this->productCollectionFactory->create();
+        $productsCollection->addAttributeToFilter('entity_id', ['in' => $productIds]);
+
+        $productsMap = [];
+        foreach ($productsCollection->getItems() as $product) {
+            $productsMap[$product->getId()] = $product;
+        }
+
+        return $productsMap;
+    }
+
+    private function getProductsIds(array $dataSource)
+    {
+        if (!isset($dataSource['data']['items'])) {
+            return [];
+        }
+
+        return array_filter(array_unique(array_column($dataSource['data']['items'], 'entity_id')));
     }
 }
