@@ -1,22 +1,9 @@
 <?php
-/**
- * MailChimp Magento Component
- *
- * @category Ebizmarts
- * @package MailChimp
- * @author Ebizmarts Team <info@ebizmarts.com>
- * @copyright Ebizmarts (http://ebizmarts.com)
- * @license     http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
- * @date: 11/29/17 1:55 PM
- * @file: Mailchimp.php
- */
 
 namespace Ebizmarts\MailChimp\Block\Adminhtml\Customer\Edit\Tabs;
 
 use Magento\Customer\Controller\RegistryConstants;
 use Magento\Ui\Component\Layout\Tabs\TabInterface;
-use Magento\Backend\Block\Widget\Form;
-use Magento\Backend\Block\Widget\Form\Generic;
 
 class Mailchimp extends \Magento\Backend\Block\Template implements TabInterface
 {
@@ -30,7 +17,6 @@ class Mailchimp extends \Magento\Backend\Block\Template implements TabInterface
     protected $_coreRegistry;
 
     /**
-     * Mailchimp constructor.
      * @param \Magento\Backend\Block\Template\Context $context
      * @param \Magento\Framework\Registry $registry
      * @param \Magento\Framework\Data\FormFactory $formFactory
@@ -80,6 +66,7 @@ class Mailchimp extends \Magento\Backend\Block\Template implements TabInterface
         if ($this->getCustomerId()) {
             return true;
         }
+
         return false;
     }
 
@@ -91,12 +78,12 @@ class Mailchimp extends \Magento\Backend\Block\Template implements TabInterface
         if ($this->getCustomerId()) {
             return false;
         }
+
         return true;
     }
 
     /**
      * Tab class getter
-     *
      * @return string
      */
     public function getTabClass()
@@ -106,7 +93,6 @@ class Mailchimp extends \Magento\Backend\Block\Template implements TabInterface
 
     /**
      * Return URL link to Tab content
-     *
      * @return string
      */
     public function getTabUrl()
@@ -116,7 +102,6 @@ class Mailchimp extends \Magento\Backend\Block\Template implements TabInterface
 
     /**
      * Tab should be loaded trough Ajax call
-     *
      * @return bool
      */
     public function isAjaxLoaded()

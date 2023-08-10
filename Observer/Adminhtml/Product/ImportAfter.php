@@ -2,9 +2,9 @@
 
 namespace Ebizmarts\MailChimp\Observer\Adminhtml\Product;
 
-use Magento\Framework\Event\Observer;
-use Magento\Catalog\Model\ResourceModel\Product\CollectionFactory;
 use Ebizmarts\MailChimp\Helper\Sync as SyncHelper;
+use Magento\Catalog\Model\ResourceModel\Product\CollectionFactory;
+use Magento\Framework\Event\Observer;
 
 class ImportAfter implements \Magento\Framework\Event\ObserverInterface
 {
@@ -22,12 +22,12 @@ class ImportAfter implements \Magento\Framework\Event\ObserverInterface
         \Ebizmarts\MailChimp\Helper\Data $helper,
         CollectionFactory $productCollectionFactory,
         SyncHelper $syncHelper
-    )
-    {
+    ) {
         $this->helper = $helper;
         $this->productCollectionFactory = $productCollectionFactory;
         $this->syncHelper = $syncHelper;
     }
+
     public function execute(Observer $observer)
     {
         try {
@@ -37,15 +37,15 @@ class ImportAfter implements \Magento\Framework\Event\ObserverInterface
             foreach ($bunch as $product) {
                 if ($counter % 100 == 0 && count($skus)) {
                     $this->updateSkus($skus);
-                    $skus =[];
+                    $skus = [];
                 }
                 $sku = $product['sku'];
-                if (key_exists('_store', $product)&&!empty($product['_store'])) {
+                if (key_exists('_store', $product) && !empty($product['_store'])) {
                     $storeId = $product['_store'];
                 } else {
                     $storeId = 0;
                 }
-                $skus[$storeId][]=$sku;
+                $skus[$storeId][] = $sku;
                 $counter++;
             }
             if (count($skus)) {
@@ -55,6 +55,7 @@ class ImportAfter implements \Magento\Framework\Event\ObserverInterface
             $this->helper->log($e->getMessage());
         }
     }
+
     protected function updateSkus($skus)
     {
         foreach ($skus as $storeId => $storeskus) {
@@ -63,7 +64,7 @@ class ImportAfter implements \Magento\Framework\Event\ObserverInterface
              */
             $collection = $this->productCollectionFactory->create();
             $collection->addStoreFilter($storeId);
-            $collection->addFieldToFilter('sku', ['in'=>$storeskus]);
+            $collection->addFieldToFilter('sku', ['in' => $storeskus]);
             $collection->addFieldToSelect('id');
             $productIds = [];
             foreach ($collection as $item) {
@@ -71,15 +72,18 @@ class ImportAfter implements \Magento\Framework\Event\ObserverInterface
             }
             $this->markAsModified($storeId, $productIds);
         }
-
     }
-    protected function markAsModified($storeId,$productsIds)
+
+    protected function markAsModified($storeId, $productsIds)
     {
         $mailchimpStoreId = $this->helper->getConfigValue(
             \Ebizmarts\MailChimp\Helper\Data::XML_MAILCHIMP_STORE,
             $storeId
         );
-        $this->syncHelper->markAllAsModifiedByIds($mailchimpStoreId, $productsIds, \Ebizmarts\MailChimp\Helper\Data::IS_PRODUCT);
-
+        $this->syncHelper->markAllAsModifiedByIds(
+            $mailchimpStoreId,
+            $productsIds,
+            \Ebizmarts\MailChimp\Helper\Data::IS_PRODUCT
+        );
     }
 }

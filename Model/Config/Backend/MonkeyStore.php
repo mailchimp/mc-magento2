@@ -1,15 +1,4 @@
 <?php
-/**
- * mc-magento2 Magento Component
- *
- * @category Ebizmarts
- * @package mc-magento2
- * @author Ebizmarts Team <info@ebizmarts.com>
- * @copyright Ebizmarts (http://ebizmarts.com)
- * @license     http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
- * @date: 3/29/17 4:29 PM
- * @file: MonkeyStore.php
- */
 
 namespace Ebizmarts\MailChimp\Model\Config\Backend;
 
@@ -69,11 +58,11 @@ class MonkeyStore extends \Magento\Framework\App\Config\Value
         \Magento\Store\Model\StoreManager $storeManager,
         array $data = []
     ) {
-        $this->_helper          = $helper;
-        $this->syncHelper       = $syncHelper;
-        $this->resourceConfig   = $resourceConfig;
-        $this->_date            = $date;
-        $this->_storeManager    = $storeManager;
+        $this->_helper = $helper;
+        $this->syncHelper = $syncHelper;
+        $this->resourceConfig = $resourceConfig;
+        $this->_date = $date;
+        $this->_storeManager = $storeManager;
         parent::__construct($context, $registry, $config, $cacheTypeList, $resource, $resourceCollection, $data);
     }
 
@@ -90,7 +79,7 @@ class MonkeyStore extends \Magento\Framework\App\Config\Value
             $active = 0;
         }
         if ($active && $this->isValueChanged()) {
-            $mailchimpStore     = $this->getOldValue();
+            $mailchimpStore = $this->getOldValue();
             // charge the $newListId
             if (isset($data['general']['fields']['apikey']['value'])) {
                 $apiKey = $data['general']['fields']['apikey']['value'];
@@ -138,7 +127,7 @@ class MonkeyStore extends \Magento\Framework\App\Config\Value
                     $createWebhook = false;
                 }
             }
-            if ($found==1) {
+            if ($found == 1) {
                 $this->_helper->cancelAllPendingBatches($mailchimpStore);
                 $this->syncHelper->resetErrors($mailchimpStore, $this->getScopeId(), true);
             }
@@ -147,17 +136,21 @@ class MonkeyStore extends \Magento\Framework\App\Config\Value
                 $this->_helper->createWebHook($apiKey, $newListId);
             }
         }
+
         return parent::beforeSave();
     }
+
     private function getStore($apiKey, $store)
     {
         try {
             $api = $this->_helper->getApiByApiKey($apiKey);
             $store = $api->ecommerce->stores->get($store);
+
             return $store['list_id'];
         } catch (\Mailchimp_Error $e) {
             $this->_helper->log($e->getFriendlyMessage());
         }
+
         return null;
     }
 }

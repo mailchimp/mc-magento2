@@ -1,14 +1,4 @@
 <?php
-/**
- * Ebizmarts_MailChimp Magento JS component
- *
- * @category    Ebizmarts
- * @package     Ebizmarts_MailChimp
- * @author      Ebizmarts Team <info@ebizmarts.com>
- * @copyright   Ebizmarts (http://ebizmarts.com)
- * @license     http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
- */
-
 
 namespace Ebizmarts\MailChimp\Model\Config\Source;
 
@@ -21,7 +11,7 @@ class Details implements \Magento\Framework\Option\ArrayInterface
     /**
      * @var \Ebizmarts\MailChimp\Helper\Data
      */
-    private $_helper  = null;
+    private $_helper = null;
     /**
      * @var \Magento\Framework\Message\ManagerInterface
      */
@@ -30,7 +20,6 @@ class Details implements \Magento\Framework\Option\ArrayInterface
     private $_error = '';
 
     /**
-     * Details constructor.
      * @param \Ebizmarts\MailChimp\Helper\Data $helper
      * @param \Magento\Framework\Message\ManagerInterface $message
      * @param \Magento\Store\Model\StoreManager $storeManager
@@ -43,9 +32,9 @@ class Details implements \Magento\Framework\Option\ArrayInterface
         \Magento\Framework\App\RequestInterface $request
     ) {
         $this->_message = $message;
-        $this->_helper  = $helper;
+        $this->_helper = $helper;
         $this->storeManager = $storeManager;
-        $storeId = (int) $request->getParam("store", 0);
+        $storeId = (int)$request->getParam("store", 0);
         if ($request->getParam('website', 0)) {
             $scope = 'website';
             $storeId = $request->getParam('website', 0);
@@ -77,7 +66,7 @@ class Details implements \Magento\Framework\Option\ArrayInterface
                     $storeId,
                     $scope
                 );
-                if ($mailchimpStoreId && $mailchimpStoreId!=-1 &&
+                if ($mailchimpStoreId && $mailchimpStoreId != -1 &&
                     $this->_helper->getConfigValue(
                         \Ebizmarts\MailChimp\Helper\Data::XML_PATH_ECOMMERCE_ACTIVE,
                         $storeId,
@@ -119,7 +108,8 @@ class Details implements \Magento\Framework\Option\ArrayInterface
             if (isset($this->_options['account_name'])) {
                 $ret = [
                     ['label' => __('Username'), 'value' => $this->_options['account_name']],
-                    ['label' => 'Total Member Subscribers', 'value' => $this->_options['total_subscribers']]];
+                    ['label' => 'Total Member Subscribers', 'value' => $this->_options['total_subscribers']]
+                ];
                 if (array_key_exists('list_subscribers', $this->_options)) {
                     $ret = array_merge(
                         $ret,
@@ -136,16 +126,19 @@ class Details implements \Magento\Framework\Option\ArrayInterface
                     ]);
                     if ($this->_options['is_syncing']) {
                         $ret = array_merge($ret, [
-                            ['label'=> __('This account is currently syncing'), 'value'=>'']
+                            ['label' => __('This account is currently syncing'), 'value' => '']
                         ]);
                     } else {
                         $ret = array_merge($ret, [
-                            ['label'=> __('Account Synced since'), 'value'=>$this->_options['date_sync']]
+                            ['label' => __('Account Synced since'), 'value' => $this->_options['date_sync']]
                         ]);
                     }
                 } else {
                     $ret = array_merge($ret, [
-                        ['label'=>'Ecommerce disabled, only subscribers will be synchronized (your orders, products,etc will be not synchronized)','value'=>'']
+                        [
+                            'label' => 'Ecommerce disabled, only subscribers will be synchronized (your orders, products,etc will be not synchronized)',
+                            'value' => ''
+                        ]
                     ]);
                 }
             }
@@ -156,12 +149,14 @@ class Details implements \Magento\Framework\Option\ArrayInterface
         } else {
             $ret = [['label' => 'Important', 'value' => __($this->_options)]];
         }
+
         return $ret;
     }
+
     private function getDateSync($mailchimpStoreId)
     {
         return $this->_helper->getConfigValue(
-            \Ebizmarts\MailChimp\Helper\Data::XML_PATH_IS_SYNC."/$mailchimpStoreId",
+            \Ebizmarts\MailChimp\Helper\Data::XML_PATH_IS_SYNC . "/$mailchimpStoreId",
             0,
             "default"
         );

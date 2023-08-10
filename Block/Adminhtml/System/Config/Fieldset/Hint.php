@@ -1,13 +1,4 @@
 <?php
-/**
- * Ebizmarts_MailChimp Magento JS component
- *
- * @category    Ebizmarts
- * @package     Ebizmarts_MailChimp
- * @author      Ebizmarts Team <info@ebizmarts.com>
- * @copyright   Ebizmarts (http://ebizmarts.com)
- * @license     http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
- */
 
 namespace Ebizmarts\MailChimp\Block\Adminhtml\System\Config\Fieldset;
 
@@ -36,7 +27,6 @@ class Hint extends \Magento\Backend\Block\Template implements
     private $_moduleVersion;
 
     /**
-     * Hint constructor.
      * @param \Magento\Backend\Block\Template\Context $context
      * @param \Magento\Framework\App\ProductMetadataInterface $productMetaData
      * @param \Ebizmarts\MailChimp\Helper\Data $helper
@@ -53,9 +43,10 @@ class Hint extends \Magento\Backend\Block\Template implements
         parent::__construct($context, $data);
         $this->_metaData = $productMetaData;
         $this->_helper = $helper;
-        $this->_moduleVersion   = $moduleVersion;
+        $this->_moduleVersion = $moduleVersion;
         $this->_context = $context;
     }
+
     /**
      * @param \Magento\Framework\Data\Form\Element\AbstractElement $element
      * @return mixed
@@ -69,6 +60,7 @@ class Hint extends \Magento\Backend\Block\Template implements
     {
         return $this->_moduleVersion->getModuleVersion('Ebizmarts_MailChimp');
     }
+
     public function getHasApiKey()
     {
         $apikey = $this->_helper->getApiKey($this->_context->getStoreManager()->getStore()->getId());
@@ -78,6 +70,7 @@ class Hint extends \Magento\Backend\Block\Template implements
             return false;
         }
     }
+
     public function getScope()
     {
         $params = $this->getRequest()->getParams();
@@ -87,8 +80,10 @@ class Hint extends \Magento\Backend\Block\Template implements
         } elseif (isset($params['store'])) {
             $scope = 'store';
         }
+
         return $scope;
     }
+
     public function getScopeId()
     {
         $params = $this->getRequest()->getParams();
@@ -98,6 +93,7 @@ class Hint extends \Magento\Backend\Block\Template implements
         } elseif (isset($params['store'])) {
             $scopeId = $params['store'];
         }
+
         return $scopeId;
     }
 }

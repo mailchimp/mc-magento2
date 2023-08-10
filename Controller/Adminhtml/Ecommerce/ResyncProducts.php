@@ -1,22 +1,10 @@
 <?php
-/**
- * mc-magento2 Magento Component
- *
- * @category Ebizmarts
- * @package mc-magento2
- * @author Ebizmarts Team <info@ebizmarts.com>
- * @copyright Ebizmarts (http://ebizmarts.com)
- * @license     http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
- * @date: 2/21/17 5:07 PM
- * @file: ResetLocalErrors.php
- */
 
 namespace Ebizmarts\MailChimp\Controller\Adminhtml\Ecommerce;
 
+use Ebizmarts\MailChimp\Helper\Sync as SyncHelper;
 use Magento\Framework\Controller\Result\JsonFactory;
 use Magento\Framework\Exception\ValidatorException;
-use Symfony\Component\Config\Definition\Exception\Exception;
-use Ebizmarts\MailChimp\Helper\Sync as SyncHelper;
 
 class ResyncProducts extends \Magento\Backend\App\Action
 {
@@ -46,9 +34,9 @@ class ResyncProducts extends \Magento\Backend\App\Action
         SyncHelper $syncHelper
     ) {
         parent::__construct($context);
-        $this->resultJsonFactory    = $resultJsonFactory;
-        $this->storeManager         = $storeManagerInterface;
-        $this->syncHelper           = $syncHelper;
+        $this->resultJsonFactory = $resultJsonFactory;
+        $this->storeManager = $storeManagerInterface;
+        $this->syncHelper = $syncHelper;
     }
 
     public function execute()
@@ -64,11 +52,13 @@ class ResyncProducts extends \Magento\Backend\App\Action
             $valid = 0;
             $message = $e->getMessage();
         }
+
         return $resultJson->setData([
             'valid' => (int)$valid,
             'message' => $message,
         ]);
     }
+
     protected function _isAllowed()
     {
         return $this->_authorization->isAllowed('Ebizmarts_MailChimp::config_mailchimp');

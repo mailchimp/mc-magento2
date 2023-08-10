@@ -2,15 +2,15 @@
 
 namespace Ebizmarts\MailChimp\Helper;
 
+use Ebizmarts\MailChimp\Model\MailChimpErrors;
+use Ebizmarts\MailChimp\Model\MailChimpSyncEcommerce;
+use Ebizmarts\MailChimp\Model\MailChimpSyncEcommerceFactory;
+use Magento\Catalog\Model\ProductFactory;
 use Magento\Framework\App\Helper\AbstractHelper;
 use Magento\Framework\App\Helper\Context;
 use Magento\Framework\Exception\ValidatorException;
 use Magento\Sales\Model\OrderFactory;
-use Magento\Catalog\Model\ProductFactory;
 use Magento\Sales\Model\ResourceModel\Order\CollectionFactory as OrderCollectionFactory;
-use Ebizmarts\MailChimp\Model\MailChimpSyncEcommerceFactory;
-use Ebizmarts\MailChimp\Model\MailChimpSyncEcommerce;
-use Ebizmarts\MailChimp\Model\MailChimpErrors;
 
 class Sync extends AbstractHelper
 {
@@ -65,6 +65,7 @@ class Sync extends AbstractHelper
         $this->productFactory = $productFactory;
         parent::__construct($context);
     }
+
     public function saveEcommerceData(
         $storeId,
         $entityId,
@@ -136,33 +137,41 @@ class Sync extends AbstractHelper
             }
         }
     }
+
     public function getChimpSyncEcommerce($storeId, $id, $type)
     {
         $chimp = $this->chimpSyncEcommerceFactory->create();
+
         return $chimp->getByStoreIdType($storeId, $id, $type);
     }
+
     public function markEcommerceAsDeleted($relatedId, $type, $relatedDeletedId = null)
     {
         $this->chimpSyncEcommerce->markAllAsDeleted($relatedId, $type, $relatedDeletedId);
     }
+
     public function ecommerceDeleteAllByIdType($id, $type, $mailchimpStoreId)
     {
         $this->chimpSyncEcommerce->deleteAllByIdType($id, $type, $mailchimpStoreId);
     }
+
     public function deleteAllByBatchId($batchId)
     {
         $this->chimpSyncEcommerce->deleteAllByBatchid($batchId);
     }
+
     public function markRegisterAsModified($registerId, $type)
     {
         if (!empty($registerId)) {
             $this->chimpSyncEcommerce->markAllAsModified($registerId, $type);
         }
     }
+
     public function markAllAsModifiedByIds($mailchimpStoreId, $ids, $type)
     {
         $this->chimpSyncEcommerce->markAllAsModifiedByIds($mailchimpStoreId, $ids, $type);
     }
+
     public function resyncAllSubscribers($mailchimpList)
     {
         $connection = $this->chimpSyncEcommerce->getResource()->getConnection();
@@ -173,6 +182,7 @@ class Sync extends AbstractHelper
             "type = '" . \Ebizmarts\MailChimp\Helper\Data::IS_SUBSCRIBER . "' and mailchimp_store_id = '$mailchimpList'"
         );
     }
+
     public function resyncProducts($mailchimpList)
     {
         $connection = $this->chimpSyncEcommerce->getResource()->getConnection();
@@ -190,7 +200,7 @@ class Sync extends AbstractHelper
             // clean the errors table
             $connection = $this->mailChimpErrors->getResource()->getConnection();
             $tableName = $this->mailChimpErrors->getResource()->getMainTable();
-            $connection->delete($tableName, "mailchimp_store_id = '".$mailchimpStore."'");
+            $connection->delete($tableName, "mailchimp_store_id = '" . $mailchimpStore . "'");
             // clean the syncecommerce table with errors
             if ($retry) {
                 $connection = $this->chimpSyncEcommerce->getResource()->getConnection();

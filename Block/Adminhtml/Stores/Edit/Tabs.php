@@ -1,15 +1,4 @@
 <?php
-/**
- * mc-magento2 Magento Component
- *
- * @category Ebizmarts
- * @package mc-magento2
- * @author Ebizmarts Team <info@ebizmarts.com>
- * @copyright Ebizmarts (http://ebizmarts.com)
- * @license     http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
- * @date: 4/12/17 11:01 AM
- * @file: Tabs.php
- */
 
 namespace Ebizmarts\MailChimp\Block\Adminhtml\Stores\Edit;
 
@@ -18,8 +7,6 @@ use Magento\Backend\Block\Widget\Tabs as WidgetTabs;
 class Tabs extends WidgetTabs
 {
     /**
-     * Class constructor
-     *
      * @return void
      */
     protected function _construct()

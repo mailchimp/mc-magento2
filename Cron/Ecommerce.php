@@ -1,15 +1,4 @@
 <?php
-/**
- * MailChimp Magento Component
- *
- * @category Ebizmarts
- * @package MailChimp
- * @author Ebizmarts Team <info@ebizmarts.com>
- * @copyright Ebizmarts (http://ebizmarts.com)
- * @license     http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
- * @date: 10/1/16 10:02 AM
- * @file: Ecommerce.php
- */
 
 namespace Ebizmarts\MailChimp\Cron;
 
@@ -69,7 +58,6 @@ class Ecommerce
     private $_dir;
 
     /**
-     * Ecommerce constructor.
      * @param \Magento\Store\Model\StoreManager $storeManager
      * @param \Ebizmarts\MailChimp\Helper\Data $helper
      * @param \Ebizmarts\MailChimp\Model\Api\Product $apiProduct
@@ -99,25 +87,23 @@ class Ecommerce
         \Ebizmarts\MailChimp\Model\MailChimpSyncEcommerce $chimpSyncEcommerce,
         \Magento\Framework\Filesystem\DirectoryList $dir
     ) {
-
-        $this->_storeManager    = $storeManager;
-        $this->_helper          = $helper;
-        $this->_apiProduct      = $apiProduct;
+        $this->_storeManager = $storeManager;
+        $this->_helper = $helper;
+        $this->_apiProduct = $apiProduct;
         $this->_mailChimpSyncBatchesFactory = $mailChimpSyncBatchesFactory;
-        $this->_apiResult       = $apiResult;
-        $this->_apiCustomer     = $apiCustomer;
-        $this->_apiOrder        = $apiOrder;
-        $this->_apiCart         = $apiCart;
-        $this->_apiSubscribers  = $apiSubscriber;
-        $this->_chimpSyncEcommerce  = $chimpSyncEcommerce;
-        $this->_apiPromoCodes   = $apiPromoCodes;
-        $this->_apiPromoRules   = $apiPromoRules;
-        $this->_dir             = $dir;
+        $this->_apiResult = $apiResult;
+        $this->_apiCustomer = $apiCustomer;
+        $this->_apiOrder = $apiOrder;
+        $this->_apiCart = $apiCart;
+        $this->_apiSubscribers = $apiSubscriber;
+        $this->_chimpSyncEcommerce = $chimpSyncEcommerce;
+        $this->_apiPromoCodes = $apiPromoCodes;
+        $this->_apiPromoRules = $apiPromoRules;
+        $this->_dir = $dir;
     }
 
     public function execute()
     {
-
         $connection = $this->_chimpSyncEcommerce->getResource()->getConnection();
         $tableName = $this->_chimpSyncEcommerce->getResource()->getMainTable();
         $connection->delete(
@@ -129,6 +115,7 @@ class Ecommerce
             if ($this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_PATH_ACTIVE, $storeId)) {
                 if (!$this->_ping($storeId)) {
                     $this->_helper->log('MailChimp is not available');
+
                     return;
                 }
                 $this->_storeManager->setCurrentStore($storeId);
@@ -155,7 +142,8 @@ class Ecommerce
                             [
                                 'batch_id' => $batchId,
                                 'mailchimp_sync_modified' => 0,
-                                'mailchimp_sync_delta' => $this->_helper->getGmtDate()],
+                                'mailchimp_sync_delta' => $this->_helper->getGmtDate()
+                            ],
                             "batch_id is null and mailchimp_store_id = '$listId' and mailchimp_sync_error is null"
                         );
                     }
@@ -188,10 +176,10 @@ class Ecommerce
         }
         foreach ($syncs as $mailchimpStoreId => $val) {
             if ($val && !$this->_helper->getConfigValue(
-                \Ebizmarts\MailChimp\Helper\Data::XML_PATH_IS_SYNC . "/$mailchimpStoreId",
-                0,
-                'default'
-            )
+                    \Ebizmarts\MailChimp\Helper\Data::XML_PATH_IS_SYNC . "/$mailchimpStoreId",
+                    0,
+                    'default'
+                )
             ) {
                 $this->updateSyncFlagData($val['storeid'], $mailchimpStoreId);
             }
@@ -242,10 +230,9 @@ class Ecommerce
         }
 
         if (!empty($results)) {
-            list($OKOperations, $BadOperations) = $this->encodeOperations($results);
+            [$OKOperations, $BadOperations] = $this->encodeOperations($results);
             $batchArray['operations'] = $OKOperations;
             try {
-
                 if (!count($batchArray['operations'])) {
                     $this->_helper->log('An empty operation was detected');
                 } else {
@@ -266,9 +253,15 @@ class Ecommerce
                         $syncBatches->setCustomersNewCount($batchCounters[\Ebizmarts\MailChimp\Helper\Data::CUS_NEW]);
                         $syncBatches->setCartsNewCount($batchCounters[\Ebizmarts\MailChimp\Helper\Data::QUO_NEW]);
                         $syncBatches->setOrdersNewCount($batchCounters[\Ebizmarts\MailChimp\Helper\Data::ORD_NEW]);
-                        $syncBatches->setSubscribersModifiedCount($batchCounters[\Ebizmarts\MailChimp\Helper\Data::SUB_MOD]);
-                        $syncBatches->setProductsModifiedCount($batchCounters[\Ebizmarts\MailChimp\Helper\Data::PRO_MOD]);
-                        $syncBatches->setCustomersModifiedCount($batchCounters[\Ebizmarts\MailChimp\Helper\Data::CUS_MOD]);
+                        $syncBatches->setSubscribersModifiedCount(
+                            $batchCounters[\Ebizmarts\MailChimp\Helper\Data::SUB_MOD]
+                        );
+                        $syncBatches->setProductsModifiedCount(
+                            $batchCounters[\Ebizmarts\MailChimp\Helper\Data::PRO_MOD]
+                        );
+                        $syncBatches->setCustomersModifiedCount(
+                            $batchCounters[\Ebizmarts\MailChimp\Helper\Data::CUS_MOD]
+                        );
                         $syncBatches->setCartsModifiedCount($batchCounters[\Ebizmarts\MailChimp\Helper\Data::QUO_MOD]);
                         $syncBatches->setOrdersModifiedCount($batchCounters[\Ebizmarts\MailChimp\Helper\Data::ORD_MOD]);
                         $syncBatches->getResource()->save($syncBatches);
@@ -279,7 +272,6 @@ class Ecommerce
                 if (count($BadOperations)) {
                     $this->markWithError($BadOperations, $mailchimpStoreId, $listId);
                 }
-
             } catch (\Mailchimp_Error $e) {
                 $this->_helper->log($e->getFriendlyMessage());
             } catch (\Exception $e) {
@@ -343,6 +335,7 @@ class Ecommerce
             $this->_helper->log($e->getFriendlyMessage());
         }
     }
+
     protected function _ping($storeId)
     {
         try {
@@ -350,10 +343,13 @@ class Ecommerce
             $api->root->info();
         } catch (\Mailchimp_Error $e) {
             $this->_helper->log($e->getFriendlyMessage());
+
             return false;
         }
+
         return true;
     }
+
     protected function _showResume($batchId, $storeId)
     {
         $this->_helper->log("Sent batch $batchId for store $storeId");
@@ -362,7 +358,8 @@ class Ecommerce
 
     protected function _saveRequest($resquest)
     {
-        $pathLog = $this->_dir->getPath('log').DIRECTORY_SEPARATOR.'Request'.$this->_helper->getGmtTimeStamp().'.log';
+        $pathLog = $this->_dir->getPath('log') . DIRECTORY_SEPARATOR . 'Request' . $this->_helper->getGmtTimeStamp(
+            ) . '.log';
         error_log(var_export($resquest, true), 3, $pathLog);
         $this->_helper->log("Request with error was saved in $pathLog");
     }
@@ -372,7 +369,7 @@ class Ecommerce
         $OKOperations = [];
         $BadOperations = [];
         $batchJson = json_encode($operations);
-        $jsonLastErrorGeneral  = json_last_error();
+        $jsonLastErrorGeneral = json_last_error();
         $jsonLastErrorMsgGeneral = json_last_error_msg();
         if ($jsonLastErrorGeneral) {
             $this->_helper->log("Encode error");
@@ -394,8 +391,10 @@ class Ecommerce
         } else {
             $OKOperations = $operations;
         }
+
         return [$OKOperations, $BadOperations];
     }
+
     protected function markWithError($operations, $mailchimpStoreId, $listId)
     {
         $type = null;
@@ -433,11 +432,11 @@ class Ecommerce
                         $connection->update(
                             $tableName,
                             [
-                            'batch_id' => -1,
-                            'mailchimp_sync_modified' => 0,
-                            'mailchimp_sync_delta' => $this->_helper->getGmtDate(),
-                            'mailchimp_sync_error' => __('Json error'),
-                            'mailchimp_sent' => \Ebizmarts\MailChimp\Helper\Data::NOTSYNCED
+                                'batch_id' => -1,
+                                'mailchimp_sync_modified' => 0,
+                                'mailchimp_sync_delta' => $this->_helper->getGmtDate(),
+                                'mailchimp_sync_error' => __('Json error'),
+                                'mailchimp_sent' => \Ebizmarts\MailChimp\Helper\Data::NOTSYNCED
                             ],
                             "batch_id is null and mailchimp_store_id = '$storeId' and type ='$type' and related_id = $relatedId"
                         );

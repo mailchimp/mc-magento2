@@ -1,15 +1,5 @@
 <?php
-/**
- * mc-magento2 Magento Component
- *
- * @category Ebizmarts
- * @package mc-magento2
- * @author Ebizmarts Team <info@ebizmarts.com>
- * @copyright Ebizmarts (http://ebizmarts.com)
- * @license     http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
- * @date: 4/25/17 7:40 PM
- * @file: Quote.php
- */
+
 namespace Ebizmarts\MailChimp\Model\Plugin;
 
 use Ebizmarts\MailChimp\Helper\Sync as SyncHelper;
@@ -39,9 +29,8 @@ class Quote
         \Ebizmarts\MailChimp\Helper\Data $helper,
         SyncHelper $syncHelper
     ) {
-
         $this->_cookieManager = $cookieManager;
-        $this->_helper  = $helper;
+        $this->_helper = $helper;
         $this->syncHelper = $syncHelper;
     }
 

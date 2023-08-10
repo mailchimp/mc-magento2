@@ -1,15 +1,4 @@
 <?php
-/**
- * mc-magento2 Magento Component
- *
- * @category Ebizmarts
- * @package mc-magento2
- * @author Ebizmarts Team <info@ebizmarts.com>
- * @copyright Ebizmarts (http://ebizmarts.com)
- * @license     http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
- * @date: 10/27/17 3:41 PM
- * @file: VarsMap.php
- */
 
 namespace Ebizmarts\MailChimp\Block\Adminhtml\System\Config\Form\Field;
 
@@ -19,8 +8,8 @@ class VarsMap extends \Magento\Framework\View\Element\Html\Select
      * @var \Magento\Customer\Model\ResourceModel\Attribute\CollectionFactory
      */
     private $_attCollection;
+
     /**
-     * VarsMap constructor.
      * @param \Magento\Framework\View\Element\Context $context
      * @param \Magento\Customer\Model\ResourceModel\Attribute\CollectionFactory $attCollection
      * @param array $data
@@ -30,26 +19,26 @@ class VarsMap extends \Magento\Framework\View\Element\Html\Select
         \Magento\Customer\Model\ResourceModel\Attribute\CollectionFactory $attCollection,
         array $data = []
     ) {
-
         parent::__construct($context, $data);
         $this->_attCollection = $attCollection;
     }
+
     protected function _getAddressAtt()
     {
         $ret = [];
-        $ret['default_shipping##zip']     = __('Shipping Zip Code');
+        $ret['default_shipping##zip'] = __('Shipping Zip Code');
         $ret['default_shipping##country'] = __('Shipping Country');
-        $ret['default_shipping##city']    = __('Shipping City');
-        $ret['default_shipping##state']   = __('Shipping State');
-        $ret['default_shipping##telephone']   = __('Shipping Telephone');
-        $ret['default_shipping##company']   = __('Shipping Company');
+        $ret['default_shipping##city'] = __('Shipping City');
+        $ret['default_shipping##state'] = __('Shipping State');
+        $ret['default_shipping##telephone'] = __('Shipping Telephone');
+        $ret['default_shipping##company'] = __('Shipping Company');
 
-        $ret['default_billing##zip']      = __('Billing Zip Code');
-        $ret['default_billing##country']  = __('Billing Country');
-        $ret['default_billing##city']     = __('Billing City');
-        $ret['default_billing##state']    = __('Billing State');
-        $ret['default_billing##telephone']   = __('Billing Telephone');
-        $ret['default_billing##company']   = __('Billing Company');
+        $ret['default_billing##zip'] = __('Billing Zip Code');
+        $ret['default_billing##country'] = __('Billing Country');
+        $ret['default_billing##city'] = __('Billing City');
+        $ret['default_billing##state'] = __('Billing State');
+        $ret['default_billing##telephone'] = __('Billing Telephone');
+        $ret['default_billing##company'] = __('Billing Company');
 
         return $ret;
     }
@@ -64,6 +53,7 @@ class VarsMap extends \Magento\Framework\View\Element\Html\Select
         $ret = $systemAtt + $extraAtt;
 
         natsort($ret);
+
         return $ret;
     }
 
@@ -79,6 +69,7 @@ class VarsMap extends \Magento\Framework\View\Element\Html\Select
         }
 
         natsort($ret);
+
         return $ret;
     }
 
@@ -89,7 +80,6 @@ class VarsMap extends \Magento\Framework\View\Element\Html\Select
 
     /**
      * Render block HTML
-     *
      * @return string
      */
     public function _toHtml()
@@ -99,6 +89,7 @@ class VarsMap extends \Magento\Framework\View\Element\Html\Select
                 $this->addOption($attId, $this->escapeHtmlAttr($attLabel));
             }
         }
+
         return parent::_toHtml();
     }
 }

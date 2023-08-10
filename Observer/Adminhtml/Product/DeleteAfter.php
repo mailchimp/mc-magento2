@@ -2,13 +2,11 @@
 
 namespace Ebizmarts\MailChimp\Observer\Adminhtml\Product;
 
+use Ebizmarts\MailChimp\Helper\Sync as SyncHelper;
+use Magento\ConfigurableProduct\Model\ResourceModel\Product\Type\Configurable;
 use Magento\ConfigurableProduct\Model\ResourceModel\Product\Type\ConfigurableFactory;
 use Magento\Framework\Event\Observer;
 use Magento\Framework\Event\ObserverInterface;
-use Magento\ConfigurableProduct\Model\ResourceModel\Product\Type\Configurable;
-use Ebizmarts\MailChimp\Helper\Sync as SyncHelper;
-
-
 
 class DeleteAfter implements ObserverInterface
 {
@@ -36,10 +34,11 @@ class DeleteAfter implements ObserverInterface
         Configurable $configurable
 
     ) {
-        $this->helper               = $helper;
-        $this->syncHelper           = $syncHelper;
-        $this->configurable         = $configurable;
+        $this->helper = $helper;
+        $this->syncHelper = $syncHelper;
+        $this->configurable = $configurable;
     }
+
     function execute(Observer $observer)
     {
         $product = $observer->getProduct();
@@ -59,6 +58,7 @@ class DeleteAfter implements ObserverInterface
         }
         $this->_updateProduct($product->getId());
     }
+
     protected function _updateProduct($entityId)
     {
         $this->syncHelper->markEcommerceAsDeleted($entityId, \Ebizmarts\MailChimp\Helper\Data::IS_PRODUCT);

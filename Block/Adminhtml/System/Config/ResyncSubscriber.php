@@ -1,10 +1,5 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: gonzalo
- * Date: 3/12/18
- * Time: 2:12 PM
- */
+
 namespace Ebizmarts\MailChimp\Block\Adminhtml\System\Config;
 
 class ResyncSubscriber extends \Magento\Config\Block\System\Config\Form\Field
@@ -15,7 +10,6 @@ class ResyncSubscriber extends \Magento\Config\Block\System\Config\Form\Field
     private $_helper;
 
     /**
-     * ResetErrors constructor.
      * @param \Magento\Backend\Block\Template\Context $context
      * @param \Ebizmarts\MailChimp\Helper\Data $helper
      * @param array $data
@@ -25,7 +19,6 @@ class ResyncSubscriber extends \Magento\Config\Block\System\Config\Form\Field
         \Ebizmarts\MailChimp\Helper\Data $helper,
         array $data = []
     ) {
-
         $this->_helper = $helper;
         parent::__construct($context, $data);
     }
@@ -45,6 +38,7 @@ class ResyncSubscriber extends \Magento\Config\Block\System\Config\Form\Field
                 'html_id' => $element->getHtmlId(),
             ]
         );
+
         return $this->_toHtml();
     }
 }

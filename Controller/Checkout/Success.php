@@ -1,15 +1,4 @@
 <?php
-/**
- * MailChimp Magento Component
- *
- * @category Ebizmarts
- * @package MailChimp
- * @author Ebizmarts Team <info@ebizmarts.com>
- * @copyright Ebizmarts (http://ebizmarts.com)
- * @license     http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
- * @date: 11/20/17 5:06 PM
- * @file: Success.php
- */
 
 namespace Ebizmarts\MailChimp\Controller\Checkout;
 
@@ -60,19 +49,18 @@ class Success extends \Magento\Framework\App\Action\Action
         \Ebizmarts\MailChimp\Model\MailChimpInterestGroupFactory $interestGroupFactory,
         SyncHelper $syncHelper
     ) {
-
-        $this->_pageFactory         =$pageFactory;
-        $this->_helper              = $helper;
-        $this->_checkoutSession     = $checkoutSession;
-        $this->_subscriberFactory   = $subscriberFactory;
-        $this->_interestGroupFactory= $interestGroupFactory;
-        $this->syncHelper           = $syncHelper;
+        $this->_pageFactory = $pageFactory;
+        $this->_helper = $helper;
+        $this->_checkoutSession = $checkoutSession;
+        $this->_subscriberFactory = $subscriberFactory;
+        $this->_interestGroupFactory = $interestGroupFactory;
+        $this->syncHelper = $syncHelper;
         parent::__construct($context);
     }
 
     public function execute()
     {
-        $params     = $this->getRequest()->getParams();
+        $params = $this->getRequest()->getParams();
         $order = $this->_checkoutSession->getLastRealOrder();
         /**
          * @var $subscriber \Magento\Newsletter\Model\Subscriber
@@ -82,8 +70,8 @@ class Success extends \Magento\Framework\App\Action\Action
         $interestGroup = $this->_interestGroupFactory->create();
         try {
             $subscriber->loadBySubscriberEmail($order->getCustomerEmail(), $order->getStoreId());
-            if ($subscriber->getEmail()==$order->getCustomerEmail()) {
-                if ($subscriber->getStatus()==\Magento\Newsletter\Model\Subscriber::STATUS_UNSUBSCRIBED) {
+            if ($subscriber->getEmail() == $order->getCustomerEmail()) {
+                if ($subscriber->getStatus() == \Magento\Newsletter\Model\Subscriber::STATUS_UNSUBSCRIBED) {
                     $subscriber->subscribe($subscriber->getEmail());
                 }
                 $interestGroup->getBySubscriberIdStoreId($subscriber->getSubscriberId(), $subscriber->getStoreId());
@@ -109,11 +97,14 @@ class Success extends \Magento\Framework\App\Action\Action
         }
         $this->messageManager->addSuccessMessage(__('Thanks for sharing your interest with us'));
 
-        return $this->_redirect($this->_helper->getBaserUrl(
-            $order->getStoreId(),
-            \Magento\Framework\UrlInterface::URL_TYPE_WEB
-        ));
+        return $this->_redirect(
+            $this->_helper->getBaserUrl(
+                $order->getStoreId(),
+                \Magento\Framework\UrlInterface::URL_TYPE_WEB
+            )
+        );
     }
+
     protected function _updateSubscriber(
         $listId,
         $entityId,

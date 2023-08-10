@@ -1,21 +1,10 @@
 <?php
-/**
- * MailChimp Magento Component
- *
- * @category Ebizmarts
- * @package MailChimp
- * @author Ebizmarts Team <info@ebizmarts.com>
- * @copyright Ebizmarts (http://ebizmarts.com)
- * @license     http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
- * @date: 11/23/17 4:40 PM
- * @file: Newsletter.php
- */
 
 namespace Ebizmarts\MailChimp\Block;
 
+use Magento\Customer\Api\CustomerRepositoryInterface;
 use Magento\Customer\Controller\RegistryConstants;
 use Magento\Framework\Exception\NoSuchEntityException;
-use Magento\Customer\Api\CustomerRepositoryInterface;
 use Magento\Framework\Registry;
 
 class Newsletter extends \Magento\Framework\View\Element\Template
@@ -59,9 +48,8 @@ class Newsletter extends \Magento\Framework\View\Element\Template
         Registry $registry,
         array $data
     ) {
-
         parent::__construct($context, $data);
-        $this->_helper  = $helper;
+        $this->_helper = $helper;
         $this->subscriberFactory = $subscriberFactory;
         $this->customerSession = $customerSession;
         $this->customerRepository = $customerRepository;
@@ -72,14 +60,17 @@ class Newsletter extends \Magento\Framework\View\Element\Template
     {
         $customer = $this->getCurrentCustomer();
         $subscriber = $this->subscriberFactory->create();
-        $subscriber->loadByCustomer($customer->getId(),$customer->getStoreId());
+        $subscriber->loadByCustomer($customer->getId(), $customer->getStoreId());
+
 //        $subscriber = $this->getSubscriptionObject();
         return $this->_helper->getSubscriberInterest($subscriber->getSubscriberId(), $subscriber->getStoreId());
     }
+
     public function getFormUrl()
     {
-        return  $this->getUrl('mailchimp/accountmanage/save');
+        return $this->getUrl('mailchimp/accountmanage/save');
     }
+
     private function getCurrentCustomer()
     {
         $customerId = $this->getCurrentCustomerId();
@@ -91,6 +82,7 @@ class Newsletter extends \Magento\Framework\View\Element\Template
 
         return $customer;
     }
+
     private function getCurrentCustomerId(): int
     {
         return (int)$this->registry->registry(RegistryConstants::CURRENT_CUSTOMER_ID);

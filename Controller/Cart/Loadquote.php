@@ -1,18 +1,11 @@
 <?php
-/**
- * Index
- *
- * @copyright Copyright © 2017 Ebizmarts Corp.. All rights reserved.
- * @author    info@ebizmarts.com
- */
 
 namespace Ebizmarts\MailChimp\Controller\Cart;
 
-use Magento\Framework\App\Action\Action;
-use Magento\Framework\Controller\ResultFactory;
-use Magento\Framework\View\Result\PageFactory;
-use Magento\Framework\App\Action\Context;
 use Ebizmarts\MailChimp\Helper\Sync as SyncHelper;
+use Magento\Framework\App\Action\Action;
+use Magento\Framework\App\Action\Context;
+use Magento\Framework\View\Result\PageFactory;
 
 class Loadquote extends Action
 {
@@ -75,29 +68,27 @@ class Loadquote extends Action
         \Magento\Framework\Url $urlHelper,
         \Magento\Customer\Model\Url $customerUrl
     ) {
-
-        $this->pageFactory      = $pageFactory;
-        $this->_quote           = $quote;
+        $this->pageFactory = $pageFactory;
+        $this->_quote = $quote;
         $this->_customerSession = $customerSession;
-        $this->_helper          = $helper;
-        $this->syncHelper       = $syncHelper;
-        $this->_urlHelper       = $urlHelper;
-        $this->_message         = $context->getMessageManager();
-        $this->_customerUrl     = $customerUrl;
+        $this->_helper = $helper;
+        $this->syncHelper = $syncHelper;
+        $this->_urlHelper = $urlHelper;
+        $this->_message = $context->getMessageManager();
+        $this->_customerUrl = $customerUrl;
         $this->_checkoutSession = $checkoutSession;
         parent::__construct($context);
     }
 
     /**
      * Index Action
-     *
      * @return \Magento\Framework\View\Result\Page
      */
     public function execute()
     {
         /** @var \Magento\Framework\View\Result\Page $resultPage */
         $resultPage = $this->pageFactory->create();
-        $params     = $this->getRequest()->getParams();
+        $params = $this->getRequest()->getParams();
         if (isset($params['id'])) {
             $quote = $this->_quote->create();
             $quote->getResource()->load($quote, $params['id']);
@@ -128,7 +119,7 @@ class Loadquote extends Action
                             \Ebizmarts\MailChimp\Helper\Data::XML_ABANDONEDCART_PAGE,
                             $magentoStoreId
                         ),
-                        ['mc_cid'=> $params['mc_cid']]
+                        ['mc_cid' => $params['mc_cid']]
                     );
                     $quote->setData('mailchimp_campaign_id', $params['mc_cid']);
                 } else {
@@ -153,7 +144,7 @@ class Loadquote extends Action
                         if (isset($params['mc_cid'])) {
                             $url = $this->_urlHelper->getUrl(
                                 $this->_customerUrl->getLoginUrl(),
-                                ['mc_cid'=>$params['mc_cid']]
+                                ['mc_cid' => $params['mc_cid']]
                             );
                         } else {
                             $url = $this->_customerUrl->getLoginUrl();
@@ -163,6 +154,7 @@ class Loadquote extends Action
                 }
             }
         }
+
         return $resultPage;
     }
 }

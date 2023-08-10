@@ -1,23 +1,12 @@
 <?php
-/**
- * mc-magento2 Magento Component
- *
- * @category Ebizmarts
- * @package mc-magento2
- * @author Ebizmarts Team <info@ebizmarts.com>
- * @copyright Ebizmarts (http://ebizmarts.com)
- * @license     http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
- * @date: 4/12/17 11:03 AM
- * @file: Info.php
- */
 
 namespace Ebizmarts\MailChimp\Block\Adminhtml\Stores\Edit\Tab;
 
+use Magento\Backend\Block\Template\Context;
 use Magento\Backend\Block\Widget\Form\Generic;
 use Magento\Backend\Block\Widget\Tab\TabInterface;
-use Magento\Backend\Block\Template\Context;
-use Magento\Framework\Registry;
 use Magento\Framework\Data\FormFactory;
+use Magento\Framework\Registry;
 
 class Info extends Generic implements TabInterface
 {
@@ -43,7 +32,6 @@ class Info extends Generic implements TabInterface
     protected $_apikey;
 
     /**
-     * Info constructor.
      * @param Context $context
      * @param Registry $registry
      * @param FormFactory $formFactory
@@ -65,19 +53,18 @@ class Info extends Generic implements TabInterface
         \Ebizmarts\MailChimp\Model\Config\Source\ApiKey $apiKey,
         array $data = []
     ) {
-    
-        $this->_timezone    = $timezone;
-        $this->_yesno       = $yesno;
-        $this->_currency    = $currency;
-        $this->_locale      = $locale;
-        $this->_apikey      = $apiKey;
+        $this->_timezone = $timezone;
+        $this->_yesno = $yesno;
+        $this->_currency = $currency;
+        $this->_locale = $locale;
+        $this->_apikey = $apiKey;
         parent::__construct($context, $registry, $formFactory, $data);
     }
 
     protected function _prepareForm()
     {
-        $model  = $this->_coreRegistry->registry('mailchimp_stores');
-        $form   = $this->_formFactory->create();
+        $model = $this->_coreRegistry->registry('mailchimp_stores');
+        $form = $this->_formFactory->create();
         $form->setHtmlIdPrefix('stores_');
         $form->setFieldNameSuffix('stores');
 
@@ -113,21 +100,21 @@ class Info extends Generic implements TabInterface
                 'apikey',
                 'select',
                 [
-                    'name'      => 'apikey',
-                    'label'     => __('Apikey'),
-                    'required'  => true,
-                    'options'   => $apikeyArray,
+                    'name' => 'apikey',
+                    'label' => __('Apikey'),
+                    'required' => true,
+                    'options' => $apikeyArray,
                 ]
             );
-            $listArray = [''=>__('Select first an ApiKey')];
+            $listArray = ['' => __('Select first an ApiKey')];
             $fieldset->addField(
                 'list_id',
                 'select',
                 [
-                    'name'      => 'list_id',
-                    'label'     => __('List'),
-                    'required'  => true,
-                    'options'   => $listArray,
+                    'name' => 'list_id',
+                    'label' => __('List'),
+                    'required' => true,
+                    'options' => $listArray,
                 ]
             );
         }
@@ -136,9 +123,9 @@ class Info extends Generic implements TabInterface
             'name',
             'text',
             [
-                'name'        => 'name',
-                'label'    => __('Name'),
-                'required'     => true
+                'name' => 'name',
+                'label' => __('Name'),
+                'required' => true
             ]
         );
 
@@ -146,9 +133,9 @@ class Info extends Generic implements TabInterface
             'domain',
             'text',
             [
-                'name'        => 'domain',
-                'label'    => __('Domain'),
-                'required'     => true
+                'name' => 'domain',
+                'label' => __('Domain'),
+                'required' => true
             ]
         );
 
@@ -156,13 +143,13 @@ class Info extends Generic implements TabInterface
             'email_address',
             'text',
             [
-                'name'        => 'email_address',
-                'label'    => __('Email'),
-                'required'     => true
+                'name' => 'email_address',
+                'label' => __('Email'),
+                'required' => true
             ]
         );
         $currency = $this->_currency->toOptionArray();
-        $currencyArray = [''=> __('Select one')];
+        $currencyArray = ['' => __('Select one')];
         foreach ($currency as $c) {
             $currencyArray[$c['value']] = $c['label'];
         }
@@ -170,14 +157,14 @@ class Info extends Generic implements TabInterface
             'currency_code',
             'select',
             [
-                'name'      => 'currency_code',
-                'label'     => __('Currency'),
-                'required'  => true,
-                'options'   => $currencyArray
+                'name' => 'currency_code',
+                'label' => __('Currency'),
+                'required' => true,
+                'options' => $currencyArray
             ]
         );
         $locale = $this->_locale->toOptionArray();
-        $localeArray = [''=> __('Select one')];
+        $localeArray = ['' => __('Select one')];
         foreach ($locale as $l) {
             $localeArray[$l['value']] = $l['label'];
         }
@@ -186,14 +173,14 @@ class Info extends Generic implements TabInterface
             'primary_locale',
             'select',
             [
-                'name'      => 'primary_locale',
-                'label'     => __('Locale'),
-                'required'  => true,
-                'options'   => $localeArray
+                'name' => 'primary_locale',
+                'label' => __('Locale'),
+                'required' => true,
+                'options' => $localeArray
             ]
         );
         $timezone = $this->_timezone->toOptionArray();
-        $timezoneArray = [''=> __('Select one')];
+        $timezoneArray = ['' => __('Select one')];
         foreach ($timezone as $t) {
             $timezoneArray[$t['value']] = $t['label'];
         }
@@ -201,19 +188,19 @@ class Info extends Generic implements TabInterface
             'timezone',
             'select',
             [
-                'name'        => 'timezone',
-                'label'    => __('TimeZone'),
-                'required'     => true,
-                'options'   => $timezoneArray
+                'name' => 'timezone',
+                'label' => __('TimeZone'),
+                'required' => true,
+                'options' => $timezoneArray
             ]
         );
         $fieldset->addField(
             'phone',
             'text',
             [
-                'name'        => 'phone',
-                'label'    => __('Phone'),
-                'required'     => true
+                'name' => 'phone',
+                'label' => __('Phone'),
+                'required' => true
             ]
         );
 
@@ -223,18 +210,22 @@ class Info extends Generic implements TabInterface
 
         return parent::_prepareForm();
     }
+
     public function getTabLabel()
     {
         return __('Store Info');
     }
+
     public function getTabTitle()
     {
         return __('Store Info');
     }
+
     public function canShowTab()
     {
         return true;
     }
+
     public function isHidden()
     {
         return false;

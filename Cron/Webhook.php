@@ -1,35 +1,23 @@
 <?php
-/**
- * mc-magento2 Magento Component
- *
- * @category Ebizmarts
- * @package mc-magento2
- * @author Ebizmarts Team <info@ebizmarts.com>
- * @copyright Ebizmarts (http://ebizmarts.com)
- * @license     http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
- * @date: 5/30/17 8:34 PM
- * @file: Webhook.php
- */
 
 namespace Ebizmarts\MailChimp\Cron;
 
-
 class Webhook
 {
-    const ACTION_DELETE         = 'delete';
-    const ACTION_UNSUBSCRIBE    = 'unsub';
+    const ACTION_DELETE = 'delete';
+    const ACTION_UNSUBSCRIBE = 'unsub';
 
-    const TYPE_SUBSCRIBE        = 'subscribe';
-    const TYPE_UNSUBSCRIBE      = 'unsubscribe';
-    const TYPE_CLEANED          = 'cleaned';
-    const TYPE_UPDATE_EMAIL     = 'upemail';
-    const TYPE_PROFILE          = 'profile';
-    const BATCH_LIMIT           = 50;
-    const NOT_PROCESSED         = 0;
-    const PROCESSED_OK          = 1;
-    const PROCESSED_WITH_ERROR  = 2;
-    const DATA_WITH_ERROR       = 3;
-    const DATA_NOT_CONVERTED    = 4;
+    const TYPE_SUBSCRIBE = 'subscribe';
+    const TYPE_UNSUBSCRIBE = 'unsubscribe';
+    const TYPE_CLEANED = 'cleaned';
+    const TYPE_UPDATE_EMAIL = 'upemail';
+    const TYPE_PROFILE = 'profile';
+    const BATCH_LIMIT = 50;
+    const NOT_PROCESSED = 0;
+    const PROCESSED_OK = 1;
+    const PROCESSED_WITH_ERROR = 2;
+    const DATA_WITH_ERROR = 3;
+    const DATA_NOT_CONVERTED = 4;
     /**
      * @var \Ebizmarts\MailChimp\Helper\Data
      */
@@ -57,7 +45,6 @@ class Webhook
     protected $groups = [];
 
     /**
-     * Webhook constructor.
      * @param \Ebizmarts\MailChimp\Helper\Data $helper
      * @param \Magento\Newsletter\Model\SubscriberFactory $subscriberFactory
      * @param \Ebizmarts\MailChimp\Model\ResourceModel\MailChimpWebhookRequest\CollectionFactory $webhookCollection
@@ -73,18 +60,19 @@ class Webhook
         \Magento\Store\Model\StoreManager $storeManager,
         \Magento\Customer\Model\CustomerFactory $customer
     ) {
-
-        $this->_helper              = $helper;
-        $this->_subscriberFactory   = $subscriberFactory;
-        $this->_webhookCollection   = $webhookCollection;
-        $this->_customer            = $customer;
+        $this->_helper = $helper;
+        $this->_subscriberFactory = $subscriberFactory;
+        $this->_webhookCollection = $webhookCollection;
+        $this->_customer = $customer;
         $this->interestGroupFactory = $interestGroupFactory;
-        $this->storeManager         = $storeManager;
+        $this->storeManager = $storeManager;
     }
+
     public function execute()
     {
         $this->processWebhooks();
     }
+
     public function processWebhooks()
     {
         $this->_loadGroups();
@@ -92,7 +80,7 @@ class Webhook
          * @var $collection \Ebizmarts\MailChimp\Model\ResourceModel\MailChimpWebhookRequest\Collection
          */
         $collection = $this->_webhookCollection->create();
-        $collection->addFieldToFilter('processed', ['eq'=>self::NOT_PROCESSED]);
+        $collection->addFieldToFilter('processed', ['eq' => self::NOT_PROCESSED]);
         $collection->getSelect()->limit(self::BATCH_LIMIT);
         /**
          * @var $item \Ebizmarts\MailChimp\Model\MailChimpWebhookRequest
@@ -130,10 +118,11 @@ class Webhook
             $item->getResource()->save($item);
         }
     }
+
     protected function _subscribe($data)
     {
         $listId = $data['list_id'];
-        $email  = $data['email'];
+        $email = $data['email'];
         $subscribers = $this->_helper->loadListSubscribers($listId, $email);
         /**
          * @var $sub \Magento\Newsletter\Model\Subscriber
@@ -161,10 +150,11 @@ class Webhook
             }
         }
     }
+
     protected function _unsubscribe($data)
     {
         $listId = $data['list_id'];
-        $email  = $data['email'];
+        $email = $data['email'];
         $subscribers = $this->_helper->loadListSubscribers($listId, $email);
         /**
          * @var $sub \Magento\Newsletter\Model\Subscriber
@@ -176,12 +166,13 @@ class Webhook
                     case self::ACTION_DELETE:
                         if ($this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_PATH_WEBHOOK_DELETE)) {
                             $sub->getResource()->delete($sub);
-                        } elseif ($sub->getSubscriberStatus()!=\Magento\Newsletter\Model\Subscriber::STATUS_UNSUBSCRIBED) {
+                        } elseif ($sub->getSubscriberStatus(
+                            ) != \Magento\Newsletter\Model\Subscriber::STATUS_UNSUBSCRIBED) {
                             $this->_subscribeMember($sub, \Magento\Newsletter\Model\Subscriber::STATUS_UNSUBSCRIBED);
                         }
                         break;
                     case self::ACTION_UNSUBSCRIBE:
-                        if ($sub->getSubscriberStatus()!=\Magento\Newsletter\Model\Subscriber::STATUS_UNSUBSCRIBED) {
+                        if ($sub->getSubscriberStatus() != \Magento\Newsletter\Model\Subscriber::STATUS_UNSUBSCRIBED) {
                             $this->_subscribeMember($sub, \Magento\Newsletter\Model\Subscriber::STATUS_UNSUBSCRIBED);
                         }
                         break;
@@ -191,6 +182,7 @@ class Webhook
             }
         }
     }
+
     protected function _clean($data)
     {
         $subscribers = $this->_helper->loadListSubscribers($data['list_id'], $data['email']);
@@ -201,11 +193,12 @@ class Webhook
             $sub->getResource()->delete($sub);
         }
     }
+
     protected function _updateEmail($data)
     {
         $oldEmail = $data['old_email'];
         $newEmail = $data['new_email'];
-        $listId   = $data['list_id'];
+        $listId = $data['list_id'];
         $oldSubscribers = $this->_helper->loadListSubscribers($listId, $oldEmail);
         $newSubscribers = $this->_helper->loadListSubscribers($listId, $newEmail);
         /**
@@ -224,6 +217,7 @@ class Webhook
             }
         }
     }
+
     protected function _profile($data)
     {
         $listId = $data['list_id'];
@@ -236,7 +230,7 @@ class Webhook
             foreach ($customers as $c) {
                 $customer = $this->_customer->create();
                 $customer->getResource()->load($customer, $c->getEntityId());
-                $this->_processMerges($customer,$data);
+                $this->_processMerges($customer, $data);
                 $customer->getResource()->save($customer);
             }
         } else {
@@ -253,9 +247,15 @@ class Webhook
                         $member = $api->lists->members->get($listId, hash('md5', strtolower($email)));
                         if ($member) {
                             if ($member['status'] == \Mailchimp::SUBSCRIBED) {
-                                $this->_subscribeMember($subscriber, \Magento\Newsletter\Model\Subscriber::STATUS_SUBSCRIBED);
+                                $this->_subscribeMember(
+                                    $subscriber,
+                                    \Magento\Newsletter\Model\Subscriber::STATUS_SUBSCRIBED
+                                );
                             } elseif ($member['status'] == \Mailchimp::UNSUBSCRIBED) {
-                                $this->_subscribeMember($subscriber, \Magento\Newsletter\Model\Subscriber::STATUS_UNSUBSCRIBED);
+                                $this->_subscribeMember(
+                                    $subscriber,
+                                    \Magento\Newsletter\Model\Subscriber::STATUS_UNSUBSCRIBED
+                                );
                             }
                         }
                     } catch (\Mailchimp_Error $e) {
@@ -273,21 +273,27 @@ class Webhook
     protected function _processMerges(\Magento\Customer\Model\Customer $customer, $data)
     {
         $mapFields = $this->_helper->getMapFields($customer->getStoreId());
-        foreach($data['merges'] as $key=> $value) {
+        foreach ($data['merges'] as $key => $value) {
             if (!empty($value)) {
-                if ($key=='GROUPINGS') {
+                if ($key == 'GROUPINGS') {
                     $groups = ['group' => []];
-                    foreach($value as $item) {
+                    foreach ($value as $item) {
                         if (!empty($item['groups'])) {
-                            $groups['group'][$item['unique_id']] = $this->_getGroups($item['groups'],$item['unique_id']);
+                            $groups['group'][$item['unique_id']] = $this->_getGroups(
+                                $item['groups'],
+                                $item['unique_id']
+                            );
                         }
                     }
                     $serializedGroups = $this->_helper->serialize($groups);
                     $subscriber = $this->_subscriberFactory->create();
                     $subscriber->loadByCustomer($customer->getId());
                     $interestGroup = $this->interestGroupFactory->create();
-                    if ($subscriber->getEmail()==$customer->getEmail()) {
-                        $interestGroup->getBySubscriberIdStoreId($subscriber->getSubscriberId(), $subscriber->getStoreId());
+                    if ($subscriber->getEmail() == $customer->getEmail()) {
+                        $interestGroup->getBySubscriberIdStoreId(
+                            $subscriber->getSubscriberId(),
+                            $subscriber->getStoreId()
+                        );
                         $interestGroup->setGroupdata($serializedGroups);
                         $interestGroup->setSubscriberId($subscriber->getSubscriberId());
                         $interestGroup->setStoreId($subscriber->getStoreId());
@@ -297,7 +303,10 @@ class Webhook
                     } else {
                         $this->_subscriberFactory->create()->subscribe($customer->getEmail());
                         $subscriber->loadBySubscriberEmail($customer->getEmail(), $customer->getStoreId());
-                        $interestGroup->getBySubscriberIdStoreId($subscriber->getSubscriberId(), $subscriber->getStoreId());
+                        $interestGroup->getBySubscriberIdStoreId(
+                            $subscriber->getSubscriberId(),
+                            $subscriber->getStoreId()
+                        );
                         $interestGroup->setGroupdata($serializedGroups);
                         $interestGroup->setSubscriberId($subscriber->getSubscriberId());
                         $interestGroup->setStoreId($subscriber->getStoreId());
@@ -308,7 +317,10 @@ class Webhook
                     if (is_array($mapFields)) {
                         foreach ($mapFields as $map) {
                             if ($map['mailchimp'] == $key) {
-                                if (!$map['isAddress'] && $map['customer_field'] != "dob" && strpos($map['customer_field'], '##') !== false) {
+                                if (!$map['isAddress'] && $map['customer_field'] != "dob" && strpos(
+                                        $map['customer_field'],
+                                        '##'
+                                    ) !== false) {
                                     if (count($map['options'])) {
                                         foreach ($map['options'] as $option) {
                                             if ($option['label'] == $value) {
@@ -340,13 +352,14 @@ class Webhook
         $subscriber->setIsStatusChanged(true);
         $subscriber->getResource()->save($subscriber);
     }
+
     protected function _loadGroups()
     {
         foreach ($this->storeManager->getStores() as $storeId => $val) {
             if (!$this->_helper->isMailChimpEnabled($storeId)) {
                 continue;
             }
-            $listId =$this->_helper->getDefaultList($storeId);
+            $listId = $this->_helper->getDefaultList($storeId);
             $api = $this->_helper->getApi($storeId);
             $interestsCat = $api->lists->interestCategory->getAll($listId, null, null, 200);
             if (isset($interestsCat['categories'])) {
@@ -357,18 +370,20 @@ class Webhook
             }
         }
     }
+
     protected function _getGroups($groups, $cat)
     {
         $rc = [];
-        $gr = explode(",",$groups);
+        $gr = explode(",", $groups);
         foreach ($gr as $g) {
             foreach ($this->groups as $group) {
-                if (trim($g)==$group['name']&&$group['category_id']==$cat) {
+                if (trim($g) == $group['name'] && $group['category_id'] == $cat) {
                     $rc[$group['id']] = $group['id'];
                     break;
                 }
             }
         }
+
         return $rc;
     }
 }

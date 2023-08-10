@@ -1,13 +1,4 @@
 <?php
-/**
- * Ebizmarts_MailChimp Magento JS component
- *
- * @category    Ebizmarts
- * @package     Ebizmarts_MailChimp
- * @author      Ebizmarts Team <info@ebizmarts.com>
- * @copyright   Ebizmarts (http://ebizmarts.com)
- * @license     http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
- */
 
 namespace Ebizmarts\MailChimp\Model\Plugin;
 
@@ -25,7 +16,6 @@ class Subscriber
     protected $_api = null;
 
     /**
-     * Subscriber constructor.
      * @param \Ebizmarts\MailChimp\Helper\Data $helper
      * @param \Magento\Store\Model\StoreManagerInterface $storeManager
      */
@@ -33,9 +23,8 @@ class Subscriber
         \Ebizmarts\MailChimp\Helper\Data $helper,
         \Magento\Store\Model\StoreManagerInterface $storeManager
     ) {
-    
-        $this->_helper          = $helper;
-        $this->_storeManager    = $storeManager;
+        $this->_helper = $helper;
+        $this->_storeManager = $storeManager;
     }
 
     /**
@@ -46,7 +35,6 @@ class Subscriber
     public function afterDelete(
         \Magento\Newsletter\Model\Subscriber $subscriber
     ) {
-
         $storeId = $this->getStoreIdFromSubscriber($subscriber);
         if ($this->_helper->isMailChimpEnabled($storeId)) {
             $api = $this->_helper->getApi($storeId);
@@ -68,6 +56,7 @@ class Subscriber
                 }
             }
         }
+
         return null;
     }
 
@@ -103,7 +92,7 @@ class Subscriber
 
         return $subscriber;
     }
-    
+
     /**
      * @param \Magento\Newsletter\Model\Subscriber $subscriber
      * @param $customerId

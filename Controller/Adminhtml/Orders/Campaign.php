@@ -2,11 +2,11 @@
 
 namespace Ebizmarts\MailChimp\Controller\Adminhtml\Orders;
 
+use Ebizmarts\MailChimp\Helper\Data as MailChimpHelper;
 use Magento\Backend\App\Action;
 use Magento\Backend\App\Action\Context;
 use Magento\Framework\UrlInterface;
 use Magento\Sales\Model\OrderRepository;
-use Ebizmarts\MailChimp\Helper\Data as MailChimpHelper;
 
 class Campaign extends Action
 {
@@ -40,6 +40,7 @@ class Campaign extends Action
         $this->orderRepository = $orderRepository;
         $this->urlBuilder = $urlBuilder;
     }
+
     public function execute()
     {
         $param = $this->getRequest()->getParams();
@@ -50,12 +51,15 @@ class Campaign extends Action
             $campaign = $api->campaigns->get($order->getMailchimpCampaignId());
             $webId = $campaign['web_id'];
             $url = $this->urlBuilder->getUrl('https://admin.mailchimp.com/reports/summary') . "?id=$webId";
+
             return $this->_redirect($url);
-        } catch(\Exception $e) {
+        } catch (\Exception $e) {
             $this->messageManager->addErrorMessage($e->getMessage());
+
             return $this->_redirect($this->urlBuilder->getUrl('sales/order'));
         }
     }
+
     protected function _isAllowed()
     {
         return $this->_authorization->isAllowed('Ebizmarts_MailChimp::mailchimp_access');

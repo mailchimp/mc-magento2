@@ -2,10 +2,10 @@
 namespace Ebizmarts\MailChimp\Setup\Patch\Data;
 
 use Ebizmarts\MailChimp\Helper\Data;
+use Ebizmarts\MailChimp\Model\ResourceModel\MailChimpWebhookRequest\CollectionFactory;
 use Magento\Framework\Setup\ModuleDataSetupInterface;
 use Magento\Framework\Setup\Patch\DataPatchInterface;
 use Magento\Framework\Setup\Patch\PatchVersionInterface;
-use Ebizmarts\MailChimp\Model\ResourceModel\MailChimpWebhookRequest\CollectionFactory;
 
 class Migrate32 implements DataPatchInterface, PatchVersionInterface
 {
@@ -26,8 +26,7 @@ class Migrate32 implements DataPatchInterface, PatchVersionInterface
         ModuleDataSetupInterface $moduleDataSetup,
         Data $helper,
         CollectionFactory $webhookCollectionFactory
-    )
-    {
+    ) {
         $this->moduleDataSetup = $moduleDataSetup;
         $this->helper = $helper;
         $this->webhookCollectionFactory = $webhookCollectionFactory;
@@ -39,7 +38,10 @@ class Migrate32 implements DataPatchInterface, PatchVersionInterface
         // delete the old serialized data from core_config_data
         $table = $this->moduleDataSetup->getTable('core_config_data');
         try {
-            $this->moduleDataSetup->getConnection()->delete($table, ['path = ?'=> \Ebizmarts\MailChimp\Helper\Data::XML_MERGEVARS]);
+            $this->moduleDataSetup->getConnection()->delete(
+                $table,
+                ['path = ?' => \Ebizmarts\MailChimp\Helper\Data::XML_MERGEVARS]
+            );
         } catch (\Exception $e) {
             $this->helper->log($e->getMessage());
         }
@@ -78,14 +80,17 @@ class Migrate32 implements DataPatchInterface, PatchVersionInterface
 
         return $this;
     }
+
     public static function getDependencies()
     {
         return [];
     }
+
     public function getAliases()
     {
         return [];
     }
+
     public static function getVersion()
     {
         return '1.2.32';

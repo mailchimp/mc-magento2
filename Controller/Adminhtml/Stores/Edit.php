@@ -1,22 +1,6 @@
 <?php
-/**
- * mc-magento2 Magento Component
- *
- * @category Ebizmarts
- * @package mc-magento2
- * @author Ebizmarts Team <info@ebizmarts.com>
- * @copyright Ebizmarts (http://ebizmarts.com)
- * @license     http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
- * @date: 4/5/17 1:23 PM
- * @file: Edit.php
- */
 
 namespace Ebizmarts\MailChimp\Controller\Adminhtml\Stores;
-
-use Ebizmarts\MailChimp\Model\MailChimpStoresFactory;
-use Magento\Backend\App\Action\Context;
-use Magento\Framework\Registry;
-use Magento\Framework\View\Result\PageFactory;
 
 class Edit extends \Ebizmarts\MailChimp\Controller\Adminhtml\Stores
 {
@@ -32,6 +16,7 @@ class Edit extends \Ebizmarts\MailChimp\Controller\Adminhtml\Stores
             if (!$model->getId()) {
                 $this->messageManager->addError(__('This store no longer exists.'));
                 $this->_redirect('*/*/');
+
                 return;
             }
         }
@@ -56,6 +41,7 @@ class Edit extends \Ebizmarts\MailChimp\Controller\Adminhtml\Stores
 
         return $resultPage;
     }
+
     protected function _isAllowed()
     {
         return $this->_authorization->isAllowed('Ebizmarts_MailChimp::stores_edit');

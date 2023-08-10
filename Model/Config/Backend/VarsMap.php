@@ -1,15 +1,4 @@
 <?php
-/**
- * mc-magento2 Magento Component
- *
- * @category Ebizmarts
- * @package mc-magento2
- * @author Ebizmarts Team <info@ebizmarts.com>
- * @copyright Ebizmarts (http://ebizmarts.com)
- * @license     http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
- * @date: 10/30/17 10:27 AM
- * @file: VarsMap.php
- */
 
 namespace Ebizmarts\MailChimp\Model\Config\Backend;
 
@@ -25,7 +14,6 @@ class VarsMap extends \Magento\Framework\App\Config\Value
     private $_helper;
 
     /**
-     * VarsMap constructor.
      * @param \Magento\Framework\Model\Context $context
      * @param \Magento\Framework\Registry $registry
      * @param \Magento\Framework\App\Config\ScopeConfigInterface $config
@@ -47,11 +35,11 @@ class VarsMap extends \Magento\Framework\App\Config\Value
         \Magento\Framework\Data\Collection\AbstractDb $resourceCollection = null,
         array $data = []
     ) {
-    
         $this->_varsHelper = $varsMap;
-        $this->_helper      = $helper;
+        $this->_helper = $helper;
         parent::__construct($context, $registry, $config, $cacheTypeList, $resource, $resourceCollection, $data);
     }
+
     protected function _afterLoad()
     {
         $value = $this->getValue();
@@ -61,7 +49,6 @@ class VarsMap extends \Magento\Framework\App\Config\Value
 
     /**
      * Prepare data before save
-     *
      * @return void
      */
     public function beforeSave()
