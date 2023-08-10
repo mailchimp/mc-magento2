@@ -57,6 +57,10 @@ class Monkey extends Column
      * @var UrlInterface
      */
     protected $urlBuilder;
+    /**
+     * @var \Magento\Sales\Model\ResourceModel\Order\CollectionFactory
+     */
+    private $orderCollectionFactory;
 
     /**
      * @param ContextInterface $context
@@ -69,6 +73,7 @@ class Monkey extends Column
      * @param \Ebizmarts\MailChimp\Model\ResourceModel\MailChimpSyncEcommerce\CollectionFactory $syncCommerceCF
      * @param \Ebizmarts\MailChimp\Model\MailChimpErrorsFactory $mailChimpErrorsFactory
      * @param \Magento\Sales\Model\OrderFactory $orderFactory
+     * @param \Magento\Sales\Model\ResourceModel\Order\CollectionFactory $orderCollectionFactory
      * @param UrlInterface $urlBuilder
      * @param array $components
      * @param array $data
@@ -84,11 +89,11 @@ class Monkey extends Column
         \Ebizmarts\MailChimp\Model\ResourceModel\MailChimpSyncEcommerce\CollectionFactory $syncCommerceCF,
         \Ebizmarts\MailChimp\Model\MailChimpErrorsFactory $mailChimpErrorsFactory,
         \Magento\Sales\Model\OrderFactory $orderFactory,
+        \Magento\Sales\Model\ResourceModel\Order\CollectionFactory $orderCollectionFactory,
         UrlInterface $urlBuilder,
         array $components = [],
         array $data = []
     ) {
-
         $this->_orderRepository = $orderRepository;
         $this->_searchCriteria  = $criteria;
         $this->_assetRepository = $assetRepository;
@@ -96,6 +101,7 @@ class Monkey extends Column
         $this->_helper          = $helper;
         $this->_syncCommerceCF  = $syncCommerceCF;
         $this->_orderFactory    = $orderFactory;
+        $this->orderCollectionFactory = $orderCollectionFactory;
         $this->_mailChimpErrorsFactory  = $mailChimpErrorsFactory;
         $this->urlBuilder       = $urlBuilder;
         parent::__construct($context, $uiComponentFactory, $components, $data);
@@ -103,6 +109,9 @@ class Monkey extends Column
 
     public function prepareDataSource(array $dataSource)
     {
+        $orderMap = $this->getOrderDataForIncrementIds(
+            $this->getOrderIncrementIds($dataSource)
+        );
         if (isset($dataSource['data']['items'])) {
             foreach ($dataSource['data']['items'] as & $item) {
                 $status = $item['mailchimp_flag'];
@@ -110,7 +119,8 @@ class Monkey extends Column
                 $sync = $item['mailchimp_sent'];
                 $error = $item['mailchimp_sync_error'];
 
-                $order = $this->_orderFactory->create()->loadByIncrementId($item['increment_id']);
+                $order = $orderMap[$orderId]
+                    ?? $this->_orderFactory->create()->loadByIncrementId($orderId); // Backwards Compatibility
                 $menu = false;
                 $params = ['_secure' => $this->_requestInterfase->isSecure()];
                 $storeId = $order->getStoreId();
@@ -212,5 +222,45 @@ class Monkey extends Column
          */
         $error = $this->_mailChimpErrorsFactory->create();
         return $error->getByStoreIdType($storeId, $orderId, \Ebizmarts\MailChimp\Helper\Data::IS_ORDER);
+    }
+    /**
+     * Extract Order Increment IDs for a given DataSource
+     *
+     * @param array $dataSource
+     * @return array
+     */
+    private function getOrderIncrementIds(array $dataSource): array
+    {
+        if (!isset($dataSource['data']['items'])) {
+            return [];
+        }
+
+        return array_filter(array_unique(array_column($dataSource['data']['items'], 'increment_id')));
+    }
+
+    /**
+     * @param array $incrementIds
+     * @return OrderInterface[]
+     */
+    private function getOrderDataForIncrementIds(array $incrementIds): array
+    {
+        if (empty($incrementIds)) {
+            return [];
+        }
+
+        $orderCollection = $this->orderCollectionFactory->create();
+        $orderCollection->getSelect()->columns(['entity_id', 'increment_id', 'store_id']);
+        $orderCollection->addAttributeToFilter(
+            'increment_id',
+            ['in' => $incrementIds]
+        );
+
+        $ordersMap = [];
+        /** @var OrderInterface $order */
+        foreach ($orderCollection->getItems() as $order) {
+            $ordersMap[$order->getIncrementId()] = $order;
+        }
+
+        return $ordersMap;
     }
 }
