@@ -10,6 +10,9 @@ use Magento\Framework\App\RequestInterface;
 use Magento\Framework\View\Element\UiComponent\ContextInterface;
 use Magento\Framework\View\Element\UiComponentFactory;
 use Magento\Ui\Component\Listing\Columns\Column;
+use Ebizmarts\MailChimp\Model\ResourceModel\MailChimpSyncEcommerce\CollectionFactory as SyncCollectionFactory;
+use Ebizmarts\MailChimp\Model\ResourceModel\MailChimpSyncEcommerce\Collection as SyncCollection;
+use Ebizmarts\MailChimp\Helper\Data as MailChimpHelper;
 
 class Products extends Column
 {
@@ -29,7 +32,7 @@ class Products extends Column
      */
     protected $_requestInterface;
     /**
-     * @var \Ebizmarts\MailChimp\Helper\Data
+     * @var MailChimpHelper
      */
     protected $_helper;
     /**
@@ -44,16 +47,21 @@ class Products extends Column
      * @var \Magento\Catalog\Model\ResourceModel\Product\CollectionFactory
      */
     private ProductCollectionFactory $productCollectionFactory;
+    /**
+     * @var SyncCollectionFactory
+     */
+    private $syncCollectionFactory;
 
     /**
      * @param ContextInterface $context
      * @param UiComponentFactory $uiComponentFactory
-     * @param \Magento\Catalog\Model\ProductFactory $productFactory
-     * @param \Magento\Catalog\Model\ResourceModel\Product\CollectionFactory $productCollectionFactory
+     * @param ProductFactory $productFactory
+     * @param ProductCollectionFactory $productCollectionFactory
      * @param RequestInterface $requestInterface
-     * @param \Ebizmarts\MailChimp\Helper\Data $helper
+     * @param MailChimpHelper $helper
      * @param \Magento\Framework\View\Asset\Repository $assetRepository
      * @param \Ebizmarts\MailChimp\Model\MailChimpErrorsFactory $mailChimpErrorsFactory
+     * @param SyncCollectionFactory $syncCollectionFactory
      * @param array $components
      * @param array $data
      */
@@ -63,9 +71,10 @@ class Products extends Column
         ProductFactory $productFactory,
         ProductCollectionFactory $productCollectionFactory,
         RequestInterface $requestInterface,
-        \Ebizmarts\MailChimp\Helper\Data $helper,
+        MailChimpHelper $helper,
         \Magento\Framework\View\Asset\Repository $assetRepository,
         \Ebizmarts\MailChimp\Model\MailChimpErrorsFactory $mailChimpErrorsFactory,
+        SyncCollectionFactory $syncCollectionFactory,
         array $components = [],
         array $data = [])
     {
@@ -75,6 +84,7 @@ class Products extends Column
         $this->_helper = $helper;
         $this->_assetRepository = $assetRepository;
         $this->_mailChimpErrorsFactory = $mailChimpErrorsFactory;
+        $this->syncCollectionFactory = $syncCollectionFactory;
         parent::__construct($context, $uiComponentFactory, $components, $data);
     }
 
@@ -82,9 +92,8 @@ class Products extends Column
     {
         if (isset($dataSource['data']['items'])) {
 
-            $productsMap = $this->getProductsByEntityIds(
-                $this->getProductsIds($dataSource)
-            );
+            $productsMap = $this->getProductsByEntityIds($this->getProductsIds($dataSource));
+            $syncMap = $this->getSyncDataByEntityIds($this->getProductsIds($dataSource));
 
             foreach ($dataSource['data']['items'] as & $item) {
                 /**
@@ -92,37 +101,41 @@ class Products extends Column
                  */
                 $product = $productsMap[$item['entity_id']]
                     ?? $this->_productFactory->create()->load($item['entity_id']); // Backwards Compatibility
+                if (key_exists($item['entity_id'],$syncMap)) {
+                    $sync = $syncMap[$item['entity_id']]->getMailchimpSent();
+                } else {
+                    $sync = MailChimpHelper::NEVERSYNC;
+                }
 
                 $params = ['_secure' => $this->_requestInterface->isSecure()];
                 $alt = '';
                 $url = '';
                 $text = '';
                 if (in_array($product->getTypeId(), self::SUPPORTED_PRODUCT_TYPES, true)) {
-                    if ($this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_PATH_ACTIVE, $product->getStoreId())) {
-                        $sync = $item['mailchimp_sent'];
+                    if ($this->_helper->getConfigValue(MailChimpHelper::XML_PATH_ACTIVE, $product->getStoreId())) {
                         switch ($sync) {
-                            case \Ebizmarts\MailChimp\Helper\Data::NEVERSYNC:
+                            case MailChimpHelper::NEVERSYNC:
                                 $url = $this->_assetRepository->getUrlWithParams(
                                     'Ebizmarts_MailChimp::images/no.png',
                                     $params
                                 );
                                 $text = __('Syncing');
                                 break;
-                            case \Ebizmarts\MailChimp\Helper\Data::SYNCED:
+                            case MailChimpHelper::SYNCED:
                                 $url = $this->_assetRepository->getUrlWithParams(
                                     'Ebizmarts_MailChimp::images/yes.png',
                                     $params
                                 );
                                 $text = __('Synced');
                                 break;
-                            case \Ebizmarts\MailChimp\Helper\Data::WAITINGSYNC:
+                            case MailChimpHelper::WAITINGSYNC:
                                 $url = $this->_assetRepository->getUrlWithParams(
                                     'Ebizmarts_MailChimp::images/waiting.png',
                                     $params
                                 );
                                 $text = __('Waiting');
                                 break;
-                            case \Ebizmarts\MailChimp\Helper\Data::SYNCERROR:
+                            case MailChimpHelper::SYNCERROR:
                                 $url = $this->_assetRepository->getUrlWithParams(
                                     'Ebizmarts_MailChimp::images/error.png',
                                     $params
@@ -133,14 +146,14 @@ class Products extends Column
                                     $alt = $orderError->getErrors();
                                 }
                                 break;
-                            case \Ebizmarts\MailChimp\Helper\Data::NEEDTORESYNC:
+                            case MailChimpHelper::NEEDTORESYNC:
                                 $url = $this->_assetRepository->getUrlWithParams(
                                     'Ebizmarts_MailChimp::images/resync.png',
                                     $params
                                 );
                                 $text = __('Resyncing');
                                 break;
-                            case \Ebizmarts\MailChimp\Helper\Data::NOTSYNCED:
+                            case MailChimpHelper::NOTSYNCED:
                                 $url = $this->_assetRepository->getUrlWithParams(
                                     'Ebizmarts_MailChimp::images/never.png',
                                     $params
@@ -175,7 +188,7 @@ class Products extends Column
          * @var $error \Ebizmarts\MailChimp\Model\MailChimpErrors
          */
         $error = $this->_mailChimpErrorsFactory->create();
-        return $error->getByStoreIdType($storeId, $productId, \Ebizmarts\MailChimp\Helper\Data::IS_PRODUCT);
+        return $error->getByStoreIdType($storeId, $productId, MailChimpHelper::IS_PRODUCT);
     }
 
     private function getProductsByEntityIds(array $productIds): array
@@ -203,5 +216,19 @@ class Products extends Column
         }
 
         return array_filter(array_unique(array_column($dataSource['data']['items'], 'entity_id')));
+    }
+    private function getSyncDataByEntityIds(array $productIds)
+    {
+        $syncMap = [];
+        /**
+         * @var SyncCollection $syncCollection
+         */
+        $syncCollection = $this->syncCollectionFactory->create();
+        $syncCollection->addFieldToFilter('related_id', ['in' => $productIds]);
+        $syncCollection->addFieldToFilter('type', ['eq' => MailChimpHelper::IS_PRODUCT]);
+        foreach($syncCollection as $item) {
+            $syncMap[$item->getRelatedId()] = $item;
+        }
+        return $syncMap;
     }
 }
