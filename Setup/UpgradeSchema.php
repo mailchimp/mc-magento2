@@ -727,5 +727,15 @@ class UpgradeSchema implements UpgradeSchemaInterface
                 ]
             );
         }
+        if (version_compare($context->getVersion(), '102.3.53') < 0) {
+            $salesConnection->dropColumn(
+                $setup->getTable('catalog_product_entity'),
+                'mailchimp_sync_error'
+            );
+            $salesConnection->dropColumn(
+                $setup->getTable('catalog_product_entity'),
+                'mailchimp_sent',
+            );
+        }
     }
 }

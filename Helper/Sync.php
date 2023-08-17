@@ -119,19 +119,6 @@ class Sync extends AbstractHelper
                         $order->save();
                     }
                     break;
-                case \Ebizmarts\MailChimp\Helper\Data::IS_PRODUCT :
-                    if ($sent || $error) {
-                        $product = $this->productFactory->create()->load($entityId);
-                        $product->setSync(true);
-                        if ($sent) {
-                            $product->setMailchimpSent($sent);
-                        }
-                        if ($error) {
-                            $product->setMailchimpSyncError($error);
-                        }
-                        $product->save();
-                    }
-                    break;
             }
         }
     }
