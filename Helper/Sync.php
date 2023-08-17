@@ -6,7 +6,6 @@ use Magento\Framework\App\Helper\AbstractHelper;
 use Magento\Framework\App\Helper\Context;
 use Magento\Framework\Exception\ValidatorException;
 use Magento\Sales\Model\OrderFactory;
-use Magento\Catalog\Model\ProductFactory;
 use Magento\Sales\Model\ResourceModel\Order\CollectionFactory as OrderCollectionFactory;
 use Ebizmarts\MailChimp\Model\MailChimpSyncEcommerceFactory;
 use Ebizmarts\MailChimp\Model\MailChimpSyncEcommerce;
@@ -34,10 +33,6 @@ class Sync extends AbstractHelper
      * @var OrderCollectionFactory
      */
     private $orderCollectionFactory;
-    /**
-     * @var ProductFactory
-     */
-    private $productFactory;
 
     /**
      * @param Context $context
@@ -46,7 +41,6 @@ class Sync extends AbstractHelper
      * @param MailChimpSyncEcommerce $chimpSyncEcommerce
      * @param OrderFactory $orderFactory
      * @param OrderCollectionFactory $orderCollectionFactory
-     * @param ProductFactory $productFactory
      */
     public function __construct(
         Context $context,
@@ -54,15 +48,13 @@ class Sync extends AbstractHelper
         MailChimpErrors $mailChimpErrors,
         MailChimpSyncEcommerce $chimpSyncEcommerce,
         OrderFactory $orderFactory,
-        OrderCollectionFactory $orderCollectionFactory,
-        ProductFactory $productFactory
+        OrderCollectionFactory $orderCollectionFactory
     ) {
         $this->chimpSyncEcommerceFactory = $chimpSyncEcommerceFactory;
         $this->mailChimpErrors = $mailChimpErrors;
         $this->chimpSyncEcommerce = $chimpSyncEcommerce;
         $this->orderFactory = $orderFactory;
         $this->orderCollectionFactory = $orderCollectionFactory;
-        $this->productFactory = $productFactory;
         parent::__construct($context);
     }
     public function saveEcommerceData(
@@ -119,20 +111,8 @@ class Sync extends AbstractHelper
                         $order->save();
                     }
                     break;
-                case \Ebizmarts\MailChimp\Helper\Data::IS_PRODUCT :
-                    if ($sent || $error) {
-                        $product = $this->productFactory->create()->load($entityId);
-                        $product->setSync(true);
-                        if ($sent) {
-                            $product->setMailchimpSent($sent);
-                        }
-                        if ($error) {
-                            $product->setMailchimpSyncError($error);
-                        }
-                        $product->save();
-                    }
-                    break;
-            }        }
+            }
+        }
     }
     public function getChimpSyncEcommerce($storeId, $id, $type)
     {
