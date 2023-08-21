@@ -27,17 +27,9 @@ class Sync extends AbstractHelper
      */
     private $chimpSyncEcommerce;
     /**
-     * @var OrderFactory
-     */
-    private $orderFactory;
-    /**
      * @var OrderCollectionFactory
      */
     private $orderCollectionFactory;
-    /**
-     * @var ProductFactory
-     */
-    private $productFactory;
 
     /**
      * @param Context $context
@@ -53,16 +45,12 @@ class Sync extends AbstractHelper
         MailChimpSyncEcommerceFactory $chimpSyncEcommerceFactory,
         MailChimpErrors $mailChimpErrors,
         MailChimpSyncEcommerce $chimpSyncEcommerce,
-        OrderFactory $orderFactory,
-        OrderCollectionFactory $orderCollectionFactory,
-        ProductFactory $productFactory
+        OrderCollectionFactory $orderCollectionFactory
     ) {
         $this->chimpSyncEcommerceFactory = $chimpSyncEcommerceFactory;
         $this->mailChimpErrors = $mailChimpErrors;
         $this->chimpSyncEcommerce = $chimpSyncEcommerce;
-        $this->orderFactory = $orderFactory;
         $this->orderCollectionFactory = $orderCollectionFactory;
-        $this->productFactory = $productFactory;
         parent::__construct($context);
     }
     public function saveEcommerceData(
@@ -105,20 +93,6 @@ class Sync extends AbstractHelper
                     $chimpSyncEcommerce->setMailchimpSent($sent);
                 }
                 $chimpSyncEcommerce->getResource()->save($chimpSyncEcommerce);
-            }
-            switch ($type) {
-                case \Ebizmarts\MailChimp\Helper\Data::IS_ORDER :
-                    if ($sent || $error) {
-                        $order = $this->orderFactory->create()->loadByAttribute('entity_id', $entityId);
-                        if ($sent) {
-                            $order->setMailchimpSent($sent);
-                        }
-                        if ($error) {
-                            $order->setMailchimpSyncError($error);
-                        }
-                        $order->save();
-                    }
-                    break;
             }
         }
     }
