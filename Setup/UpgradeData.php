@@ -183,47 +183,5 @@ class UpgradeData implements UpgradeDataInterface
                 $config->getResource()->delete($config);
             }
         }
-        if (version_compare($context->getVersion(), '101.2.53') < 0) {
-            $setup->startSetup();
-            $connection = $this->_resource->getConnectionByName('default');
-            try {
-                $tableOrders = $setup->getTable('sales_order');
-                $tableEcommerce = $setup->getTable('mailchimp_sync_ecommerce');
-                $query = "UPDATE `$tableOrders` as A ";
-                $query .= "INNER JOIN `$tableEcommerce` as B ON A.`entity_id` = B.`related_id` ";
-                $query .= "SET A.`mailchimp_sync_error` = B.`mailchimp_sync_error`, A.`mailchimp_sent` = B.`mailchimp_sent` ";
-                $query .= "WHERE B.`type` = 'ORD'";
-                $connection->query($query);
-
-            } catch(\Exception $e) {
-                $this->_helper->log($e->getMessage());
-                throw new \Exception($e->getMessage());
-            }
-            try {
-                $tableOrdersGrid = $setup->getTable('sales_order_grid');
-                $tableEcommerce = $setup->getTable('mailchimp_sync_ecommerce');
-                $query = "UPDATE `$tableOrdersGrid` as A ";
-                $query .= "INNER JOIN `$tableEcommerce` as B ON A.`entity_id` = B.`related_id` ";
-                $query .= "SET A.`mailchimp_sync_error` = B.`mailchimp_sync_error`, A.`mailchimp_sent` = B.`mailchimp_sent` ";
-                $query .= "WHERE B.`type` = 'ORD'";
-                $connection->query($query);
-
-            } catch(\Exception $e) {
-                $this->_helper->log($e->getMessage());
-                throw new \Exception($e->getMessage());
-            }
-            try {
-                $tableProducts = $setup->getTable('catalog_product_entity');
-                $tableEcommerce = $setup->getTable('mailchimp_sync_ecommerce');
-                $query = "UPDATE `$tableProducts` as A ";
-                $query .= "INNER JOIN `$tableEcommerce` as B ON A.`entity_id` = B.`related_id` ";
-                $query .= "SET A.`mailchimp_sync_error` = B.`mailchimp_sync_error`, A.`mailchimp_sent` = B.`mailchimp_sent` ";
-                $query .= "WHERE B.`type` = 'PRO'";
-                $connection->query($query);
-            } catch(\Exception $e) {
-                $this->_helper->log($e->getMessage());
-                throw new \Exception($e->getMessage());
-            }
-        }
    }
 }
