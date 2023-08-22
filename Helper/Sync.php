@@ -5,7 +5,6 @@ namespace Ebizmarts\MailChimp\Helper;
 use Magento\Framework\App\Helper\AbstractHelper;
 use Magento\Framework\App\Helper\Context;
 use Magento\Framework\Exception\ValidatorException;
-use Magento\Sales\Model\OrderFactory;
 use Magento\Sales\Model\ResourceModel\Order\CollectionFactory as OrderCollectionFactory;
 use Ebizmarts\MailChimp\Model\MailChimpSyncEcommerceFactory;
 use Ebizmarts\MailChimp\Model\MailChimpSyncEcommerce;
@@ -26,10 +25,6 @@ class Sync extends AbstractHelper
      */
     private $chimpSyncEcommerce;
     /**
-     * @var OrderFactory
-     */
-    private $orderFactory;
-    /**
      * @var OrderCollectionFactory
      */
     private $orderCollectionFactory;
@@ -39,21 +34,18 @@ class Sync extends AbstractHelper
      * @param MailChimpSyncEcommerceFactory $chimpSyncEcommerceFactory
      * @param MailChimpErrors $mailChimpErrors
      * @param MailChimpSyncEcommerce $chimpSyncEcommerce
-     * @param OrderFactory $orderFactory
-     * @param OrderCollectionFactory $orderCollectionFactory\
+     * @param OrderCollectionFactory $orderCollectionFactory
      */
     public function __construct(
         Context $context,
         MailChimpSyncEcommerceFactory $chimpSyncEcommerceFactory,
         MailChimpErrors $mailChimpErrors,
         MailChimpSyncEcommerce $chimpSyncEcommerce,
-        OrderFactory $orderFactory,
         OrderCollectionFactory $orderCollectionFactory
     ) {
         $this->chimpSyncEcommerceFactory = $chimpSyncEcommerceFactory;
         $this->mailChimpErrors = $mailChimpErrors;
         $this->chimpSyncEcommerce = $chimpSyncEcommerce;
-        $this->orderFactory = $orderFactory;
         $this->orderCollectionFactory = $orderCollectionFactory;
         parent::__construct($context);
     }
@@ -97,20 +89,6 @@ class Sync extends AbstractHelper
                     $chimpSyncEcommerce->setMailchimpSent($sent);
                 }
                 $chimpSyncEcommerce->getResource()->save($chimpSyncEcommerce);
-            }
-            switch ($type) {
-                case \Ebizmarts\MailChimp\Helper\Data::IS_ORDER :
-                    if ($sent || $error) {
-                        $order = $this->orderFactory->create()->loadByAttribute('entity_id', $entityId);
-                        if ($sent) {
-                            $order->setMailchimpSent($sent);
-                        }
-                        if ($error) {
-                            $order->setMailchimpSyncError($error);
-                        }
-                        $order->save();
-                    }
-                    break;
             }
         }
     }
