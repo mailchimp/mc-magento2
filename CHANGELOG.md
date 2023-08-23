@@ -1,5 +1,20 @@
 # Change Log
 
+## [102.3.54](https://github.com/mailchimp/mc-magento2/tree/102.3.54)
+
+[Full Changelog](https://github.com/mailchimp/mc-magento2/compare/102.3.53...102.3.54)
+
+**Implemented enhancements:**
+
+- Performance: Excessive SQL usage in Sales and Products Grid [\#1759](https://github.com/mailchimp/mc-magento2/issues/1759)
+- Remove unused code in Heper/Data.php [\#1753](https://github.com/mailchimp/mc-magento2/issues/1753)
+
+**Fixed bugs:**
+
+- Upgrade to 103.4.53 caused UPDATE on over 60% of the existing \(old\) orders [\#1772](https://github.com/mailchimp/mc-magento2/issues/1772)
+- ebizmarts\_ecommerce job unchecks "Use Default Value" checkbox for some product attributes [\#1758](https://github.com/mailchimp/mc-magento2/issues/1758)
+- Check if the Abandoned cart is enabled, the ecommerce must be enabled [\#1745](https://github.com/mailchimp/mc-magento2/issues/1745)
+
 ## [102.3.53](https://github.com/mailchimp/mc-magento2/tree/102.3.53)
 
 [Full Changelog](https://github.com/mailchimp/mc-magento2/compare/102.3.52...102.3.53)
