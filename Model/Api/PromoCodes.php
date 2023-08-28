@@ -111,7 +111,7 @@ class PromoCodes
             $batchArray[$counter]['path'] =
                 "/ecommerce/stores/$mailchimpStoreId/promo-rules/$ruleId/promo-codes/$couponId";
             $counter++;
-            $syncCoupon =$this->_helper->getChimpSyncEcommerce(
+            $syncCoupon =$this->syncHelper->getChimpSyncEcommerce(
                 $mailchimpStoreId,
                 $couponId,
                 \Ebizmarts\MailChimp\Helper\Data::IS_PROMO_CODE
@@ -158,7 +158,7 @@ class PromoCodes
                 $ruleId = $item->getRuleId();
                 $couponId = $item->getCouponId();
                 try {
-                    $promoRule = $this->_helper->getChimpSyncEcommerce(
+                    $promoRule = $this->syncHelper->getChimpSyncEcommerce(
                         $mailchimpStoreId,
                         $ruleId,
                         \Ebizmarts\MailChimp\Helper\Data::IS_PROMO_RULE
