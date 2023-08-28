@@ -412,7 +412,7 @@ class Order
         foreach ($items as $item) {
             $variant = null;
             try {
-                $productSyncData = $this->_helper->getChimpSyncEcommerce(
+                $productSyncData = $this->syncHelper->getChimpSyncEcommerce(
                     $mailchimpStoreId,
                     $item->getProductId(),
                     \Ebizmarts\MailChimp\Helper\Data::IS_PRODUCT
