@@ -177,15 +177,6 @@ class Sync extends AbstractHelper
                     $tableName,
                     "mailchimp_store_id = '" . $mailchimpStore . "' and mailchimp_sync_error is not null"
                 );
-                // clean the order table
-                $orderCollection = $this->orderCollectionFactory->create();
-                $orderCollection->addFieldToFilter('store_id', ['eq' => $storeId]);
-                $orderCollection->addFieldToFilter('mailchimp_sync_error', ['notnull' => true]);
-                foreach ($orderCollection as $item) {
-                    $item->setMailchimpSent(\Ebizmarts\MailChimp\Helper\Data::NEVERSYNC);
-                    $item->setMailchimpSyncError('');
-                    $item->save();
-                }
             }
         } catch (\Zend_Db_Exception $e) {
             throw new ValidatorException(__($e->getMessage()));
