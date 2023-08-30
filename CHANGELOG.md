@@ -1,5 +1,13 @@
 # Change Log
 
+## [102.3.55](https://github.com/mailchimp/mc-magento2/tree/102.3.55)
+
+[Full Changelog](https://github.com/mailchimp/mc-magento2/compare/102.3.54...102.3.55)
+
+**Fixed bugs:**
+
+- Checkout is broken (error in the etc/di.xml) [\#1790](https://github.com/mailchimp/mc-magento2/issues/1790)
+
 ## [102.3.54](https://github.com/mailchimp/mc-magento2/tree/102.3.54)
 
 [Full Changelog](https://github.com/mailchimp/mc-magento2/compare/102.3.53...102.3.54)
