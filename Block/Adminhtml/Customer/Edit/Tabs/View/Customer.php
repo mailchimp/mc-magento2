@@ -25,37 +25,36 @@ class Customer extends \Magento\Backend\Block\Template
     protected $subscriberFactory;
 
     /**
-     * @var \Magento\Framework\Registry
+     * @var \Magento\Backend\Model\Session
      */
-    protected $registry;
+    protected $session;
 
     /**
-     * Customer constructor.
      * @param \Magento\Backend\Block\Template\Context $context
      * @param \Ebizmarts\MailChimp\Helper\Data $helper
      * @param \Magento\Newsletter\Model\SubscriberFactory $subscriberFactory
-     * @param \Magento\Framework\Registry $registry
      * @param array $data
      */
     public function __construct(
         \Magento\Backend\Block\Template\Context $context,
         \Ebizmarts\MailChimp\Helper\Data $helper,
         \Magento\Newsletter\Model\SubscriberFactory $subscriberFactory,
-        \Magento\Framework\Registry $registry,
         array $data
     ) {
 
         parent::__construct($context, $data);
         $this->helper               = $helper;
         $this->subscriberFactory    = $subscriberFactory;
-        $this->registry             = $registry;
+        $this->session =$context->getBackendSession();
     }
 
     public function getInterest()
     {
         $subscriber = $this->subscriberFactory->create();
-        $customerId = $this->registry->registry(\Magento\Customer\Controller\RegistryConstants::CURRENT_CUSTOMER_ID);
-        $subscriber->loadByCustomer($customerId);
+        $customerData = $this->session->getCustomerData();
+        $email = $customerData['account']['email'];
+        $storeId = $customerData['account']['store_id'];
+        $subscriber->loadBySubscriberEmail($email,$storeId);
         return $this->helper->getSubscriberInterest($subscriber->getSubscriberId(), $subscriber->getStoreId());
     }
 }
