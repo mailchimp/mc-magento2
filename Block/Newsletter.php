@@ -13,10 +13,8 @@
 
 namespace Ebizmarts\MailChimp\Block;
 
-use Magento\Customer\Controller\RegistryConstants;
 use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Customer\Api\CustomerRepositoryInterface;
-use Magento\Framework\Registry;
 
 class Newsletter extends \Magento\Framework\View\Element\Template
 {
@@ -36,10 +34,6 @@ class Newsletter extends \Magento\Framework\View\Element\Template
      * @var CustomerRepositoryInterface
      */
     private $customerRepository;
-    /**
-     * @var Registry
-     */
-    private $registry;
 
     /**
      * @param \Magento\Framework\View\Element\Template\Context $context
@@ -47,7 +41,6 @@ class Newsletter extends \Magento\Framework\View\Element\Template
      * @param \Magento\Newsletter\Model\SubscriberFactory $subscriberFactory
      * @param \Ebizmarts\MailChimp\Helper\Data $helper
      * @param CustomerRepositoryInterface $customerRepository
-     * @param Registry $registry
      * @param array $data
      */
     public function __construct(
@@ -56,16 +49,13 @@ class Newsletter extends \Magento\Framework\View\Element\Template
         \Magento\Newsletter\Model\SubscriberFactory $subscriberFactory,
         \Ebizmarts\MailChimp\Helper\Data $helper,
         CustomerRepositoryInterface $customerRepository,
-        Registry $registry,
         array $data
     ) {
-
         parent::__construct($context, $data);
         $this->_helper  = $helper;
         $this->subscriberFactory = $subscriberFactory;
         $this->customerSession = $customerSession;
         $this->customerRepository = $customerRepository;
-        $this->registry = $registry;
     }
 
     public function getInterest()
@@ -73,7 +63,6 @@ class Newsletter extends \Magento\Framework\View\Element\Template
         $customer = $this->getCurrentCustomer();
         $subscriber = $this->subscriberFactory->create();
         $subscriber->loadByCustomer($customer->getId(),$customer->getStoreId());
-//        $subscriber = $this->getSubscriptionObject();
         return $this->_helper->getSubscriberInterest($subscriber->getSubscriberId(), $subscriber->getStoreId());
     }
     public function getFormUrl()
@@ -93,7 +82,6 @@ class Newsletter extends \Magento\Framework\View\Element\Template
     }
     private function getCurrentCustomerId(): int
     {
-        return (int)$this->registry->registry(RegistryConstants::CURRENT_CUSTOMER_ID);
+        return $this->customerSession->getCustomerId();
     }
-
 }
