@@ -15,7 +15,6 @@ namespace Ebizmarts\MailChimp\Block;
 
 use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Customer\Api\CustomerRepositoryInterface;
-use Magento\Customer\Model\Session;
 
 class Newsletter extends \Magento\Framework\View\Element\Template
 {
@@ -35,18 +34,13 @@ class Newsletter extends \Magento\Framework\View\Element\Template
      * @var CustomerRepositoryInterface
      */
     private $customerRepository;
-    /**
-     * @var Session
-     */
-    private $session;
 
     /**
      * @param \Magento\Framework\View\Element\Template\Context $context
-     * @param Session $customerSession
+     * @param \Magento\Customer\Model\Session $customerSession
      * @param \Magento\Newsletter\Model\SubscriberFactory $subscriberFactory
      * @param \Ebizmarts\MailChimp\Helper\Data $helper
      * @param CustomerRepositoryInterface $customerRepository
-     * @param Session $session
      * @param array $data
      */
     public function __construct(
@@ -55,7 +49,6 @@ class Newsletter extends \Magento\Framework\View\Element\Template
         \Magento\Newsletter\Model\SubscriberFactory $subscriberFactory,
         \Ebizmarts\MailChimp\Helper\Data $helper,
         CustomerRepositoryInterface $customerRepository,
-        Session $session,
         array $data
     ) {
         parent::__construct($context, $data);
@@ -63,7 +56,6 @@ class Newsletter extends \Magento\Framework\View\Element\Template
         $this->subscriberFactory = $subscriberFactory;
         $this->customerSession = $customerSession;
         $this->customerRepository = $customerRepository;
-        $this->session = $session;
     }
 
     public function getInterest()
@@ -90,6 +82,6 @@ class Newsletter extends \Magento\Framework\View\Element\Template
     }
     private function getCurrentCustomerId(): int
     {
-        return $this->session->getCustomerId();
+        return $this->customerSession->getCustomerId();
     }
 }
