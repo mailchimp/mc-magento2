@@ -1,5 +1,18 @@
 # Changelog
 
+## [103.4.56](https://github.com/mailchimp/mc-magento2/tree/103.4.56)
+
+[Full Changelog](https://github.com/mailchimp/mc-magento2/compare/103.4.55...103.4.56)
+
+**Implemented enhancements:**
+
+- MailChimp Customer Tab Empty [\#1804](https://github.com/mailchimp/mc-magento2/issues/1804)
+
+**Fixed bugs:**
+
+- Call to a member function getId\(\) on null [\#1805](https://github.com/mailchimp/mc-magento2/issues/1805)
+- Cannot View Customer Info - Too Few Arguments In Customer.php [\#1802](https://github.com/mailchimp/mc-magento2/issues/1802)
+
 ## [103.4.55](https://github.com/mailchimp/mc-magento2/tree/103.4.55)
 
 [Full Changelog](https://github.com/mailchimp/mc-magento2/compare/103.4.54...103.4.55)
