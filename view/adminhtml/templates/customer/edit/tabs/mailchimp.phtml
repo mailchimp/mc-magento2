@@ -10,6 +10,7 @@ $interest = $block->getInterest();
     </div>
     <div class="admin__fieldset-wrapper-content">
     <fieldset class="admin__fieldset">
+    <?php if (count($interest)): ?>
     <?php foreach($interest as $i): ?>
         <div class="admin__field">
             <label class="admin__field-label" for="<?php echo $i['interest']['id'] ?>">
@@ -74,6 +75,11 @@ $interest = $block->getInterest();
             </div>
         </div>
     <?php endforeach; ?>
+    <?php else: ?>
+        <div class="admin__field">
+        <?php echo __("No Interest groups found"); ?>
+        </div>
+    <?php endif; ?>
 </fieldset>
     </div>
 </div>
