@@ -1,5 +1,13 @@
 # Change Log
 
+## [100.1.56](https://github.com/mailchimp/mc-magento2/tree/100.1.56)
+
+[Full Changelog](https://github.com/mailchimp/mc-magento2/compare/100.1.55...100.1.56)
+
+**Implemented enhancements:**
+
+- MailChimp Customer Tab Empty [\#1804](https://github.com/mailchimp/mc-magento2/issues/1804)
+
 ## [100.1.55](https://github.com/mailchimp/mc-magento2/tree/100.1.55)
 
 [Full Changelog](https://github.com/mailchimp/mc-magento2/compare/100.1.54...100.1.55)
