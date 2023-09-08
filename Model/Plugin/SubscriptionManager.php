@@ -17,7 +17,6 @@ use \Magento\Customer\Model\ResourceModel\CustomerRepository;
 use \Magento\Customer\Model\Session;
 use \Magento\Store\Model\StoreManagerInterface;
 
-
 class SubscriptionManager
 {
     /**
@@ -73,8 +72,8 @@ class SubscriptionManager
         $storeId
     ) {
         if ($this->_helper->isMailChimpEnabled($storeId)) {
-
-            $subscriber = $this->_subscriberFactory->create()->loadByCustomer($customerId, $storeId);
+            $websiteId = (int)$this->storeManager->getStore($storeId)->getWebsiteId();
+            $subscriber = $this->_subscriberFactory->create()->loadByCustomer($customerId, $websiteId);
             if ($subscriber->isSubscribed()) {
                 $api = $this->_helper->getApi($storeId);
                 try {
@@ -106,8 +105,8 @@ class SubscriptionManager
         $storeId
     ) {
         if ($this->_helper->isMailChimpEnabled($storeId)) {
-
-            $subscriber = $this->_subscriberFactory->create()->loadByCustomer($customerId, $storeId);
+            $websiteId = (int)$this->storeManager->getStore($storeId)->getWebsiteId();
+            $subscriber = $this->_subscriberFactory->create()->loadByCustomer($customerId, $websiteId);
             if (!$subscriber->isSubscribed()) {
                 if (!$this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_MAGENTO_MAIL, $storeId)) {
                     $subscriber->setImportMode(true);

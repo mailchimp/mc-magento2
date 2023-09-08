@@ -15,6 +15,7 @@ namespace Ebizmarts\MailChimp\Block;
 
 use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Customer\Api\CustomerRepositoryInterface;
+use Magento\Store\Model\StoreManagerInterface;
 
 class Newsletter extends \Magento\Framework\View\Element\Template
 {
@@ -34,6 +35,10 @@ class Newsletter extends \Magento\Framework\View\Element\Template
      * @var CustomerRepositoryInterface
      */
     private $customerRepository;
+    /**
+     * @var StoreManagerInterface
+     */
+    private $storeManager;
 
     /**
      * @param \Magento\Framework\View\Element\Template\Context $context
@@ -41,6 +46,7 @@ class Newsletter extends \Magento\Framework\View\Element\Template
      * @param \Magento\Newsletter\Model\SubscriberFactory $subscriberFactory
      * @param \Ebizmarts\MailChimp\Helper\Data $helper
      * @param CustomerRepositoryInterface $customerRepository
+     * @param StoreManagerInterface $storeManager
      * @param array $data
      */
     public function __construct(
@@ -49,6 +55,7 @@ class Newsletter extends \Magento\Framework\View\Element\Template
         \Magento\Newsletter\Model\SubscriberFactory $subscriberFactory,
         \Ebizmarts\MailChimp\Helper\Data $helper,
         CustomerRepositoryInterface $customerRepository,
+        StoreManagerInterface $storeManager,
         array $data
     ) {
         parent::__construct($context, $data);
@@ -56,13 +63,15 @@ class Newsletter extends \Magento\Framework\View\Element\Template
         $this->subscriberFactory = $subscriberFactory;
         $this->customerSession = $customerSession;
         $this->customerRepository = $customerRepository;
+        $this->storeManager       = $storeManager;
     }
 
     public function getInterest()
     {
         $customer = $this->getCurrentCustomer();
         $subscriber = $this->subscriberFactory->create();
-        $subscriber->loadByCustomer($customer->getId(),$customer->getStoreId());
+        $websiteId = (int)$this->storeManager->getStore($customer->getStoreId())->getWebsiteId();
+        $subscriber->loadByCustomer($customer->getId(),$websiteId);
         return $this->_helper->getSubscriberInterest($subscriber->getSubscriberId(), $subscriber->getStoreId());
     }
     public function getFormUrl()

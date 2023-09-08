@@ -60,7 +60,6 @@ class SaveAfter implements \Magento\Framework\Event\ObserverInterface
          */
         $factory = $this->_subscriberFactory->create();
         $subscriber = $observer->getSubscriber();
-//        $subscriberOld = $factory->loadByCustomer($subscriber->getCustomerId(), $subscriber->getStoreId());
         $isCustomer = $subscriber->getCustomerId();
         if ($isCustomer) {
             $subscriberOld = $factory->loadBySubscriberEmail($subscriber->getCustomerId(), $subscriber->getStoreId());
