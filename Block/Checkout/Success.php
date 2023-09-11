@@ -11,6 +11,7 @@
  * @file: Success.php
  */
 namespace Ebizmarts\MailChimp\Block\Checkout;
+use Magento\Store\Model\StoreManagerInterface;
 
 class Success extends \Magento\Framework\View\Element\Template
 {
@@ -34,14 +35,18 @@ class Success extends \Magento\Framework\View\Element\Template
      * @var \Magento\Framework\View\Element\Template\Context
      */
     protected $_context;
+    /**
+     * @var StoreManagerInterface
+     */
+    private $storeManager;
 
     /**
-     * Success constructor.
      * @param \Magento\Framework\View\Element\Template\Context $context
      * @param \Magento\Checkout\Model\Session $checkoutSession
      * @param \Ebizmarts\MailChimp\Helper\Data $helper
      * @param \Magento\Newsletter\Model\SubscriberFactory $subscriberFactory
      * @param \Ebizmarts\MailChimp\Model\MailChimpInterestGroupFactory $interestGroupFactory
+     * @param StoreManagerInterface $storeManager
      * @param array $data
      */
     public function __construct(
@@ -50,15 +55,16 @@ class Success extends \Magento\Framework\View\Element\Template
         \Ebizmarts\MailChimp\Helper\Data $helper,
         \Magento\Newsletter\Model\SubscriberFactory $subscriberFactory,
         \Ebizmarts\MailChimp\Model\MailChimpInterestGroupFactory $interestGroupFactory,
+        StoreManagerInterface $storeManager,
         array $data
     ) {
-
         parent::__construct($context, $data);
         $this->_checkoutSession     = $checkoutSession;
         $this->_helper              = $helper;
         $this->_subscriberFactory   = $subscriberFactory;
         $this->_interestGroupFactory= $interestGroupFactory;
         $this->_context             = $context;
+        $this->storeManager         = $storeManager;
     }
 
     public function getInterest()
@@ -68,7 +74,8 @@ class Success extends \Magento\Framework\View\Element\Template
          * @var $subscriber \Magento\Newsletter\Model\Subscriber
          */
         $subscriber = $this->_subscriberFactory->create();
-        $subscriber->loadBySubscriberEmail($order->getCustomerEmail(), $order->getStoreId());
+        $websiteId = (int)$this->storeManager->getStore($order->getStoreId())->getWebsiteId();
+        $subscriber->loadBySubscriberEmail($order->getCustomerEmail(), $websiteId);
 
         return $this->_helper->getSubscriberInterest($subscriber->getSubscriberId(), $subscriber->getStoreId());
     }

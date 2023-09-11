@@ -12,6 +12,7 @@
  */
 
 namespace Ebizmarts\MailChimp\Block\Adminhtml\Customer\Edit\Tabs\View;
+use Magento\Store\Model\StoreManagerInterface;
 
 class Customer extends \Magento\Backend\Block\Template
 {
@@ -28,17 +29,23 @@ class Customer extends \Magento\Backend\Block\Template
      * @var \Magento\Backend\Model\Session
      */
     protected $session;
+    /**
+     * @var StoreManagerInterface
+     */
+    private $storeManager;
 
     /**
      * @param \Magento\Backend\Block\Template\Context $context
      * @param \Ebizmarts\MailChimp\Helper\Data $helper
      * @param \Magento\Newsletter\Model\SubscriberFactory $subscriberFactory
+     * @param StoreManagerInterface $storeManager
      * @param array $data
      */
     public function __construct(
         \Magento\Backend\Block\Template\Context $context,
         \Ebizmarts\MailChimp\Helper\Data $helper,
         \Magento\Newsletter\Model\SubscriberFactory $subscriberFactory,
+        StoreManagerInterface $storeManager,
         array $data
     ) {
 
@@ -46,6 +53,7 @@ class Customer extends \Magento\Backend\Block\Template
         $this->helper               = $helper;
         $this->subscriberFactory    = $subscriberFactory;
         $this->session =$context->getBackendSession();
+        $this->storeManager         = $storeManager;
     }
 
     public function getInterest()
@@ -54,7 +62,8 @@ class Customer extends \Magento\Backend\Block\Template
         $customerData = $this->session->getCustomerData();
         $email = $customerData['account']['email'];
         $storeId = $customerData['account']['store_id'];
-        $subscriber->loadBySubscriberEmail($email,$storeId);
+        $websiteId = (int)$this->storeManager->getStore($storeId)->getWebsiteId();
+        $subscriber->loadBySubscriberEmail($email,$websiteId);
         return $this->helper->getSubscriberInterest($subscriber->getSubscriberId(), $subscriber->getStoreId());
     }
 }

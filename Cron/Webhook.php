@@ -273,6 +273,7 @@ class Webhook
     protected function _processMerges(\Magento\Customer\Model\Customer $customer, $data)
     {
         $mapFields = $this->_helper->getMapFields($customer->getStoreId());
+        $websiteId = (int)$this->storeManager->getStore($customer->getStoreId())->getWebsiteId();
         foreach($data['merges'] as $key=> $value) {
             if (!empty($value)) {
                 if ($key=='GROUPINGS') {
@@ -284,7 +285,7 @@ class Webhook
                     }
                     $serializedGroups = $this->_helper->serialize($groups);
                     $subscriber = $this->_subscriberFactory->create();
-                    $subscriber->loadByCustomer($customer->getId());
+                    $subscriber->loadByCustomer($customer->getId(),$websiteId);
                     $interestGroup = $this->interestGroupFactory->create();
                     if ($subscriber->getEmail()==$customer->getEmail()) {
                         $interestGroup->getBySubscriberIdStoreId($subscriber->getSubscriberId(), $subscriber->getStoreId());
@@ -296,7 +297,7 @@ class Webhook
                         $listId = $this->_helper->getGeneralList($subscriber->getStoreId());
                     } else {
                         $this->_subscriberFactory->create()->subscribe($customer->getEmail());
-                        $subscriber->loadBySubscriberEmail($customer->getEmail(), $customer->getStoreId());
+                        $subscriber->loadBySubscriberEmail($customer->getEmail(), $websiteId);
                         $interestGroup->getBySubscriberIdStoreId($subscriber->getSubscriberId(), $subscriber->getStoreId());
                         $interestGroup->setGroupdata($serializedGroups);
                         $interestGroup->setSubscriberId($subscriber->getSubscriberId());

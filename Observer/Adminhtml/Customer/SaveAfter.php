@@ -13,6 +13,7 @@
 
 namespace Ebizmarts\MailChimp\Observer\Adminhtml\Customer;
 use Ebizmarts\MailChimp\Helper\Sync as SyncHelper;
+use Magento\Store\Model\StoreManagerInterface;
 
 class SaveAfter implements \Magento\Framework\Event\ObserverInterface
 {
@@ -32,29 +33,39 @@ class SaveAfter implements \Magento\Framework\Event\ObserverInterface
      * @var SyncHelper
      */
     private $syncHelper;
+    /**
+     * @var StoreManagerInterface
+     */
+    private $storeManager;
 
     /**
      * @param \Ebizmarts\MailChimp\Helper\Data $helper
      * @param \Magento\Newsletter\Model\SubscriberFactory $subscriberFactory
      * @param \Ebizmarts\MailChimp\Model\MailChimpInterestGroupFactory $interestGroupFactory
      * @param SyncHelper $syncHelper
+     * @param StoreManagerInterface $storeManager
      */
     public function __construct(
         \Ebizmarts\MailChimp\Helper\Data $helper,
         \Magento\Newsletter\Model\SubscriberFactory $subscriberFactory,
         \Ebizmarts\MailChimp\Model\MailChimpInterestGroupFactory $interestGroupFactory,
-        SyncHelper $syncHelper
+        SyncHelper $syncHelper,
+        StoreManagerInterface $storeManager
     ) {
-
         $this->helper               = $helper;
         $this->subscriberFactory    = $subscriberFactory;
         $this->interestGroupFactory = $interestGroupFactory;
         $this->syncHelper           = $syncHelper;
+        $this->storeManager         = $storeManager;
     }
 
     public function execute(\Magento\Framework\Event\Observer $observer)
     {
+        /**
+         * @var $customer \Magento\Customer\Model\Customer
+         */
         $customer = $observer->getCustomer();
+        $websiteId = (int)$this->storeManager->getStore($customer->getStoreId())->getWebsiteId();
         $request  = $observer->getEvent()->getRequest();
         $allParams = $request->getParams();
         $subscriber = $this->subscriberFactory->create();
@@ -71,7 +82,7 @@ class SaveAfter implements \Magento\Framework\Event\ObserverInterface
             }
             $interestGroup = $this->interestGroupFactory->create();
             try {
-                $subscriber->loadBySubscriberEmail($customer->getEmail(), $customer->getStoreId());
+                $subscriber->loadBySubscriberEmail($customer->getEmail(), $websiteId);
                 if ($subscriber->getEmail() == $customer->getEmail()) {
                     $interestGroup->getBySubscriberIdStoreId($subscriber->getSubscriberId(), $subscriber->getStoreId());
                     $interestGroup->setGroupdata($this->helper->serialize($params));
@@ -85,7 +96,7 @@ class SaveAfter implements \Magento\Framework\Event\ObserverInterface
                     );
                 } else {
                     $this->subscriberFactory->create()->subscribe($customer->getEmail());
-                    $subscriber->loadBySubscriberEmail($customer->getEmail(), $customer->getStoreId());
+                    $subscriber->loadBySubscriberEmail($customer->getEmail(), $websiteId);
                     $interestGroup->getBySubscriberIdStoreId($subscriber->getSubscriberId(), $subscriber->getStoreId());
                     $interestGroup->setGroupdata($this->helper->serialize($params));
                     $interestGroup->setSubscriberId($subscriber->getSubscriberId());
@@ -98,7 +109,7 @@ class SaveAfter implements \Magento\Framework\Event\ObserverInterface
                 $this->helper->log($params);
             }
         } else {
-            $subscriber->loadBySubscriberEmail($customer->getEmail(), $customer->getStoreId());
+            $subscriber->loadBySubscriberEmail($customer->getEmail(), $websiteId);
             if ($subscriber->getEmail() == $customer->getEmail()) {
                 $this->syncHelper->markRegisterAsModified(
                     $subscriber->getId(),
