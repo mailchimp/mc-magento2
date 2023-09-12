@@ -1,5 +1,14 @@
 # Change Log
 
+## [100.1.57](https://github.com/mailchimp/mc-magento2/tree/100.1.57)
+
+[Full Changelog](https://github.com/mailchimp/mc-magento2/compare/100.1.56...100.1.57)
+
+**Fixed bugs:**
+
+- The order is not marked as modified when cancel [\#1822](https://github.com/mailchimp/mc-magento2/issues/1822)
+- Unable to assign a customer to another website [\#1818](https://github.com/mailchimp/mc-magento2/issues/1818)
+
 ## [100.1.56](https://github.com/mailchimp/mc-magento2/tree/100.1.56)
 
 [Full Changelog](https://github.com/mailchimp/mc-magento2/compare/100.1.55...100.1.56)
