@@ -273,7 +273,7 @@ class Webhook
     protected function _processMerges(\Magento\Customer\Model\Customer $customer, $data)
     {
         $mapFields = $this->_helper->getMapFields($customer->getStoreId());
-        $websiteId = (int)$this->storeManager->getStore($customer->getStoreId())->getWebsiteId();
+        $websiteId = (int)$customer->getWebsiteId();
         foreach($data['merges'] as $key=> $value) {
             if (!empty($value)) {
                 if ($key=='GROUPINGS') {

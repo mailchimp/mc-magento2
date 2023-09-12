@@ -14,7 +14,6 @@ namespace Ebizmarts\MailChimp\Observer\Customer;
 
 use Magento\Framework\Event\Observer;
 use Ebizmarts\MailChimp\Helper\Sync as SyncHelper;
-use Magento\Store\Model\StoreManagerInterface;
 
 class SaveBefore implements \Magento\Framework\Event\ObserverInterface
 {
@@ -30,7 +29,6 @@ class SaveBefore implements \Magento\Framework\Event\ObserverInterface
      * @var \Magento\Newsletter\Model\SubscriberFactory
      */
     protected $subscriberFactory;
-    private $storeManager;
 
     /**
      * @param \Ebizmarts\MailChimp\Helper\Data $helper
@@ -40,13 +38,11 @@ class SaveBefore implements \Magento\Framework\Event\ObserverInterface
     public function __construct(
         \Ebizmarts\MailChimp\Helper\Data $helper,
         SyncHelper $syncHelper,
-        \Magento\Newsletter\Model\SubscriberFactory $subscriberFactory,
-        StoreManagerInterface $storeManager
+        \Magento\Newsletter\Model\SubscriberFactory $subscriberFactory
     ) {
         $this->_helper              = $helper;
         $this->syncHelper           = $syncHelper;
         $this->subscriberFactory    = $subscriberFactory;
-        $this->storeManager         = $storeManager;
     }
 
     public function execute(\Magento\Framework\Event\Observer $observer)
@@ -56,7 +52,7 @@ class SaveBefore implements \Magento\Framework\Event\ObserverInterface
          */
         $customer = $observer->getCustomer();
         $storeId  = $customer->getStoreId();
-        $websiteId = (int)$this->storeManager->getStore($customer->getStoreId())->getWebsiteId();
+        $websiteId = $customer->getWebsiteId();
         if ($this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_PATH_ACTIVE)) {
             if ($this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_PATH_ECOMMERCE_ACTIVE)) {
                 $mailchimpStoreId = $this->_helper->getConfigValue(

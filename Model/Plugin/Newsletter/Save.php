@@ -14,7 +14,6 @@
 namespace Ebizmarts\MailChimp\Model\Plugin\Newsletter;
 
 use Ebizmarts\MailChimp\Helper\Sync as SyncHelper;
-use Magento\Store\Model\StoreManagerInterface;
 
 class Save
 {
@@ -42,10 +41,6 @@ class Save
      * @var \Ebizmarts\MailChimp\Model\MailChimpInterestGroupFactory
      */
     protected $interestGroupFactory;
-    /**
-     * @var StoreManagerInterface
-     */
-    private $storeManager;
 
     /**
      * @param \Ebizmarts\MailChimp\Helper\Data $helper
@@ -54,7 +49,6 @@ class Save
      * @param \Magento\Newsletter\Model\SubscriberFactory $subscriberFactory
      * @param \Ebizmarts\MailChimp\Model\MailChimpInterestGroupFactory $interestGroupFactory
      * @param \Magento\Framework\App\Request\Http $request
-     * @param StoreManagerInterface $storeManager
      */
     public function __construct(
         \Ebizmarts\MailChimp\Helper\Data $helper,
@@ -62,8 +56,7 @@ class Save
         \Magento\Customer\Model\Session $customerSession,
         \Magento\Newsletter\Model\SubscriberFactory $subscriberFactory,
         \Ebizmarts\MailChimp\Model\MailChimpInterestGroupFactory $interestGroupFactory,
-        \Magento\Framework\App\Request\Http $request,
-        StoreManagerInterface $storeManager
+        \Magento\Framework\App\Request\Http $request
     ) {
         $this->helper               = $helper;
         $this->syncHelper           = $syncHelper;
@@ -71,7 +64,6 @@ class Save
         $this->subscriberFactory    = $subscriberFactory;
         $this->request              = $request;
         $this->interestGroupFactory = $interestGroupFactory;
-        $this->storeManager         = $storeManager;
     }
     public function afterExecute()
     {
@@ -85,7 +77,7 @@ class Save
         $customer = $this->customerSession->getCustomer();
 
         $email = $customer->getEmail();
-        $websiteId = (int)$this->storeManager->getStore($customer->getStoreId())->getWebsiteId();
+        $websiteId = $customer->getWebsiteId();
 
         try {
             $subscriber->loadByCustomer($customer->getId(), $websiteId);
