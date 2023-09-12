@@ -14,9 +14,6 @@
 namespace Ebizmarts\MailChimp\Model\Api;
 
 use Magento\Directory\Model\CountryFactory;
-use Magento\Framework\Exception\State\ExpiredException;
-use Magento\Store\Model\StoreManagerInterface;
-use Symfony\Component\Config\Definition\Exception\Exception;
 use Ebizmarts\MailChimp\Helper\Sync as SyncHelper;
 
 class Customer
@@ -59,10 +56,6 @@ class Customer
      * @var SyncHelper
      */
     private $syncHelper;
-    /**
-     * @var StoreManagerInterface
-     */
-    private $storeManager;
 
     /**
      * @param \Ebizmarts\MailChimp\Helper\Data $helper
@@ -73,7 +66,6 @@ class Customer
      * @param CountryFactory $countryFactory
      * @param \Magento\Customer\Model\Address $address
      * @param \Magento\Newsletter\Model\SubscriberFactory $subscriberFactory
-     * @param StoreManagerInterface $storeManager
      */
     public function __construct(
         \Ebizmarts\MailChimp\Helper\Data $helper,
@@ -83,8 +75,7 @@ class Customer
         \Magento\Sales\Model\ResourceModel\Order\CollectionFactory $orderCollection,
         \Magento\Directory\Model\CountryFactory $countryFactory,
         \Magento\Customer\Model\Address $address,
-        \Magento\Newsletter\Model\SubscriberFactory $subscriberFactory,
-        StoreManagerInterface $storeManager
+        \Magento\Newsletter\Model\SubscriberFactory $subscriberFactory
     ) {
         $this->_helper              = $helper;
         $this->_collection          = $collection;
@@ -96,7 +87,6 @@ class Customer
         $this->_countryFactory      = $countryFactory;
         $this->subscriberFactory    = $subscriberFactory;
         $this->syncHelper           = $syncHelper;
-        $this->storeManager         = $storeManager;
     }
     public function sendCustomers($storeId)
     {
@@ -192,7 +182,7 @@ class Customer
     protected function isSubscriber(\Magento\Customer\Model\Customer $customer)
     {
         $subscriber = $this->subscriberFactory->create();
-        $websiteId = (int)$this->storeManager->getStore($customer->getStoreId())->getWebsiteId();
+        $websiteId = $customer->getWebsiteId();
         $subscriber->loadBySubscriberEmail($customer->getEmail(), $websiteId);
         if ($subscriber->getEmail() == $customer->getEmail()) {
             if ($subscriber->getStatus() === \Magento\Newsletter\Model\Subscriber::STATUS_SUBSCRIBED) {

@@ -13,7 +13,6 @@
 
 namespace Ebizmarts\MailChimp\Observer\Adminhtml\Customer;
 use Ebizmarts\MailChimp\Helper\Sync as SyncHelper;
-use Magento\Store\Model\StoreManagerInterface;
 
 class SaveAfter implements \Magento\Framework\Event\ObserverInterface
 {
@@ -33,30 +32,23 @@ class SaveAfter implements \Magento\Framework\Event\ObserverInterface
      * @var SyncHelper
      */
     private $syncHelper;
-    /**
-     * @var StoreManagerInterface
-     */
-    private $storeManager;
 
     /**
      * @param \Ebizmarts\MailChimp\Helper\Data $helper
      * @param \Magento\Newsletter\Model\SubscriberFactory $subscriberFactory
      * @param \Ebizmarts\MailChimp\Model\MailChimpInterestGroupFactory $interestGroupFactory
      * @param SyncHelper $syncHelper
-     * @param StoreManagerInterface $storeManager
      */
     public function __construct(
         \Ebizmarts\MailChimp\Helper\Data $helper,
         \Magento\Newsletter\Model\SubscriberFactory $subscriberFactory,
         \Ebizmarts\MailChimp\Model\MailChimpInterestGroupFactory $interestGroupFactory,
-        SyncHelper $syncHelper,
-        StoreManagerInterface $storeManager
+        SyncHelper $syncHelper
     ) {
         $this->helper               = $helper;
         $this->subscriberFactory    = $subscriberFactory;
         $this->interestGroupFactory = $interestGroupFactory;
         $this->syncHelper           = $syncHelper;
-        $this->storeManager         = $storeManager;
     }
 
     public function execute(\Magento\Framework\Event\Observer $observer)
@@ -65,7 +57,7 @@ class SaveAfter implements \Magento\Framework\Event\ObserverInterface
          * @var $customer \Magento\Customer\Model\Customer
          */
         $customer = $observer->getCustomer();
-        $websiteId = (int)$this->storeManager->getStore($customer->getStoreId())->getWebsiteId();
+        $websiteId = $customer->getWebsiteId();
         $request  = $observer->getEvent()->getRequest();
         $allParams = $request->getParams();
         $subscriber = $this->subscriberFactory->create();
