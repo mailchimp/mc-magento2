@@ -100,7 +100,7 @@ class Batches extends Column
             try {
                 $store = $api->ecommerce->stores->get($mailchimp_store_id);
                 $this->stores[$mailchimp_store_id] = $store['name'];
-            } catch (\Exception) {
+            } catch (\Exception $e) {
                 $this->stores[$mailchimp_store_id] = 'Not existing store';
             }
         }
