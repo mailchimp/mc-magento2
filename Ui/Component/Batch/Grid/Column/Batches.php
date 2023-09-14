@@ -26,11 +26,11 @@ class Batches extends Column
      */
     protected $urlBuilder;
     /**
-     * @var Helper
+     * @var \Ebizmarts\MailChimp\Model\MailChimpSyncBatches
      */
     protected $mailChimpSyncB;
     /**
-     * @var Helper
+     * @var \Ebizmarts\MailChimp\Helper\Data
      */
     protected $helper;
 
@@ -53,7 +53,7 @@ class Batches extends Column
         array $components = [],
         array $data = []
     ) {
-        $this->_helper = $helper;
+        $this->helper = $helper;
         $this->mailChimpSyncB = $mailChimpSyncB;
         $this->urlBuilder = $urlBuilder;
         parent::__construct($context, $uiComponentFactory, $components, $data);
@@ -96,9 +96,13 @@ class Batches extends Column
     private function getMCStoreNameById($mailchimp_store_id, $magentoStoreId)
     {
         if (!key_exists($mailchimp_store_id, $this->stores)) {
-            $api = $this->_helper->getApi($magentoStoreId);
-            $store = $api->ecommerce->stores->get($mailchimp_store_id);
-            $this->stores[$mailchimp_store_id] = $store['name'];
+            $api = $this->helper->getApi($magentoStoreId);
+            try {
+                $store = $api->ecommerce->stores->get($mailchimp_store_id);
+                $this->stores[$mailchimp_store_id] = $store['name'];
+            } catch (\Exception $e) {
+                $this->stores[$mailchimp_store_id] = 'Not existing store';
+            }
         }
         return $this->stores[$mailchimp_store_id];
     }
