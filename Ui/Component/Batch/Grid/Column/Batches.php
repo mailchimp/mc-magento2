@@ -33,7 +33,7 @@ class Batches extends Column
      * @var Helper
      */
     protected $helper;
-    
+
     private $stores=[];
 
     /**
@@ -97,8 +97,12 @@ class Batches extends Column
     {
         if (!key_exists($mailchimp_store_id, $this->stores)) {
             $api = $this->helper->getApi($magentoStoreId);
-            $store = $api->ecommerce->stores->get($mailchimp_store_id);
-            $this->stores[$mailchimp_store_id] = $store['name'];
+            try {
+                $store = $api->ecommerce->stores->get($mailchimp_store_id);
+                $this->stores[$mailchimp_store_id] = $store['name'];
+            } catch (\Exception) {
+                $this->stores[$mailchimp_store_id] = 'Not existing store';
+            }
         }
         return $this->stores[$mailchimp_store_id];
     }
