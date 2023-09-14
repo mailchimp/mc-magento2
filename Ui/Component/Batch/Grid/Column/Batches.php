@@ -26,14 +26,14 @@ class Batches extends Column
      */
     protected $urlBuilder;
     /**
-     * @var Helper
+     * @var \Ebizmarts\MailChimp\Model\MailChimpSyncBatches
      */
     protected $mailChimpSyncB;
     /**
-     * @var Helper
+     * @var \Ebizmarts\MailChimp\Helper\Data
      */
     protected $helper;
-    
+
     private $stores=[];
 
     /**
@@ -97,8 +97,12 @@ class Batches extends Column
     {
         if (!key_exists($mailchimp_store_id, $this->stores)) {
             $api = $this->helper->getApi($magentoStoreId);
-            $store = $api->ecommerce->stores->get($mailchimp_store_id);
-            $this->stores[$mailchimp_store_id] = $store['name'];
+            try {
+                $store = $api->ecommerce->stores->get($mailchimp_store_id);
+                $this->stores[$mailchimp_store_id] = $store['name'];
+            } catch (\Exception $e) {
+                $this->stores[$mailchimp_store_id] = 'Not existing store';
+            }
         }
         return $this->stores[$mailchimp_store_id];
     }
