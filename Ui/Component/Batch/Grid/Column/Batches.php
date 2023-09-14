@@ -26,11 +26,11 @@ class Batches extends Column
      */
     protected $urlBuilder;
     /**
-     * @var Helper
+     * @var \Ebizmarts\MailChimp\Model\MailChimpSyncBatches
      */
     protected $mailChimpSyncB;
     /**
-     * @var Helper
+     * @var \Ebizmarts\MailChimp\Helper\Data
      */
     protected $helper;
 
