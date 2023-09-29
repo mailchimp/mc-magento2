@@ -1,8 +1,13 @@
+<?php
+/**
+ * @var $escaper \Magento\Framework\Escaper
+ */
+?>
 <div id="monkey_storeconfirmation" style="display:none;" data-mage-init='{"mailchimpconfirmation":{}}'>
 </div>
 <div class="actions actions-delete-store">
     <div id="validation_result" class="message-validation hidden"></div>
-    <button onclick="mailchimpdeleteconfirmation('<?php echo $this->getAjaxCheckUrl() ?>')" class="action-delete-store" type="button" id="<?php echo $block->getHtmlId() ?>">
-        <span><?php echo $block->escapeHtml($block->getButtonLabel()) ?></span>
+    <button onclick="mailchimpdeleteconfirmation('<?= $escaper->escapeUrl($block->getAjaxCheckUrl()) ?>')" class="action-delete-store" type="button" id="<?= $block->getHtmlId() ?>">
+        <span><?= $escaper->escapeHtml($block->getButtonLabel()) ?></span>
     </button>
 </div>
