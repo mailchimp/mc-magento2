@@ -1,4 +1,4 @@
 <?php
-    $url = $this->getJsUrl();
+    $url = $block->getJsUrl();
 ?>
-<script type="text/javascript" src="<?php echo $url;?>" defer></script>
+<script" src="<?= $block->escapeHtml($url);?>" defer></script>
