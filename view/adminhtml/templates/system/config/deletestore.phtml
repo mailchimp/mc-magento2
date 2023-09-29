@@ -2,7 +2,7 @@
 </div>
 <div class="actions actions-delete-store">
     <div id="validation_result" class="message-validation hidden"></div>
-    <button onclick="mailchimpdeleteconfirmation('<?php echo $this->getAjaxCheckUrl() ?>')" class="action-delete-store" type="button" id="<?php echo $block->getHtmlId() ?>">
-        <span><?php echo $block->escapeHtml($block->getButtonLabel()) ?></span>
+    <button onclick="mailchimpdeleteconfirmation('<?= $block->escapeHtml($block->getAjaxCheckUrl()) ?>')" class="action-delete-store" type="button" id="<?= $block->getHtmlId() ?>">
+        <span><?= $block->escapeHtml($block->getButtonLabel()) ?></span>
     </button>
 </div>
