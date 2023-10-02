@@ -1,6 +1,11 @@
+<?php
+/**
+ * @var $escaper \Magento\Framework\Escaper
+ */
+?>
 <div class="actions actions-fix-mailchimp-js">
     <div id="validation_result" class="message-validation hidden"></div>
-    <button class="action-fix-mailchimp-js" type="button" id="<?php echo $block->getHtmlId() ?>">
-        <span><?php echo $block->escapeHtml($block->getButtonLabel()) ?></span>
+    <button class="action-fix-mailchimp-js" type="button" id="<?= $block->getHtmlId() ?>">
+        <span><?= $escaper->escapeHtml($block->getButtonLabel()) ?></span>
     </button>
 </div>

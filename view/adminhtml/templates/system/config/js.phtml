@@ -1,3 +1,8 @@
+<?php
+/**
+ * @var $escaper \Magento\Framework\Escaper
+ */
+?>
 <div id="monkey_apikey" class="admin__page-section-item" style="display:none;"
-     data-mage-init='{"monkeyapikey":{"apikeyUrl": "<?php echo $this->getUrl('mailchimp/lists/get');?>"}}'>
+     data-mage-init='{"monkeyapikey":{"apikeyUrl": "<?= $escaper->escapeUrl($block->getUrl('mailchimp/lists/get')); ?>"}}'>
 </div>

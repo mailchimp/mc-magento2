@@ -1,8 +1,14 @@
-<script type="text/javascript">
+<?php
+/**
+ * @var $escaper \Magento\Framework\Escaper
+ */
+?>
+
+<script>
     //<![CDATA[
     function resetStore() {
         jQuery.ajax({
-            url: '<?php echo $this->getAjaxCheckUrl() ?>',
+            url: '<?= $escaper->escapeUrl($block->getAjaxCheckUrl()) ?>',
             data: {form_key: window.FORM_KEY},
             type: 'POST',
             success: function(data){
@@ -20,13 +26,9 @@
     //]]>
 </script>
 
-
-<?php //echo  __($block->escapeHtml('Reset errors')); ?>
-
-
 <div class="actions actions-reset-store">
     <div id="validation_result" class="message-validation hidden"></div>
-    <button onclick="javascript:resetStore(); return false;" class="action-reset-store" type="button" id="<?php echo $block->getHtmlId() ?>">
-        <span><?php echo $block->escapeHtml($block->getButtonLabel()) ?></span>
+    <button onclick="javascript:resetStore(); return false;" class="action-reset-store" type="button" id="<?= $block->getHtmlId() ?>">
+        <span><?= $escaper->escapeHtml($block->getButtonLabel()) ?></span>
     </button>
 </div>
