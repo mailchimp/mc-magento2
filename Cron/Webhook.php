@@ -149,8 +149,9 @@ class Webhook
             $storeIds = $this->_helper->getMagentoStoreIdsByListId($listId);
             if (count($storeIds) > 0) {
                 foreach ($storeIds as $storeId) {
+                    $websiteId = $this->storeManager->getStore($storeId)->getWebsiteId();
                     $sub = $this->_subscriberFactory->create();
-                    $sub->setStoreId($storeId);
+                    $sub->setStoreId($websiteId);
                     $sub->setSubscriberEmail($email);
                     $this->_subscribeMember($sub, \Magento\Newsletter\Model\Subscriber::STATUS_SUBSCRIBED);
                 }
@@ -247,7 +248,8 @@ class Webhook
 
                 $stores = $this->_helper->getMagentoStoreIdsByListId($listId);
                 if (count($stores)) {
-                    $subscriber->setStoreId($stores[0]);
+                    $websiteId = $this->storeManager->getStore($stores[0])->getWebsiteId();
+                    $subscriber->setStoreId($websiteId);
                     try {
                         $api = $this->_helper->getApi($stores[0]);
                         $member = $api->lists->members->get($listId, hash('md5', strtolower($email)));
@@ -307,6 +309,7 @@ class Webhook
                     }
                 } else {
                     if (is_array($mapFields)) {
+                        $this->_helper->log($mapFields);
                         foreach ($mapFields as $map) {
                             if ($map['mailchimp'] == $key) {
                                 if (!$map['isAddress'] && $map['customer_field'] != "dob" && strpos($map['customer_field'], '##') !== false) {

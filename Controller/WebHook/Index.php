@@ -52,7 +52,7 @@ class Index extends Action implements CsrfAwareActionInterface
         \Ebizmarts\MailChimp\Model\MailChimpWebhookRequestFactory $chimpWebhookRequestFactory,
         \Magento\Framework\HTTP\PhpEnvironment\RemoteAddress $remoteAddress
     ) {
-    
+
         parent::__construct($context);
         $this->_resultFactory              = $context->getResultFactory();
         $this->_helper                      = $helper;
@@ -94,6 +94,7 @@ class Index extends Action implements CsrfAwareActionInterface
             $result->setHttpResponseCode(403);
             return $result;
         }
+        $this->_helper->log($this->getRequest()->getPost());
         if ($this->getRequest()->getPost('type')) {
             $request = $this->getRequest()->getPost();
             if ($this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_PATH_WEBHOOK_ACTIVE) ||
@@ -111,6 +112,8 @@ class Index extends Action implements CsrfAwareActionInterface
                     $this->_helper->log($request['data']);
                     $result->setHttpResponseCode(403);
                 }
+            } else {
+                $this->_helper->log("The two way is off");
             }
         } else {
             $this->_helper->log('An empty request comes from ip: '.$this->_remoteAddress->getRemoteAddress());

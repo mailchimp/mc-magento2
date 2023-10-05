@@ -155,5 +155,10 @@
             "mailchimp_sync_error": true,
             "mailchimp_sent": true
         }
+    },
+    "newsletter_subscriber": {
+        "column": {
+            "phone": true
+        }
     }
 }

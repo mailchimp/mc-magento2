@@ -148,4 +148,7 @@
             <column name="id"/>
         </constraint>
     </table>
+    <table name="newsletter_subscriber">
+        <column xsi:type="varchar" name="phone" length="50" comment="Phone of the subscriber"/>
+    </table>
 </schema>

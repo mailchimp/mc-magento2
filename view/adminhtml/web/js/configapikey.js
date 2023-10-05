@@ -84,7 +84,21 @@ define(
                 var abandonedCartEnabled = $('#mailchimp_abandonedcart_active').find(':selected').val();
                 if (ecommerceEnabled == 0 && abandonedCartEnabled == 1) {
                     self._changeAbandonedCart();
-                }
+                };
+                $('#mailchimp_general_popup_form').change(function () {
+                    var popupformEnabled = $('#mailchimp_general_popup_form').find(':selected').val();
+                    var footerphoneEnabled = $('#mailchimp_general_footer_phone').find(':selected').val();
+                    if (popupformEnabled == 1 && footerphoneEnabled == 1) {
+                        self._disableFooterPhone();
+                    }
+                });
+                $('#mailchimp_general_footer_phone').change(function () {
+                    var popupformEnabled = $('#mailchimp_general_popup_form').find(':selected').val();
+                    var footerphoneEnabled = $('#mailchimp_general_footer_phone').find(':selected').val();
+                    if (popupformEnabled == 1 && footerphoneEnabled == 1) {
+                        self._disablePopupForm();
+                    }
+                });
 
             },
             _changeEcommerce: function () {
@@ -398,6 +412,36 @@ define(
                         }
                     });
                 });
+            },
+            _disableFooterPhone: function () {
+                var tag = '#mailchimp_general_footer_phone'
+                $(tag).empty();
+                $(tag).append($('<option>', {
+                    value: "0",
+                    text: 'No',
+                    selected: "selected"
+                }));
+                $(tag).append($('<option>', {
+                    value: "1",
+                    text: 'Yes'
+                }));
+                $('#mailchimp_general_footer_phone_map').hide();
+                $('#row_mailchimp_general_footer_phone_map').hide();
+            },
+            _disablePopupForm: function () {
+                var tag = '#mailchimp_general_popup_form'
+                $(tag).empty();
+                $(tag).append($('<option>', {
+                    value: "0",
+                    text: 'No',
+                    selected: "selected"
+                }));
+                $(tag).append($('<option>', {
+                    value: "1",
+                    text: 'Yes'
+                }));
+                $('#mailchimp_general_popup_url').hide();
+                $('#row_mailchimp_general_popup_url').hide();
             }
         });
         return $.mage.configmonkeyapikey;
