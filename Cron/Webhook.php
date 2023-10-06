@@ -309,7 +309,6 @@ class Webhook
                     }
                 } else {
                     if (is_array($mapFields)) {
-                        $this->_helper->log($mapFields);
                         foreach ($mapFields as $map) {
                             if ($map['mailchimp'] == $key) {
                                 if (!$map['isAddress'] && $map['customer_field'] != "dob" && strpos($map['customer_field'], '##') !== false) {
