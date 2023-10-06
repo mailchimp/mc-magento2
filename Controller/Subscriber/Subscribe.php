@@ -36,7 +36,6 @@ class Subscribe extends SubscriberController implements HttpPostActionInterface
     public function execute()
     {
         if($this->getRequest()->isPost() && $this->getRequest()->getPost('phone')) {
-            $email = (string)$this->getRequest()->getPost('email');
             $phone = (string)$this->getRequest()->getPost('phone');
             $this->session->setPhone($phone);
         }
