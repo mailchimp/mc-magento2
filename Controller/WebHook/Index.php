@@ -94,7 +94,6 @@ class Index extends Action implements CsrfAwareActionInterface
             $result->setHttpResponseCode(403);
             return $result;
         }
-        $this->_helper->log($this->getRequest()->getPost());
         if ($this->getRequest()->getPost('type')) {
             $request = $this->getRequest()->getPost();
             if ($this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_PATH_WEBHOOK_ACTIVE) ||
