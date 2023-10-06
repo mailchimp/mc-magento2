@@ -23,8 +23,6 @@
             <action method="setTemplate" ifconfig="mailchimp/general/popup_form">
                 <argument name="template" xsi:type="string">Ebizmarts_MailChimp::footer.phtml</argument>
             </action>
-        </referenceBlock>
-        <referenceBlock name="form.subscribe">
             <action method="setTemplate" ifconfig="mailchimp/general/footer_phone">
                 <argument name="template" xsi:type="string">Ebizmarts_MailChimp::footerwphone.phtml</argument>
             </action>
