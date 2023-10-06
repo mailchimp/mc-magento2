@@ -721,14 +721,11 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
 
     public function getMergeVarsBySubscriber(\Magento\Newsletter\Model\Subscriber $subscriber, $email = null)
     {
-        $this->log(__METHOD__);
         $mergeVars = [];
         $webSiteId = $subscriber->getStoreId();
         if ($this->getConfigValue(self::XML_FOOTER_PHONE, $webSiteId, "websites")) {
             $phone_field = $this->getConfigValue(self::XML_FOOTER_MAP , $webSiteId, "websites");
-            $this->log("Phone field [$phone_field]");
             $phone = $subscriber->getPhone();
-            $this->log("Phone [$phone]");
             if ($phone_field && $subscriber->getPhone()) {
                 $mergeVars[$phone_field] = $subscriber->getPhone();
             }
@@ -749,7 +746,6 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         } catch (\Exception $e) {
             $this->log($e->getMessage());
         }
-        $this->log($mergeVars);
         return $mergeVars;
     }
 
