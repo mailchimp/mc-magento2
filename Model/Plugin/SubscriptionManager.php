@@ -158,11 +158,17 @@ class SubscriptionManager
         $email,
         $storeId
     ) {
+        $this->_helper->log(__METHOD__);
         if ($this->_helper->isMailChimpEnabled($storeId)) {
             $websiteId = (int)$this->_storeManager->getStore($storeId)->getWebsiteId();
 
             $subscriber = $this->_subscriberFactory->create()->loadBySubscriberEmail($email, $websiteId);
+            $phones = $subscriber->getPhone();
+            $phonec = $this->_customerSession->getPhone();
 
+            if ($this->_customerSession->getPhone()) {
+                $subscriber->setPhone($this->_customerSession->getPhone());
+            }
             if ($this->_helper->isMailChimpEnabled($storeId)) {
                 $api = $this->_helper->getApi($storeId);
                 if ($this->_helper->isDoubleOptInEnabled($storeId)) {
