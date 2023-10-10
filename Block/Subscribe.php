@@ -38,4 +38,8 @@ class Subscribe extends \Magento\Newsletter\Block\Subscribe
         $storeId = $this->context->getStoreManager()->getStore()->getId();
         return $this->helper->getConfigValue(MailchimpHelper::XML_POPUP_URL,$storeId);
     }
+    public function getFormActionUrl()
+    {
+        return $this->getUrl('mailchimp/subscriber/subscribe', ['_secure' => true]);
+    }
 }
