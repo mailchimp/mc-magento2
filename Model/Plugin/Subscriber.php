@@ -49,7 +49,7 @@ class Subscriber
         \Magento\Customer\Model\Session $customerSession,
         \Magento\Store\Model\StoreManagerInterface $storeManager
     ) {
-    
+
         $this->_helper          = $helper;
         $this->_customer        = $customer;
         $this->_customerSession = $customerSession;
@@ -64,9 +64,9 @@ class Subscriber
      */
     public function beforeUnsubscribeCustomerById(
         \Magento\Newsletter\Model\Subscriber $subscriber,
-        $customerId
+                                             $customerId
     ) {
-        $storeId = $this->getStoreIdFromSubscriber($subscriber);
+        $storeId = $this->_storeManager->getStore()->getId();
         if ($this->_helper->isMailChimpEnabled($storeId)) {
             if (!$this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_MAGENTO_MAIL, $storeId)) {
                 $subscriber->setImportMode(true);
@@ -99,10 +99,9 @@ class Subscriber
      */
     public function beforeSubscribeCustomerById(
         \Magento\Newsletter\Model\Subscriber $subscriber,
-        $customerId
+                                             $customerId
     ) {
-
-        $storeId = $this->getStoreIdFromSubscriber($subscriber);
+        $storeId = $this->_storeManager->getStore()->getId();
         if ($this->_helper->isMailChimpEnabled($storeId)) {
             $subscriber->loadByCustomerId($customerId);
             if (!$subscriber->isSubscribed()) {
@@ -152,15 +151,16 @@ class Subscriber
      */
     public function beforeSubscribe(
         \Magento\Newsletter\Model\Subscriber $subscriber,
-        $email
+                                             $email
     ) {
-
-        $storeId = $this->getStoreIdFromSubscriber($subscriber);
+        $storeId = $this->_storeManager->getStore()->getId();
         if ($this->_helper->isMailChimpEnabled($storeId)) {
             if (!$this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_MAGENTO_MAIL, $storeId)) {
                 $subscriber->setImportMode(true);
             }
-            $storeId = $this->_storeManager->getStore()->getId();
+            if ($this->_customerSession->getPhone()) {
+                $subscriber->setPhone($this->_customerSession->getPhone());
+            }
 
             if ($this->_helper->isMailChimpEnabled($storeId)) {
                 $api = $this->_helper->getApi($storeId);
@@ -201,7 +201,7 @@ class Subscriber
     public function beforeUnsubscribe(
         \Magento\Newsletter\Model\Subscriber $subscriber
     ) {
-        $storeId = $this->getStoreIdFromSubscriber($subscriber);
+        $storeId = $this->_storeManager->getStore()->getId();
         if ($this->_helper->isMailChimpEnabled($storeId)) {
             if (!$this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_MAGENTO_MAIL, $storeId)) {
                 $subscriber->setImportMode(true);
@@ -228,8 +228,7 @@ class Subscriber
     public function afterDelete(
         \Magento\Newsletter\Model\Subscriber $subscriber
     ) {
-
-        $storeId = $this->getStoreIdFromSubscriber($subscriber);
+        $storeId = $this->_storeManager->getStore()->getId();
         if ($this->_helper->isMailChimpEnabled($storeId)) {
             $api = $this->_helper->getApi($storeId);
             if ($subscriber->isSubscribed()) {
@@ -251,14 +250,5 @@ class Subscriber
             }
         }
         return null;
-    }
-
-    /**
-     * @param \Magento\Newsletter\Model\Subscriber $subscriber
-     * @return int
-     */
-    protected function getStoreIdFromSubscriber(\Magento\Newsletter\Model\Subscriber $subscriber)
-    {
-        return $subscriber->getStoreId();
     }
 }

@@ -53,7 +53,8 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     const XML_POPUP_FORM             = 'mailchimp/general/popup_form';
     const XML_POPUP_URL              = 'mailchimp/general/popup_url';
     const XML_CLEAN_ERROR_MONTHS     = 'mailchimp/ecommerce/clean_errors_months';
-
+    const XML_FOOTER_PHONE           = 'mailchimp/general/footer_phone';
+    const XML_FOOTER_MAP             = 'mailchimp/general/footer_phone_map';
     const ORDER_STATE_OK             = 'complete';
 
     const GUEST_GROUP                = 'NOT LOGGED IN';
@@ -424,7 +425,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
                 $ret[$item] = [
                     'attCode'   => $item,
                     'isDate'    => false,
-                    'isAddress' => false,
+                    'isAddress' => true,
                     'options'   => []
                 ];
             }
@@ -787,6 +788,14 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         $mergeVars = [];
         $storeId = $subscriber->getStoreId();
         $webSiteId = $this->getWebsiteId($subscriber->getStoreId());
+        $webSiteId = $subscriber->getStoreId();
+        if ($this->getConfigValue(self::XML_FOOTER_PHONE, $webSiteId, "websites")) {
+            $phone_field = $this->getConfigValue(self::XML_FOOTER_MAP , $webSiteId, "websites");
+            $phone = $subscriber->getPhone();
+            if ($phone_field && $phone) {
+                $mergeVars[$phone_field] = $phone;
+            }
+        }
         if (!$email) {
             $email = $subscriber->getEmail();
         }
@@ -798,7 +807,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
             $customer->setWebsiteId($webSiteId);
             $customer->loadByEmail($email);
             if ($customer->getData('email') == $email) {
-                $mergeVars = $this->getMergeVars($customer, $storeId);
+                $mergeVars = array_merge($mergeVars,$this->getMergeVars($customer, $customer->getStoreId()));
             }
         } catch (\Exception $e) {
             $this->log($e->getMessage());
@@ -1035,12 +1044,15 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     public function loadListSubscribers($listId, $mail)
     {
         $collection = null;
+        $websiteIds = [];
         $storeIds = $this->getMagentoStoreIdsByListId($listId);
-        $storeIds[] = 0;
+        foreach($storeIds as $storeId) {
+            $websiteIds[] =$this->_storeManager->getStore($storeId)->getWebsiteId();
+        }
         if (count($storeIds) > 0) {
             $collection = $this->_subscriberCollection->create();
             $collection
-                ->addFieldToFilter('store_id', ['in'=>$storeIds])
+                ->addFieldToFilter('store_id', ['in'=>$websiteIds])
                 ->addFieldToFilter('subscriber_email', ['eq'=>$mail]);
         }
         return $collection;
