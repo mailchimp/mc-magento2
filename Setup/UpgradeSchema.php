@@ -742,5 +742,17 @@ class UpgradeSchema implements UpgradeSchemaInterface
                 'mailchimp_sent'
             );
         }
+        if (version_compare($context->getVersion(), '100.1.58') < 0) {
+            $connection->addColumn(
+                $setup->getTable('newsletter_subscriber'),
+                'phone',
+                [
+                    'type' => \Magento\Framework\DB\Ddl\Table::TYPE_TEXT,
+                    'default' => null,
+                    'length' => 128,
+                    'comment' => 'Phone'
+                ]
+            );
+        }
     }
 }

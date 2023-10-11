@@ -49,7 +49,7 @@ class Subscriber
         \Magento\Customer\Model\Session $customerSession,
         \Magento\Store\Model\StoreManagerInterface $storeManager
     ) {
-    
+
         $this->_helper          = $helper;
         $this->_customer        = $customer;
         $this->_customerSession = $customerSession;
@@ -57,17 +57,16 @@ class Subscriber
     }
 
     /**
-     * @param $subscriber
+     * @param \Magento\Newsletter\Model\Subscriber $subscriber
      * @param $customerId
      * @return array
      * @throws \Magento\Framework\Exception\LocalizedException
      */
     public function beforeUnsubscribeCustomerById(
-        $subscriber,
-        $customerId
+        \Magento\Newsletter\Model\Subscriber $subscriber,
+                                             $customerId
     ) {
-
-        $storeId = $this->getStoreIdFromSubscriber($subscriber);
+        $storeId = $this->_storeManager->getStore()->getId();
         if ($this->_helper->isMailChimpEnabled($storeId)) {
             if (!$this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_MAGENTO_MAIL, $storeId)) {
                 $subscriber->setImportMode(true);
@@ -76,8 +75,13 @@ class Subscriber
             if ($subscriber->isSubscribed()) {
                 $api = $this->_helper->getApi($storeId);
                 try {
-                    $md5HashEmail = md5(strtolower($subscriber->getSubscriberEmail()));
-                    $api->lists->members->update($this->_helper->getDefaultList($storeId), $md5HashEmail, null, 'unsubscribed');
+                    $md5HashEmail = hash('md5', strtolower($subscriber->getSubscriberEmail()));
+                    $api->lists->members->update(
+                        $this->_helper->getDefaultList($storeId),
+                        $md5HashEmail,
+                        null,
+                        'unsubscribed'
+                    );
                 } catch (\Mailchimp_Error $e) {
                     $this->_helper->log($e->getFriendlyMessage());
                 }
@@ -87,25 +91,23 @@ class Subscriber
     }
 
     /**
-     * @param $subscriber
+     * @param \Magento\Newsletter\Model\Subscriber $subscriber
      * @param $customerId
      * @return array
      * @throws \Magento\Framework\Exception\LocalizedException
      * @throws \Magento\Framework\Exception\NoSuchEntityException
      */
     public function beforeSubscribeCustomerById(
-        $subscriber,
-        $customerId
+        \Magento\Newsletter\Model\Subscriber $subscriber,
+                                             $customerId
     ) {
-
-        $storeId = $this->getStoreIdFromSubscriber($subscriber);
+        $storeId = $this->_storeManager->getStore()->getId();
         if ($this->_helper->isMailChimpEnabled($storeId)) {
             $subscriber->loadByCustomerId($customerId);
             if (!$subscriber->isSubscribed()) {
                 if (!$this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_MAGENTO_MAIL, $storeId)) {
                     $subscriber->setImportMode(true);
                 }
-
                 if ($this->_helper->isMailChimpEnabled($storeId)) {
                     $customer = $this->_customer->getById($customerId);
                     $email = $customer->getEmail();
@@ -117,8 +119,20 @@ class Subscriber
                         $status = 'subscribed';
                     }
                     try {
-                        $emailHash = md5(strtolower($customer->getEmail()));
-                        $api->lists->members->addOrUpdate($this->_helper->getDefaultList($storeId), $emailHash, null, $status, $mergeVars, null, null, null, null, $email, $status);
+                        $emailHash = hash('md5', strtolower($customer->getEmail()));
+                        $api->lists->members->addOrUpdate(
+                            $this->_helper->getDefaultList($storeId),
+                            $emailHash,
+                            null,
+                            $status,
+                            $mergeVars,
+                            null,
+                            null,
+                            null,
+                            null,
+                            $email,
+                            $status
+                        );
                     } catch (\Mailchimp_Error $e) {
                         $this->_helper->log($e->getFriendlyMessage());
                     }
@@ -129,20 +143,23 @@ class Subscriber
     }
 
     /**
-     * @param $subscriber
+     * @param \Magento\Newsletter\Model\Subscriber $subscriber
      * @param $email
      * @return array
      * @throws \Magento\Framework\Exception\LocalizedException
+     * @throws \Magento\Framework\Exception\NoSuchEntityException
      */
     public function beforeSubscribe(
-        $subscriber,
-        $email
+        \Magento\Newsletter\Model\Subscriber $subscriber,
+                                             $email
     ) {
-
-        $storeId = $this->getStoreIdFromSubscriber($subscriber);
+        $storeId = $this->_storeManager->getStore()->getId();
         if ($this->_helper->isMailChimpEnabled($storeId)) {
             if (!$this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_MAGENTO_MAIL, $storeId)) {
                 $subscriber->setImportMode(true);
+            }
+            if ($this->_customerSession->getPhone()) {
+                $subscriber->setPhone($this->_customerSession->getPhone());
             }
 
             if ($this->_helper->isMailChimpEnabled($storeId)) {
@@ -154,8 +171,20 @@ class Subscriber
                 }
                 $mergeVars = $this->_helper->getMergeVarsBySubscriber($subscriber, $email);
                 try {
-                    $md5HashEmail = md5(strtolower($email));
-                    $return = $api->lists->members->addOrUpdate($this->_helper->getDefaultList($storeId), $md5HashEmail, null, $status, $mergeVars, null, null, null, null, $email, $status);
+                    $md5HashEmail = hash('md5', strtolower($email));
+                    $return = $api->lists->members->addOrUpdate(
+                        $this->_helper->getDefaultList($storeId),
+                        $md5HashEmail,
+                        null,
+                        $status,
+                        $mergeVars,
+                        null,
+                        null,
+                        null,
+                        null,
+                        $email,
+                        $status
+                    );
                 } catch (\Mailchimp_Error $e) {
                     $this->_helper->log($e->getFriendlyMessage());
                 }
@@ -172,21 +201,23 @@ class Subscriber
     public function beforeUnsubscribe(
         \Magento\Newsletter\Model\Subscriber $subscriber
     ) {
-
-        $storeId = $this->getStoreIdFromSubscriber($subscriber);
+        $storeId = $this->_storeManager->getStore()->getId();
         if ($this->_helper->isMailChimpEnabled($storeId)) {
             if (!$this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_MAGENTO_MAIL, $storeId)) {
                 $subscriber->setImportMode(true);
-            }
-            $api = $this->_helper->getApi($this->getStoreIdFromSubscriber($subscriber));
+            }            $api = $this->_helper->getApi($storeId);
             try {
-                $md5HashEmail = md5(strtolower($subscriber->getSubscriberEmail()));
-                $api->lists->members->update($this->_helper->getDefaultList($storeId), $md5HashEmail, null, 'unsubscribed');
+                $md5HashEmail = hash('md5', strtolower($subscriber->getSubscriberEmail()));
+                $api->lists->members->update(
+                    $this->_helper->getDefaultList($storeId),
+                    $md5HashEmail,
+                    null,
+                    'unsubscribed'
+                );
             } catch (\Mailchimp_Error $e) {
                 $this->_helper->log($e->getFriendlyMessage());
             }
         }
-        return null;
     }
 
     /**
@@ -197,15 +228,19 @@ class Subscriber
     public function afterDelete(
         \Magento\Newsletter\Model\Subscriber $subscriber
     ) {
-
-        $storeId = $this->getStoreIdFromSubscriber($subscriber);
+        $storeId = $this->_storeManager->getStore()->getId();
         if ($this->_helper->isMailChimpEnabled($storeId)) {
             $api = $this->_helper->getApi($storeId);
             if ($subscriber->isSubscribed()) {
                 try {
-                    $md5HashEmail = md5(strtolower($subscriber->getSubscriberEmail()));
+                    $md5HashEmail = hash('md5', strtolower($subscriber->getSubscriberEmail()));
                     if ($subscriber->getCustomerId()) {
-                        $api->lists->members->update($this->_helper->getDefaultList($storeId), $md5HashEmail, null, 'unsubscribed');
+                        $api->lists->members->update(
+                            $this->_helper->getDefaultList($storeId),
+                            $md5HashEmail,
+                            null,
+                            'unsubscribed'
+                        );
                     } else {
                         $api->lists->members->delete($this->_helper->getDefaultList($storeId), $md5HashEmail);
                     }
@@ -215,14 +250,5 @@ class Subscriber
             }
         }
         return null;
-    }
-
-    /**
-     * @param $subscriber
-     * @return mixed
-     */
-    protected function getStoreIdFromSubscriber($subscriber)
-    {
-        return $subscriber->getStoreId();
     }
 }
