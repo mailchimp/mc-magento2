@@ -158,7 +158,6 @@ class SubscriptionManager
         $email,
         $storeId
     ) {
-        $this->_helper->log(__METHOD__);
         if ($this->_helper->isMailChimpEnabled($storeId)) {
             $websiteId = (int)$this->_storeManager->getStore($storeId)->getWebsiteId();
 
