@@ -12,10 +12,10 @@
 namespace Ebizmarts\MailChimp\Model\Plugin;
 
 use Magento\Newsletter\Model\SubscriberFactory;
-use \Ebizmarts\MailChimp\Helper\Data as Helper;
-use \Magento\Customer\Model\ResourceModel\CustomerRepository;
-use \Magento\Customer\Model\Session;
-use \Magento\Store\Model\StoreManagerInterface;
+use Ebizmarts\MailChimp\Helper\Data as Helper;
+use Magento\Customer\Model\ResourceModel\CustomerRepository;
+use Magento\Customer\Model\Session;
+use Magento\Store\Model\StoreManagerInterface;
 
 class SubscriptionManager
 {
