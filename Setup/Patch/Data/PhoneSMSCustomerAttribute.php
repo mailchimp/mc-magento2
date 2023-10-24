@@ -78,11 +78,7 @@ class PhoneSMSCustomerAttribute  implements DataPatchInterface, PatchRevertableI
 
         $attribute->setData('used_in_forms', [
             'adminhtml_customer',
-            'adminhtml_customer_address',
-            'customer_account_edit',
-            'customer_address_edit',
-            'customer_register_address',
-            'customer_account_create'
+            'customer_account_edit'
         ]);
 
         $this->attributeResource->save($attribute);
