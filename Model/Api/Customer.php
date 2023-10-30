@@ -186,7 +186,7 @@ class Customer
         $subscriber = $this->subscriberFactory->create();
         $subscriber->loadByEmail($customer->getEmail());
         if ($subscriber->getEmail() == $customer->getEmail()) {
-            if ($subscriber->getStatus() === \Magento\Newsletter\Model\Subscriber::STATUS_SUBSCRIBED) {
+            if ((int)$subscriber->getStatus() === \Magento\Newsletter\Model\Subscriber::STATUS_SUBSCRIBED) {
                 return true;
             }
         }
