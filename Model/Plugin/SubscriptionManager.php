@@ -12,10 +12,10 @@
 namespace Ebizmarts\MailChimp\Model\Plugin;
 
 use Magento\Newsletter\Model\SubscriberFactory;
-use \Ebizmarts\MailChimp\Helper\Data as Helper;
-use \Magento\Customer\Model\ResourceModel\CustomerRepository;
-use \Magento\Customer\Model\Session;
-use \Magento\Store\Model\StoreManagerInterface;
+use Ebizmarts\MailChimp\Helper\Data as Helper;
+use Magento\Customer\Model\ResourceModel\CustomerRepository;
+use Magento\Customer\Model\Session;
+use Magento\Store\Model\StoreManagerInterface;
 
 class SubscriptionManager
 {
@@ -161,6 +161,9 @@ class SubscriptionManager
             $websiteId = (int)$this->_storeManager->getStore($storeId)->getWebsiteId();
 
             $subscriber = $this->_subscriberFactory->create()->loadBySubscriberEmail($email, $websiteId);
+            if ($this->_customerSession->getPhone()) {
+                $subscriber->setPhone($this->_customerSession->getPhone());
+            }
 
             if ($this->_helper->isMailChimpEnabled($storeId)) {
                 $api = $this->_helper->getApi($storeId);
