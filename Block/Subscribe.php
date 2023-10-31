@@ -70,12 +70,7 @@ class Subscribe extends \Magento\Newsletter\Block\Subscribe
              * @var $customer \Magento\Customer\Model\Customer
              */
             $customer = $this->customerFactory->create()->load($this->customerSession->getCustomerId());
-//            /**
-//             * @var $customer \Magento\Customer\Model\Customer
-//             */
-//            $customer = $this->customerRepo->getById($this->customerSession->getCustomerId());
             $mobilePhone = $customer->getData('mobile_phone');
-            $this->helper->log("Mobile [$mobilePhone]");
             if ($mobilePhone&&$mobilePhone!='') {
                 $ret = false;
             }
