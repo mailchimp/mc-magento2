@@ -30,7 +30,11 @@ class UpgradeSchema implements UpgradeSchemaInterface
      * @var DeploymentConfig
      */
     protected $_deploymentConfig;
-    public function __construct(ResourceConnection $resource, DeploymentConfig $deploymentConfig)
+
+    public function __construct(
+        ResourceConnection $resource,
+        DeploymentConfig $deploymentConfig
+    )
     {
         $this->_resource = $resource;
         $this->_deploymentConfig = $deploymentConfig;

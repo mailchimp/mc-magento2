@@ -27,7 +27,7 @@ class SaveBefore implements \Magento\Framework\Event\ObserverInterface
         $subscriber = $observer->getSubscriber();
         if ($this->customerSession->getPhone()) {
             $subscriber->setPhone($this->customerSession->getPhone());
-            //$this->customerSession->unsPhone();
+            $this->customerSession->unsPhone();
         }
         return $subscriber;
     }
