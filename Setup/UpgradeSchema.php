@@ -30,7 +30,11 @@ class UpgradeSchema implements UpgradeSchemaInterface
      * @var DeploymentConfig
      */
     protected $_deploymentConfig;
-    public function __construct(ResourceConnection $resource, DeploymentConfig $deploymentConfig)
+
+    public function __construct(
+        ResourceConnection $resource,
+        DeploymentConfig $deploymentConfig
+    )
     {
         $this->_resource = $resource;
         $this->_deploymentConfig = $deploymentConfig;
@@ -751,6 +755,18 @@ class UpgradeSchema implements UpgradeSchemaInterface
             $salesConnection->dropColumn(
                 $setup->getTable('sales_order_grid'),
                 'mailchimp_sent'
+            );
+        }
+        if (version_compare($context->getVersion(), '102.3.58') < 0) {
+            $connection->addColumn(
+                $setup->getTable('newsletter_subscriber'),
+                'phone',
+                [
+                    'type' => \Magento\Framework\DB\Ddl\Table::TYPE_TEXT,
+                    'default' => null,
+                    'length' => 128,
+                    'comment' => 'Phone'
+                ]
             );
         }
     }
