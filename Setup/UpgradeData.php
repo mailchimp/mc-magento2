@@ -18,6 +18,10 @@ use Magento\Framework\Setup\UpgradeDataInterface;
 use Magento\Framework\App\ResourceConnection;
 use Magento\Framework\App\DeploymentConfig;
 use Magento\Sales\Model\OrderFactory;
+use Magento\Customer\Setup\CustomerSetupFactory;
+use Magento\Eav\Model\Entity\Attribute\SetFactory as AttributeSetFactory;
+use Magento\Eav\Model\Entity\Attribute\Set as AttributeSet;
+use Magento\Customer\Model\Customer;
 use Ebizmarts\MailChimp\Model\ResourceModel\MailChimpSyncEcommerce\CollectionFactory as SyncCollectionFactory;
 
 class UpgradeData implements UpgradeDataInterface
@@ -51,9 +55,13 @@ class UpgradeData implements UpgradeDataInterface
      */
     private $syncCollectionFactory;
     /**
-     * @var OrderFactory
+     * @var CustomerSetupFactory
      */
-    private $orderFactory;
+    protected $customerSetupFactory;
+    /**
+     * @var AttributeSetFactory
+     */
+    private $attributeSetFactory;
     /**
      * @param ResourceConnection $resource
      * @param DeploymentConfig $deploymentConfig
@@ -71,7 +79,8 @@ class UpgradeData implements UpgradeDataInterface
         \Ebizmarts\MailChimp\Model\ResourceModel\MailChimpWebhookRequest\CollectionFactory $webhookCollectionFactory,
         \Magento\Config\Model\ResourceModel\Config\Data\CollectionFactory $configFactory,
         SyncCollectionFactory $syncCollectionFactory,
-        OrderFactory $orderFactory,
+        CustomerSetupFactory $customerSetupFactory,
+        AttributeSetFactory $attributeSetFactory,
         \Ebizmarts\MailChimp\Helper\Data $helper
     ) {
         $this->_resource            = $resource;
@@ -80,7 +89,8 @@ class UpgradeData implements UpgradeDataInterface
         $this->_webhookCollectionFactory        = $webhookCollectionFactory;
         $this->configFactory                    = $configFactory;
         $this->syncCollectionFactory            = $syncCollectionFactory;
-        $this->orderFactory                     = $orderFactory;
+        $this->customerSetupFactory = $customerSetupFactory;
+        $this->attributeSetFactory = $attributeSetFactory;
         $this->_helper              = $helper;
     }
 
@@ -185,6 +195,31 @@ class UpgradeData implements UpgradeDataInterface
             foreach ($configCollection as $config) {
                 $config->getResource()->delete($config);
             }
+        }
+        if (version_compare($context->getVersion(), '102.3.58')){
+            $customerSetup = $this->customerSetupFactory->create(['setup' => $setup]);
+            $customerEntity = $customerSetup->getEavConfig()->getEntityType('customer');
+            $attributeSetId = $customerEntity->getDefaultAttributeSetId();
+            /** @var $attributeSet AttributeSet */
+            $attributeSet = $this->attributeSetFactory->create();
+            $attributeGroupId = $attributeSet->getDefaultGroupId($attributeSetId);
+            $customerSetup->addAttribute(Customer::ENTITY, 'mobile_phone', [
+                'type' => 'varchar',
+                'label' => 'Mobile Phone',
+                'input' => 'text',
+                'required' => false,
+                'visible' => true,
+                'user_defined' => true,
+                'position' => 999,
+                'system' => 0,
+            ]);
+            $attribute = $customerSetup->getEavConfig()->getAttribute(Customer::ENTITY, 'mobile_phone')
+                ->addData([
+                    'attribute_set_id' => $attributeSetId,
+                    'attribute_group_id' => $attributeGroupId,
+                    'used_in_forms' => ['adminhtml_customer', 'customer_account_edit'],
+                ]);
+            $attribute->save();
         }
     }
 }
