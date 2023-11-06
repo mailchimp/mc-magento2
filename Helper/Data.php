@@ -11,10 +11,33 @@
 
 namespace Ebizmarts\MailChimp\Helper;
 
-use Magento\Framework\App\ResourceConnection;
-use Magento\Framework\Exception\ValidatorException;
-use Magento\Store\Model\Store;
+use Magento\Customer\Api\Data\CustomerInterface;
 use Symfony\Component\Config\Definition\Exception\Exception;
+use Magento\Framework\App\ResourceConnection;
+use Magento\Framework\App\DeploymentConfig;
+use Magento\Framework\App\Cache\TypeListInterface;
+use Magento\Framework\App\Helper\Context;
+use Magento\Framework\Stdlib\DateTime\DateTime;
+use Magento\Framework\Locale\Resolver;
+use Magento\Framework\Serialize\Serializer\Json as JsonSerializer;
+use Magento\Framework\Module\ModuleList\Loader;
+use Magento\Framework\Encryption\Encryptor;
+use Magento\Directory\Api\CountryInformationAcquirerInterface;
+use Magento\Directory\Model\CountryFactory;
+use Magento\Customer\Model\Session;
+use Magento\Customer\Api\CustomerRepositoryInterface;
+use Magento\Customer\Model\CustomerFactory;
+use Magento\Customer\Model\ResourceModel\Attribute\CollectionFactory as AttributeCollectionFactory;
+use Magento\Customer\Model\ResourceModel\Customer\CollectionFactory as CustomerCollectionFactory;
+use Magento\Newsletter\Model\ResourceModel\Subscriber\CollectionFactory as SubscriberCollectionFactory;
+use Magento\Store\Model\StoreManagerInterface;
+use Magento\Config\Model\ResourceModel\Config;
+use Ebizmarts\MailChimp\Model\Logger\Logger;
+use Ebizmarts\MailChimp\Model\MailChimpSyncBatches;
+use Ebizmarts\MailChimp\Model\MailChimpStoresFactory;
+use Ebizmarts\MailChimp\Model\MailChimpStores;
+use Ebizmarts\MailChimp\Model\MailChimpInterestGroupFactory;
+use Magento\Framework\App\Config\ScopeConfigInterface;
 
 class Data extends \Magento\Framework\App\Helper\AbstractHelper
 {
@@ -98,19 +121,15 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
 
     protected $counters = [];
     /**
-     * @var \Magento\Store\Model\StoreManagerInterface
+     * @var StoreManagerInterface
      */
     private $_storeManager;
     /**
-     * @var \Ebizmarts\MailChimp\Model\Logger\Logger
+     * @var Logger
      */
     private $_mlogger;
     /**
-     * @var \Magento\Customer\Model\GroupRegistry
-     */
-    private $_groupRegistry;
-    /**
-     * @var \Magento\Framework\App\Config\ScopeConfigInterface
+     * @var ScopeConfigInterface
      */
     private $_scopeConfig;
     /**
@@ -118,193 +137,177 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
      */
     protected $_request;
     /**
-     * @var \Magento\Framework\App\State
-     */
-    private $_state;
-    /**
-     * @var \Magento\Framework\Module\ModuleList\Loader
+     * @var Loader
      */
     private $_loader;
     /**
-     * @var \Magento\Config\Model\ResourceModel\Config
+     * @var Config
      */
     private $_config;
     /**
      * @var \Mailchimp
      */
     private $_api;
-
     /**
-     * @var \Magento\Customer\Model\ResourceModel\Customer\CustomerRepository
-     */
-    private $_customer;
-    /**
-     * @var \Ebizmarts\MailChimp\Model\MailChimpSyncBatches
+     * @var MailChimpSyncBatches
      */
     private $_syncBatches;
     /**
-     * @var \Ebizmarts\MailChimp\Model\MailChimpStoresFactory
+     * @var MailChimpStoresFactory
      */
     private $_mailChimpStoresFactory;
     /**
-     * @var \Ebizmarts\MailChimp\Model\MailChimpStores
+     * @var MailChimpStores
      */
     private $_mailChimpStores;
     /**
-     * @var \Magento\Framework\Encryption\Encryptor
+     * @var Encryptor
      */
     private $_encryptor;
     /**
-     * @var \Magento\Newsletter\Model\ResourceModel\Subscriber\CollectionFactory
+     * @var SubscriberCollectionFactory
      */
     private $_subscriberCollection;
     /**
-     * @var \Magento\Customer\Model\ResourceModel\Customer\CollectionFactory
+     * @var CustomerCollectionFactory
      */
     private $_customerCollection;
-    private $_addressRepositoryInterface;
     /**
-     * @var \Magento\Framework\DB\Adapter\AdapterInterface
-     */
-    private $connection;
-    /**
-     * @var \Magento\Framework\App\ResourceConnection
+     * @var ResourceConnection
      */
     private $_resource;
     /**
-     * @var \Magento\Framework\App\Cache\TypeListInterface
+     * @var TypeListInterface
      */
     private $_cacheTypeList;
     /**
-     * @var \Magento\Customer\Model\ResourceModel\Attribute\CollectionFactory
+     * @var AttributeCollectionFactory
      */
     private $_attCollection;
     /**
-     * @var \Magento\Customer\Model\CustomerFactory
+     * @var CustomerFactory
      */
     protected $_customerFactory;
     /**
-     * @var \Magento\Directory\Api\CountryInformationAcquirerInterface
+     * @var CountryInformationAcquirerInterface
      */
     protected $_countryInformation;
     /**
-     * @var \Ebizmarts\MailChimp\Model\MailChimpInterestGroupFactory
+     * @var MailChimpInterestGroupFactory
      */
     protected $_interestGroupFactory;
     /**
-     * @var \Magento\Framework\Stdlib\DateTime\DateTime
+     * @var DateTime
      */
     protected $_date;
     /**
-     * @var \Magento\Framework\Serialize\Serializer\Json
+     * @var JsonSerializer
      */
     protected $_serializer;
     /**
-     * @var \Magento\Framework\App\DeploymentConfig
+     * @var DeploymentConfig
      */
     protected $_deploymentConfig;
     /**
-     * @var \Magento\Directory\Model\CountryFactory
+     * @var CountryFactory
      */
     protected $countryFactory;
     /**
-     * @var \Magento\Framework\Locale\Resolver
+     * @var CustomerRepositoryInterface
      */
-    protected $resolver;
+    protected $_customerRepo;
+    /**
+     * @var Session
+     */
+    protected $customerSession;
+    /**
+     * @var CustomerFactory
+     */
+    protected $customerFactory;
 
     private $customerAtt    = null;
     private $addressAtt     = null;
     private $_mapFields     = null;
 
     /**
-     * @param \Magento\Framework\App\Helper\Context $context
-     * @param \Magento\Store\Model\StoreManagerInterface $storeManager
-     * @param \Ebizmarts\MailChimp\Model\Logger\Logger $logger
-     * @param \Magento\Customer\Model\GroupRegistry $groupRegistry
-     * @param \Magento\Framework\App\State $state
-     * @param \Magento\Framework\Module\ModuleList\Loader $loader
-     * @param \Magento\Config\Model\ResourceModel\Config $config
+     * @param Context $context
+     * @param StoreManagerInterface $storeManager
+     * @param Logger $logger
+     * @param Loader $loader
+     * @param Config $config
      * @param \Mailchimp $api
-     * @param \Magento\Framework\App\Cache\TypeListInterface $cacheTypeList
-     * @param \Magento\Customer\Model\ResourceModel\CustomerRepository $customer
-     * @param \Ebizmarts\MailChimp\Model\MailChimpSyncBatches $syncBatches
-     * @param \Ebizmarts\MailChimp\Model\MailChimpStoresFactory $mailChimpStoresFactory
-     * @param \Ebizmarts\MailChimp\Model\MailChimpStores $mailChimpStores
-     * @param \Magento\Customer\Model\ResourceModel\Attribute\CollectionFactory $attCollection
-     * @param \Magento\Framework\Encryption\Encryptor $encryptor
-     * @param \Magento\Newsletter\Model\ResourceModel\Subscriber\CollectionFactory $subscriberCollection
-     * @param \Magento\Customer\Model\ResourceModel\Customer\CollectionFactory $customerCollection
-     * @param \Magento\Customer\Api\AddressRepositoryInterface $addressRepositoryInterface
-     * @param \Magento\Customer\Model\CustomerFactory $customerFactory
-     * @param \Magento\Directory\Api\CountryInformationAcquirerInterface $countryInformation
+     * @param TypeListInterface $cacheTypeList
+     * @param MailChimpSyncBatches $syncBatches
+     * @param MailChimpStoresFactory $mailChimpStoresFactory
+     * @param MailChimpStores $mailChimpStores
+     * @param AttributeCollectionFactory $attCollection
+     * @param Encryptor $encryptor
+     * @param SubscriberCollectionFactory $subscriberCollection
+     * @param CustomerCollectionFactory $customerCollection
+     * @param CustomerRepositoryInterface $customerRepository
+     * @param CountryInformationAcquirerInterface $countryInformation
      * @param ResourceConnection $resource
-     * @param \Ebizmarts\MailChimp\Model\MailChimpInterestGroupFactory $interestGroupFactory
-     * @param \Magento\Framework\Serialize\Serializer\Json $serializer
-     * @param \Magento\Framework\App\DeploymentConfig $deploymentConfig
-     * @param \Magento\Framework\Stdlib\DateTime\DateTime $date
-     * @param \Magento\Directory\Model\CountryFactory $countryFactory
-     * @param \Magento\Framework\Locale\Resolver $resolver
+     * @param MailChimpInterestGroupFactory $interestGroupFactory
+     * @param JsonSerializer $serializer
+     * @param DeploymentConfig $deploymentConfig
+     * @param DateTime $date
+     * @param CountryFactory $countryFactory
+     * @param Session $customerSession
+     * @param CustomerFactory $customerFactory
      */
     public function __construct(
-        \Magento\Framework\App\Helper\Context $context,
-        \Magento\Store\Model\StoreManagerInterface $storeManager,
-        \Ebizmarts\MailChimp\Model\Logger\Logger $logger,
-        \Magento\Customer\Model\GroupRegistry $groupRegistry,
-        \Magento\Framework\App\State $state,
-        \Magento\Framework\Module\ModuleList\Loader $loader,
-        \Magento\Config\Model\ResourceModel\Config $config,
+        Context $context,
+        StoreManagerInterface $storeManager,
+        Logger $logger,
+        Loader $loader,
+        Config $config,
         \Mailchimp $api,
-        \Magento\Framework\App\Cache\TypeListInterface $cacheTypeList,
-        \Magento\Customer\Model\ResourceModel\CustomerRepository $customer,
-        \Ebizmarts\MailChimp\Model\MailChimpSyncBatches $syncBatches,
-        \Ebizmarts\MailChimp\Model\MailChimpStoresFactory $mailChimpStoresFactory,
-        \Ebizmarts\MailChimp\Model\MailChimpStores $mailChimpStores,
-        \Magento\Customer\Model\ResourceModel\Attribute\CollectionFactory $attCollection,
-        \Magento\Framework\Encryption\Encryptor $encryptor,
-        \Magento\Newsletter\Model\ResourceModel\Subscriber\CollectionFactory $subscriberCollection,
-        \Magento\Customer\Model\ResourceModel\Customer\CollectionFactory $customerCollection,
-        \Magento\Customer\Api\AddressRepositoryInterface $addressRepositoryInterface,
-        \Magento\Customer\Model\CustomerFactory $customerFactory,
-        \Magento\Directory\Api\CountryInformationAcquirerInterface $countryInformation,
-        \Magento\Framework\App\ResourceConnection $resource,
-        \Ebizmarts\MailChimp\Model\MailChimpInterestGroupFactory $interestGroupFactory,
-        \Magento\Framework\Serialize\Serializer\Json $serializer,
-        \Magento\Framework\App\DeploymentConfig $deploymentConfig,
-        \Magento\Framework\Stdlib\DateTime\DateTime $date,
-        \Magento\Directory\Model\CountryFactory $countryFactory,
-        \Magento\Framework\Locale\Resolver $resolver
+        TypeListInterface $cacheTypeList,
+        MailChimpSyncBatches $syncBatches,
+        MailChimpStoresFactory $mailChimpStoresFactory,
+        MailChimpStores $mailChimpStores,
+        AttributeCollectionFactory $attCollection,
+        Encryptor $encryptor,
+        SubscriberCollectionFactory $subscriberCollection,
+        CustomerCollectionFactory $customerCollection,
+        CustomerRepositoryInterface $customerRepository,
+        CountryInformationAcquirerInterface $countryInformation,
+        ResourceConnection $resource,
+        MailChimpInterestGroupFactory $interestGroupFactory,
+        JsonSerializer $serializer,
+        DeploymentConfig $deploymentConfig,
+        DateTime $date,
+        CountryFactory $countryFactory,
+        Session $customerSession,
+        CustomerFactory $customerFactory
     )
     {
-
         $this->_storeManager            = $storeManager;
         $this->_mlogger                 = $logger;
-        $this->_groupRegistry           = $groupRegistry;
         $this->_scopeConfig             = $context->getScopeConfig();
         $this->_request                 = $context->getRequest();
-        $this->_state                   = $state;
         $this->_loader                  = $loader;
         $this->_config                  = $config;
         $this->_api                     = $api;
-        $this->_customer                = $customer;
         $this->_syncBatches             = $syncBatches;
         $this->_mailChimpStores         = $mailChimpStores;
         $this->_mailChimpStoresFactory  = $mailChimpStoresFactory;
         $this->_encryptor               = $encryptor;
         $this->_subscriberCollection    = $subscriberCollection;
         $this->_customerCollection      = $customerCollection;
-        $this->_addressRepositoryInterface = $addressRepositoryInterface;
         $this->_resource                = $resource;
-        $this->connection               = $resource->getConnection();
         $this->_cacheTypeList           = $cacheTypeList;
         $this->_attCollection           = $attCollection;
+        $this->_customerRepo            = $customerRepository;
         $this->_customerFactory         = $customerFactory;
         $this->_countryInformation      = $countryInformation;
         $this->_interestGroupFactory    = $interestGroupFactory;
         $this->_serializer              = $serializer;
         $this->_deploymentConfig        = $deploymentConfig;
-        $this->_date = $date;
+        $this->_date                    = $date;
         $this->countryFactory           = $countryFactory;
-        $this->resolver                 = $resolver;
+        $this->customerSession          = $customerSession;
+        $this->customerFactory          = $customerFactory;
         parent::__construct($context);
     }
 
@@ -775,8 +778,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     public function getMergeVarsBySubscriber(\Magento\Newsletter\Model\Subscriber $subscriber, $email = null)
     {
         $mergeVars = [];
-        $storeId = $subscriber->getStoreId();
-        $webSiteId = $this->getWebsiteId($subscriber->getStoreId());
+        $webSiteId = $subscriber->getStoreId();
         if ($this->getConfigValue(self::XML_FOOTER_PHONE, $webSiteId, "websites")) {
             $phone_field = $this->getConfigValue(self::XML_FOOTER_MAP , $webSiteId, "websites");
             $phone = $subscriber->getPhone();
@@ -787,21 +789,28 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         if (!$email) {
             $email = $subscriber->getEmail();
         }
-        try {
-            /**
-             * @var $customer \Magento\Customer\Model\Customer
-             */
-            $customer = $this->_customerFactory->create();
-            $customer->setWebsiteId($webSiteId);
-            $customer->loadByEmail($email);
-            if ($customer->getData('email') == $email) {
-                $mergeVars = array_merge($mergeVars,$this->getMergeVars($customer, $customer->getStoreId()));
+        if ($this->customerSession->getCustomerId()) {
+            try {
+                /**
+                 * @var $customer CustomerInterface
+                 */
+                $customer = $this->customerFactory->create()->load($this->customerSession->getCustomerId());
+                $this->log("Customer ".$customer->getId());
+                if ($customer->getData('mobile_phone')) {
+                    $this->log($customer->getData('mobile_phone'));
+                } else {
+                    $this->log('no mobile phone');
+                }
+                if ($customer->getData('email') == $email) {
+                    $mergeVars = array_merge($mergeVars, $this->getMergeVars($customer, $customer->getStoreId()));
+                }
+            } catch (\Exception $e) {
+                $this->log($e->getMessage());
             }
-        } catch (\Exception $e) {
-            $this->log($e->getMessage());
+        } else {
+            $this->log("Subscriber is not a customer");
         }
-        return $mergeVars;
-    }
+        return $mergeVars;    }
 
     /**
      * @param \Magento\Customer\Model\Customer $customer
