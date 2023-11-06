@@ -69,7 +69,7 @@
                     </depends>
                 </field>
                 <field id="popup_form" translate="label" type="select" sortOrder="42" showInStore="1" showInWebsite="1" showInDefault="1">
-                    <label>Change the footer link</label>
+                    <label>Popup</label>
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
                     <comment>Enabling this, the "Subscribe" button at the bottom open a popup with the Mailchimp subscription form</comment>
                     <depends>
@@ -82,6 +82,22 @@
                     <depends>
                         <field id="*/*/active">1</field>
                         <field id="*/*/popup_form">1</field>
+                    </depends>
+                </field>
+                <field id="footer_phone" translate="label" type="select" sortOrder="44" showInStore="1" showInWebsite="1" showInDefault="1">
+                    <label>Add the phone in the footer</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <comment></comment>
+                    <depends>
+                        <field id="*/*/active">1</field>
+                    </depends>
+                </field>
+                <field id="footer_phone_map" translate="label" type="select" sortOrder="45" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Mailchimp map for phone</label>
+                    <source_model>Ebizmarts\MailChimp\Model\Config\Source\Maps</source_model>
+                    <depends>
+                        <field id="*/*/active">1</field>
+                        <field id="*/*/footer_phone">1</field>
                     </depends>
                 </field>
                 <field id="magentoemail" translate="label" type="select" sortOrder="45" showInDefault="1" showInWebsite="1" showInStore="1">
