@@ -810,7 +810,8 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         } else {
             $this->log("Subscriber is not a customer");
         }
-        return $mergeVars;    }
+        return $mergeVars;
+    }
 
     /**
      * @param \Magento\Customer\Model\Customer $customer
