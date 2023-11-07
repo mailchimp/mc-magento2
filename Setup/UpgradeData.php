@@ -58,7 +58,6 @@ class UpgradeData implements UpgradeDataInterface
      * @var AttributeSetFactory
      */
     private $attributeSetFactory;
-    private $state;
 
     /**
      * @param ResourceConnection $resource
@@ -76,7 +75,6 @@ class UpgradeData implements UpgradeDataInterface
         \Ebizmarts\MailChimp\Model\ResourceModel\MailChimpInterestGroup\CollectionFactory $interestGroupCollectionFactory,
         \Ebizmarts\MailChimp\Model\ResourceModel\MailChimpWebhookRequest\CollectionFactory $webhookCollectionFactory,
         \Magento\Config\Model\ResourceModel\Config\Data\CollectionFactory $configFactory,
-        \Magento\Framework\App\State $state,
         CustomerSetupFactory $customerSetupFactory,
         AttributeSetFactory $attributeSetFactory,
         \Ebizmarts\MailChimp\Helper\Data $helper
@@ -89,8 +87,6 @@ class UpgradeData implements UpgradeDataInterface
         $this->customerSetupFactory = $customerSetupFactory;
         $this->attributeSetFactory = $attributeSetFactory;
         $this->_helper              = $helper;
-        $this->state                = $state;
-        $this->state->setAreaCode(\Magento\Framework\App\Area::AREA_ADMINHTML);
     }
 
     /**
@@ -99,7 +95,6 @@ class UpgradeData implements UpgradeDataInterface
      */
     public function upgrade(ModuleDataSetupInterface $setup, ModuleContextInterface $context)
     {
-        $this->state->setAreaCode(\Magento\Framework\App\Area::AREA_ADMINHTML);
         if (version_compare($context->getVersion(), '1.0.24') < 0) {
             $setup->startSetup();
             $connection = $this->_resource->getConnectionByName('default');
