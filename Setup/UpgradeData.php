@@ -17,6 +17,12 @@ use Magento\Framework\Setup\ModuleDataSetupInterface;
 use Magento\Framework\Setup\UpgradeDataInterface;
 use Magento\Framework\App\ResourceConnection;
 use Magento\Framework\App\DeploymentConfig;
+use Magento\Sales\Model\OrderFactory;
+use Magento\Customer\Setup\CustomerSetupFactory;
+use Magento\Eav\Model\Entity\Attribute\SetFactory as AttributeSetFactory;
+use Magento\Eav\Model\Entity\Attribute\Set as AttributeSet;
+use Magento\Customer\Model\Customer;
+use Ebizmarts\MailChimp\Model\ResourceModel\MailChimpSyncEcommerce\CollectionFactory as SyncCollectionFactory;
 
 class UpgradeData implements UpgradeDataInterface
 {
@@ -44,14 +50,24 @@ class UpgradeData implements UpgradeDataInterface
      * @var \Magento\Config\Model\ResourceModel\Config\Data\CollectionFactory
      */
     protected $configFactory;
+    /**
+     * @var CustomerSetupFactory
+     */
+    protected $customerSetupFactory;
+    /**
+     * @var AttributeSetFactory
+     */
+    private $attributeSetFactory;
+    private $state;
 
     /**
-     * UpgradeData constructor.
      * @param ResourceConnection $resource
      * @param DeploymentConfig $deploymentConfig
      * @param \Ebizmarts\MailChimp\Model\ResourceModel\MailChimpInterestGroup\CollectionFactory $interestGroupCollectionFactory
      * @param \Ebizmarts\MailChimp\Model\ResourceModel\MailChimpWebhookRequest\CollectionFactory $webhookCollectionFactory
      * @param \Magento\Config\Model\ResourceModel\Config\Data\CollectionFactory $configFactory
+     * @param CustomerSetupFactory $customerSetupFactory
+     * @param AttributeSetFactory $attributeSetFactory
      * @param \Ebizmarts\MailChimp\Helper\Data $helper
      */
     public function __construct(
@@ -60,15 +76,21 @@ class UpgradeData implements UpgradeDataInterface
         \Ebizmarts\MailChimp\Model\ResourceModel\MailChimpInterestGroup\CollectionFactory $interestGroupCollectionFactory,
         \Ebizmarts\MailChimp\Model\ResourceModel\MailChimpWebhookRequest\CollectionFactory $webhookCollectionFactory,
         \Magento\Config\Model\ResourceModel\Config\Data\CollectionFactory $configFactory,
+        \Magento\Framework\App\State $state,
+        CustomerSetupFactory $customerSetupFactory,
+        AttributeSetFactory $attributeSetFactory,
         \Ebizmarts\MailChimp\Helper\Data $helper
     ) {
-    
         $this->_resource            = $resource;
         $this->_deploymentConfig    = $deploymentConfig;
         $this->_insterestGroupCollectionFactory = $interestGroupCollectionFactory;
         $this->_webhookCollectionFactory        = $webhookCollectionFactory;
         $this->configFactory                    = $configFactory;
+        $this->customerSetupFactory = $customerSetupFactory;
+        $this->attributeSetFactory = $attributeSetFactory;
         $this->_helper              = $helper;
+        $this->state                = $state;
+        $this->state->setAreaCode(\Magento\Framework\App\Area::AREA_ADMINHTML);
     }
 
     /**
@@ -77,6 +99,7 @@ class UpgradeData implements UpgradeDataInterface
      */
     public function upgrade(ModuleDataSetupInterface $setup, ModuleContextInterface $context)
     {
+        $this->state->setAreaCode(\Magento\Framework\App\Area::AREA_ADMINHTML);
         if (version_compare($context->getVersion(), '1.0.24') < 0) {
             $setup->startSetup();
             $connection = $this->_resource->getConnectionByName('default');
@@ -196,6 +219,31 @@ class UpgradeData implements UpgradeDataInterface
             foreach($configCollection as $config) {
                 $config->getResource()->delete($config);
             }
+        }
+        if (version_compare($context->getVersion(), '100.1.58')){
+            $customerSetup = $this->customerSetupFactory->create(['setup' => $setup]);
+            $customerEntity = $customerSetup->getEavConfig()->getEntityType('customer');
+            $attributeSetId = $customerEntity->getDefaultAttributeSetId();
+            /** @var $attributeSet AttributeSet */
+            $attributeSet = $this->attributeSetFactory->create();
+            $attributeGroupId = $attributeSet->getDefaultGroupId($attributeSetId);
+            $customerSetup->addAttribute(Customer::ENTITY, 'mobile_phone', [
+                'type' => 'varchar',
+                'label' => 'Mobile Phone',
+                'input' => 'text',
+                'required' => false,
+                'visible' => true,
+                'user_defined' => true,
+                'position' => 999,
+                'system' => 0,
+            ]);
+            $attribute = $customerSetup->getEavConfig()->getAttribute(Customer::ENTITY, 'mobile_phone')
+                ->addData([
+                    'attribute_set_id' => $attributeSetId,
+                    'attribute_group_id' => $attributeGroupId,
+                    'used_in_forms' => ['adminhtml_customer', 'customer_account_edit'],
+                ]);
+            $attribute->save();
         }
     }
 }

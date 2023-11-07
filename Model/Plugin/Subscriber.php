@@ -29,12 +29,6 @@ class Subscriber
      * @var \Magento\Store\Model\StoreManagerInterface
      */
     protected $_storeManager;
-    /**
-     * @param \Ebizmarts\MailChimp\Helper\Data $helper
-     * @param \Magento\Customer\Model\ResourceModel\CustomerRepository $customer
-     * @param \Magento\Customer\Model\Session $customerSession
-     */
-    protected $_api = null;
 
     /**
      * Subscriber constructor.
