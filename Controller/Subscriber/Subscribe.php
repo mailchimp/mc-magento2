@@ -1,0 +1,39 @@
+<?php
+
+namespace Ebizmarts\MailChimp\Controller\Subscriber;
+
+use Magento\Customer\Api\AccountManagementInterface as CustomerAccountManagement;
+use Magento\Customer\Model\Session;
+use Magento\Customer\Model\Url as CustomerUrl;
+use Magento\Framework\App\Action\Context;
+use Magento\Framework\Validator\EmailAddress as EmailValidator;
+use Magento\Newsletter\Controller\Subscriber\NewAction as SubscriberController;
+use Magento\Newsletter\Model\SubscriberFactory;
+use Magento\Store\Model\StoreManagerInterface;
+
+class Subscribe extends SubscriberController
+{
+    private $session;
+    public function __construct(
+        Context $context,
+        SubscriberFactory $subscriberFactory,
+        Session $customerSession,
+        StoreManagerInterface $storeManager,
+        CustomerUrl $customerUrl,
+        CustomerAccountManagement $customerAccountManagement,
+        EmailValidator $emailValidator = null
+    )
+    {
+        $this->session = $customerSession;
+        parent::__construct($context, $subscriberFactory, $customerSession, $storeManager, $customerUrl, $customerAccountManagement,  $emailValidator);
+    }
+
+    public function execute()
+    {
+        if($this->getRequest()->isPost() && $this->getRequest()->getPost('phone')) {
+            $phone = (string)$this->getRequest()->getPost('phone');
+            $this->session->setPhone($phone);
+        }
+        return parent::execute();
+    }
+}

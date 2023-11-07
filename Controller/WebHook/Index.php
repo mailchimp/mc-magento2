@@ -85,6 +85,8 @@ class Index extends Action
                     $this->_helper->log($e->getMessage());
                     $this->_helper->log($request['data']);
                 }
+            } else {
+                $this->_helper->log("The two way is off");
             }
         } else {
             $this->_helper->log('An empty request comes from ip: '.$this->_remoteAddress->getRemoteAddress());
