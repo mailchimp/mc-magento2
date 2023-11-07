@@ -5,6 +5,7 @@
             <settings>
                 <label translate="true">Mailchimp</label>
                 <bodyTmpl>ui/grid/cells/html</bodyTmpl>
+                 <sortable>false</sortable>
             </settings>
         </column>
     </columns>
