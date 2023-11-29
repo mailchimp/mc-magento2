@@ -33,7 +33,7 @@ class SaveAfter implements \Magento\Framework\Event\ObserverInterface
      */
     protected $_subscriberFactory;
     /**
-     * @var \\Magento\Store\Model\StoreManagerInterface
+     * @var \Magento\Store\Model\StoreManagerInterface
      */
     protected $_storeManager;
 
