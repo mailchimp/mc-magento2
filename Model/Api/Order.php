@@ -164,6 +164,7 @@ class Order
             \Ebizmarts\MailChimp\Helper\Data::XML_MAILCHIMP_STORE,
             $magentoStoreId
         );
+        $isSynced = $this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_PATH_IS_SYNC, $magentoStoreId);
         $modifiedOrders = $this->_getCollection();
         // select orders for the current Magento store id
         $modifiedOrders->addFieldToFilter('store_id', ['eq' => $magentoStoreId]);
@@ -205,7 +206,7 @@ class Order
                     }
                 }
 
-                $orderJson = $this->generatePOSTPayload($order, $mailchimpStoreId, $magentoStoreId, true);
+                $orderJson = $this->generatePOSTPayload($order, $mailchimpStoreId, $magentoStoreId, true, $isSynced);
                 if ($this->modifiedOrder) {
                     $order->save();
                     $this->modifiedOrder = false;
@@ -248,6 +249,7 @@ class Order
             \Ebizmarts\MailChimp\Helper\Data::XML_MAILCHIMP_STORE,
             $magentoStoreId
         );
+        $isSynced = $this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_PATH_IS_SYNC, $magentoStoreId);
         $newOrders = $this->_getCollection();
         // select carts for the current Magento store id
         $newOrders->addFieldToFilter('store_id', ['eq' => $magentoStoreId]);
@@ -290,7 +292,7 @@ class Order
                         $this->_counter++;
                     }
                 }
-                $orderJson = $this->generatePOSTPayload($order, $mailchimpStoreId, $magentoStoreId);
+                $orderJson = $this->generatePOSTPayload($order, $mailchimpStoreId, $magentoStoreId, false, $isSynced);
                 if ($this->modifiedOrder) {
                     $order->save();
                     $this->modifiedOrder = false;
@@ -338,13 +340,14 @@ class Order
         \Magento\Sales\Model\Order $order,
         $mailchimpStoreId,
         $magentoStoreId,
-        $isModifiedOrder = false
+        $isModifiedOrder,
+        $isSynced
     ) {
         $data = [];
         $data['id'] = $order->getIncrementId();
         if ($order->getMailchimpCampaignId()) {
             $data['campaign_id'] = $order->getMailchimpCampaignId();
-        } else {
+        } elseif ($isSynced) {
             if ($campaignId = $this->getCampaign($magentoStoreId, $order->getCustomerEmail())) {
                 $data['campaign_id'] = $campaignId;
                 $order->setMailchimpCampaignId($campaignId);
@@ -758,8 +761,9 @@ class Order
     {
         $campaign_id = null;
         $api = $this->_helper->getApi($store);
+        $actions = $this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_CAMPAIGN_ACTION, $store);
         try {
-            $activity = $api->lists->members->memberActivity->get($this->_helper->getDefaultList($store), md5($email), null, null);
+            $activity = $api->lists->members->memberActivity->get($this->_helper->getDefaultList($store), md5($email), null, null, $actions);
             if ($activity) {
                 foreach ($activity['activity'] as $act) {
                     if (key_exists('action', $act) && ($act['action'] == 'click' || $act['action'] == 'open')&& key_exists('campaign_id', $act) && $act['campaign_id']) {
