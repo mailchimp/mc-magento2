@@ -222,6 +222,16 @@
                         <field id="*/*/active">1</field>
                     </depends>
                 </field>
+                <field id="campaign_action" translate="label" type="multiselect" sortOrder="155" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Campaign Attribution Action</label>
+                    <source_model>Ebizmarts\MailChimp\Model\Config\Source\CampaignAction</source_model>
+                    <can_be_empty>1</can_be_empty>
+                    <size>3</size>
+                    <depends>
+                        <field id="*/*/active">1</field>
+                    </depends>
+                    <comment>Order attribution based on customer actions</comment>
+                </field>
                 <field id="reset_errors_retry" translate="button_label" type="button" sortOrder="160" showInDefault="1" showInWebsite="1" showInStore="1">
                     <button_label>Reset Errors and retry</button_label>
                     <frontend_model>Ebizmarts\MailChimp\Block\Adminhtml\System\Config\ResetErrors</frontend_model>
