@@ -354,8 +354,6 @@ class Order
                 $order->setMailchimpFlag(1);
                 $this->modifiedOrder = true;
             }
-        } else {
-            $this->_helper->log();
         }
 
         if ($order->getMailchimpLandingPage()) {
