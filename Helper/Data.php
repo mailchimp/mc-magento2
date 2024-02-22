@@ -50,6 +50,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     const XML_MAGENTO_MAIL           = 'mailchimp/general/magentoemail';
     const XML_SEND_PROMO             = 'mailchimp/ecommerce/send_promo';
     const XML_INCLUDING_TAXES        = 'mailchimp/ecommerce/including_taxes';
+    const XML_CAMPAIGN_ACTION        = 'mailchimp/ecommerce/campaign_action';
     const XML_POPUP_FORM             = 'mailchimp/general/popup_form';
     const XML_POPUP_URL              = 'mailchimp/general/popup_url';
     const XML_CLEAN_ERROR_MONTHS     = 'mailchimp/ecommerce/clean_errors_months';
