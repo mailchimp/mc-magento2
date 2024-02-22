@@ -354,6 +354,8 @@ class Order
                 $order->setMailchimpFlag(1);
                 $this->modifiedOrder = true;
             }
+        } else {
+            $this->_helper->log();
         }
 
         if ($order->getMailchimpLandingPage()) {
@@ -766,7 +768,7 @@ class Order
             $activity = $api->lists->members->memberActivity->get($this->_helper->getDefaultList($store), md5($email), null, null, $actions);
             if ($activity) {
                 foreach ($activity['activity'] as $act) {
-                    if (key_exists('action', $act) && ($act['action'] == 'click' || $act['action'] == 'open')&& key_exists('campaign_id', $act) && $act['campaign_id']) {
+                    if (key_exists('action', $act) && key_exists('campaign_id', $act) && $act['campaign_id']) {
                         $campaign_id = $act['campaign_id'];
                         break;
                     }
