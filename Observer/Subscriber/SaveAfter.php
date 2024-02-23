@@ -13,6 +13,7 @@
 namespace Ebizmarts\MailChimp\Observer\Subscriber;
 
 use Magento\Framework\Event\Observer;
+use Magento\Store\Model\StoreManagerInterface;
 
 class SaveAfter implements \Magento\Framework\Event\ObserverInterface
 {
@@ -32,25 +33,31 @@ class SaveAfter implements \Magento\Framework\Event\ObserverInterface
      * @var \Magento\Newsletter\Model\SubscriberFactory
      */
     protected $_subscriberFactory;
+    /**
+     * @var StoreManagerInterface
+     */
+    protected $_storeManager;
 
     /**
-     * SaveBefore constructor.
      * @param \Ebizmarts\MailChimp\Model\MailChimpSyncEcommerce $ecommerce
      * @param \Ebizmarts\MailChimp\Helper\Data $helper
      * @param \Ebizmarts\MailChimp\Model\Api\Subscriber $subscriberApi
      * @param \Magento\Newsletter\Model\SubscriberFactory $subscriberFactory
+     * @param StoreManagerInterface $storeManager
      */
     public function __construct(
         \Ebizmarts\MailChimp\Model\MailChimpSyncEcommerce $ecommerce,
         \Ebizmarts\MailChimp\Helper\Data $helper,
         \Ebizmarts\MailChimp\Model\Api\Subscriber $subscriberApi,
-        \Magento\Newsletter\Model\SubscriberFactory $subscriberFactory
+        \Magento\Newsletter\Model\SubscriberFactory $subscriberFactory,
+        StoreManagerInterface $storeManager
     ) {
 
         $this->_ecommerce           = $ecommerce;
         $this->_helper              = $helper;
         $this->_subscriberApi       = $subscriberApi;
         $this->_subscriberFactory   = $subscriberFactory;
+        $this->_storeManager         = $storeManager;
     }
 
     public function execute(\Magento\Framework\Event\Observer $observer)
@@ -61,8 +68,9 @@ class SaveAfter implements \Magento\Framework\Event\ObserverInterface
         $factory = $this->_subscriberFactory->create();
         $subscriber = $observer->getSubscriber();
         $isCustomer = $subscriber->getCustomerId();
+        $websiteId = $this->_storeManager->getStore($subscriber->getStoreId())->getWebsiteId();
         if ($isCustomer) {
-            $subscriberOld = $factory->loadBySubscriberEmail($subscriber->getCustomerId(), $subscriber->getStoreId());
+            $subscriberOld = $factory->loadBySubscriberEmail($subscriber->getCustomerId(), $websiteId);
         }
         if ($this->_helper->isMailChimpEnabled($subscriber->getStoreId())&&$isCustomer&&
             $subscriberOld->getEmail()&&$subscriber->getEmail()!=$subscriberOld->getEmail()) {
