@@ -85,6 +85,7 @@ class Order
     protected $_counter;
 
     protected $_batchId;
+    protected $modifiedOrder = false;
 
     /**
      * @param \Ebizmarts\MailChimp\Helper\Data $helper
@@ -159,6 +160,7 @@ class Order
     {
         $batchArray = [];
         $mailchimpStoreId = $this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_MAILCHIMP_STORE, $magentoStoreId);
+        $isSynced = $this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_PATH_IS_SYNC, $magentoStoreId);
         $modifiedOrders = $this->_getCollection();
         // select orders for the current Magento store id
         $modifiedOrders->addFieldToFilter('store_id', ['eq' => $magentoStoreId]);
@@ -198,7 +200,11 @@ class Order
                     }
                 }
 
-                $orderJson = $this->GeneratePOSTPayload($order, $mailchimpStoreId, $magentoStoreId, true);
+                $orderJson = $this->GeneratePOSTPayload($order, $mailchimpStoreId, $magentoStoreId, true, $isSynced);
+                if ($this->modifiedOrder) {
+                    $order->save();
+                    $this->modifiedOrder = false;
+                }
                 if ($orderJson!==false) {
                     if (!empty($orderJson)) {
                         $this->_helper->modifyCounter(\Ebizmarts\MailChimp\Helper\Data::ORD_MOD);
@@ -235,6 +241,7 @@ class Order
     {
         $batchArray = [];
         $mailchimpStoreId = $this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_MAILCHIMP_STORE, $magentoStoreId);
+        $isSynced = $this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_PATH_IS_SYNC, $magentoStoreId);
         $newOrders = $this->_getCollection();
         // select carts for the current Magento store id
         $newOrders->addFieldToFilter('store_id', ['eq' => $magentoStoreId]);
@@ -277,7 +284,11 @@ class Order
                         $this->_counter++;
                     }
                 }
-                $orderJson = $this->GeneratePOSTPayload($order, $mailchimpStoreId, $magentoStoreId);
+                $orderJson = $this->GeneratePOSTPayload($order, $mailchimpStoreId, $magentoStoreId,false, $isSynced);
+                if ($this->modifiedOrder) {
+                    $order->save();
+                    $this->modifiedOrder = false;
+                }
                 if ($orderJson!==false) {
                     if (!empty($orderJson)) {
                         $this->_helper->modifyCounter(\Ebizmarts\MailChimp\Helper\Data::ORD_NEW);
@@ -318,12 +329,19 @@ class Order
      * @return string
      * @throws \Exception
      */
-    protected function GeneratePOSTPayload(\Magento\Sales\Model\Order $order, $mailchimpStoreId, $magentoStoreId, $isModifiedOrder = false)
+    protected function GeneratePOSTPayload(\Magento\Sales\Model\Order $order, $mailchimpStoreId, $magentoStoreId, $isModifiedOrder, $isSynced)
     {
         $data = [];
         $data['id'] = $order->getIncrementId();
         if ($order->getMailchimpCampaignId()) {
             $data['campaign_id'] = $order->getMailchimpCampaignId();
+        } elseif ($isSynced) {
+            if ($campaignId = $this->getCampaign($magentoStoreId, $order->getCustomerEmail())) {
+                $data['campaign_id'] = $campaignId;
+                $order->setMailchimpCampaignId($campaignId);
+                $order->setMailchimpFlag(1);
+                $this->modifiedOrder = true;
+            }
         }
 
         if ($order->getMailchimpLandingPage()) {
@@ -725,6 +743,26 @@ class Order
         return $promo;
     }
 
+    protected function getCampaign($store, $email)
+    {
+        $campaign_id = null;
+        $api = $this->_helper->getApi($store);
+        $actions = $this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_CAMPAIGN_ACTION, $store);
+        try {
+            $activity = $api->lists->members->memberActivity->get($this->_helper->getDefaultList($store), md5($email), null, null, $actions);
+            if ($activity) {
+                foreach ($activity['activity'] as $act) {
+                    if (key_exists('action', $act) && key_exists('campaign_id', $act) && $act['campaign_id']) {
+                        $campaign_id = $act['campaign_id'];
+                        break;
+                    }
+                }
+            }
+        } catch (\Mailchimp_Error $e) {
+            $this->_helper->log("No activity for $email");
+        }
+        return $campaign_id;
+    }
     protected function _updateOrder($storeId, $entityId, $sync_delta = null, $sync_error = null, $sync_modified = null)
     {
         if (!empty($sync_error)) {
