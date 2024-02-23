@@ -33,14 +33,17 @@ class SaveAfter implements \Magento\Framework\Event\ObserverInterface
      * @var \Magento\Newsletter\Model\SubscriberFactory
      */
     protected $_subscriberFactory;
+    /**
+     * @var StoreManagerInterface
+     */
     protected $_storeManager;
 
     /**
-     * SaveBefore constructor.
      * @param \Ebizmarts\MailChimp\Model\MailChimpSyncEcommerce $ecommerce
      * @param \Ebizmarts\MailChimp\Helper\Data $helper
      * @param \Ebizmarts\MailChimp\Model\Api\Subscriber $subscriberApi
      * @param \Magento\Newsletter\Model\SubscriberFactory $subscriberFactory
+     * @param StoreManagerInterface $storeManager
      */
     public function __construct(
         \Ebizmarts\MailChimp\Model\MailChimpSyncEcommerce $ecommerce,
