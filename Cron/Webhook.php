@@ -347,12 +347,17 @@ class Webhook
                 continue;
             }
             $listId =$this->_helper->getDefaultList($storeId);
-            $api = $this->_helper->getApi($storeId);
-            $interestsCat = $api->lists->interestCategory->getAll($listId, null, null, 200);
-            if (isset($interestsCat['categories'])) {
-                foreach ($interestsCat['categories'] as $cat) {
-                    $interests = $api->lists->interestCategory->interests->getAll($listId, $cat['id'], null, null, 200);
-                    $this->groups = array_merge_recursive($this->groups, $interests['interests']);
+            if (!$listId||$listId==-1) {
+                $this->_helper->log("ListId [$listId] is invalid for Store [$storeId]");
+                continue;
+            } else {
+                $api = $this->_helper->getApi($storeId);
+                $interestsCat = $api->lists->interestCategory->getAll($listId, null, null, 200);
+                if (isset($interestsCat['categories'])) {
+                    foreach ($interestsCat['categories'] as $cat) {
+                        $interests = $api->lists->interestCategory->interests->getAll($listId, $cat['id'], null, null, 200);
+                        $this->groups = array_merge_recursive($this->groups, $interests['interests']);
+                    }
                 }
             }
         }
