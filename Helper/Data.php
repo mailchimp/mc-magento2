@@ -1076,8 +1076,8 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
      */
     public function getTableName($tableName, $conn = ResourceConnection::DEFAULT_CONNECTION)
     {
-        $dbName = $this->_deploymentConfig->get("db/connection/$conn/dbname");
-        return $dbName.'.'.$this->_resource->getTableName($tableName, $conn);
+        $connection = $this->_resource->getConnection($conn);
+        return $connection->getTableName($tableName, $conn);
     }
     public function getWebsiteId($storeId)
     {
