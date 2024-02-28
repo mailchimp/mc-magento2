@@ -62,9 +62,6 @@ class Sync extends AbstractHelper
     ) {
         if (!empty($entityId)) {
             $chimpSyncEcommerce = $this->getChimpSyncEcommerce($storeId, $entityId, $type);
-            if ($modified==0) {
-                $sent = \Ebizmarts\MailChimp\Helper\Data::SYNCED;
-            }
             if ($chimpSyncEcommerce->getRelatedId() == $entityId ||
                 !$chimpSyncEcommerce->getRelatedId() && $modified != 1) {
                 $chimpSyncEcommerce->setMailchimpStoreId($storeId);
