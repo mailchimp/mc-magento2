@@ -1,5 +1,24 @@
 # Change Log
 
+## [100.1.58](https://github.com/mailchimp/mc-magento2/tree/100.1.58)
+
+[Full Changelog](https://github.com/mailchimp/mc-magento2/compare/100.1.57...100.1.58)
+
+**Implemented enhancements:**
+
+- Add controls to the webhook cron to exclude stores with no mailchimp store [\#1880](https://github.com/mailchimp/mc-magento2/issues/1880)
+- Use the activity API end point to fill the campaign id [\#1866](https://github.com/mailchimp/mc-magento2/issues/1866)
+
+**Fixed bugs:**
+
+- SQL Error on config page right after installation [\#1865](https://github.com/mailchimp/mc-magento2/issues/1865)
+- Trinidad & Tobago country incorrectly synced [\#1863](https://github.com/mailchimp/mc-magento2/issues/1863)
+- Unescaped output  [\#1841](https://github.com/mailchimp/mc-magento2/issues/1841)
+- Cannot save some customers [\#1840](https://github.com/mailchimp/mc-magento2/issues/1840)
+- Error "Resource Not Found for Api Call:" when try to access batches grid [\#1834](https://github.com/mailchimp/mc-magento2/issues/1834)
+- Magento subscription email sent despite 'Magento always managed emails' set to 'No' [\#1311](https://github.com/mailchimp/mc-magento2/issues/1311)
+
+
 ## [100.1.57](https://github.com/mailchimp/mc-magento2/tree/100.1.57)
 
 [Full Changelog](https://github.com/mailchimp/mc-magento2/compare/100.1.56...100.1.57)
