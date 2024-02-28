@@ -763,7 +763,7 @@ class Order
         $api = $this->_helper->getApi($store);
         $actions = $this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_CAMPAIGN_ACTION, $store);
         try {
-            $activity = $api->lists->members->memberActivity->get($this->_helper->getDefaultList($store), md5($email), null, null, $actions);
+            $activity = $api->lists->members->memberActivity->get($this->_helper->getDefaultList($store), hash('md5',$email), null, null, $actions);
             if ($activity) {
                 foreach ($activity['activity'] as $act) {
                     if (key_exists('action', $act) && key_exists('campaign_id', $act) && $act['campaign_id']) {
