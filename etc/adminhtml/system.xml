@@ -233,7 +233,6 @@
                     <label>Campaign Attribution Action</label>
                     <source_model>Ebizmarts\MailChimp\Model\Config\Source\CampaignAction</source_model>
                     <can_be_empty>1</can_be_empty>
-                    <size>3</size>
                     <depends>
                         <field id="*/*/active">1</field>
                     </depends>
