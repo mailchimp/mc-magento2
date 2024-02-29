@@ -1,5 +1,13 @@
 # Changelog
 
+## [103.4.59](https://github.com/mailchimp/mc-magento2/tree/103.4.59)
+
+[Full Changelog](https://github.com/mailchimp/mc-magento2/compare/103.4.58...103.4.59)
+
+**Fixed bugs:**
+
+- "The website with id X that was requested wasn't found. Verify the website and try again" [\#1890](https://github.com/mailchimp/mc-magento2/issues/1890)
+
 ## [103.4.58](https://github.com/mailchimp/mc-magento2/tree/103.4.58)
 
 [Full Changelog](https://github.com/mailchimp/mc-magento2/compare/103.4.57...103.4.58)
