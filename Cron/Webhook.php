@@ -353,12 +353,17 @@ class Webhook
                 continue;
             } else {
                 $api = $this->_helper->getApi($storeId);
-                $interestsCat = $api->lists->interestCategory->getAll($listId, null, null, 200);
-                if (isset($interestsCat['categories'])) {
-                    foreach ($interestsCat['categories'] as $cat) {
-                        $interests = $api->lists->interestCategory->interests->getAll($listId, $cat['id'], null, null, 200);
-                        $this->groups = array_merge_recursive($this->groups, $interests['interests']);
+                try {
+                    $interestsCat = $api->lists->interestCategory->getAll($listId, null, null, 200);
+                    if (isset($interestsCat['categories'])) {
+                        foreach ($interestsCat['categories'] as $cat) {
+                            $interests = $api->lists->interestCategory->interests->getAll($listId, $cat['id'], null, null, 200);
+                            $this->groups = array_merge_recursive($this->groups, $interests['interests']);
+                        }
                     }
+                } catch (\Mailchimp_Error $e) {
+                    $error = $e->getMessage();
+                    $this->_helper->log("Error: [$error] for store [$storeId]");
                 }
             }
         }
