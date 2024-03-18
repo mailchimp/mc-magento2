@@ -410,7 +410,7 @@ class Order
         } else {
             $data['order_total'] = $order->getGrandTotal();
             $data['tax_total'] = $order->getTaxAmount();
-            $data['discount_total'] = abs($order->getDiscountAmount());
+            $data['discount_total'] = $order->getDiscountAmount() ? abs($order->getDiscountAmount()) : 0;
             $data['shipping_total'] = $order->getShippingAmount();
         }
 
@@ -466,7 +466,7 @@ class Order
                     "product_variant_id" => $variant,
                     "quantity" => (int)$item->getQtyOrdered(),
                     "price" => $item->getPrice(),
-                    "discount" => abs($item->getDiscountAmount())
+                    "discount" => $item->getDiscountAmount() ? abs($item->getDiscountAmount()) : 0
                 ];
             }
         }
@@ -735,7 +735,7 @@ class Order
                 if ($code->getCouponId() !== null) {
                     $rule = $this->ruleRepository->getById($code->getRuleId());
                     if ($rule->getRuleId() !== null) {
-                        $amountDiscounted = $order->getBaseDiscountAmount();
+                        $amountDiscounted = $order->getBaseDiscountAmount() ? $order->getBaseDiscountAmount() : 0;
                         $type = $rule->getSimpleAction();
                         if ($type == 'by_percent') {
                             $type = 'percentage';
