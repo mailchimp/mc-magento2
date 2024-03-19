@@ -1027,7 +1027,8 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         if ($tablePrefix && strpos($tableName, $tablePrefix) !== 0) {
             $tableName = $tablePrefix . $tableName;
         }
-         return $connection->getTableName($tableName, $conn);    }
+         return $connection->getTableName($tableName, $conn);
+    }
     public function getWebsiteId($storeId)
     {
         return $this->_storeManager->getStore($storeId)->getWebsiteId();
