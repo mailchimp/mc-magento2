@@ -1,5 +1,15 @@
 # Change Log
 
+## [101.2.60](https://github.com/mailchimp/mc-magento2/tree/101.2.60)
+
+[Full Changelog](https://github.com/mailchimp/mc-magento2/compare/101.2.59...101.2.60)
+
+**Fixed bugs:**
+
+- Abs fail when discount amount is null [\#1921](https://github.com/mailchimp/mc-magento2/issues/1921)
+- Check in webhook cron if the listid is OK when get the groups [\#1914](https://github.com/mailchimp/mc-magento2/issues/1914)
+
+
 ## [101.2.58](https://github.com/mailchimp/mc-magento2/tree/101.2.58)
 
 [Full Changelog](https://github.com/mailchimp/mc-magento2/compare/101.2.57...101.2.58)
