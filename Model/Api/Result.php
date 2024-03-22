@@ -308,7 +308,7 @@ class Result
             $type,
             null,
             $error,
-            0,
+            null,
             null,
             null,
             $status
