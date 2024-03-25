@@ -1,5 +1,16 @@
 # Change Log
 
+## [102.3.60](https://github.com/mailchimp/mc-magento2/tree/102.3.60)
+
+[Full Changelog](https://github.com/mailchimp/mc-magento2/compare/102.3.59...102.3.60)
+
+**Fixed bugs:**
+
+- The token change and can't retrieve the cart from the abandoned cart email [\#1930](https://github.com/mailchimp/mc-magento2/issues/1930)
+- Abs fail when discount amount is null [\#1921](https://github.com/mailchimp/mc-magento2/issues/1921)
+- Error table prefix [\#1920](https://github.com/mailchimp/mc-magento2/issues/1920)
+- Check in webhook cron if the listid is OK when get the groups [\#1914](https://github.com/mailchimp/mc-magento2/issues/1914)
+
 ## [102.3.58](https://github.com/mailchimp/mc-magento2/tree/102.3.58)
 
 [Full Changelog](https://github.com/mailchimp/mc-magento2/compare/102.3.57...102.3.58)
