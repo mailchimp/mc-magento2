@@ -36,16 +36,6 @@ class DeleteAfter implements ObserverInterface
             \Ebizmarts\MailChimp\Helper\Data::XML_MAILCHIMP_STORE,
             $product->getStoreId()
         );
-        if ($product->getTypeId() == \Magento\Catalog\Model\Product\Type::TYPE_SIMPLE) {
-            $parents = $this->configurable->getParentIdsByChild($product->getId());
-            if (is_array($parents)) {
-                foreach ($parents as $parentid) {
-                    $this->_updateProduct($parentid);
-                }
-            } elseif ($parents) {
-                $this->_updateProduct($parents);
-            }
-        }
         $this->_updateProduct($product->getId());
     }
     protected function _updateProduct($entityId)

@@ -74,7 +74,7 @@ class Product
      */
     protected $_categoryCollection;
     protected $includingTaxes;
-
+    private $_chimpSyncEcommerceCollection;
     /**
      * @param \Magento\Catalog\Model\ResourceModel\Product\CollectionFactory $productCollection
      * @param \Magento\Catalog\Model\ProductRepository $productRepository
@@ -83,6 +83,7 @@ class Product
      * @param \Magento\CatalogInventory\Api\StockRegistryInterface $stockRegistry
      * @param \Magento\Catalog\Model\CategoryRepository $categoryRepository
      * @param \Ebizmarts\MailChimp\Model\MailChimpSyncEcommerceFactory $chimpSyncEcommerce
+     * @param \Ebizmarts\MailChimp\Model\ResourceModel\MailChimpSyncEcommerce\CollectionFactory $chimpSyncEcommerceCollection
      * @param \Magento\ConfigurableProduct\Model\Product\Type\Configurable $configurable
      * @param \Magento\Catalog\Model\ResourceModel\Category\CollectionFactory $categoryCollection
      * @param \Magento\Catalog\Helper\Data $taxHelper
@@ -97,6 +98,7 @@ class Product
         \Magento\CatalogInventory\Api\StockRegistryInterface $stockRegistry,
         \Magento\Catalog\Model\CategoryRepository $categoryRepository,
         \Ebizmarts\MailChimp\Model\MailChimpSyncEcommerceFactory $chimpSyncEcommerce,
+        \Ebizmarts\MailChimp\Model\ResourceModel\MailChimpSyncEcommerce\CollectionFactory $chimpSyncEcommerceCollection,
         \Magento\ConfigurableProduct\Model\Product\Type\Configurable $configurable,
         \Magento\Catalog\Model\ResourceModel\Category\CollectionFactory $categoryCollection,
         \Magento\Catalog\Helper\Data $taxHelper,
@@ -110,6 +112,7 @@ class Product
         $this->_stockRegistry       = $stockRegistry;
         $this->_categoryRepository  = $categoryRepository;
         $this->_chimpSyncEcommerce  = $chimpSyncEcommerce;
+        $this->_chimpSyncEcommerceCollection = $chimpSyncEcommerceCollection;
         $this->_configurable        = $configurable;
         $this->_option              = $option;
         $this->_categoryCollection  = $categoryCollection;
@@ -130,6 +133,7 @@ class Product
             $magentoStoreId
         );
         $this->_markSpecialPrices($magentoStoreId, $mailchimpStoreId);
+        $batchArray = array_merge($batchArray,$this->processDeletedProducts($magentoStoreId, $mailchimpStoreId));
         $collection = $this->_getCollection();
         $collection->addFieldToFilter("type_id", ["nin"=>[\Magento\Catalog\Model\Product\Type::TYPE_BUNDLE, "grouped"]]);
         $collection->addStoreFilter($magentoStoreId);
@@ -238,12 +242,50 @@ class Product
             }
         }
     }
+    protected function processDeletedProducts($magentoStoreId, $mailchimpStoreId)
+    {
+        $deletedData = [];
+        $collection = $this->_getMailchimpCollection();
+        $collection->getSelect()->where(
+            "main_table.mailchimp_sync_deleted = 1 ".
+            " and main_table.type = '".\Ebizmarts\MailChimp\Helper\Data::IS_PRODUCT."'".
+            " and main_table.mailchimp_store_id = '".$mailchimpStoreId."'".
+            " and main_table.mailchimp_sent = ".\Ebizmarts\Mailchimp\Helper\Data::NEEDTORESYNC
+        );
+        $collection->getSelect()->limit(self::MAX);
+        foreach ($collection as $item) {
+            $data = [];
+            $productId = $item->getRelatedId();
+            $data ['inventory_quantity'] = 0;
+            $body = json_encode($data, JSON_HEX_APOS|JSON_HEX_QUOT);
+            if ($body === false) {
+                $jsonError = json_last_error();
+                $jsonErrorMsg = json_last_error_msg();
+                $this->_helper->log("");
+                $this->_helper->log("$jsonErrorMsg for product [$productId]");
+            } else {
+                $this->_helper->modifyCounter(\Ebizmarts\MailChimp\Helper\Data::PRO_DELETED);
+                $data = [];
+                $data['method'] = "PATCH";
+                $data['path'] = "/ecommerce/stores/$mailchimpStoreId/products/$productId/variants/$productId";
+                $data['operation_id'] = $this->_batchId . '_' . $productId;
+                $data['body'] = $body;
+                $deletedData [] = $data;
+                $this->_updateProduct($mailchimpStoreId, $productId);
+            }
+        }
+        return $deletedData;
+    }
     /**
      * @return \Magento\Catalog\Model\ResourceModel\Product\Collection
      */
     protected function _getCollection()
     {
         return $this->_productCollection->create();
+    }
+    protected function _getMailchimpCollection()
+    {
+        return $this->_chimpSyncEcommerceCollection->create();
     }
     protected function _buildNewProductRequest(
         \Magento\Catalog\Model\Product $product,
