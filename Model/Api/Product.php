@@ -277,7 +277,7 @@ class Product
                 $data['operation_id'] = $this->_batchId . '_' . $productId;
                 $data['body'] = $body;
                 $deletedData [] = $data;
-                $this->_updateProduct($mailchimpStoreId, $productId);
+                $this->_updateProduct($mailchimpStoreId, $productId,null, null, null, true);
             }
         }
         return $deletedData;
@@ -703,7 +703,8 @@ class Product
         $entityId,
         $sync_delta = null,
         $sync_error = null,
-        $sync_modified = null
+        $sync_modified = null,
+        $nullifyBatchId = false
     ) {
         $this->syncHelper->saveEcommerceData(
             $storeId,
@@ -714,7 +715,8 @@ class Product
             $sync_modified,
             null,
             null,
-            \Ebizmarts\MailChimp\Helper\Data::WAITINGSYNC
+            \Ebizmarts\MailChimp\Helper\Data::WAITINGSYNC,
+            $nullifyBatchId
         );
     }
 }

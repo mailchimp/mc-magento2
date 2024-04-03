@@ -58,7 +58,8 @@ class Sync extends AbstractHelper
         $modified = null,
         $deleted = null,
         $token = null,
-        $sent = null
+        $sent = null,
+        $nullifyBatchId = false
     ) {
         if (!empty($entityId)) {
             $chimpSyncEcommerce = $this->getChimpSyncEcommerce($storeId, $entityId, $type);
@@ -88,6 +89,9 @@ class Sync extends AbstractHelper
                 }
                 if ($sent) {
                     $chimpSyncEcommerce->setMailchimpSent($sent);
+                }
+                if ($nullifyBatchId) {
+                    $chimpSyncEcommerce->setBatchId(null);
                 }
                 $chimpSyncEcommerce->getResource()->save($chimpSyncEcommerce);
             }
