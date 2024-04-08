@@ -266,7 +266,7 @@ class Product
             } else {
                 $this->_helper->modifyCounter(\Ebizmarts\MailChimp\Helper\Data::PRO_DELETED);
                 $data = [];
-                $data['method'] = "PATCH";
+                $data['method'] = "DELETE";
                 $data['path'] = "/ecommerce/stores/$mailchimpStoreId/products/$productId/variants/$productId";
                 $data['operation_id'] = $this->_batchId . '_' . $productId;
                 $data['body'] = $body;
