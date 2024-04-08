@@ -86,7 +86,6 @@ class Order
     protected $_counter;
 
     protected $_batchId;
-    protected $modifiedOrder = false;
 
     /**
      * @param \Ebizmarts\MailChimp\Helper\Data $helper
@@ -202,10 +201,6 @@ class Order
                 }
 
                 $orderJson = $this->GeneratePOSTPayload($order, $mailchimpStoreId, $magentoStoreId, true, $isSynced);
-                if ($this->modifiedOrder) {
-                    $order->save();
-                    $this->modifiedOrder = false;
-                }
                 if ($orderJson!==false) {
                     if (!empty($orderJson)) {
                         $this->_helper->modifyCounter(\Ebizmarts\MailChimp\Helper\Data::ORD_MOD);
@@ -284,10 +279,6 @@ class Order
                     }
                 }
                 $orderJson = $this->GeneratePOSTPayload($order, $mailchimpStoreId, $magentoStoreId, false, $isSynced);
-                if ($this->modifiedOrder) {
-                    $order->save();
-                    $this->modifiedOrder = false;
-                }
                 if ($orderJson!==false) {
                     if (!empty($orderJson)) {
                         $this->_helper->modifyCounter(\Ebizmarts\MailChimp\Helper\Data::ORD_NEW);
@@ -334,11 +325,10 @@ class Order
         if ($order->getMailchimpCampaignId()) {
             $data['campaign_id'] = $order->getMailchimpCampaignId();
         } elseif ($isSynced) {
-            if ($campaignId = $this->getCampaign($magentoStoreId, $order->getCustomerEmail())) {
+            if (!$isModifiedOrder && $campaignId = $this->getCampaign($magentoStoreId, $order->getCustomerEmail())) {
                 $data['campaign_id'] = $campaignId;
                 $order->setMailchimpCampaignId($campaignId);
                 $order->setMailchimpFlag(1);
-                $this->modifiedOrder = true;
             }
         }
 
