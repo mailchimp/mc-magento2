@@ -84,7 +84,6 @@ class Order
     protected $_counter;
 
     protected $_batchId;
-    protected $modifiedOrder = false;
 
     /**
      * @param \Ebizmarts\MailChimp\Helper\Data $helper
