@@ -1,5 +1,18 @@
 # Changelog
 
+## [103.4.61](https://github.com/mailchimp/mc-magento2/tree/103.4.61)
+
+[Full Changelog](https://github.com/mailchimp/mc-magento2/compare/103.4.60...103.4.61)
+
+**Implemented enhancements:**
+
+- Put the inventory\_quantity = 0 when delete a product in magento [\#1945](https://github.com/mailchimp/mc-magento2/issues/1945)
+
+**Fixed bugs:**
+
+- Doesn't search for customer activity for modified orders [\#1951](https://github.com/mailchimp/mc-magento2/issues/1951)
+- Abandoned cart button doesn't load the cart when click on it [\#1939](https://github.com/mailchimp/mc-magento2/issues/1939)
+
 ## [103.4.60](https://github.com/mailchimp/mc-magento2/tree/103.4.60)
 
 [Full Changelog](https://github.com/mailchimp/mc-magento2/compare/103.4.59...103.4.60)
