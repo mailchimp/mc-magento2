@@ -271,6 +271,11 @@ class Product
                 $data['operation_id'] = $this->_batchId . '_' . $productId;
                 $data['body'] = $body;
                 $deletedData [] = $data;
+                $data['method'] = "DELETE";
+                $data['path'] = "/ecommerce/stores/$mailchimpStoreId/products/$productId";
+                $data['operation_id'] = $this->_batchId . '_' . $productId;
+                $data['body'] = $body;
+                $deletedData [] = $data;
                 $this->_updateProduct($mailchimpStoreId, $productId);
             }
         }
