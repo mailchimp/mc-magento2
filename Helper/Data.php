@@ -73,6 +73,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     const SUB_NEW = "SubscriberNew";
     const PRO_MOD = "ProductModified";
     const PRO_NEW = "ProductNew";
+    const PRO_DELETED = "ProductDeleted";
     const CUS_MOD = "CustomerModified";
     const CUS_NEW = "CustomerNew";
     const ORD_MOD = "OrderModified";
@@ -1202,6 +1203,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
             self::ORD_NEW => 0,
             self::ORD_MOD => 0,
             self::PRO_NEW => 0,
+            self::PRO_DELETED => 0,
             self::PRO_MOD => 0,
             self::CUS_NEW => 0,
             self::CUS_MOD => 0,
