@@ -5,7 +5,6 @@ namespace Ebizmarts\MailChimp\Helper;
 use Magento\Framework\App\Helper\AbstractHelper;
 use Magento\Framework\App\Helper\Context;
 use Magento\Framework\Exception\ValidatorException;
-use Magento\Sales\Model\ResourceModel\Order\CollectionFactory as OrderCollectionFactory;
 use Ebizmarts\MailChimp\Model\MailChimpSyncEcommerceFactory;
 use Ebizmarts\MailChimp\Model\MailChimpSyncEcommerce;
 use Ebizmarts\MailChimp\Model\MailChimpErrors;
@@ -30,7 +29,6 @@ class Sync extends AbstractHelper
      * @param MailChimpSyncEcommerceFactory $chimpSyncEcommerceFactory
      * @param MailChimpErrors $mailChimpErrors
      * @param MailChimpSyncEcommerce $chimpSyncEcommerce
-     * @param OrderCollectionFactory $orderCollectionFactory
      */
     public function __construct(
         Context $context,
