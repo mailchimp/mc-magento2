@@ -24,10 +24,6 @@ class Sync extends AbstractHelper
      * @var MailChimpSyncEcommerce
      */
     private $chimpSyncEcommerce;
-    /**
-     * @var OrderCollectionFactory
-     */
-    private $orderCollectionFactory;
 
     /**
      * @param Context $context
@@ -40,13 +36,11 @@ class Sync extends AbstractHelper
         Context $context,
         MailChimpSyncEcommerceFactory $chimpSyncEcommerceFactory,
         MailChimpErrors $mailChimpErrors,
-        MailChimpSyncEcommerce $chimpSyncEcommerce,
-        OrderCollectionFactory $orderCollectionFactory
+        MailChimpSyncEcommerce $chimpSyncEcommerce
     ) {
         $this->chimpSyncEcommerceFactory = $chimpSyncEcommerceFactory;
         $this->mailChimpErrors = $mailChimpErrors;
         $this->chimpSyncEcommerce = $chimpSyncEcommerce;
-        $this->orderCollectionFactory = $orderCollectionFactory;
         parent::__construct($context);
     }
     public function saveEcommerceData(
@@ -59,12 +53,16 @@ class Sync extends AbstractHelper
         $deleted = null,
         $token = null,
         $sent = null,
-        $nullifyBatchId = false
+        $nullifyBatchId = false,
+        $isResult = false
     ) {
         if (!empty($entityId)) {
             $chimpSyncEcommerce = $this->getChimpSyncEcommerce($storeId, $entityId, $type);
-            if ($chimpSyncEcommerce->getRelatedId() == $entityId ||
-                !$chimpSyncEcommerce->getRelatedId() && $modified != 1) {
+            if (($chimpSyncEcommerce->getRelatedId() == $entityId)||
+                (!$chimpSyncEcommerce->getRelatedId() && $modified != 1)) {
+                if ($isResult && $chimpSyncEcommerce->getMailchimpSyncModified()) {
+                    return;
+                }
                 $chimpSyncEcommerce->setMailchimpStoreId($storeId);
                 $chimpSyncEcommerce->setType($type);
                 $chimpSyncEcommerce->setRelatedId($entityId);
