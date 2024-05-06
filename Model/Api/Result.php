@@ -298,7 +298,8 @@ class Result
             null,
             null,
             null,
-            $status
+            $status,
+            true
         );
     }
 }
