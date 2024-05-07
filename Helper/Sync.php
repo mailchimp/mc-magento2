@@ -5,9 +5,6 @@ namespace Ebizmarts\MailChimp\Helper;
 use Magento\Framework\App\Helper\AbstractHelper;
 use Magento\Framework\App\Helper\Context;
 use Magento\Framework\Exception\ValidatorException;
-use Magento\Sales\Model\OrderFactory;
-use Magento\Catalog\Model\ProductFactory;
-use Magento\Sales\Model\ResourceModel\Order\CollectionFactory as OrderCollectionFactory;
 use Ebizmarts\MailChimp\Model\MailChimpSyncEcommerceFactory;
 use Ebizmarts\MailChimp\Model\MailChimpSyncEcommerce;
 use Ebizmarts\MailChimp\Model\MailChimpErrors;
@@ -26,31 +23,22 @@ class Sync extends AbstractHelper
      * @var MailChimpSyncEcommerce
      */
     private $chimpSyncEcommerce;
-    /**
-     * @var OrderCollectionFactory
-     */
-    private $orderCollectionFactory;
 
     /**
      * @param Context $context
      * @param MailChimpSyncEcommerceFactory $chimpSyncEcommerceFactory
      * @param MailChimpErrors $mailChimpErrors
      * @param MailChimpSyncEcommerce $chimpSyncEcommerce
-     * @param OrderFactory $orderFactory
-     * @param OrderCollectionFactory $orderCollectionFactory
-     * @param ProductFactory $productFactory
      */
     public function __construct(
         Context $context,
         MailChimpSyncEcommerceFactory $chimpSyncEcommerceFactory,
         MailChimpErrors $mailChimpErrors,
-        MailChimpSyncEcommerce $chimpSyncEcommerce,
-        OrderCollectionFactory $orderCollectionFactory
+        MailChimpSyncEcommerce $chimpSyncEcommerce
     ) {
         $this->chimpSyncEcommerceFactory = $chimpSyncEcommerceFactory;
         $this->mailChimpErrors = $mailChimpErrors;
         $this->chimpSyncEcommerce = $chimpSyncEcommerce;
-        $this->orderCollectionFactory = $orderCollectionFactory;
         parent::__construct($context);
     }
     public function saveEcommerceData(
@@ -62,12 +50,16 @@ class Sync extends AbstractHelper
         $modified = null,
         $deleted = null,
         $token = null,
-        $sent = null
+        $sent = null,
+        $isResult = false
     ) {
         if (!empty($entityId)) {
             $chimpSyncEcommerce = $this->getChimpSyncEcommerce($storeId, $entityId, $type);
             if ($chimpSyncEcommerce->getRelatedId() == $entityId ||
                 !$chimpSyncEcommerce->getRelatedId() && $modified != 1) {
+                if ($isResult && $chimpSyncEcommerce->getMailchimpSyncModified()) {
+                    return;
+                }
                 $chimpSyncEcommerce->setMailchimpStoreId($storeId);
                 $chimpSyncEcommerce->setType($type);
                 $chimpSyncEcommerce->setRelatedId($entityId);
