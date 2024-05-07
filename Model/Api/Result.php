@@ -311,7 +311,9 @@ class Result
             null,
             null,
             null,
-            $status
+            $status,
+            false,
+            true
         );
     }
 }
