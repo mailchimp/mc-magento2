@@ -1,5 +1,14 @@
 # Change Log
 
+## [102.3.62](https://github.com/mailchimp/mc-magento2/tree/102.3.62)
+
+[Full Changelog](https://github.com/mailchimp/mc-magento2/compare/102.3.61...102.3.62)
+
+**Fixed bugs:**
+
+- Bad financial status in mailchimp [\#1962](https://github.com/mailchimp/mc-magento2/issues/1962)
+
+
 ## [101.2.61](https://github.com/mailchimp/mc-magento2/tree/102.3.61)
 
 [Full Changelog](https://github.com/mailchimp/mc-magento2/compare/102.3.60...102.3.61)
