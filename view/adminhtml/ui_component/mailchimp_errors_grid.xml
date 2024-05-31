@@ -113,6 +113,15 @@
                 </item>
             </argument>
         </column>
+        <column name="added_at">
+            <argument name="data" xsi:type="array">
+                <item name="config" xsi:type="array">
+                    <item name="filter" xsi:type="string">text</item>
+                    <item name="sorting" xsi:type="string">asc</item>
+                    <item name="label" xsi:type="string" translate="true">Date</item>
+                </item>
+            </argument>
+        </column>
         <actionsColumn name="actions" class="\Ebizmarts\MailChimp\Ui\Component\Errors\Grid\Column\Batch">
             <argument name="data" xsi:type="array">
                 <item name="config" xsi:type="array">
