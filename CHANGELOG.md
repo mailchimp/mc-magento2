@@ -1,5 +1,18 @@
 # Change Log
 
+## [101.2.63](https://github.com/mailchimp/mc-magento2/tree/101.2.63)
+
+[Full Changelog](https://github.com/mailchimp/mc-magento2/compare/101.2.61...101.2.63)
+
+**Implemented enhancements:**
+
+- Add the date to the error grid [\#1972](https://github.com/mailchimp/mc-magento2/issues/1972)
+
+**Fixed bugs:**
+
+- Order status change is not synced when done through webapi [\#1985](https://github.com/mailchimp/mc-magento2/issues/1985)
+- Column not found: 1054 Unknown column 'mailchimp\_sync' in 'order clause' [\#1981](https://github.com/mailchimp/mc-magento2/issues/1981)
+
 ## [101.2.61](https://github.com/mailchimp/mc-magento2/tree/101.2.61)
 
 [Full Changelog](https://github.com/mailchimp/mc-magento2/compare/101.2.60...101.2.61)
