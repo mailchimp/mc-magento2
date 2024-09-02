@@ -1,5 +1,17 @@
 # Change Log
 
+## [100.1.63](https://github.com/mailchimp/mc-magento2/tree/100.1.63)
+
+[Full Changelog](https://github.com/mailchimp/mc-magento2/compare/100.1.61...100.1.63)
+
+**Implemented enhancements:**
+
+- Add the date to the error grid [\#1972](https://github.com/mailchimp/mc-magento2/issues/1972)
+
+**Fixed bugs:**
+
+- Order status change is not synced when done through webapi [\#1985](https://github.com/mailchimp/mc-magento2/issues/1985)
+
 ## [100.1.61](https://github.com/mailchimp/mc-magento2/tree/100.1.61)
 
 [Full Changelog](https://github.com/mailchimp/mc-magento2/compare/100.1.60...100.1.61)
