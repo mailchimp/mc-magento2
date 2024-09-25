@@ -285,7 +285,7 @@ class Product
         $collection->getSelect()->limit(self::MAX);
         foreach ($collection as $item) {
            try {
-                $product = $this->_productRepository->getById($item->getId(), false, $magentoStoreId);
+                $product = $this->_productRepository->getById($item->getRelatedId(), false, $magentoStoreId);
             } catch (NoSuchEntityException $e) {
                 $productId = $item->getRelatedId();
                 $deletedData[] = $this->deleteProduct($mailchimpStoreId, $productId, "Deleted product");
