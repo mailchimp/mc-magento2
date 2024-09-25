@@ -160,7 +160,6 @@ class Product
             /**
              * @var $product \Magento\Catalog\Model\Product
              */
-            $this->_helper->log("Trying to process product [".$item->getEntityId()."]");
             $product = $this->_productRepository->getById($item->getId(), false, $magentoStoreId);
             if ($item->getMailchimpSyncModified() && $item->getMailchimpSyncDelta() &&
                 $item->getMailchimpSyncDelta() > $this->_helper->getMCMinSyncDateFlag()) {
