@@ -12,6 +12,8 @@ mc-magento2 Magento Component
 namespace Ebizmarts\MailChimp\Model\Api;
 
 use Ebizmarts\MailChimp\Helper\Sync as SyncHelper;
+use Magento\Framework\Exception\NoSuchEntityException;
+
 class Product
 {
     const DOWNLOADABLE = 'downloadable';
@@ -151,15 +153,44 @@ class Product
             $product = $this->_productRepository->getById($item->getId(), false, $magentoStoreId);
             if ($item->getMailchimpSyncModified() && $item->getMailchimpSyncDelta() &&
                 $item->getMailchimpSyncDelta() > $this->_helper->getMCMinSyncDateFlag()) {
-                $batchArray = array_merge($this->_buildOldProductRequest($product, $this->_batchId, $mailchimpStoreId, $magentoStoreId), $batchArray);
-                $this->_updateProduct($mailchimpStoreId, $product->getId());
+                if ($product->isSalable()) {
+                    if (!$item->getMailchimpSyncDeleted()) {
+                        $batchArray = array_merge($this->_buildOldProductRequest(
+                            $product,
+                            $this->_batchId,
+                            $mailchimpStoreId,
+                            $magentoStoreId
+                        ), $batchArray);
+                        $this->_updateProduct($mailchimpStoreId, $product->getId());
+                    } else {
+                        $data = array_merge($this->_buildNewProductRequest($product, $mailchimpStoreId, $magentoStoreId), $batchArray);
+                        $batchArray[] = $data;
+                        $this->syncHelper->markEcommorceAsNotDeleted($product->getId(), \Ebizmarts\MailChimp\Helper\Data::IS_PRODUCT);
+                        continue;
+                    }
+                } else {
+                    $productId = $product->getId();
+                    $batchArray[] = $this->deleteProduct($mailchimpStoreId, $productId,"Product not salable");
+                }
                 continue;
             } else {
-                $data = $this->_buildNewProductRequest($product, $mailchimpStoreId, $magentoStoreId);
+                if ($product->isSalable()) {
+                    $data = $this->_buildNewProductRequest($product, $mailchimpStoreId, $magentoStoreId);
+                } else {
+                    $this->_updateProduct(
+                        $mailchimpStoreId,
+                        $product->getId(),
+                        $this->_helper->getGmtDate(),
+                        "This product is not salable.",
+                        0,
+                        true,
+                        true
+                    );
+                    continue;
+                }
             }
             if (!empty($data)) {
                 $batchArray[] = $data;
-
                 //update product delta
                 $this->_updateProduct($mailchimpStoreId, $product->getId());
             } else {
@@ -245,32 +276,32 @@ class Product
         );
         $collection->getSelect()->limit(self::MAX);
         foreach ($collection as $item) {
-            $data = [];
-            $productId = $item->getRelatedId();
-            $data ['inventory_quantity'] = 0;
-            $body = json_encode($data, JSON_HEX_APOS|JSON_HEX_QUOT);
-            if ($body === false) {
-                $jsonError = json_last_error();
-                $jsonErrorMsg = json_last_error_msg();
-                $this->_helper->log("");
-                $this->_helper->log("$jsonErrorMsg for product [$productId]");
-            } else {
-                $this->_helper->modifyCounter(\Ebizmarts\MailChimp\Helper\Data::PRO_DELETED);
-                $data = [];
-                $data['method'] = "DELETE";
-                $data['path'] = "/ecommerce/stores/$mailchimpStoreId/products/$productId/variants/$productId";
-                $data['operation_id'] = $this->_batchId . '_' . $productId;
-                $data['body'] = $body;
-                $deletedData [] = $data;
-                $data['method'] = "DELETE";
-                $data['path'] = "/ecommerce/stores/$mailchimpStoreId/products/$productId";
-                $data['operation_id'] = $this->_batchId . '_' . $productId;
-                $data['body'] = $body;
-                $deletedData [] = $data;
-                $this->_updateProduct($mailchimpStoreId, $productId);
+            try {
+                $product = $this->_productRepository->getById($item->getRelatedId(), false, $magentoStoreId);
+            } catch (NoSuchEntityException $e) {
+                $productId = $item->getRelatedId();
+                $deletedData[] = $this->deleteProduct($mailchimpStoreId, $productId, "Deleted product]");
             }
         }
         return $deletedData;
+    }
+    protected function deleteProduct($mailchimpStoreId, $productId, $error)
+    {
+        $data = [];
+        $data['method'] = "DELETE";
+        $data['path'] = "/ecommerce/stores/$mailchimpStoreId/products/$productId";
+        $data['operation_id'] = $this->_batchId . '_' . $productId;
+        $data['body'] = "";
+        $this->_updateProduct(
+            $mailchimpStoreId,
+            $productId,
+            $this->_helper->getGmtDate(),
+            $error,
+            0,
+            true
+        );
+        $this->_helper->modifyCounter(\Ebizmarts\MailChimp\Helper\Data::PRO_DELETED);
+        return $data;
     }
     /**
      * @return \Magento\Catalog\Model\ResourceModel\Product\Collection
@@ -673,8 +704,20 @@ class Product
      * @param $sync_error
      * @param $sync_modified
      */
-    protected function _updateProduct($storeId, $entityId, $sync_delta = null, $sync_error = null, $sync_modified = null)
-    {
+    protected function _updateProduct(
+        $storeId,
+        $entityId,
+        $sync_delta = null,
+        $sync_error = null,
+        $sync_modified = null,
+        $deleted = null,
+        $forcedNoWaiting = false
+    ) {
+        if ($forcedNoWaiting) {
+            $sent = \Ebizmarts\MailChimp\Helper\Data::SYNCED;
+        } else {
+            $sent = \Ebizmarts\MailChimp\Helper\Data::WAITINGSYNC;
+        }
         $this->syncHelper->saveEcommerceData(
             $storeId,
             $entityId,
@@ -682,9 +725,8 @@ class Product
             $sync_delta,
             $sync_error,
             $sync_modified,
+            $deleted,
             null,
-            null,
-            \Ebizmarts\MailChimp\Helper\Data::WAITINGSYNC
+            $sent
         );
-    }
-}
+    }}
