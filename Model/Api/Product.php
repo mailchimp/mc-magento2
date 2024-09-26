@@ -192,7 +192,10 @@ class Product
                         $product->getId(),
                         $this->_helper->getGmtDate(),
                         "This product is not salable.",
-                        0
+                        0,
+                        false,
+                        true,
+                        true
                     );
                     continue;
                 }
@@ -735,8 +738,14 @@ class Product
         $sync_error = null,
         $sync_modified = null,
         $nullifyBatchId = false,
-        $deleted = null
+        $deleted = null,
+        $forcedNoWaiting = false
     ) {
+        if ($forcedNoWaiting) {
+            $sent = \Ebizmarts\MailChimp\Helper\Data::SYNCED;
+        } else {
+            $sent = \Ebizmarts\MailChimp\Helper\Data::WAITINGSYNC;
+        }
         $this->syncHelper->saveEcommerceData(
             $storeId,
             $entityId,
@@ -746,7 +755,7 @@ class Product
             $sync_modified,
             $deleted,
             null,
-            \Ebizmarts\MailChimp\Helper\Data::WAITINGSYNC,
+            $sent,
             $nullifyBatchId
         );
     }
