@@ -47,7 +47,7 @@ class MailChimpSyncEcommerce extends AbstractDb
         );
         return $this;
     }
-    public function markAllAsNotDeleted(
+    public function markEcommorceAsNotDeleted(
         \Ebizmarts\MailChimp\Model\MailChimpSyncEcommerce $chimp,
                                                           $id,
                                                           $type
