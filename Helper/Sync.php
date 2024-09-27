@@ -99,7 +99,7 @@ class Sync extends AbstractHelper
     }
     public function markEcommorceAsNotDeleted($relatedId, $type)
     {
-        $this->chimpSyncEcommerce->markAllAsNotDeleted($relatedId, $type);
+        $this->chimpSyncEcommerce->markEcommorceAsNotDeleted($relatedId, $type);
     }
     public function ecommerceDeleteAllByIdType($id, $type, $mailchimpStoreId)
     {
