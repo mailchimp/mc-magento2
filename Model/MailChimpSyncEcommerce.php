@@ -31,9 +31,9 @@ class MailChimpSyncEcommerce extends \Magento\Framework\Model\AbstractModel
         $this->getResource()->markAllAsDeleted($this, $id, $type, $relatedDeletedId);
         return $this;
     }
-    public function markAllAsNotDeleted($id, $type)
+    public function markEcommorceAsNotDeleted($id, $type)
     {
-        $this->getResource()->markAllAsNotDeleted($this, $id, $type);
+        $this->getResource()->markEcommorceAsNotDeleted($this, $id, $type);
         return $this;
     }
     public function markAllAsModified($id, $type)
