@@ -175,8 +175,6 @@ define(
                 $("#mailchimp_ecommerce_reset_errors_retry").show();
                 $("#row_mailchimp_ecommerce_reset_errors_noretry").show();
                 $("#mailchimp_ecommerce_reset_errors_noretry").show();
-                $("#row_mailchimp_ecommerce_clean_errors_months").show();
-                $("#mailchimp_ecommerce_clean_errors_months").show();
                 $("#row_mailchimp_ecommerce_delete_store").show();
                 $("#mailchimp_ecommerce_delete_store").show();
                 $("#row_mailchimp_ecommerce_resync_products").show();
