@@ -173,6 +173,8 @@ define(
                 $("#row_mailchimp_ecommerce_reset_errors_retry").show();
                 $("#mailchimp_ecommerce_reset_errors_retry").show();
                 $("#row_mailchimp_ecommerce_reset_errors_noretry").show();
+                $("#row_mailchimp_ecommerce_clean_errors_months").show();
+                $("#mailchimp_ecommerce_clean_errors_months").show();
                 $("#mailchimp_ecommerce_reset_errors_noretry").show();
                 $("#row_mailchimp_ecommerce_delete_store").show();
                 $("#mailchimp_ecommerce_delete_store").show();
