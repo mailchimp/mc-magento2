@@ -140,13 +140,6 @@
                         <field id="*/*/active">1</field>
                     </depends>
                 </field>
-                <field id="clean_ecommerce" translate="button_label" type="button" sortOrder="87" showInDefault="1" showInWebsite="1" showInStore="1">
-                    <button_label>Remove Unused Registers</button_label>
-                    <frontend_model>Ebizmarts\MailChimp\Block\Adminhtml\System\Config\CleanEcommerce</frontend_model>
-                    <depends>
-                        <field id="*/*/active">1</field>
-                    </depends>
-                </field>
                 <field id="fix_mailchimpjs" translate="button_label" type="button" sortOrder="88" showInDefault="1" showInWebsite="1" showInStore="1">
                     <button_label>Fix Mailchimp JS in frontend</button_label>
                     <frontend_model>Ebizmarts\MailChimp\Block\Adminhtml\System\Config\FixMailchimpJS</frontend_model>
