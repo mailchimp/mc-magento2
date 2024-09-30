@@ -25,8 +25,6 @@ define(
                 "getInterestUrl": "",
                 "resyncSubscribersUrl": "",
                 "resyncProductsUrl": "",
-                "cleanEcommerceUrl": "",
-                "checkEcommerceUrl": "",
                 "fixMailchimpjsUrl": "",
                 "scope": "",
                 "scopeId": ""
@@ -58,10 +56,6 @@ define(
                 $('#mailchimp_ecommerce_resync_products').click(function () {
                     var mailchimpStoreId = $('#mailchimp_general_monkeystore').find(':selected').val();
                     self._resyncProducts(mailchimpStoreId);
-                });
-                self._checkCleanButton();
-                $('#mailchimp_general_clean_ecommerce').click(function () {
-                    self._cleanEcommerce();
                 });
                 $('#mailchimp_general_fix_mailchimpjs').click(function () {
                     self._fixMailchimpJS();
@@ -187,39 +181,6 @@ define(
                 $("#mailchimp_ecommerce_delete_store").show();
                 $("#row_mailchimp_ecommerce_resync_products").show();
                 $("#mailchimp_ecommerce_resync_products").show();
-            },
-            _checkCleanButton: function () {
-                var checkEcommerceUrl = this.options.checkEcommerceUrl;
-                $.ajax({
-                    url: checkEcommerceUrl,
-                    data: {'form_key': window.FORM_KEY},
-                    type: 'GET',
-                    dataType: 'json',
-                    showLoader: true
-                }).done(function (data) {
-                    if (data.valid == -1) {
-                        alert({content: 'Error: can\'t check the unused registers'});
-                    } else if (data.valid == 0) {
-                        $('#row_mailchimp_general_clean_ecommerce').hide();
-                        $('#mailchimp_general_clean_ecommerce').hide();
-                    }
-                });
-            },
-            _cleanEcommerce: function () {
-                var cleanEcommerceUrl = this.options.cleanEcommerceUrl;
-                $.ajax({
-                    url: cleanEcommerceUrl,
-                    data: {'form_key': window.FORM_KEY},
-                    type: 'GET',
-                    dataType: 'json',
-                    showLoader: true
-                }).done(function (data) {
-                    if (data.valid == 0) {
-                        alert({content: 'Error: can\'t remove the unused registers'});
-                    } else if (data.valid == 1) {
-                        alert({content: 'All unused registers are deleted'});
-                    }
-                });
             },
             _fixMailchimpJS: function ()
             {
