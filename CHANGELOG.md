@@ -1,5 +1,15 @@
 # Change Log
 
+## [101.2.64](https://github.com/mailchimp/mc-magento2/tree/101.2.64)
+
+[Full Changelog](https://github.com/mailchimp/mc-magento2/compare/101.2.63...101.2.64)
+
+**Fixed bugs:**
+
+- Manage deleted and not salable products [\#2003](https://github.com/mailchimp/mc-magento2/issues/2003)
+- 
+- Configuration page in Magento's backend takes a long time to load in certain cases [\#2002](https://github.com/mailchimp/mc-magento2/issues/2002)
+
 ## [101.2.63](https://github.com/mailchimp/mc-magento2/tree/101.2.63)
 
 [Full Changelog](https://github.com/mailchimp/mc-magento2/compare/101.2.61...101.2.63)
