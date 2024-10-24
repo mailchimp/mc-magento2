@@ -726,6 +726,8 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
 
                 if (!empty($value)) {
                     $mergeVars[$map['mailchimp']] = $value;
+                } else {
+                    $mergeVars[$map['mailchimp']] = '';
                 }
             }
         }
