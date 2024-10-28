@@ -1,0 +1,179 @@
+MailChimp,MailChimp
+Save,Enregistrer
+Save and Continue Edit,Enregistrer et continuer la modification
+Delete,Supprimer
+Edit Store '%1',Modifier la boutique '%1'
+Add Store,Ajouter une boutique
+Address,Adresse
+Street,Rue
+City,Ville
+Postal Code,Code postal
+Select one,Sélectionnez-en une
+Country,Pays
+Store Address Info,Informations sur l'adresse de la boutique
+General,Général
+Apikey,Apikey
+Select first an ApiKey,Sélectionnez d'abord une ApiKey
+List,Liste
+Name,Nom
+Domain,Domaine
+Email,E-mail
+Currency,Devise
+Locale,Localité
+TimeZone,Fuseau horaire
+Phone,Téléphone
+Store Info,Informations sur la boutique
+Mailchimp Store Information,Informations sur la boutique Mailchimp
+button_label,button_label
+Mailchimp,Mailchimp
+Magento,Magento
+Add,Ajouter
+Shipping Zip Code,Code postal d'expédition
+Shipping Country,Pays d'expédition
+Shipping City,Ville d'expédition
+Shipping State,État d'expédition
+Shipping Telephone,Téléphone d'expédition
+Shipping Company,Société de livraison
+Billing Zip Code,Code postal de facturation
+Billing Country,Pays de facturation
+Billing City,Ville de facturation
+Billing State,État de facturation
+Billing Telephone,Téléphone de facturation
+Billing Company,Société de facturation
+Mailchimp Batches,Lots Mailchimp
+Mailchimp Cron,Mailchimp Cron
+User name:,Nom d'utilisateur :
+Total Account Subscribers:,Nombre total d'abonnés au compte :
+Total List Subscribers:,Nombre total d'abonnés à la liste :
+Ecommerce Data uploaded to MailChimp:,Données de commerce électronique téléchargées sur MailChimp :
+Total customers:,Nombre total de clients :
+Total products:,Nombre total de produits :
+Total orders:,Nombre total de commandes :
+Total Carts:,Nombre total de paniers :
+"Ecommerce disabled, save configuration to enable","Commerce électronique désactivé, enregistrer la configuration pour activer"
+"Ecommerce disabled, only subscribers will be synchronized (your orders, products,etc will be not synchronized)","Le commerce électronique est désactivé, seuls les abonnés seront synchronisés (vos commandes, produits, etc. ne seront pas synchronisés)"
+--- Invalid API Key ---,--- Clé API non valide ---
+Mailchimp Errors,Erreurs Mailchimp
+You deleted the store.,Vous avez supprimé la boutique.
+'Store could not be deleted.' .,'La boutique n'a pas pu être supprimée.' .
+This store no longer exists.,Cette boutique n'existe plus.
+Mailchimp Store,Boutique Mailchimp
+Mailchimp Stores,Boutiques Mailchimp
+'Store could not be saved.' .,'La boutique n'a pas pu être enregistrée.' .
+You can't access this cart,Vous ne pouvez pas accéder à ce panier
+Login to complete your order,Connectez-vous pour terminer votre commande
+Thanks for sharing your interest with us,Merci d'avoir partagé votre intérêt avec nous
+Json error,Erreur Json
+Error retrieving interest groups for store ,Erreur lors de la récupération des groupes d'intérêt pour la boutique
+Order [' . . '] is empty,La commande [' . . '] est vide
+Parent rule with id ' . . 'has not been correctly sent.,La règle parente avec l'ID ' . . ' n'a pas été correctement envoyée.
+Something went wrong when retrieving the information for promo rule,Une erreur s'est produite lors de la récupération des informations pour la règle de promotion
+Something went wrong when retrieving the information.,Une erreur s'est produite lors de la récupération des informations.
+Invalid API Key,Clé API non valide
+Username,Nom d'utilisateur
+This account is currently syncing,Ce compte est en cours de synchronisation
+Account Synced since,Compte synchronisé depuis
+---No Data---,---Aucune donnée---
+No,Non
+Unsubscribe,Se désabonner
+Delete subscriber,Supprimer l'abonné
+Syncing,Synchronisation
+Synced,Synchronisé
+Waiting,En attente
+Error,Erreur
+Resyncing,Resynchronisation
+With error,Avec erreur
+Unsupported,Non pris en charge
+Edit,Modifier
+MailChimp Information,Informations MailChimp
+No Interest groups found,Aucun groupe d'intérêt trouvé
+Mailchimp v,Mailchimp v
+ by,par
+Need help? See our ,Besoin d'aide ? Consultez notre
+Wiki,Wiki
+ Got feedback? ,Vous avez des commentaires ?
+Email us,Envoyez-nous un e-mail
+You can find more extension in our ,Vous pouvez trouver plus d'extensions dans notre
+Store,Boutique
+Subscribe to more detailed newsletters,Abonnez-vous à des newsletters plus détaillées
+Newsletter,Newsletter
+Sign Up for Our Newsletter:,Inscrivez-vous à notre newsletter :
+Enter your email address,Entrez votre adresse e-mail
+Enter your phone,Entrez votre téléphone
+Subscribe,S'abonner
+Mailchimp General Configuration,Configuration générale de Mailchimp
+Enabled,Activé
+API Key,Clé API
+You must create a MailChimp Store for this API key to connect to this account,Vous devez créer une boutique MailChimp pour que cette clé API se connecte à ce compte
+Mailchimp List,Liste Mailchimp
+Account Details,Détails du compte
+Change the footer link,Modifier le lien de pied de page
+"Enabling this, the ""Subscribe"" button at the bottom open a popup with the Mailchimp subscription form","En activant cette option, le bouton « S'abonner » en bas ouvre une fenêtre contextuelle avec le formulaire d'abonnement Mailchimp"
+Popup Url,URL de la fenêtre contextuelle
+Paste the form URL from your MailChimp audience,Collez l'URL du formulaire à partir de votre audience MailChimp
+Magento always manage emails,Magento gère toujours les e-mails
+Enable Two Way Sync,Activer la synchronisation bidirectionnelle
+"If this is set to ""No"", the synchronization will be from Magento's newsletter to Mailchimp only","Si cette option est définie sur « Non », la synchronisation se fera uniquement de la newsletter de Magento vers Mailchimp"
+Create Webhook,Créer un Webhook
+Webhooks Delete action,Action de suppression des Webhooks
+Enable Log,Activer le journal
+Customer Fields Mapping,Mappage des champs client
+Add the magento to mailchimp mapping,Ajoutez le mappage magento vers mailchimp
+Map the magento customer field to mailchimp merge_fields,Mappez le champ client magento vers les champs de fusion mailchimp
+Resync Subscribers,Resynchroniser Abonnés
+Fix Mailchimp JS in frontend,Correction du JS Mailchimp dans le frontend
+Available Groups,Groupes disponibles
+"If you <a href=""https://kb.mailchimp.com/lists/groups/create-a-new-list-group"" target=""_blank"">set up groups in Mailchimp</a>, include them in your checkout page so customers can choose the type of email marketing they want to receive.","Si vous <a href=""https://kb.mailchimp.com/lists/groups/create-a-new-list-group"" target=""_blank"">configurez des groupes dans Mailchimp</a>, incluez-les dans votre page de paiement afin que les clients puissent choisir le type de marketing par e-mail qu'ils souhaitent recevoir."
+Show groups after checkout?,Afficher les groupes après le paiement ?
+"Don't use in magento 2.1 see at <a href=""https://github.com/magento/magento2/issues/4999"" target=""_blank"">here</a>","Ne pas utiliser dans magento 2.1, voir <a href=""https://github.com/magento/magento2/issues/4999"" target=""_blank"">ici</a>"
+Group Description,Description du groupe
+Success message,Message de réussite
+Connection timeout,Délai de connexion expiré
+Ecommerce Configuration,Configuration du commerce électronique
+Subscribe all customers to the newsletter,Abonnez tous les clients à la newsletter
+First Date,Premier rendez-vous
+Send Promo Rules and Promo Codes,Envoyer les règles de promotion et les codes promotionnels
+Prices including taxes,Prix TTC
+"You must configure Price Display Settings in Sales/Tax to ""including taxes""","Vous devez configurer les paramètres d'affichage des prix dans Ventes/Taxes sur ""TTC"""
+Campaign Attribution Action,Action d'attribution de campagne
+Order attribution based on customer actions,Attribution de commande en fonction des actions du client
+Reset Errors and retry,Réinitialiser les erreurs et réessayer
+Truncate the errors table and retry all the registers with error,Tronquer la table des erreurs et réessayer tous les registres avec erreur
+Reset Errors and no retry,Réinitialiser les erreurs et ne pas réessayer
+Truncate the errors table and no retry all the registers with error,Tronquer la table des erreurs et ne pas réessayer tous les registres avec erreur
+Months to clear the error table,Mois pour effacer la table des erreurs
+How many month before clean the error from the error table automatically and not retry,Combien de mois avant de nettoyer automatiquement l'erreur de la table des erreurs et de ne pas réessayer
+Delete Store,Supprimer la boutique
+"Proceed with caution, this delete the mailchimp store for all the connected magento stores","Procédez avec prudence, cela supprime la boutique Mailchimp pour toutes les boutiques Magento connectées"
+Resync all products,Resynchroniser tout produits
+Abandoned Cart Configuration,Configuration du panier abandonné
+Redirect Page,Page de redirection
+Save Email to the Quote before place Order,Enregistrer l'e-mail dans le devis avant de passer la commande
+Select No to prevent saving customer Email to the quote before Order was placed,Sélectionnez Non pour empêcher l'enregistrement de l'e-mail du client dans le devis avant la passation de la commande
+"Must be logged in to MailChimp's website previously to see the automation wizard, re-open if not","Vous devez être connecté au site Web de MailChimp au préalable pour voir l'assistant d'automatisation, rouvrez-le si ce n'est pas le cas"
+All Store Views,Toutes les vues de la boutique
+Store View,Vue de la boutique
+ID,ID
+Status,Statut
+Last modified,Dernière modification
+#Customers,#Clients
+#Orders,#Commandes
+#Products,#Produits
+#Carts,#Paniers
+#Subscribers,#Abonnés
+Batch JSON,Lot JSON
+Job Code,Code de tâche
+Messages,Messages
+Created at,Créé à
+Scheduled at,Planifié à
+Executed at,Exécuté à
+Finished at,Terminé à
+Type,Type
+Title,Titre
+Date,Date
+Action,Action
+Create New Mailchimp Store,Créer une nouvelle boutique Mailchimp
+MC Account name,Nom du compte MC
+Store name,Nom de la boutique
+List name,Nom de la liste
+Mailchimp Sync,Synchronisation Mailchimp
