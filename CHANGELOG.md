@@ -1,6 +1,6 @@
 # Change Log
 
-## [102.3.65-p1](https://github.com/mailchimp/mc-magento2/tree/101.2.65)
+## [101.2.65](https://github.com/mailchimp/mc-magento2/tree/101.2.65)
 
 [Full Changelog](https://github.com/mailchimp/mc-magento2/compare/101.2.64...101.2.65)
 
