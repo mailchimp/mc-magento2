@@ -1,5 +1,18 @@
 # Change Log
 
+## [102.3.65](https://github.com/mailchimp/mc-magento2/tree/102.3.65)
+
+[Full Changelog](https://github.com/mailchimp/mc-magento2/compare/102.3.64...102.3.65)
+
+**Implemented enhancements:**
+
+- missing i18n translation [\#1983](https://github.com/mailchimp/mc-magento2/issues/1983)
+
+**Fixed bugs:**
+
+- Merge field value is deleted on the Magento store, but not on Mailchimp [\#1388](https://github.com/mailchimp/mc-magento2/issues/1388)
+- Wrong total revenue in MailChimp [\#395](https://github.com/mailchimp/mc-magento2/issues/395)
+
 ## [102.3.64](https://github.com/mailchimp/mc-magento2/tree/102.3.64)
 
 [Full Changelog](https://github.com/mailchimp/mc-magento2/compare/102.3.63...102.3.64)
