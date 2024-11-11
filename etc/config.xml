@@ -5,6 +5,7 @@
         <mailchimp>
             <ecommerce>
                 <campaign_action>sent,open,click</campaign_action>
+                <all_customers>Yes</all_customers>
             </ecommerce>
         </mailchimp>
     </default>
