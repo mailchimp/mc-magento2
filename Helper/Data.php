@@ -33,6 +33,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     const XML_PATH_CONFIRMATION_FLAG = 'newsletter/subscription/confirm';
     const XML_PATH_STORE             = 'mailchimp/ecommerce/store';
     const XML_PATH_ECOMMERCE_ACTIVE  = 'mailchimp/ecommerce/active';
+    const XML_PATH_ALL_CUSTOMERS     = 'mailchimp/ecommerce/all_customers';
     const XML_PATH_SYNC_DATE         = 'mailchimp/general/mcminsyncdateflag';
     const XML_ECOMMERCE_OPTIN        = 'mailchimp/ecommerce/customer_optin';
     const XML_ECOMMERCE_FIRSTDATE    = 'mailchimp/ecommerce/firstdate';
@@ -1146,8 +1147,9 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
             $this->counters[$index] = 1;
         }
     }
-    public function resetCounters()
+    public function resetCounters($storeId = null)
     {
+        $this->counters = [];
         $this->counters = [
             self::SUB_NEW => 0,
             self::SUB_MOD => 0,
@@ -1156,11 +1158,14 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
             self::PRO_NEW => 0,
             self::PRO_DELETED => 0,
             self::PRO_MOD => 0,
-            self::CUS_NEW => 0,
-            self::CUS_MOD => 0,
             self::QUO_NEW => 0,
             self::QUO_MOD => 0
         ];
+        if ($this->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_PATH_ALL_CUSTOMERS, $storeId)) {
+            $this->counters [self::CUS_NEW] = 0;
+            $this->counters [self::CUS_MOD] = 0;
+        }
+
     }
     public function getCounters()
     {
