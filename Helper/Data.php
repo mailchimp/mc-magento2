@@ -1166,7 +1166,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
             $this->counters [self::CUS_MOD] = 0;
         }
 
-        }
+    }
     public function getCounters()
     {
         return $this->counters;
