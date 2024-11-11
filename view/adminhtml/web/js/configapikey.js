@@ -162,6 +162,8 @@ define(
                 $("#row_mailchimp_abandonedcart_create_abandonedcart_automation").hide();
             },
             _showEcommerce: function () {
+                $("#row_mailchimp_ecommerce_all_customers").show();
+                $("#mailchimp_ecommerce_all_customers").show();
                 $("#row_mailchimp_ecommerce_customer_optin").show();
                 $("#mailchimp_ecommerce_customer_optin").show();
                 $("#row_mailchimp_ecommerce_firstdate").show();
