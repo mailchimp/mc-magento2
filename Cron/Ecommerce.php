@@ -206,7 +206,7 @@ class Ecommerce
 
         $batchArray = [];
 
-        $this->_helper->resetCounters();
+        $this->_helper->resetCounters($storeId);
 
         $results = $this->_apiSubscribers->sendSubscribers($storeId, $listId);
 
@@ -217,11 +217,11 @@ class Ecommerce
             $this->_helper->log('Generate Products payload');
             $products = $this->_apiProduct->_sendProducts($storeId);
             $results = array_merge($results, $products);
-
-            $this->_helper->log('Generate Customers payload');
-            $customers = $this->_apiCustomer->sendCustomers($storeId);
-            $results = array_merge($results, $customers);
-
+            if ($this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_PATH_ALL_CUSTOMERS, $storeId)) {
+                $this->_helper->log('Generate Customers payload');
+                $customers = $this->_apiCustomer->sendCustomers($storeId);
+                $results = array_merge($results, $customers);
+            }
             $this->_helper->log('Generate Orders payload');
             $orders = $this->_apiOrder->sendOrders($storeId);
             $results = array_merge($results, $orders);
@@ -264,14 +264,16 @@ class Ecommerce
                         $syncBatches->setStatus(\Ebizmarts\MailChimp\Helper\Data::BATCH_PENDING);
                         $syncBatches->setMailchimpStoreId($mailchimpStoreId);
                         $syncBatches->setModifiedDate($this->_helper->getGmtDate());
+                        if ($this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_PATH_ALL_CUSTOMERS, $storeId)) {
+                            $syncBatches->setCustomersNewCount($batchCounters[\Ebizmarts\MailChimp\Helper\Data::CUS_NEW]);
+                            $syncBatches->setCustomersModifiedCount($batchCounters[\Ebizmarts\MailChimp\Helper\Data::CUS_MOD]);
+                        }
                         $syncBatches->setSubscribersNewCount($batchCounters[\Ebizmarts\MailChimp\Helper\Data::SUB_NEW]);
                         $syncBatches->setProductsNewCount($batchCounters[\Ebizmarts\MailChimp\Helper\Data::PRO_NEW]);
-                        $syncBatches->setCustomersNewCount($batchCounters[\Ebizmarts\MailChimp\Helper\Data::CUS_NEW]);
                         $syncBatches->setCartsNewCount($batchCounters[\Ebizmarts\MailChimp\Helper\Data::QUO_NEW]);
                         $syncBatches->setOrdersNewCount($batchCounters[\Ebizmarts\MailChimp\Helper\Data::ORD_NEW]);
                         $syncBatches->setSubscribersModifiedCount($batchCounters[\Ebizmarts\MailChimp\Helper\Data::SUB_MOD]);
                         $syncBatches->setProductsModifiedCount($batchCounters[\Ebizmarts\MailChimp\Helper\Data::PRO_MOD]);
-                        $syncBatches->setCustomersModifiedCount($batchCounters[\Ebizmarts\MailChimp\Helper\Data::CUS_MOD]);
                         $syncBatches->setCartsModifiedCount($batchCounters[\Ebizmarts\MailChimp\Helper\Data::QUO_MOD]);
                         $syncBatches->setOrdersModifiedCount($batchCounters[\Ebizmarts\MailChimp\Helper\Data::ORD_MOD]);
                         $syncBatches->getResource()->save($syncBatches);
