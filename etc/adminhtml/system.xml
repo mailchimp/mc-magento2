@@ -116,7 +116,17 @@
                     </depends>
                 </field>
                 <field id="log" translate="label" type="select" sortOrder="70" showInDefault="1" showInWebsite="1" showInStore="1">
-                    <label>Enable Log</label>
+                    <label>Enable log</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <depends>
+                        <field id="*/*/active">1</field>
+                    </depends>
+                </field>
+                <field id="support" translate="label comment" type="select" sortOrder="75" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Enable Support</label>
+                    <comment>
+                        <![CDATA[By ennabling this, you accept <a href="https://github.com/magento/magento2/issues/4999" target="_blank">this</a>]]>
+                    </comment>
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
                     <depends>
                         <field id="*/*/active">1</field>

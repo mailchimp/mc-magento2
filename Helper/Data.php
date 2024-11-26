@@ -404,7 +404,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     {
         $this->_mapFields = null;
     }
-    public function getMapFields($storeId = null)
+    public function getMapFields($storeId = null, $options=true)
     {
         if (!$this->_mapFields) {
             $customerAtt = $this->getBindableAttributes();
@@ -418,7 +418,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
                             'customer_field' => $customerAtt[$customerFieldId]['attCode'],
                             'isDate' => $customerAtt[$customerFieldId]['isDate'],
                             'isAddress' => $customerAtt[$customerFieldId]['isAddress'],
-                            'options' => $customerAtt[$customerFieldId]['options']
+                            'options' => $options ? $customerAtt[$customerFieldId]['options'] : false
                         ];
                     }
                 }
@@ -1114,7 +1114,9 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
                         }
                     }
                 }
-            } catch (\Exception $e) {
+            } catch (\Mailchimp_Error | \Mailchimp_HttpError $e) {
+                $this->log($e->getFriendlyMessage());
+            } catch (Exception $e) {
                 $this->log($e->getMessage());
             }
         }
