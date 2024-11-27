@@ -243,7 +243,6 @@ class GenerateStatistics
         foreach ($collection as $item) {
             $batch = [];
             $batch['id'] = $item['batch_id'];
-            $batch['magento_store_id'] = $item['store_id'];
             $batch['mailchimp_store_id'] = $item['mailchimp_store_id'];
             $batch['date'] = $item['modified_date'];
             $batch['status'] = $item['status'];
