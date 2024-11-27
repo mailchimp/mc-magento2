@@ -33,7 +33,7 @@
             <schedule>*/5 * * * *</schedule>
         </job>
         <job name="ebizmarts_sync_statistics" instance="Ebizmarts\MailChimp\Cron\SyncStatistics" method="execute">
-            <schedule>*/10 * * * *</schedule>
+            <schedule>0 */6 * * *</schedule>
         </job>
     </group>
 </config>
