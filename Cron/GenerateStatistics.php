@@ -96,10 +96,10 @@ class GenerateStatistics
                 $storeStatistics['mailchimp'] = $this->getMailchimpTotals($storeId);
                 $storeStatistics['magento'] = $this->getMagentoTotals($storeId);
                 $data['statistics']['store'][$storeId] = $storeStatistics;
-                $data['batches'] = $this->getBatches($storeId, $mailChimpStoreId);
-                $data['jobs'] = $this->getJobs();
+                $data['batches']['store'][$storeId] = $this->getBatches($storeId, $mailChimpStoreId);
             }
         }
+        $data['jobs'] = $this->getJobs();
         if (!empty($data)) {
             $mailchimpNotification = $this->mailchimpNotificationFactory->create();
             $mailchimpNotification->setNotificationData(json_encode($data));
@@ -243,6 +243,8 @@ class GenerateStatistics
         foreach ($collection as $item) {
             $batch = [];
             $batch['id'] = $item['batch_id'];
+            $batch['magento_store_id'] = $item['store_id'];
+            $batch['mailchimp_store_id'] = $item['mailchimp_store_id'];
             $batch['date'] = $item['modified_date'];
             $batch['status'] = $item['status'];
             $counters = [];
