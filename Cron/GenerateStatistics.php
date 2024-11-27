@@ -89,19 +89,23 @@ class GenerateStatistics
         $data = [];
         foreach ($this->storeManager->getStores() as $storeId => $val)
         {
-            $mailChimpStoreId = $this->helper->getConfigValue(Data::XML_MAILCHIMP_STORE, $storeId);
-            $storeStatistics = [];
-            // Get currents mailchimp totals (orders, products, customers)
-            $storeStatistics['mailchimp'] = $this->getMailchimpTotals($storeId);
-            $storeStatistics['magento'] = $this->getMagentoTotals($storeId);
-            $data['statistics']['store'][$storeId] = $storeStatistics;
-            $data['batches'] = $this->getBatches($storeId, $mailChimpStoreId);
-            $data['jobs'] = $this->getJobs();
+            if ($this->helper->isMailChimpEnabled($storeId)) {
+                $mailChimpStoreId = $this->helper->getConfigValue(Data::XML_MAILCHIMP_STORE, $storeId);
+                $storeStatistics = [];
+                // Get currents mailchimp totals (orders, products, customers)
+                $storeStatistics['mailchimp'] = $this->getMailchimpTotals($storeId);
+                $storeStatistics['magento'] = $this->getMagentoTotals($storeId);
+                $data['statistics']['store'][$storeId] = $storeStatistics;
+                $data['batches'] = $this->getBatches($storeId, $mailChimpStoreId);
+                $data['jobs'] = $this->getJobs();
+            }
         }
-        $mailchimpNotification = $this->mailchimpNotificationFactory->create();
-        $mailchimpNotification->setNotificationData(json_encode($data));
-        $mailchimpNotification->setProcessed(false);
-        $mailchimpNotification->getResource()->save($mailchimpNotification);
+        if (!empty($data)) {
+            $mailchimpNotification = $this->mailchimpNotificationFactory->create();
+            $mailchimpNotification->setNotificationData(json_encode($data));
+            $mailchimpNotification->setProcessed(false);
+            $mailchimpNotification->getResource()->save($mailchimpNotification);
+        }
     }
     private function getMagentoTotals($storeId)
     {
