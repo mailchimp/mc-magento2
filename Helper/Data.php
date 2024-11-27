@@ -54,6 +54,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     const XML_POPUP_FORM             = 'mailchimp/general/popup_form';
     const XML_POPUP_URL              = 'mailchimp/general/popup_url';
     const XML_CLEAN_ERROR_MONTHS     = 'mailchimp/ecommerce/clean_errors_months';
+    const XML_ENABLE_SUPPORT         = 'mailchimp/general/enable_support';
 
     const ORDER_STATE_OK             = 'complete';
 
@@ -283,6 +284,10 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     public function isMailChimpEnabled($store = null)
     {
         return $this->getConfigValue(self::XML_PATH_ACTIVE, $store);
+    }
+    public function isSupportEnabled()
+    {
+        return $this->getConfigValue(self::XML_ENABLE_SUPPORT);
     }
 
     /**

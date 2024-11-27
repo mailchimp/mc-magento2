@@ -122,7 +122,7 @@
                         <field id="*/*/active">1</field>
                     </depends>
                 </field>
-                <field id="support" translate="label comment" type="select" sortOrder="75" showInDefault="1" showInWebsite="1" showInStore="1">
+                <field id="enable_support" translate="label comment" type="select" sortOrder="75" showInDefault="1" showInWebsite="0" showInStore="0">
                     <label>Enable Support</label>
                     <comment>
                         <![CDATA[By ennabling this, you accept <a href="https://github.com/magento/magento2/issues/4999" target="_blank">this</a>]]>
