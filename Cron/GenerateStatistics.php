@@ -2,8 +2,8 @@
 
 namespace Ebizmarts\MailChimp\Cron;
 
-use Magento\Framework\Component\ComponentRegistrar;
 use Magento\Store\Model\StoreManager;
+use Magento\Framework\Stdlib\DateTime\TimezoneInterface;
 use Magento\Customer\Model\ResourceModel\Customer\CollectionFactory as CustomerCollectionFactory;
 use Magento\Catalog\Model\ResourceModel\Product\CollectionFactory as ProductCollectionFactory;
 use Magento\Sales\Model\ResourceModel\Order\CollectionFactory as OrderCollectionFactory;
@@ -56,6 +56,7 @@ class GenerateStatistics
      * @var ModuleVersion
      */
     protected $moduleVersion;
+    protected $locale;
     protected $deleteAction = [
         0 => 'Unsubscribe',
         1 => 'Delete',
@@ -70,7 +71,8 @@ class GenerateStatistics
         MailchimpSyncBatchesCollectionFactory $mailchimpSyncBatchesCollectionFactory,
         ScheduleCollectionFactory $scheduleCollectionFactory,
         ProductMetadataInterface $productMetadata,
-        ModuleVersion $moduleVersion
+        ModuleVersion $moduleVersion,
+        TimezoneInterface $locale
     )
     {
         $this->mailchimpNotificationFactory = $mailchimpNotificationFactory;
@@ -83,6 +85,7 @@ class GenerateStatistics
         $this->scheduleCollectionFactory = $scheduleCollectionFactory;
         $this->productMetadata = $productMetadata;
         $this->moduleVersion = $moduleVersion;
+        $this->locale = $locale;
     }
     public function execute()
     {
@@ -173,7 +176,7 @@ class GenerateStatistics
         } catch (\Exception $e) {
             $this->helper->log($e->getMessage());
         }
-
+        $options['time_zone'] = $this->locale->getConfigTimezone(\Magento\Store\Model\ScopeInterface::SCOPE_STORE, $storeId);
         return $options;
     }
     private function getMailchimpTotals($storeId)
