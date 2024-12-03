@@ -69,6 +69,7 @@ class SyncStatistics
             $connection = $this->mailchimpNotification->getConnection();
             $tableName = $this->mailchimpNotification->getMainTable();
             $connection->delete($tableName, ['date_add(generated_at , interval 1 week) <= NOW()']);
+            $connection->delete($tableName, ['processed' => 1]);
         } catch (\Exception $e) {
             $this->helper->log($e->getMessage());
         }

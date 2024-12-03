@@ -92,7 +92,7 @@ class SaveAfter implements \Magento\Framework\Event\ObserverInterface
                     $subscriberOld->getEmail(),
                     $status
                 );
-            } catch (\Mailchimp_Error $e) {
+            } catch (\Mailchimp_Error | \Mailchimp_HttpError $e) {
                 $this->_helper->log($e->getFriendlyMessage());
             }
 

@@ -282,7 +282,7 @@ class Ecommerce
                     $this->markWithError($BadOperations, $mailchimpStoreId, $listId);
                 }
 
-            } catch (\Mailchimp_Error $e) {
+            } catch (\Mailchimp_Error | \Mailchimp_HttpError $e) {
                 $this->_helper->log($e->getFriendlyMessage());
             } catch (\Exception $e) {
                 $this->_helper->log($e->getMessage());
@@ -340,7 +340,7 @@ class Ecommerce
                 null,
                 false
             );
-        } catch (\Mailchimp_Error $e) {
+        } catch (\Mailchimp_Error | \Mailchimp_HttpError $e) {
             $this->_helper->log('MailChimp error when updating syncing flag for store ' . $storeId);
             $this->_helper->log($e->getFriendlyMessage());
         }
@@ -350,7 +350,7 @@ class Ecommerce
         try {
             $api = $this->_helper->getApi($storeId);
             $api->root->info();
-        } catch (\Mailchimp_Error $e) {
+        } catch (\Mailchimp_Error | \Mailchimp_HttpError $e) {
             $this->_helper->log($e->getFriendlyMessage());
             return false;
         }

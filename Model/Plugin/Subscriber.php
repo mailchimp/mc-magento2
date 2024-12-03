@@ -33,7 +33,7 @@ class Subscriber
         \Ebizmarts\MailChimp\Helper\Data $helper,
         \Magento\Store\Model\StoreManagerInterface $storeManager
     ) {
-    
+
         $this->_helper          = $helper;
         $this->_storeManager    = $storeManager;
     }
@@ -63,7 +63,7 @@ class Subscriber
                     } else {
                         $api->lists->members->delete($this->_helper->getDefaultList($storeId), $md5HashEmail);
                     }
-                } catch (\Mailchimp_Error $e) {
+                } catch (\Mailchimp_Error | \Mailchimp_HttpError $e) {
                     $this->_helper->log($e->getFriendlyMessage());
                 }
             }
@@ -103,7 +103,7 @@ class Subscriber
 
         return $subscriber;
     }
-    
+
     /**
      * @param \Magento\Newsletter\Model\Subscriber $subscriber
      * @param $customerId

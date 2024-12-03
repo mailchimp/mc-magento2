@@ -8,7 +8,6 @@ use Magento\Customer\Model\ResourceModel\Customer\CollectionFactory as CustomerC
 use Magento\Catalog\Model\ResourceModel\Product\CollectionFactory as ProductCollectionFactory;
 use Magento\Sales\Model\ResourceModel\Order\CollectionFactory as OrderCollectionFactory;
 use Magento\Cron\Model\ResourceModel\Schedule\CollectionFactory as ScheduleCollectionFactory;
-use Ebizmarts\MailChimp\Model\MailchimpNotificationFactory as MailchimpNotificationFactory;
 use Magento\Framework\App\ProductMetadataInterface;
 use Ebizmarts\MailChimp\Helper\Data;
 use Ebizmarts\MailChimp\Model\ResourceModel\MailChimpSyncBatches\CollectionFactory as MailChimpSyncBatchesCollectionFactory;
@@ -16,10 +15,6 @@ use Ebizmarts\MailChimp\Model\Config\ModuleVersion;
 
 class GenerateStatistics
 {
-    /**
-     * @var MailchimpNotificationFactory
-     */
-    protected $mailchimpNotificationFactory;
     /**
      * @var Data
      */
@@ -56,13 +51,15 @@ class GenerateStatistics
      * @var ModuleVersion
      */
     protected $moduleVersion;
+    /**
+     * @var TimezoneInterface
+     */
     protected $locale;
     protected $deleteAction = [
         0 => 'Unsubscribe',
         1 => 'Delete',
     ];
     public function __construct(
-        MailchimpNotificationFactory $mailchimpNotificationFactory,
         Data $helper,
         StoreManager $storeManager,
         CustomerCollectionFactory $customerCollectionFactory,
@@ -75,7 +72,6 @@ class GenerateStatistics
         TimezoneInterface $locale
     )
     {
-        $this->mailchimpNotificationFactory = $mailchimpNotificationFactory;
         $this->helper = $helper;
         $this->storeManager = $storeManager;
         $this->customerCollectionFactory = $customerCollectionFactory;
@@ -104,10 +100,7 @@ class GenerateStatistics
         }
         $data['jobs'] = $this->getJobs();
         if (!empty($data)) {
-            $mailchimpNotification = $this->mailchimpNotificationFactory->create();
-            $mailchimpNotification->setNotificationData(json_encode($data));
-            $mailchimpNotification->setProcessed(false);
-            $mailchimpNotification->getResource()->save($mailchimpNotification);
+            $this->helper->saveNotification($data);
         }
     }
     private function getMagentoTotals($storeId)
