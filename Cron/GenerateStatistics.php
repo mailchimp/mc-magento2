@@ -86,6 +86,7 @@ class GenerateStatistics
     public function execute()
     {
         $data = [];
+        $data['time'] = $this->helper->getGmtDate();
         foreach ($this->storeManager->getStores() as $storeId => $val)
         {
             if ($this->helper->isMailChimpEnabled($storeId)) {
