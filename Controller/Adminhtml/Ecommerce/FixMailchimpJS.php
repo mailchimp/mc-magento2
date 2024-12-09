@@ -48,7 +48,7 @@ class FixMailchimpJS extends \Magento\Backend\App\Action
         \Magento\Framework\App\Cache\TypeListInterface $typeList,
         \Ebizmarts\MailChimp\Helper\Data $helper
     ) {
-    
+
         parent::__construct($context);
         $this->resultJsonFactory    = $resultJsonFactory;
         $this->helper               = $helper;
@@ -76,11 +76,15 @@ class FixMailchimpJS extends \Magento\Backend\App\Action
             $valid = 0;
             $message = $e->getMessage();
         }
-
-        return $resultJson->setData([
+        $resultJson->setData([
             'valid' => (int)$valid,
             'message' => $message,
         ]);
+        $this->helper->buttonPressed("FixMailchimpJS", [
+            'valid' => (int)$valid,
+            'message' => $message,
+        ]);
+        return $resultJson;
     }
     protected function _isAllowed()
     {

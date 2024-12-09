@@ -32,23 +32,30 @@ class ResyncProducts extends \Magento\Backend\App\Action
      * @var SyncHelper
      */
     private $syncHelper;
+    /**
+     * @var \Ebizmarts\MailChimp\Helper\Data
+     */
+    private $helper;
 
     /**
      * @param \Magento\Backend\App\Action\Context $context
      * @param JsonFactory $resultJsonFactory
      * @param \Magento\Store\Model\StoreManagerInterface $storeManagerInterface
      * @param SyncHelper $syncHelper
+     * @param \Ebizmarts\MailChimp\Helper\Data $helper
      */
     public function __construct(
         \Magento\Backend\App\Action\Context $context,
         JsonFactory $resultJsonFactory,
         \Magento\Store\Model\StoreManagerInterface $storeManagerInterface,
-        SyncHelper $syncHelper
+        SyncHelper $syncHelper,
+        \Ebizmarts\MailChimp\Helper\Data $helper
     ) {
         parent::__construct($context);
         $this->resultJsonFactory    = $resultJsonFactory;
         $this->storeManager         = $storeManagerInterface;
         $this->syncHelper           = $syncHelper;
+        $this->helper               = $helper;
     }
 
     public function execute()
@@ -64,10 +71,15 @@ class ResyncProducts extends \Magento\Backend\App\Action
             $valid = 0;
             $message = $e->getMessage();
         }
-        return $resultJson->setData([
+        $resultJson->setData([
             'valid' => (int)$valid,
             'message' => $message,
         ]);
+        $this->helper->buttonPressed("ResyncProducts", [
+            'valid' => (int)$valid,
+            'message' => $message,
+        ]);
+        return $resultJson;
     }
     protected function _isAllowed()
     {

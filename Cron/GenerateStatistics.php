@@ -86,6 +86,7 @@ class GenerateStatistics
     public function execute()
     {
         $data = [];
+        $data['storeURL'] = $this->storeManager->getStore()->getBaseUrl();
         $data['time'] = $this->helper->getGmtDate();
         foreach ($this->storeManager->getStores() as $storeId => $val)
         {

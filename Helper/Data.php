@@ -331,6 +331,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         $timeOut = $this->getTimeOut($store,$scope);
         $this->_api->setApiKey($apiKey);
         $this->_api->setHelper($this);
+        $this->_api->setStoreURL($this->_storeManager->getStore($store)->getBaseUrl());
         $this->_api->setUserAgent('Mailchimp4Magento' . (string)$this->getModuleVersion());
         if ($timeOut) {
             $this->_api->setTimeOut($timeOut);
@@ -461,8 +462,10 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         } else {
             $this->_api->setApiKey($apiKey);
         }
+
         $this->_api->setUserAgent('Mailchimp4Magento' . (string)$this->getModuleVersion());
         $this->_api->setHelper($this);
+        $this->_api->setStoreURL($this->_storeManager->getStore()->getBaseUrl());
 
         return $this->_api;
     }
@@ -1232,5 +1235,15 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     public function encrypt($value)
     {
         return $this->_encryptor->encrypt($value);
+    }
+    public function buttonPressed($button, $result)
+    {
+        $data = [];
+        $data['storeURL'] = $this->_storeManager->getStore()->getBaseUrl();
+        $data['time'] = $this->getGmtDate();
+        $data['button']['action'] = $button;
+        $data['button']['result'] = $result;
+        $this->saveNotification($data);
+
     }
 }
