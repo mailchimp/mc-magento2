@@ -74,15 +74,12 @@ class CreateWebhook extends \Magento\Backend\App\Action
             $message = $return['message'];
         }
         $resultJson = $this->resultJsonFactory->create();
-        $resultJson->setData([
+        $ret = [
             'valid' => (int)$valid,
             'message' => $message,
-        ]);
-        $this->helper->buttonPressed("CreateWebhook", [
-            'valid' => (int)$valid,
-            'message' => $message,
-        ]);
-        return $resultJson;
+        ];
+        $this->helper->buttonPressed("CreateWebhook", $ret);
+        return $resultJson->setData($ret);
     }
     protected function _isAllowed()
     {

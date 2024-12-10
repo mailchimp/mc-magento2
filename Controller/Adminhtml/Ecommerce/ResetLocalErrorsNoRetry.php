@@ -93,15 +93,12 @@ class ResetLocalErrorsNoRetry extends \Magento\Backend\App\Action
             $valid = 0;
             $message = $e->getMessage();
         }
-        $resultJson->setData([
+        $ret = [
             'valid' => (int)$valid,
             'message' => $message,
-        ]);
-        $this->helper->buttonPressed("ResetLocalErrorNoRetry",[
-            'valid' => (int)$valid,
-            'message' => $message,
-        ]);
-        return $resultJson;
+        ];
+        $this->helper->buttonPressed("ResetLocalErrorNoRetry",$ret);
+        return $resultJson->setData($ret);
     }
     protected function _isAllowed()
     {
