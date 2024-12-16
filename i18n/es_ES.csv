@@ -34,12 +34,14 @@ Shipping City,Ciudad de Envío
 Shipping State,Estado de Envío
 Shipping Telephone,Teléfono de Envío
 Shipping Company,Empresa de Envío
+Shipping Street,Calle de envío
 Billing Zip Code,Código Postal de Facturación
 Billing Country,País de Facturación
 Billing City,Ciudad de Facturación
 Billing State,Estado de Facturación
 Billing Telephone,Teléfono de Facturación
 Billing Company,Empresa de Facturación
+Billing Street, Calle de facturación
 Mailchimp Batches,Lotes de Mailchimp
 Mailchimp Cron,Mailchimp Cron
 User name:,Nombre de usuario:
