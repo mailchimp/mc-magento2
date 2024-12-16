@@ -43,6 +43,7 @@ class VarsMap extends \Magento\Framework\View\Element\Html\Select
         $ret['default_shipping##state']   = __('Shipping State');
         $ret['default_shipping##telephone']   = __('Shipping Telephone');
         $ret['default_shipping##company']   = __('Shipping Company');
+        $ret['default_shipping##street']   = __('Shipping Street');
 
         $ret['default_billing##zip']      = __('Billing Zip Code');
         $ret['default_billing##country']  = __('Billing Country');
@@ -50,6 +51,7 @@ class VarsMap extends \Magento\Framework\View\Element\Html\Select
         $ret['default_billing##state']    = __('Billing State');
         $ret['default_billing##telephone']   = __('Billing Telephone');
         $ret['default_billing##company']   = __('Billing Company');
+        $ret['default_billing##street']   = __('Billing Street');
 
         return $ret;
     }
