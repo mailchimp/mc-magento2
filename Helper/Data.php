@@ -407,12 +407,14 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
                 'default_shipping##state',
                 'default_shipping##telephone',
                 'default_shipping##company',
+                'default_shipping##street',
                 'default_billing##zip',
                 'default_billing##country',
                 'default_billing##city',
                 'default_billing##state',
                 'default_billing##telephone',
-                'default_billing##company'
+                'default_billing##company',
+                'default_billing##street'
             ];
 
             foreach($elements as $item) {
@@ -745,11 +747,10 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         if ($address) {
             $street = $address->getStreet();
             if (count($street) > 1) {
-                $addressData["addr1"] = $street[0];
-                $addressData["addr2"] = $street[1];
+                $addressData["street"] = $street[0].' '.$street[1];
             } else {
                 if (!empty($street[0])) {
-                    $addressData["addr1"] = $street[0];
+                    $addressData["street"] = $street[0];
                 }
             }
             if ($address->getCity()) {
