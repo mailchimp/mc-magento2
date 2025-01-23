@@ -56,6 +56,8 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     const XML_POPUP_URL              = 'mailchimp/general/popup_url';
     const XML_CLEAN_ERROR_MONTHS     = 'mailchimp/ecommerce/clean_errors_months';
     const XML_ENABLE_SUPPORT         = 'mailchimp/general/enable_support';
+    const SYNC_TOKEN                 = 'mailchimp/statistics/token';
+    const SYNC_NOTIFICATION_URL       = 'mailchimp/statistics/notification_url';
 
     const ORDER_STATE_OK             = 'complete';
 

@@ -5,6 +5,8 @@ namespace Ebizmarts\MailChimp\Cron;
 use Ebizmarts\MailChimp\Helper\Data as MailChimpHelper;
 use Ebizmarts\MailChimp\Model\ResourceModel\MailchimpNotification\CollectionFactory as MailchimpNotificationCollectionFactory;
 use Ebizmarts\MailChimp\Model\ResourceModel\MailchimpNotification;
+use Ebizmarts\MailChimp\Helper\Http as MailChimpHttp;
+
 class SyncStatistics
 {
     /**
@@ -19,19 +21,26 @@ class SyncStatistics
      * @var MailchimpNotification
      */
     private $mailchimpNotification;
+    /**
+     * @var MailChimpHttp
+     */
+    private $mailchimpHttp;
+    const MAX_NOTIFICATIONS = 100;
+
     public function __construct(
         MailChimpHelper $helper,
         MailchimpNotificationCollectionFactory $mailchimpNotificationCollectionFactory,
-        MailchimpNotification $mailchimpNotification
+        MailchimpNotification $mailchimpNotification,
+        MailchimpHttp $mailchimpHttp
     )
     {
         $this->helper = $helper;
         $this->mailchimpNotificationCollectionFactory = $mailchimpNotificationCollectionFactory;
         $this->mailchimpNotification = $mailchimpNotification;
+        $this->mailchimpHttp = $mailchimpHttp;
     }
     public function execute()
     {
-        $this->helper->log("Sync statistics started");
         if ($this->helper->isSupportEnabled())
         {
             $collection = $this->getCollection();
@@ -45,23 +54,24 @@ class SyncStatistics
                 $collectionItem->setSyncedAt($this->helper->getGmtDate());
                 $collectionItem->getResource()->save($collectionItem);
             }
-        } else {
-            $this->helper->log("Support is off");
         }
         $this->cleanData();
-        $this->helper->log("Sync statistics finished");
     }
     private function getCollection()
     {
         $collection = $this->mailchimpNotificationCollectionFactory->create();
         $collection->addFieldToFilter('processed', 0);
         $collection->setOrder('generated_at', 'ASC');
+        $collection->getSelect()->limit(self::MAX_NOTIFICATIONS);;
 
         return $collection;
     }
     private function syncData($data)
     {
-        $this->helper->log($data);
+        $response = $this->mailchimpHttp->post($data);
+        if (!$this->mailchimpHttp->extractResponse($response)) {
+            $this->helper->log($response);
+        }
     }
     private function cleanData()
     {
