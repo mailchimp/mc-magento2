@@ -6,6 +6,7 @@ use Ebizmarts\MailChimp\Helper\Data as MailChimpHelper;
 use Ebizmarts\MailChimp\Model\ResourceModel\MailchimpNotification\CollectionFactory as MailchimpNotificationCollectionFactory;
 use Ebizmarts\MailChimp\Model\ResourceModel\MailchimpNotification;
 use Ebizmarts\MailChimp\Helper\Http as MailChimpHttp;
+use const _PHPStan_7c8075089\__;
 
 class SyncStatistics
 {
