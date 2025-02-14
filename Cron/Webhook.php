@@ -258,7 +258,7 @@ class Webhook
                                 $this->_subscribeMember($subscriber, \Magento\Newsletter\Model\Subscriber::STATUS_UNSUBSCRIBED);
                             }
                         }
-                    } catch (\Mailchimp_Error $e) {
+                    } catch (\Mailchimp_Error | \Mailchimp_HttpError $e) {
                         $this->_helper->log($e->getFriendlyMessage());
                     }
                 }

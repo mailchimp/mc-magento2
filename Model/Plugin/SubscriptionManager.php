@@ -85,7 +85,7 @@ class SubscriptionManager
                         null,
                         'unsubscribed'
                     );
-                } catch (\Mailchimp_Error $e) {
+                } catch (\Mailchimp_Error | \Mailchimp_HttpError $e) {
                     $this->_helper->log($e->getFriendlyMessage());
                 }
             }
@@ -137,7 +137,7 @@ class SubscriptionManager
                             $email,
                             $status
                         );
-                    } catch (\Mailchimp_Error $e) {
+                    } catch (\Mailchimp_Error | \Mailchimp_HttpError $e) {
                         $this->_helper->log($e->getFriendlyMessage());
                     }
                 }
@@ -186,7 +186,7 @@ class SubscriptionManager
                         $email,
                         $status
                     );
-                } catch (\Mailchimp_Error $e) {
+                } catch (\Mailchimp_Error | \Mailchimp_HttpError $e) {
                     $this->_helper->log($e->getFriendlyMessage());
                 }
             }
@@ -215,7 +215,7 @@ class SubscriptionManager
                     null,
                     'unsubscribed'
                 );
-            } catch (\Mailchimp_Error $e) {
+            } catch (\Mailchimp_Error | \Mailchimp_HttpError $e) {
                 $this->_helper->log($e->getFriendlyMessage());
             }
         }

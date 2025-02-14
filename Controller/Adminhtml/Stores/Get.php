@@ -69,7 +69,7 @@ class Get extends Action
                     $result['valid'] = 1;
                 }
             }
-        } catch (\Mailchimp_Error $e) {
+        } catch (\Mailchimp_Error | \Mailchimp_HttpError $e) {
             $this->_helper->log($e->getFriendlyMessage());
             $result['valid'] = 0;
             $result['errormsg'] = $e->getTitle();
