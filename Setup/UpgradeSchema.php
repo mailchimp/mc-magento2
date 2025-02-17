@@ -753,5 +753,47 @@ class UpgradeSchema implements UpgradeSchemaInterface
                 'mailchimp_sent'
             );
         }
+        if (version_compare($context->getVersion(), '102.3.66') < 0) {
+            $table = $connection
+                ->newTable($setup->getTable('mailchimp_notification'))
+                ->addColumn(
+                    'id',
+                    \Magento\Framework\DB\Ddl\Table::TYPE_INTEGER,
+                    null,
+                    ['identity' => true, 'unsigned' => true, 'nullable' => false, 'primary' => true],
+                    'Id'
+                )
+                ->addColumn(
+                    'notification_data',
+                    \Magento\Framework\DB\Ddl\Table::TYPE_TEXT,
+                    \Magento\Framework\DB\Ddl\Table::MAX_TEXT_SIZE,
+                    [],
+                    'Notification Data'
+                )
+                ->addColumn(
+                    'generated_at',
+                    \Magento\Framework\DB\Ddl\Table::TYPE_TIMESTAMP,
+                    null,
+                    ['default' => \Magento\Framework\DB\Ddl\Table::TIMESTAMP_INIT],
+                    'Generated At'
+                )
+                ->addColumn(
+                    'synced_at',
+                    \Magento\Framework\DB\Ddl\Table::TYPE_DATETIME,
+                    null,
+                    ['default' => null],
+                    'date of sync'
+                )
+                ->addColumn(
+                    'processed',
+                    \Magento\Framework\DB\Ddl\Table::TYPE_BOOLEAN,
+                    null,
+                    ['default' => false],
+                    'Already processed'
+                );
+            $connection->createTable($table);
+
+        }
     }
+
 }

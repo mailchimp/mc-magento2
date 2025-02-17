@@ -26,7 +26,7 @@ class Interest implements \Magento\Framework\Option\ArrayInterface
         \Ebizmarts\MailChimp\Helper\Data $helper,
         \Magento\Framework\App\RequestInterface $request
     ) {
-    
+
         $storeId = (int) $request->getParam("store", 0);
         if ($request->getParam('website', 0)) {
             $scope = 'website';
@@ -45,7 +45,7 @@ class Interest implements \Magento\Framework\Option\ArrayInterface
                     null,
                     200
                 );
-            } catch (\Mailchimp_Error $e) {
+            } catch (\Mailchimp_Error | \Mailchimp_HttpError $e) {
                 $helper->log($e->getFriendlyMessage());
             }
         }

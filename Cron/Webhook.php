@@ -360,7 +360,7 @@ class Webhook
                             $this->groups = array_merge_recursive($this->groups, $interests['interests']);
                         }
                     }
-                } catch (\Mailchimp_Error $e) {
+                } catch (\Mailchimp_Error | \Mailchimp_HttpError $e) {
                     $error = $e->getMessage();
                     $this->_helper->log("Error: [$error] for store [$storeId]");
                 }

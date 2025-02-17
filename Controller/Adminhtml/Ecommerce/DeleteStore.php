@@ -51,7 +51,7 @@ class DeleteStore extends \Magento\Backend\App\Action
         \Ebizmarts\MailChimp\Helper\Data $helper,
         \Magento\Config\Model\ResourceModel\Config $config
     ) {
-    
+
         parent::__construct($context);
         $this->resultJsonFactory    = $resultJsonFactory;
         $this->helper               = $helper;
@@ -89,10 +89,12 @@ class DeleteStore extends \Magento\Backend\App\Action
             $valid = 0;
             $message = $e->getMessage();
         }
-        return $resultJson->setData([
+        $ret = [
             'valid' => (int)$valid,
             'message' => $message,
-        ]);
+        ];
+        $this->helper->buttonPressed("DeleteStore",$ret);
+        return $resultJson->setData($ret);
     }
     protected function _isAllowed()
     {

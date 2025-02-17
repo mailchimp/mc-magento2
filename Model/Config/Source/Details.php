@@ -99,7 +99,7 @@ class Details implements \Magento\Framework\Option\ArrayInterface
                 } else {
                     $this->_options['store_exists'] = false;
                 }
-            } catch (\Mailchimp_Error $e) {
+            } catch (\Mailchimp_Error | \Mailchimp_HttpError $e) {
                 $this->_helper->log($e->getFriendlyMessage());
                 $this->_error = $e->getMessage();
                 $this->_options['store_exists'] = false;
