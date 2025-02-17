@@ -79,7 +79,7 @@ class MailchimpMap extends \Magento\Framework\View\Element\Html\Select
                     $ret[$item['tag']] = $item['tag'] . ' (' . $item['name'] . ' : ' . $item['type'] . ')';
                 }
             }
-        } catch (\Mailchimp_Error $e) {
+        } catch (\Mailchimp_Error | \Mailchimp_HttpError $e) {
             $this->_helper->log($e->getFriendlyMessage());
         }
         return $ret;

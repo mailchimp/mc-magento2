@@ -77,7 +77,7 @@ class Subscriber
                 try {
                     $md5HashEmail = hash('md5', strtolower($subscriber->getSubscriberEmail()));
                     $api->lists->members->update($this->_helper->getDefaultList($storeId), $md5HashEmail, null, 'unsubscribed');
-                } catch (\Mailchimp_Error $e) {
+                } catch (\Mailchimp_Error | \Mailchimp_HttpError $e) {
                     $this->_helper->log($e->getFriendlyMessage());
                 }
             }
