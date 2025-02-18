@@ -66,6 +66,10 @@ class Get extends Action
             $result['valid'] = 0;
             $result['errormsg'] = $e->getTitle();
             $this->_helper->log($e->getFriendlyMessage());
+        } catch (\Mailchimp_HttpError $e) {
+            $result['valid'] = 0;
+            $result['errormsg'] = $e->getTitle();
+            $this->_helper->log($e->getFriendlyMessage());
         }
         $resultJson = $this->_resultFactory->create(ResultFactory::TYPE_JSON);
         $resultJson->setData($result);

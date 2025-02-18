@@ -138,6 +138,9 @@ class Result
         } catch (\Mailchimp_Error $e) {
             $this->_helper->log($e->getFriendlyMessage());
             return false;
+        }  catch (\Mailchimp_HttpError $e) {
+            $this->_helper->log($e->getFriendlyMessage());
+            return false;
         } catch (\Exception $e) {
             $this->_helper->log($e->getMessage());
         }

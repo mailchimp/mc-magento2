@@ -80,6 +80,8 @@ class Subscriber
                     $api->lists->members->update($this->_helper->getDefaultList($storeId), $md5HashEmail, null, 'unsubscribed');
                 } catch (\Mailchimp_Error $e) {
                     $this->_helper->log($e->getFriendlyMessage());
+                } catch (\Mailchimp_HttpError $e) {
+                    $this->_helper->log($e->getFriendlyMessage());
                 }
             }
         }
@@ -121,6 +123,8 @@ class Subscriber
                         $api->lists->members->addOrUpdate($this->_helper->getDefaultList($storeId), $emailHash, null, $status, $mergeVars, null, null, null, null, $email, $status);
                     } catch (\Mailchimp_Error $e) {
                         $this->_helper->log($e->getFriendlyMessage());
+                    } catch (\Mailchimp_HttpError $e) {
+                        $this->_helper->log($e->getFriendlyMessage());
                     }
                 }
             }
@@ -158,6 +162,8 @@ class Subscriber
                     $return = $api->lists->members->addOrUpdate($this->_helper->getDefaultList($storeId), $md5HashEmail, null, $status, $mergeVars, null, null, null, null, $email, $status);
                 } catch (\Mailchimp_Error $e) {
                     $this->_helper->log($e->getFriendlyMessage());
+                } catch (\Mailchimp_HttpError $e) {
+                    $this->_helper->log($e->getFriendlyMessage());
                 }
             }
         }
@@ -183,6 +189,8 @@ class Subscriber
                 $md5HashEmail = md5(strtolower($subscriber->getSubscriberEmail()));
                 $api->lists->members->update($this->_helper->getDefaultList($storeId), $md5HashEmail, null, 'unsubscribed');
             } catch (\Mailchimp_Error $e) {
+                $this->_helper->log($e->getFriendlyMessage());
+            } catch (\Mailchimp_HttpError $e) {
                 $this->_helper->log($e->getFriendlyMessage());
             }
         }
@@ -210,6 +218,8 @@ class Subscriber
                         $api->lists->members->delete($this->_helper->getDefaultList($storeId), $md5HashEmail);
                     }
                 } catch (\Mailchimp_Error $e) {
+                    $this->_helper->log($e->getFriendlyMessage());
+                } catch (\Mailchimp_HttpError $e) {
                     $this->_helper->log($e->getFriendlyMessage());
                 }
             }

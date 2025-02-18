@@ -158,6 +158,8 @@ class MonkeyStore extends \Magento\Framework\App\Config\Value
             return $store['list_id'];
         } catch (\Mailchimp_Error $e) {
             $this->_helper->log($e->getFriendlyMessage());
+        } catch (\Mailchimp_HttpError $e) {
+            $this->_helper->log($e->getFriendlyMessage());
         }
         return null;
     }

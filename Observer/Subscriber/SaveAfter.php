@@ -83,6 +83,8 @@ class SaveAfter implements \Magento\Framework\Event\ObserverInterface
                 );
             } catch (\Mailchimp_Error $e) {
                 $this->_helper->log($e->getFriendlyMessage());
+            } catch (\Mailchimp_HttpError $e) {
+                $this->_helper->log($e->getFriendlyMessage());
             }
 
         }

@@ -44,6 +44,10 @@ class Save extends \Ebizmarts\MailChimp\Controller\Adminhtml\Stores
                 $this->messageManager->addErrorMessage(__('Store could not be saved.'.$e->getMessage()));
                 $this->_mhelper->log($e->getFriendlyMessage());
                 return $resultRedirect->setPath('mailchimp/stores/edit', ['id'=>$storeId]);
+            } catch (\Mailchimp_HttpError $e) {
+                $this->messageManager->addErrorMessage(__('Store could not be saved.'.$e->getMessage()));
+                $this->_mhelper->log($e->getFriendlyMessage());
+                return $resultRedirect->setPath('mailchimp/stores/edit', ['id'=>$storeId]);
             }
         }
     }

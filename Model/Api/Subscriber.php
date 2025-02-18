@@ -185,6 +185,9 @@ class Subscriber
         } catch (\MailChimp_Error $e) {
             $this->_helper->log($e->getFriendlyMessage(), $storeId);
             $this->_message->addErrorMessage($e->getMessage());
+        } catch (\Mailchimp_HttpError $e) {
+            $this->_helper->log($e->getFriendlyMessage(), $storeId);
+            $this->_message->addErrorMessage($e->getMessage());
         } catch (\Exception $e) {
             $this->_helper->log($e->getMessage(), $storeId);
         }

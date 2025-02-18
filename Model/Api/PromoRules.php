@@ -113,6 +113,8 @@ class PromoRules
                 $count++;
             } catch (\Mailchimp_Error $e) {
                 $this->_helper->log($e->getFriendlyMessage());
+            } catch (\Mailchimp_HttpError $e) {
+                $this->_helper->log($e->getFriendlyMessage());
             }
             $this->syncHelper->ecommerceDeleteAllByIdType($ruleId, \Ebizmarts\MailChimp\Helper\Data::IS_PROMO_RULE, $mailchimpStoreId);
         }
@@ -148,6 +150,8 @@ class PromoRules
                     $this->syncHelper->ecommerceDeleteAllByIdType($promoCode['id'], \Ebizmarts\MailChimp\Helper\Data::IS_PROMO_CODE, $mailchimpStoreId);
                 }
             } catch (\Mailchimp_Error $e) {
+                $this->_helper->log($e->getFriendlyMessage());
+            } catch (\Mailchimp_HttpError $e) {
                 $this->_helper->log($e->getFriendlyMessage());
             }
             $this->syncHelper->ecommerceDeleteAllByIdType($rule->getRuleId(), \Ebizmarts\MailChimp\Helper\Data::IS_PROMO_RULE, $mailchimpStoreId);

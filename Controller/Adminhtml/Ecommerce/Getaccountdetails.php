@@ -89,6 +89,9 @@ class Getaccountdetails extends Action
         } catch (\Mailchimp_Error $e) {
             $this->_helper->log($e->getFriendlyMessage());
             $options['error'] = ['label' => 'Error', 'value' => __('--- Invalid API Key ---')];
+        } catch (\Mailchimp_HttpError $e) {
+            $this->_helper->log($e->getFriendlyMessage());
+            $options['error'] = ['label' => 'Error', 'value' => __('--- Invalid API Key ---')];
         }
 
 

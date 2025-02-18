@@ -255,6 +255,8 @@ class Ecommerce
 
             } catch (\Mailchimp_Error $e) {
                 $this->_helper->log($e->getFriendlyMessage());
+            } catch (\Mailchimp_HttpError $e) {
+                $this->_helper->log($e->getFriendlyMessage());
             } catch (\Exception $e) {
                 $this->_helper->log($e->getMessage());
             }
@@ -293,6 +295,9 @@ class Ecommerce
         } catch (\Mailchimp_Error $e) {
             $this->_helper->log('MailChimp error when updating syncing flag for store ' . $storeId);
             $this->_helper->log($e->getFriendlyMessage());
+        } catch (\Mailchimp_HttpError $e) {
+            $this->_helper->log('MailChimp error when updating syncing flag for store ' . $storeId);
+            $this->_helper->log($e->getFriendlyMessage());
         }
     }
     protected function _ping($storeId)
@@ -301,6 +306,9 @@ class Ecommerce
             $api = $this->_helper->getApi($storeId);
             $api->root->info();
         } catch (\Mailchimp_Error $e) {
+            $this->_helper->log($e->getFriendlyMessage());
+            return false;
+        } catch (\Mailchimp_HttpError $e) {
             $this->_helper->log($e->getFriendlyMessage());
             return false;
         }
