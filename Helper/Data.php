@@ -491,9 +491,9 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         } else {
             $this->_api->setApiKey($apiKey);
         }
-        $this->_api->setHelper($this);
-        $this->_api->setStoreURL($this->_storeManager->getStore($store)->getBaseUrl());
         $this->_api->setUserAgent('Mailchimp4Magento' . (string)$this->getModuleVersion());
+        $this->_api->setHelper($this);
+        $this->_api->setStoreURL($this->_storeManager->getStore()->getBaseUrl());
         return $this->_api;
     }
 
