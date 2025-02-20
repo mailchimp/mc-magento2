@@ -63,7 +63,6 @@ class SyncStatistics
         $collection->addFieldToFilter('processed', 0);
         $collection->setOrder('generated_at', 'ASC');
         $collection->getSelect()->limit(self::MAX_NOTIFICATIONS);;
-
         return $collection;
     }
     private function syncData($data)

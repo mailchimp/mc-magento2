@@ -2,7 +2,7 @@
 
 namespace Ebizmarts\MailChimp\Helper;
 
-use Magento\Framework\HTTP\Client\Curl;
+use Ebizmarts\MailChimp\Helper\Curl;
 use Ebizmarts\MailChimp\Helper\Data as MailChimpHelper;
 
 class Http
@@ -12,6 +12,7 @@ class Http
      */
     protected $curl;
     protected $url;
+    protected $helper;
     public function __construct(
         Curl $curl,
         MailChimpHelper $helper
@@ -24,6 +25,7 @@ class Http
         ];
         $this->curl->setOption(CURLOPT_RETURNTRANSFER, true);
         $this->curl->setHeaders($headers);
+        $this->helper = $helper;
     }
     public function post($body)
     {
