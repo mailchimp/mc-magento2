@@ -74,6 +74,9 @@ define(
                         self._changeAbandonedCart();
                     }
                 });
+                $('#mailchimp_support').click(function () {
+                    self._showSupport();
+                });
                 var ecommerceEnabled = $('#mailchimp_ecommerce_active').find(':selected').val();
                 var abandonedCartEnabled = $('#mailchimp_abandonedcart_active').find(':selected').val();
                 if (ecommerceEnabled == 0 && abandonedCartEnabled == 1) {
@@ -306,6 +309,9 @@ define(
                         }
                     }
                 });
+            },
+            _showSupport: function () {
+                alert({content: "By leveraging remote diagnostics for the Mailchimp for Magento plugin, our technical team can pinpoint and resolve syncing issues while ensuring that no sensitive data is involved in the troubleshooting process."});
             },
             _loadDetails: function () {
                 var detailsUrl = this.options.detailsUrl;
