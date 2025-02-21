@@ -17,6 +17,7 @@ use Magento\Framework\Controller\Result\JsonFactory;
 use Magento\Framework\Exception\ValidatorException;
 use Symfony\Component\Config\Definition\Exception\Exception;
 use Ebizmarts\MailChimp\Helper\Sync as SyncHelper;
+use Ebizmarts\MailChimp\Helper\Data;
 
 class ResyncSubscribers extends \Magento\Backend\App\Action
 {
@@ -32,23 +33,30 @@ class ResyncSubscribers extends \Magento\Backend\App\Action
      * @var \Magento\Store\Model\StoreManagerInterface
      */
     protected $storeManager;
+    /**
+     * @var Data
+     */
+    protected $helper;
 
     /**
      * @param \Magento\Backend\App\Action\Context $context
      * @param JsonFactory $resultJsonFactory
      * @param \Magento\Store\Model\StoreManagerInterface $storeManagerInterface
      * @param SyncHelper $syncHelper
+     * @param Data $helper
      */
     public function __construct(
         \Magento\Backend\App\Action\Context $context,
         JsonFactory $resultJsonFactory,
         \Magento\Store\Model\StoreManagerInterface $storeManagerInterface,
-        SyncHelper $syncHelper
+        SyncHelper $syncHelper,
+        Data $helper
     ) {
         parent::__construct($context);
         $this->resultJsonFactory    = $resultJsonFactory;
         $this->syncHelper           = $syncHelper;
         $this->storeManager         = $storeManagerInterface;
+        $this->helper               = $helper;
     }
 
     public function execute()
