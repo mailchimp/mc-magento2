@@ -124,7 +124,7 @@
                 <field id="enable_support" translate="label comment" type="select" sortOrder="75" showInDefault="1" showInWebsite="0" showInStore="0">
                     <label>Enable Support</label>
                     <comment>
-                        <![CDATA[By ennabling this, you accept <a href="https://github.com/magento/magento2/issues/4999" target="_blank">this</a>]]>
+                        <![CDATA[By ennabling this, you accept <a id='mailchimp_support' style="cursor: pointer">this</a>]]>
                     </comment>
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
                     <depends>
