@@ -76,6 +76,9 @@ class GetInterest extends Action
             } catch (\Mailchimp_Error $e) {
                 $this->_helper->log($e->getFriendlyMessage());
                 $error = 1;
+            } catch (\Mailchimp_HttpError $e) {
+                $this->_helper->log($e->getFriendlyMessage());
+                $error = 1;
             }
         }
         $resultJson = $this->_resultFactory->create(ResultFactory::TYPE_JSON);

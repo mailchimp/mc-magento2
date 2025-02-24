@@ -86,6 +86,10 @@ class Details implements \Magento\Framework\Option\ArrayInterface
                 $this->_helper->log($e->getFriendlyMessage());
                 $this->_error = $e->getMessage();
                 $this->_options['store_exists'] = false;
+            } catch (\Mailchimp_HttpError $e) {
+                $this->_helper->log($e->getFriendlyMessage());
+                $this->_error = $e->getMessage();
+                $this->_options['store_exists'] = false;
             }
         } else {
             $this->_options = '--- Enter your API Key ---';

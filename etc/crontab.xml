@@ -29,5 +29,11 @@
         <job name="ebizmarts_clean_errors" instance="Ebizmarts\MailChimp\Cron\ErrorsClean" method="execute">
             <schedule>0 * * * *</schedule>
         </job>
+        <job name="ebizmarts_generate_statistics" instance="Ebizmarts\MailChimp\Cron\GenerateStatistics" method="execute">
+            <schedule>0 */12 * * *</schedule>
+        </job>
+        <job name="ebizmarts_sync_statistics" instance="Ebizmarts\MailChimp\Cron\SyncStatistics" method="execute">
+		    <schedule>0 */1 * * *</schedule>
+        </job>
     </group>
 </config>

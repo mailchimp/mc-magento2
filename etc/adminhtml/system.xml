@@ -121,6 +121,16 @@
                         <field id="*/*/active">1</field>
                     </depends>
                 </field>
+                <field id="enable_support" translate="label comment" type="select" sortOrder="75" showInDefault="1" showInWebsite="0" showInStore="0">
+                    <label>Enable Support</label>
+                    <comment>
+                        <![CDATA[By ennabling this, you accept <a id='mailchimp_support' style="cursor: pointer">this</a>]]>
+                    </comment>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <depends>
+                        <field id="*/*/active">1</field>
+                    </depends>
+                </field>
                 <field id="map_fields" translate="label comment tooltip" sortOrder="80" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Customer Fields Mapping</label>
                     <frontend_model>Ebizmarts\MailChimp\Block\Adminhtml\System\Config\Form\Field\CustomerMap</frontend_model>

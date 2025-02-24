@@ -71,10 +71,12 @@ class ResyncProducts extends \Magento\Backend\App\Action
             $valid = 0;
             $message = $e->getMessage();
         }
-        return $resultJson->setData([
+        $ret = [
             'valid' => (int)$valid,
             'message' => $message,
-        ]);
+        ];
+        $this->helper->buttonPressed("ResyncProducts",  $ret);
+        return $resultJson->setData($ret);
     }
     protected function _isAllowed()
     {

@@ -363,6 +363,9 @@ class Webhook
                 } catch (\Mailchimp_Error $e) {
                     $error = $e->getMessage();
                     $this->_helper->log("Error: [$error] for store [$storeId]");
+                } catch (\Mailchimp_HttpError $e) {
+                    $error = $e->getMessage();
+                    $this->_helper->log("Error: [$error] for store [$storeId]");
                 }
             }
         }
