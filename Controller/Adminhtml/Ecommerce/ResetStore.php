@@ -45,7 +45,7 @@ class ResetStore extends \Magento\Backend\App\Action
         \Magento\Store\Model\StoreManagerInterface $storeManagerInterface,
         \Ebizmarts\MailChimp\Helper\Data $helper
     ) {
-    
+
         parent::__construct($context);
         $this->resultJsonFactory    = $resultJsonFactory;
         $this->helper               = $helper;
@@ -82,10 +82,12 @@ class ResetStore extends \Magento\Backend\App\Action
             $valid = 0;
             $message = $e->getMessage();
         }
-        return $resultJson->setData([
+        $ret = [
             'valid' => (int)$valid,
             'message' => $message,
-        ]);
+        ];
+        $this->helper->buttonPressed("ResetStore",$ret);
+        return $resultJson->setData($ret);
     }
     protected function _isAllowed()
     {

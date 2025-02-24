@@ -1,16 +1,16 @@
 <schema xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:noNamespaceSchemaLocation="urn:magento:framework:Setup/Declaration/Schema/etc/schema.xsd">
     <table name="sales_order">
-        <column xsi:type="boolean" name="mailchimp_abandonedcart_flag" nullable="false" comment="Retrieved from Mailchimp"/>
+        <column xsi:type="boolean" name="mailchimp_abandonedcart_flag" nullable="false" comment="Retrieved from Mailchimp" default="false"/>
         <column xsi:type="varchar" name="mailchimp_campaign_id" length="16" comment="Campaign"/>
         <column xsi:type="text" name="mailchimp_landing_page" nullable="false" comment="Landing Page"/>
-        <column xsi:type="boolean" name="mailchimp_flag" nullable="false" comment="Retrieved from Mailchimp"/>
+        <column xsi:type="boolean" name="mailchimp_flag" nullable="false" comment="Retrieved from Mailchimp" default="false"/>
     </table>
     <table name="sales_order_grid">
-        <column xsi:type="boolean" name="mailchimp_flag" nullable="false" comment="Retrieved from Mailchimp"/>
+        <column xsi:type="boolean" name="mailchimp_flag" nullable="false" comment="Retrieved from Mailchimp" default="false"/>
     </table>
     <table name="quote">
-        <column xsi:type="boolean" name="mailchimp_abandonedcart_flag" nullable="false" comment="Retrieved from Mailchimp"/>
+        <column xsi:type="boolean" name="mailchimp_abandonedcart_flag" nullable="false" comment="Retrieved from Mailchimp" default="false"/>
         <column xsi:type="varchar" name="mailchimp_campaign_id" length="16" comment="Campaign"/>
         <column xsi:type="text" name="mailchimp_landing_page" nullable="false" comment="Landing Page"/>
     </table>
@@ -54,7 +54,7 @@
         <column xsi:type="varchar" name="list_id" length="50" comment="List Id"/>
         <column xsi:type="varchar" name="name" length="128" comment="Name"/>
         <column xsi:type="varchar" name="platform" length="50" comment="Platform"/>
-        <column xsi:type="boolean" name="is_sync" nullable="false" comment="if the store is synced or not	"/>
+        <column xsi:type="boolean" name="is_sync" nullable="false" comment="if the store is synced or not" default="false"/>
         <column xsi:type="varchar" name="email_address" length="128" comment="email associated to store"/>
         <column xsi:type="varchar" name="currency_code" length="3" comment="store currency code"/>
         <column xsi:type="varchar" name="money_format" length="10" comment="symbol of currency"/>
@@ -104,11 +104,11 @@
         <column xsi:type="varchar" name="type" length="24" comment="Type of register"/>
         <column xsi:type="int" name="related_id" padding="11" unsigned="true" nullable="false"
                 comment="Id of the related entity"/>
-        <column xsi:type="boolean" name="mailchimp_sync_modified" nullable="false" comment="If the entity was modified"/>
+        <column xsi:type="boolean" name="mailchimp_sync_modified" nullable="false" comment="If the entity was modified" default="false"/>
         <column xsi:type="datetime" name="mailchimp_sync_delta" on_update="false" nullable="false" default="CURRENT_TIMESTAMP"
                 comment="Sync Delta"/>
         <column xsi:type="varchar" name="mailchimp_sync_error" length="128" comment="Error on synchronization"/>
-        <column xsi:type="boolean" name="mailchimp_sync_deleted" nullable="false" comment="If the object was deleted in mailchimp"/>
+        <column xsi:type="boolean" name="mailchimp_sync_deleted" nullable="false" comment="If the object was deleted in mailchimp" default="false"/>
         <column xsi:type="varchar" name="mailchimp_token" length="32" comment="Quote token"/>
         <column xsi:type="varchar" name="batch_id" length="64" comment="Batch id"/>
         <column xsi:type="int" name="deleted_related_id" padding="11" unsigned="true" nullable="false"
@@ -143,7 +143,19 @@
         <column xsi:type="datetime" name="fired_at" on_update="false" nullable="false" default="CURRENT_TIMESTAMP"
                 comment="date of the request"/>
         <column xsi:type="text" name="data_request" nullable="false" comment="data of the request"/>
-        <column xsi:type="boolean" name="processed" nullable="false" comment="Already processed"/>
+        <column xsi:type="boolean" name="processed" nullable="false" comment="Already processed"  default="false"/>
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="id"/>
+        </constraint>
+    </table>
+    <table name="mailchimp_notification">
+        <column xsi:type="int" name="id" padding="10" nullable="false" identity="true" comment=""/>
+        <column xsi:type="text" name="notification_data" nullable="false" comment="data of the request"/>
+        <column xsi:type="datetime" name="generated_at" on_update="false" nullable="false" default="CURRENT_TIMESTAMP"
+                comment="date of generation"/>
+        <column xsi:type="datetime" name="synced_at" on_update="true" nullable="true" default="null"
+                comment="date of generation"/>
+        <column xsi:type="boolean" name="processed" nullable="false" comment="Already processed" default="false"/>
         <constraint xsi:type="primary" referenceId="PRIMARY">
             <column name="id"/>
         </constraint>

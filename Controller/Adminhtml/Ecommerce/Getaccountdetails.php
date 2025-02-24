@@ -86,7 +86,7 @@ class Getaccountdetails extends Action
                     $options['nostore'] = ['label' => __('Ecommerce disabled, only subscribers will be synchronized (your orders, products,etc will be not synchronized)'), 'value' => ''];
                 }
             }
-        } catch (\Mailchimp_Error $e) {
+        } catch (\Mailchimp_Error | \Mailchimp_HttpError $e) {
             $this->_helper->log($e->getFriendlyMessage());
             $options['error'] = ['label' => 'Error', 'value' => __('--- Invalid API Key ---')];
         }

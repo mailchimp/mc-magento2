@@ -15,7 +15,7 @@ use Magento\Framework\Component\ComponentRegistrar;
 use Magento\Framework\Component\ComponentRegistrarInterface;
 use Magento\Framework\Exception\FileSystemException;
 use Magento\Framework\Filesystem\Directory\ReadFactory;
-
+use Composer\InstalledVersions;
 class ModuleVersion
 {
     const COMPOSER_FILE_NAME = 'composer.json';
@@ -38,6 +38,16 @@ class ModuleVersion
         $this->componentRegistrar = $componentRegistrar;
         $this->readFactory = $readFactory;
     }
+    public function getLibVersion($libName)
+    {
+        $emptyVersionNumber = '';
+        try {
+            $lib = InstalledVersions::getVersion($libName);
+            return $lib;
+        } catch (\Exception $e) {
+            return $emptyVersionNumber;
+        }
+    }
     public function getModuleVersion($moduleName) : string
     {
         $emptyVersionNumber = '';
@@ -50,11 +60,17 @@ class ModuleVersion
             return $emptyVersionNumber;
         } catch (FileSystemException $fsException) {
             return $emptyVersionNumber;
-        }
-        $jsonData = json_decode($composerJsonData);
-        if ($jsonData === null) {
+        } catch (\Exception $exception) {
             return $emptyVersionNumber;
         }
-        return $jsonData->version ?? $emptyVersionNumber;
+        try {
+            $jsonData = json_decode($composerJsonData);
+            if ($jsonData === null) {
+                return $emptyVersionNumber;
+            }
+            return $jsonData->version ?? $emptyVersionNumber;
+        } catch (\Exception $exception) {
+            return $emptyVersionNumber;
+        }
     }
 }

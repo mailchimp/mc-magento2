@@ -155,5 +155,17 @@
             "mailchimp_sync_error": true,
             "mailchimp_sent": true
         }
+    },
+    "mailchimp_notification": {
+        "column": {
+            "id": true,
+            "notification_data": true,
+            "generated_at": true,
+            "synced_at": true,
+            "processed": true
+        },
+        "constraint": {
+            "PRIMARY": true
+        }
     }
 }
