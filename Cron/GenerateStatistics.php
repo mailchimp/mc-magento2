@@ -142,7 +142,7 @@ class GenerateStatistics
             $config['general']['delete_action'] = $this->deleteAction[$this->helper->getConfigValue(Data::XML_PATH_WEBHOOK_DELETE)];
         }
         $config['general']['enable_log'] = $this->helper->getConfigValue(Data::XML_PATH_LOG,$storeId);
-//        $config['general']['field_mapping'] = $this->helper->getConfigValue(Data::XML_MERGEVARS, $storeId);
+        $config['general']['field_mapping'] = $this->helper->getConfigValue(Data::XML_MERGEVARS, $storeId);
         $config['general']['mapping'] = $this->helper->getMapFields($storeId, false);
         $config['general']['interest'] = $this->helper->getConfigValue(Data::XML_INTEREST, $storeId);
         $config['general']['show_groups'] = $this->helper->getConfigValue(Data::XML_INTEREST_IN_SUCCESS);
