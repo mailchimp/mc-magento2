@@ -110,7 +110,7 @@ class PromoRules
                 $batchArray[$count]['path'] = "/ecommerce/stores/$mailchimpStoreId/promo-rules/$ruleId";
                 $batchArray[$count]['operation_id'] = $this->_batchId . '_' . $ruleId;
                 $count++;
-            } catch (\Mailchimp_Error $e) {
+            } catch (\Mailchimp_Error | \Mailchimp_HttpError $e) {
                 $this->_helper->log($e->getFriendlyMessage());
             }
             $this->syncHelper->ecommerceDeleteAllByIdType($ruleId, \Ebizmarts\MailChimp\Helper\Data::IS_PROMO_RULE, $mailchimpStoreId);

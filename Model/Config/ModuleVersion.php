@@ -49,12 +49,18 @@ class ModuleVersion
             return $emptyVersionNumber;
         } catch(FileSystemException $fsException) {
             return $emptyVersionNumber;
-        }
-        $jsonData = json_decode($composerJsonData);
-        if ($jsonData === null) {
+        } catch (\Exception $exception) {
             return $emptyVersionNumber;
         }
-        return $jsonData->version ?? $emptyVersionNumber;
+        try {
+            $jsonData = json_decode($composerJsonData);
+            if ($jsonData === null) {
+                return $emptyVersionNumber;
+            }
+            return $jsonData->version ?? $emptyVersionNumber;
+        } catch (\Exception $exception) {
+            return $emptyVersionNumber;
+        }
     }
 }
 

@@ -45,7 +45,7 @@ class Interest implements \Magento\Framework\Option\ArrayInterface
                     null,
                     200
                 );
-            } catch (\Mailchimp_Error $e) {
+            } catch (\Mailchimp_Error | \Mailchimp_HttpError $e) {
                 $helper->log($e->getFriendlyMessage());
             }
         }
