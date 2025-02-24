@@ -73,7 +73,7 @@ class GetInterest extends Action
                 if (is_array($result['categories']) && count($result['categories'])) {
                     $rc = $result['categories'];
                 }
-            } catch (\Mailchimp_Error $e) {
+            } catch (\Mailchimp_Error | \Mailchimp_HttpError $e) {
                 $this->_helper->log($e->getFriendlyMessage());
                 $error = 1;
             }

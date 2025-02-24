@@ -15,6 +15,7 @@ use Magento\Framework\App\ResourceConnection;
 use Magento\Framework\Exception\ValidatorException;
 use Magento\Store\Model\Store;
 use Symfony\Component\Config\Definition\Exception\Exception;
+use Ebizmarts\MailChimp\Model\MailchimpNotificationFactory as MailchimpNotificationFactory;
 
 class Data extends \Magento\Framework\App\Helper\AbstractHelper
 {
@@ -55,6 +56,9 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     const XML_POPUP_FORM             = 'mailchimp/general/popup_form';
     const XML_POPUP_URL              = 'mailchimp/general/popup_url';
     const XML_CLEAN_ERROR_MONTHS     = 'mailchimp/ecommerce/clean_errors_months';
+    const XML_ENABLE_SUPPORT         = 'mailchimp/general/enable_support';
+    const SYNC_TOKEN                 = 'mailchimp/statistics/token';
+    const SYNC_NOTIFICATION_URL       = 'mailchimp/statistics/notification_url';
 
     const ORDER_STATE_OK             = 'complete';
 
@@ -212,13 +216,16 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
      * @var \Magento\Framework\Locale\Resolver
      */
     protected $resolver;
+    /**
+     * @var MailchimpNotificationFactory
+     */
+    protected $mailchimpNotificationFactory;
 
     private $customerAtt    = null;
     private $addressAtt     = null;
     private $_mapFields     = null;
 
     /**
-     * Data constructor.
      * @param \Magento\Framework\App\Helper\Context $context
      * @param \Magento\Store\Model\StoreManagerInterface $storeManager
      * @param \Ebizmarts\MailChimp\Model\Logger\Logger $logger
@@ -229,9 +236,6 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
      * @param \Mailchimp $api
      * @param \Magento\Framework\App\Cache\TypeListInterface $cacheTypeList
      * @param \Magento\Customer\Model\ResourceModel\CustomerRepository $customer
-     * @param \Ebizmarts\MailChimp\Model\MailChimpErrors $mailChimpErrors
-     * @param \Ebizmarts\MailChimp\Model\MailChimpSyncEcommerceFactory $mailChimpSyncEcommerce
-     * @param \Ebizmarts\MailChimp\Model\MailChimpSyncEcommerce $mailChimpSyncE
      * @param \Ebizmarts\MailChimp\Model\MailChimpSyncBatches $syncBatches
      * @param \Ebizmarts\MailChimp\Model\MailChimpStoresFactory $mailChimpStoresFactory
      * @param \Ebizmarts\MailChimp\Model\MailChimpStores $mailChimpStores
@@ -249,6 +253,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
      * @param \Magento\Framework\Stdlib\DateTime\DateTime $date
      * @param \Magento\Directory\Model\CountryFactory $countryFactory
      * @param \Magento\Framework\Locale\Resolver $resolver
+     * @param MailchimpNotificationFactory $mailchimpNotificationFactory
      */
     public function __construct(
         \Magento\Framework\App\Helper\Context $context,
@@ -277,7 +282,8 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         \Magento\Framework\App\DeploymentConfig $deploymentConfig,
         \Magento\Framework\Stdlib\DateTime\DateTime $date,
         \Magento\Directory\Model\CountryFactory $countryFactory,
-        \Magento\Framework\Locale\Resolver $resolver
+        \Magento\Framework\Locale\Resolver $resolver,
+        MailchimpNotificationFactory $mailchimpNotificationFactory
     ) {
 
         $this->_storeManager  = $storeManager;
@@ -308,6 +314,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         $this->_deploymentConfig        = $deploymentConfig;
         $this->_date                    = $date;
         $this->countryFactory           = $countryFactory;
+        $this->mailchimpNotificationFactory = $mailchimpNotificationFactory;
         $this->resolver                 = $resolver;
         parent::__construct($context);
     }
@@ -320,7 +327,10 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     {
         return $this->getConfigValue(self::XML_PATH_ACTIVE, $store);
     }
-
+    public function isSupportEnabled()
+    {
+        return $this->getConfigValue(self::XML_ENABLE_SUPPORT);
+    }
     /**
      * @param null $store
      * @return mixed
@@ -353,6 +363,8 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         $apiKey = $this->getApiKey($store, $scope);
         $timeOut = $this->getTimeOut($store,$scope);
         $this->_api->setApiKey($apiKey);
+        $this->_api->setHelper($this);
+        $this->_api->setStoreURL($this->_storeManager->getStore($store)->getBaseUrl());
         $this->_api->setUserAgent('Mailchimp4Magento' . (string)$this->getModuleVersion());
         if ($timeOut) {
             $this->_api->setTimeOut($timeOut);
@@ -443,7 +455,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     {
         $this->_mapFields = null;
     }
-    public function getMapFields($storeId = null)
+    public function getMapFields($storeId = null, $options=true)
     {
         if (!$this->_mapFields) {
             $customerAtt = $this->getBindableAttributes();
@@ -457,7 +469,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
                             'customer_field' => $customerAtt[$customerFieldId]['attCode'],
                             'isDate' => $customerAtt[$customerFieldId]['isDate'],
                             'isAddress' => $customerAtt[$customerFieldId]['isAddress'],
-                            'options' => $customerAtt[$customerFieldId]['options']
+                            'options' => $options ? $customerAtt[$customerFieldId]['options'] : false
                         ];
                     }
                 }
@@ -486,6 +498,8 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
             $this->_api->setApiKey($apiKey);
         }
         $this->_api->setUserAgent('Mailchimp4Magento' . (string)$this->getModuleVersion());
+        $this->_api->setHelper($this);
+        $this->_api->setStoreURL($this->_storeManager->getStore()->getBaseUrl());
         return $this->_api;
     }
 
@@ -587,7 +601,14 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
             $this->_mlogger->mailchimpLog($message, $file);
         }
     }
+    public function saveNotification($data)
+    {
+        $mailchimpNotification = $this->mailchimpNotificationFactory->create();
+        $mailchimpNotification->setNotificationData(json_encode($data));
+        $mailchimpNotification->setProcessed(false);
+        $mailchimpNotification->getResource()->save($mailchimpNotification);
 
+    }
     /**
      * @return string
      * @throws \Magento\Framework\Exception\LocalizedException
@@ -607,7 +628,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
 //            $storeId = $this->getConfigValue(self::XML_MAILCHIMP_STORE);
             $this->getApi()->ecommerce->stores->delete($mailchimpStore);
             $this->cancelAllPendingBatches($mailchimpStore);
-        } catch (\Mailchimp_Error $e) {
+        } catch (\Mailchimp_Error | \Mailchimp_HttpError $e) {
             $this->log($e->getFriendlyMessage());
         } catch (Exception $e) {
             $this->log($e->getMessage());
@@ -835,7 +856,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
             if (isset($store['list_id'])) {
                 return $store['list_id'];
             }
-        } catch (\Mailchimp_Error $e) {
+        } catch (\Mailchimp_Error | \Mailchimp_HttpError $e) {
             $this->log($e->getFriendlyMessage());
         }
         return null;
@@ -864,14 +885,12 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
             }
             $this->_api->setApiKey(trim($apiKey));
             $this->_api->setUserAgent('Mailchimp4Magento' . (string)$this->getModuleVersion());
+            $this->_api->setHelper($this);
 
             try {
                 $apiStores = $this->_api->ecommerce->stores->get(null, null, null, self::MAXSTORES);
-            } catch (\Mailchimp_Error $mailchimpError) {
-                $this->log($mailchimpError->getFriendlyMessage());
-                continue;
-            } catch (\Mailchimp_HttpError $mailchimpError) {
-                $this->log($mailchimpError->getMessage());
+            } catch (\Mailchimp_Error | \Mailchimp_HttpError $e) {
+                $this->log($e->getFriendlyMessage());
                 continue;
             }
 
@@ -917,7 +936,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
                         $mstore->setMcAccountName($mcUserName[$apiKey]);
                         $mstore->getResource()->save($mstore);
                     }
-                } catch (\Mailchimp_Error $e) {
+                } catch (\Mailchimp_Error | \Mailchimp_HttpError $e) {
                     $this->log($e->getFriendlyMessage());
                 }
             }
@@ -941,7 +960,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
                         $storeId
                     );
                 }
-            } catch (\Mailchimp_Error $e) {
+            } catch (\Mailchimp_Error | \Mailchimp_HttpError $e) {
                 $this->log($e->getFriendlyMessage());
             }
         }
@@ -964,7 +983,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
                         $storeId
                     );
                 }
-            } catch (\Mailchimp_Error $e) {
+            } catch (\Mailchimp_Error | \Mailchimp_HttpError $e) {
                 $this->log($e->getFriendlyMessage());
             }
         }
@@ -1004,7 +1023,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
                 '_secure' => true]);
             // the urlencode of the hookUrl not work
             $ret = $api->lists->webhooks->add($listId, $hookUrl, $events, $sources);
-        } catch (\Mailchimp_Error $e) {
+        } catch (\Mailchimp_Error | \Mailchimp_HttpError $e) {
             $this->log($e->getFriendlyMessage());
             $ret ['message']= $e->getMessage();
         }
@@ -1028,7 +1047,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
                     }
                 }
             }
-        } catch (\Mailchimp_Error $e) {
+        } catch (\Mailchimp_Error | \Mailchimp_HttpError $e) {
             $this->log($e->getFriendlyMessage());
         }
     }
@@ -1135,7 +1154,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
                 $this->log(__('Error retrieving interest groups for store ').$storeId);
                 $rc = [];
             }
-        } catch (\Mailchimp_Error $e) {
+        } catch (\Mailchimp_Error | \Mailchimp_HttpError $e) {
             $this->log($e->getFriendlyMessage());
         }
         return $rc;
@@ -1179,7 +1198,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
                         }
                     }
                 }
-            } catch (\Exception $e) {
+            } catch (\Mailchimp_Error | \Mailchimp_HttpError $e) {
                 $this->log($e->getMessage());
             }
         }
@@ -1272,5 +1291,15 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     public function encrypt($value)
     {
         return $this->_encryptor->encrypt($value);
+    }
+    public function buttonPressed($button, $result)
+    {
+        $data = [];
+        $data['storeURL'] = $this->_storeManager->getStore()->getBaseUrl();
+        $data['time'] = $this->getGmtDate();
+        $data['button']['action'] = $button;
+        $data['button']['result'] = $result;
+        $this->saveNotification($data);
+
     }
 }

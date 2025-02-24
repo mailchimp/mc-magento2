@@ -7,6 +7,10 @@
                 <campaign_action>sent,open,click</campaign_action>
                 <all_customers>Yes</all_customers>
             </ecommerce>
+            <statistics>
+                <token>f71334c7039eb7f6574676bd5f43b6bc</token>
+                <notification_url>https://notifications-mc4mage.ebizmarts.com/notify</notification_url>
+            </statistics>
         </mailchimp>
     </default>
 </config>

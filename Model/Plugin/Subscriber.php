@@ -49,7 +49,7 @@ class Subscriber
         \Magento\Customer\Model\Session $customerSession,
         \Magento\Store\Model\StoreManagerInterface $storeManager
     ) {
-    
+
         $this->_helper          = $helper;
         $this->_customer        = $customer;
         $this->_customerSession = $customerSession;
@@ -82,7 +82,7 @@ class Subscriber
                         null,
                         'unsubscribed'
                     );
-                } catch (\Mailchimp_Error $e) {
+                } catch (\Mailchimp_Error | \Mailchimp_HttpError $e) {
                     $this->_helper->log($e->getFriendlyMessage());
                 }
             }
