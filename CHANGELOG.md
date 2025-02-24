@@ -1,5 +1,15 @@
 # Changelog
 
+## [103.4.66](https://github.com/mailchimp/mc-magento2/tree/103.4.66)
+
+[Full Changelog](https://github.com/mailchimp/mc-magento2/compare/103.4.65...103.4.66)
+
+**Implemented enhancements:**
+
+- Include the Billing and Shipping street in the maps fields [\#2043](https://github.com/mailchimp/mc-magento2/issues/2043)
+- Generate support data [\#2041](https://github.com/mailchimp/mc-magento2/issues/2041)
+- Put a config to sync only customers with orders [\#2035](https://github.com/mailchimp/mc-magento2/issues/2035)
+
 ## [103.4.65](https://github.com/mailchimp/mc-magento2/tree/103.4.65)
 
 [Full Changelog](https://github.com/mailchimp/mc-magento2/compare/103.4.64...103.4.65)
