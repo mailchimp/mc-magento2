@@ -47,7 +47,7 @@ class CreateWebhook extends \Magento\Backend\App\Action
         \Ebizmarts\MailChimp\Helper\Data $helper,
         \Magento\Config\Model\ResourceModel\Config $config
     ) {
-    
+
         parent::__construct($context);
         $this->resultJsonFactory    = $resultJsonFactory;
         $this->helper               = $helper;
@@ -74,11 +74,12 @@ class CreateWebhook extends \Magento\Backend\App\Action
             $message = $return['message'];
         }
         $resultJson = $this->resultJsonFactory->create();
-
-        return $resultJson->setData([
+        $ret = [
             'valid' => (int)$valid,
             'message' => $message,
-        ]);
+        ];
+        $this->helper->buttonPressed("CreateWebhook", $ret);
+        return $resultJson->setData($ret);
     }
     protected function _isAllowed()
     {
