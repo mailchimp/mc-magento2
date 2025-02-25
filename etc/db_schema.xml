@@ -153,7 +153,7 @@
         <column xsi:type="text" name="notification_data" nullable="false" comment="data of the request"/>
         <column xsi:type="datetime" name="generated_at" on_update="false" nullable="false" default="CURRENT_TIMESTAMP"
                 comment="date of generation"/>
-        <column xsi:type="datetime" name="synced_at" on_update="true" nullable="true" default="null"
+        <column xsi:type="datetime" name="synced_at" on_update="true" nullable="true"
                 comment="date of generation"/>
         <column xsi:type="boolean" name="processed" nullable="false" comment="Already processed" default="false"/>
         <constraint xsi:type="primary" referenceId="PRIMARY">
