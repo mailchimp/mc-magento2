@@ -1,5 +1,14 @@
 # Changelog
 
+## [103.4.66-p1](https://github.com/mailchimp/mc-magento2/tree/103.4.66-p1)
+
+[Full Changelog](https://github.com/mailchimp/mc-magento2/compare/103.4.66...103.4.66-1)
+
+**Fixed bugs:**
+
+- Invalid default value in db_schema.xml for datetime column "synced_at" [\#2058](https://github.com/mailchimp/mc-magento2/issues/2058)
+
+
 ## [103.4.66](https://github.com/mailchimp/mc-magento2/tree/103.4.66)
 
 [Full Changelog](https://github.com/mailchimp/mc-magento2/compare/103.4.65...103.4.66)
