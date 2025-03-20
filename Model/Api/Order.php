@@ -280,7 +280,7 @@ class Order
                         $this->_counter++;
                     }
                 }
-                $payLoadReturn = $this->generatePOSTPayload($order, $mailchimpStoreId, $magentoStoreId, true, $isSynced);
+                $payLoadReturn = $this->generatePOSTPayload($order, $mailchimpStoreId, $magentoStoreId, false, $isSynced);
                 $orderJson = $payLoadReturn['jsonOrder'];
                 $payLoadError = $payLoadReturn['error'];
                 if ($orderJson) {
