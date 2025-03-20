@@ -255,6 +255,12 @@ class Product
                 'to' => date('Y-m-d', time()).' 00:00:00'],
             ]],
             'left'
+        )->addAttributeToFilter(
+            'special_to_date',
+            ['or' => [ 0 => ['date' => true,
+                'from' => date('Y-m-d', strtotime('-1 day')).' 00:00:00'],
+            ]],
+            'left'
         );
         foreach ($collection2 as $item) {
             $productId = $this->_productRepository->get($item->getSku(),false, $magentoStoreId)->getId();
