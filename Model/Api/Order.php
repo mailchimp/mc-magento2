@@ -205,26 +205,21 @@ class Order
                     }
                 }
 
-                $orderJson = $this->generatePOSTPayload($order, $mailchimpStoreId, $magentoStoreId, true, $isSynced);
-                if ($orderJson!==false) {
-                    if (!empty($orderJson)) {
-                        $this->_helper->modifyCounter(\Ebizmarts\MailChimp\Helper\Data::ORD_MOD);
-                        $batchArray[$this->_counter]['method'] = "PATCH";
-                        $batchArray[$this->_counter]['path'] = '/ecommerce/stores/' . $mailchimpStoreId . '/orders/' .
-                            $order->getIncrementId();
-                        $batchArray[$this->_counter]['operation_id'] = $this->_batchId . '_' . $orderId;
-                        $batchArray[$this->_counter]['body'] = $orderJson;
-                    } else {
-                        $error = __('Order ['.$order->getIncrementId().'] is empty');
-                        $this->_helper->log($error);
-                        $this->_updateOrder($mailchimpStoreId, $orderId, $this->_helper->getGmtDate(), $error, 0);
-                        continue;
-                    }
+                $payLoadReturn = $this->generatePOSTPayload($order, $mailchimpStoreId, $magentoStoreId, true, $isSynced);
+                $orderJson = $payLoadReturn['jsonOrder'];
+                $payLoadError = $payLoadReturn['error'];
+                if ($orderJson) {
+                    $this->_helper->modifyCounter(\Ebizmarts\MailChimp\Helper\Data::ORD_MOD);
+                    $batchArray[$this->_counter]['method'] = "PATCH";
+                    $batchArray[$this->_counter]['path'] = '/ecommerce/stores/' . $mailchimpStoreId . '/orders/' .
+                        $order->getIncrementId();
+                    $batchArray[$this->_counter]['operation_id'] = $this->_batchId . '_' . $orderId;
+                    $batchArray[$this->_counter]['body'] = $orderJson;
                     //update order delta
                     $this->_updateOrder($mailchimpStoreId, $orderId);
                     $this->_counter++;
                 } else {
-                    $error = __('Json error');
+                    $error = __($payLoadError);
                     $this->_updateOrder($mailchimpStoreId, $orderId, $this->_helper->getGmtDate(), $error, 0);
                     continue;
                 }
@@ -287,24 +282,20 @@ class Order
                         $this->_counter++;
                     }
                 }
-                $orderJson = $this->generatePOSTPayload($order, $mailchimpStoreId, $magentoStoreId, false, $isSynced);
-                if ($orderJson!==false) {
-                    if (!empty($orderJson)) {
-                        $this->_helper->modifyCounter(\Ebizmarts\MailChimp\Helper\Data::ORD_NEW);
-                        $batchArray[$this->_counter]['method'] = "POST";
-                        $batchArray[$this->_counter]['path'] = '/ecommerce/stores/' . $mailchimpStoreId . '/orders';
-                        $batchArray[$this->_counter]['operation_id'] = $this->_batchId . '_' . $orderId;
-                        $batchArray[$this->_counter]['body'] = $orderJson;
-                        //update order delta
-                        $this->_updateOrder($mailchimpStoreId, $orderId);
-                        $this->_counter++;
-                    } else {
-                        $error = __('Order ['.$item->getIncrementId().'] is empty');
-                        $this->_helper->log($error);
-                        $this->_updateOrder($mailchimpStoreId, $orderId, $this->_helper->getGmtDate(), $error, 0);
-                    }
+                $payLoadReturn = $this->generatePOSTPayload($order, $mailchimpStoreId, $magentoStoreId, false, $isSynced);
+                $orderJson = $payLoadReturn['jsonOrder'];
+                $payLoadError = $payLoadReturn['error'];
+                if ($orderJson) {
+                    $this->_helper->modifyCounter(\Ebizmarts\MailChimp\Helper\Data::ORD_NEW);
+                    $batchArray[$this->_counter]['method'] = "POST";
+                    $batchArray[$this->_counter]['path'] = '/ecommerce/stores/' . $mailchimpStoreId . '/orders';
+                    $batchArray[$this->_counter]['operation_id'] = $this->_batchId . '_' . $orderId;
+                    $batchArray[$this->_counter]['body'] = $orderJson;
+                    //update order delta
+                    $this->_updateOrder($mailchimpStoreId, $orderId);
+                    $this->_counter++;
                 } else {
-                    $error = __('Json error');
+                    $error = __($payLoadError);
                     $this->_updateOrder($mailchimpStoreId, $orderId, $this->_helper->getGmtDate(), $error, 0);
                     continue;
                 }
@@ -324,7 +315,7 @@ class Order
      * @param $mailchimpStoreId
      * @param $magentoStoreId
      * @param $isModifiedOrder
-     * @return string
+     * @return array
      * @throws \Exception
      */
     protected function generatePOSTPayload(
@@ -334,6 +325,9 @@ class Order
         $isModifiedOrder,
         $isSynced
     ) {
+        if (!$order->getCustomerEmail()) {
+            return ['error' => 'Customer email is empty', 'jsonOrder' => null];
+        }
         $data = [];
         $data['id'] = $order->getIncrementId();
         if ($order->getMailchimpCampaignId()) {
@@ -463,7 +457,7 @@ class Order
         }
         if (!$itemCount) {
             unset($data['lines']);
-            return "";
+            return ['error' => 'Order is empty', 'jsonOrder' => null];
         }
 
         //customer data
@@ -564,7 +558,7 @@ class Order
             }
         } else {
             $this->_helper->log("Order [".$order->getId()."] as no billing address");
-            return "";
+            return ['error' => "Order [".$order->getId()."] as no billing address", 'jsonOrder' => null];
         }
         $shippingAddress = $order->getShippingAddress();
         if ($shippingAddress) {
@@ -649,8 +643,7 @@ class Order
             $this->_helper->log('');
             $this->_helper->log("$jsonErrorMsg on order [".$order->getEntityId()."]");
         }
-
-        return $jsonData;
+        return ['error' =>  null, 'jsonOrder' => $jsonData];
     }
 
     protected function _getMailChimpStatus(\Magento\Sales\Model\Order $order)
