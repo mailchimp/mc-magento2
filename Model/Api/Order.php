@@ -285,7 +285,6 @@ class Order
                 $payLoadReturn = $this->generatePOSTPayload($order, $mailchimpStoreId, $magentoStoreId, false, $isSynced);
                 $orderJson = $payLoadReturn['jsonOrder'];
                 $payLoadError = $payLoadReturn['error'];
-
                 if ($orderJson) {
                     $this->_helper->modifyCounter(\Ebizmarts\MailChimp\Helper\Data::ORD_NEW);
                     $batchArray[$this->_counter]['method'] = "POST";
