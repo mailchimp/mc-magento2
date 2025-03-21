@@ -149,7 +149,7 @@
         </constraint>
     </table>
     <table name="mailchimp_notification">
-        <column xsi:type="int" name="id" padding="10" nullable="false" identity="true" comment=""/>
+        <column xsi:type="int" name="id" padding="10" nullable="false" identity="true" comment="Table Id"/>
         <column xsi:type="text" name="notification_data" nullable="false" comment="data of the request"/>
         <column xsi:type="datetime" name="generated_at" on_update="false" nullable="false" default="CURRENT_TIMESTAMP"
                 comment="date of generation"/>
