@@ -1,5 +1,15 @@
 # Changelog
 
+## [103.4.67](https://github.com/mailchimp/mc-magento2/tree/103.4.67)
+
+[Full Changelog](https://github.com/mailchimp/mc-magento2/compare/103.4.66-p1...103.4.67)
+
+**Fixed bugs:**
+
+- Cron is taking long time \(special price related\) [\#2063](https://github.com/mailchimp/mc-magento2/issues/2063)
+- Deprecated Warning in Order.php - Null passed to hash\(\) on orders without email \(PHP 8.3\) [\#2062](https://github.com/mailchimp/mc-magento2/issues/2062)
+- Missing description in db_schema.xml results in perpetual "not up to date"-state  [\#2076](https://github.com/mailchimp/mc-magento2/issues/2076)
+
 ## [103.4.66-p1](https://github.com/mailchimp/mc-magento2/tree/103.4.66-p1)
 
 [Full Changelog](https://github.com/mailchimp/mc-magento2/compare/103.4.66...103.4.66-1)
