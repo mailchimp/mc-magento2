@@ -41,8 +41,11 @@ class SyncStatistics
     }
     public function execute()
     {
+        $count = 0;
+        $this->helper->log("SyncStatistics");
         if ($this->helper->isSupportEnabled())
         {
+            $this->helper->log("Processing sync statistics");
             $collection = $this->getCollection();
             /**
              * @var $collectionItem \Ebizmarts\MailChimp\Model\MailChimpNotification
@@ -53,7 +56,11 @@ class SyncStatistics
                 $collectionItem->setProcessed(true);
                 $collectionItem->setSyncedAt($this->helper->getGmtDate());
                 $collectionItem->getResource()->save($collectionItem);
+                $count++;
             }
+            $this->helper->log("Sync statistics $count registers processed");
+        }  else {
+            $this->helper->log("Sync statistics not enabled");
         }
         $this->cleanData();
     }
