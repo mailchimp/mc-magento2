@@ -12,6 +12,10 @@ class Http
      */
     protected $curl;
     protected $url;
+    /**
+     * @var MailChimpHelper
+     */
+    protected $helper;
     public function __construct(
         Curl $curl,
         MailChimpHelper $helper
@@ -24,6 +28,7 @@ class Http
         ];
         $this->curl->setOption(CURLOPT_RETURNTRANSFER, true);
         $this->curl->setHeaders($headers);
+        $this->helper = $helper;
     }
     public function post($body)
     {
@@ -33,9 +38,17 @@ class Http
     }
     public function extractResponse($response)
     {
-        $data = json_decode($response, true);
-        if (key_exists('error', $data) && !$data['error']) {
-            return true;
+        try {
+            $data = json_decode($response, true);
+            if (is_null($data) || json_last_error() !== JSON_ERROR_NONE) {
+                return false;
+            }
+            if (key_exists('error', $data) && !$data['error']) {
+                return true;
+            }
+        } catch (\Exception $e) {
+            $this->helper->log($e->getMessage());
+            return false;
         }
         return false;
     }
