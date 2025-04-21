@@ -12,6 +12,9 @@ class Http
      */
     protected $curl;
     protected $url;
+    /**
+     * @var MailChimpHelper
+     */
     protected $helper;
     public function __construct(
         Curl $curl,
