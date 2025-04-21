@@ -78,7 +78,7 @@ class SyncStatistics
     {
         $response = $this->mailchimpHttp->post($data);
         if (!$this->mailchimpHttp->extractResponse($response)) {
-            $this->helper->log("Error syncing and continue");
+            $this->helper->log("Invalid JSON, syncing process will continue regardless");
         }
     }
     private function cleanData()
