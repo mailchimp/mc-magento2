@@ -13,60 +13,44 @@
 
 namespace Ebizmarts\MailChimp\Model\Config\Backend;
 
+use Ebizmarts\MailChimp\Helper\Data;
 use Ebizmarts\MailChimp\Helper\Sync as SyncHelper;
+use Magento\Config\Model\ResourceModel\Config;
+use Magento\Framework\App\Cache\TypeListInterface;
+use Magento\Framework\App\Config\ScopeConfigInterface;
+use Magento\Framework\App\Config\Value;
+use Magento\Framework\Data\Collection\AbstractDb;
+use Magento\Framework\Model\Context;
+use Magento\Framework\Model\ResourceModel\AbstractResource;
+use Magento\Framework\Registry;
+use Magento\Framework\Stdlib\DateTime\DateTime;
+use Magento\Store\Model\StoreManager;
+use Mailchimp_Error;
+use Mailchimp_HttpError;
 
-class MonkeyStore extends \Magento\Framework\App\Config\Value
+class MonkeyStore extends Value
 {
-    /**
-     * @var \Ebizmarts\MailChimp\Helper\Data
-     */
-    private $_helper;
-    /**
-     * @var SyncHelper
-     */
-    private $syncHelper;
-    /**
-     * @var \Magento\Config\Model\ResourceModel\Config
-     */
-    protected $resourceConfig;
-    /**
-     * @var \Magento\Framework\Stdlib\DateTime\DateTime
-     */
-    private $_date;
-    /**
-     * @var \Magento\Store\Model\StoreManager
-     */
-    private $_storeManager;
+    private Data $_helper;
+    private SyncHelper $syncHelper;
+    protected Config $resourceConfig;
+    private DateTime $_date;
+    private StoreManager $_storeManager;
 
     private $oldListId = null;
     const MAX_LISTS = 200;
 
-    /**
-     * @param \Magento\Framework\Model\Context $context
-     * @param \Magento\Framework\Registry $registry
-     * @param \Magento\Framework\App\Config\ScopeConfigInterface $config
-     * @param \Magento\Framework\App\Cache\TypeListInterface $cacheTypeList
-     * @param \Magento\Config\Model\ResourceModel\Config $resourceConfig
-     * @param \Magento\Framework\Model\ResourceModel\AbstractResource|null $resource
-     * @param \Magento\Framework\Data\Collection\AbstractDb|null $resourceCollection
-     * @param \Magento\Framework\Stdlib\DateTime\DateTime $date
-     * @param \Ebizmarts\MailChimp\Helper\Data $helper
-     * @param SyncHelper $syncHelper
-     * @param \Magento\Store\Model\StoreManager $storeManager
-     * @param array $data
-     */
     public function __construct(
-        \Magento\Framework\Model\Context $context,
-        \Magento\Framework\Registry $registry,
-        \Magento\Framework\App\Config\ScopeConfigInterface $config,
-        \Magento\Framework\App\Cache\TypeListInterface $cacheTypeList,
-        \Magento\Config\Model\ResourceModel\Config $resourceConfig,
-        \Magento\Framework\Model\ResourceModel\AbstractResource $resource = null,
-        \Magento\Framework\Data\Collection\AbstractDb $resourceCollection = null,
-        \Magento\Framework\Stdlib\DateTime\DateTime $date,
-        \Ebizmarts\MailChimp\Helper\Data $helper,
+        Context $context,
+        Registry $registry,
+        ScopeConfigInterface $config,
+        TypeListInterface $cacheTypeList,
+        Config $resourceConfig,
+        DateTime $date,
+        Data $helper,
         SyncHelper $syncHelper,
-        \Magento\Store\Model\StoreManager $storeManager,
+        StoreManager $storeManager,
+        ?AbstractResource $resource = null,
+        ?AbstractDb $resourceCollection = null,
         array $data = []
     ) {
         $this->_helper          = $helper;
@@ -102,38 +86,38 @@ class MonkeyStore extends \Magento\Framework\App\Config\Value
             } else {
                 $newListId = $this->getStore($apiKey, $this->getValue());
                 $this->_helper->saveConfigValue(
-                    \Ebizmarts\MailChimp\Helper\Data::XML_PATH_LIST,
+                    Data::XML_PATH_LIST,
                     $newListId,
                     $this->getScopeId(),
                     $this->getScope()
                 );
             }
             $this->oldListId = $this->_helper->getConfigValue(
-                \Ebizmarts\MailChimp\Helper\Data::XML_PATH_LIST,
+                Data::XML_PATH_LIST,
                 $this->getScopeId(),
                 $this->getScope()
             );
 
             $createWebhook = true;
             $this->_helper->deleteConfig(
-                \Ebizmarts\MailChimp\Helper\Data::XML_MAILCHIMP_JS_URL,
+                Data::XML_MAILCHIMP_JS_URL,
                 $this->getScopeId(),
                 $this->getScope()
             );
             foreach ($this->_storeManager->getStores() as $storeId => $val) {
                 $mstoreId = $this->_helper->getConfigValue(
-                    \Ebizmarts\MailChimp\Helper\Data::XML_MAILCHIMP_STORE,
+                    Data::XML_MAILCHIMP_STORE,
                     $storeId
                 );
                 if ($mstoreId == $mailchimpStore) {
                     $this->_helper->deleteConfig(
-                        \Ebizmarts\MailChimp\Helper\Data::XML_MAILCHIMP_JS_URL,
+                        Data::XML_MAILCHIMP_JS_URL,
                         $storeId,
                         'stores'
                     );
                     $found++;
                 }
-                $listId = $this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_PATH_LIST, $storeId);
+                $listId = $this->_helper->getConfigValue(Data::XML_PATH_LIST, $storeId);
                 if ($listId == $newListId) {
                     $createWebhook = false;
                 }
@@ -155,7 +139,7 @@ class MonkeyStore extends \Magento\Framework\App\Config\Value
             $api = $this->_helper->getApiByApiKey($apiKey);
             $store = $api->ecommerce->stores->get($store);
             return $store['list_id'];
-        } catch (\Mailchimp_Error | \Mailchimp_HttpError $e) {
+        } catch (Mailchimp_Error | Mailchimp_HttpError $e) {
             $this->_helper->log($e->getFriendlyMessage());
         }
         return null;

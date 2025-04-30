@@ -43,11 +43,11 @@ class VarsMap extends \Magento\Framework\App\Config\Value
         \Magento\Framework\App\Cache\TypeListInterface $cacheTypeList,
         \Ebizmarts\MailChimp\Helper\VarsMap $varsMap,
         \Ebizmarts\MailChimp\Helper\Data $helper,
-        \Magento\Framework\Model\ResourceModel\AbstractResource $resource = null,
-        \Magento\Framework\Data\Collection\AbstractDb $resourceCollection = null,
+        ?\Magento\Framework\Model\ResourceModel\AbstractResource $resource = null,
+        ?\Magento\Framework\Data\Collection\AbstractDb $resourceCollection = null,
         array $data = []
     ) {
-    
+
         $this->_varsHelper = $varsMap;
         $this->_helper      = $helper;
         parent::__construct($context, $registry, $config, $cacheTypeList, $resource, $resourceCollection, $data);
