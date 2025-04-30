@@ -1,5 +1,14 @@
 # Changelog
 
+# [103.4.68](https://github.com/mailchimp/mc-magento2/tree/103.4.68)
+
+[Full Changelog](https://github.com/mailchimp/mc-magento2/compare/103.4.67...103.4.68)
+
+**Fixed bugs:**
+
+- SyncStatistics error when the data in mailchimp\_notification is not a valid json [\#2083](https://github.com/mailchimp/mc-magento2/issues/2083)
+- PHP 8.4 compatibility [\#2091](https://github.com/mailchimp/mc-magento2/issues/2091)
+
 ## [103.4.67](https://github.com/mailchimp/mc-magento2/tree/103.4.67)
 
 [Full Changelog](https://github.com/mailchimp/mc-magento2/compare/103.4.66-p1...103.4.67)
