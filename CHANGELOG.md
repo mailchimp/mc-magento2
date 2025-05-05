@@ -1,5 +1,13 @@
 # Change Log
 
+# [102.3.68](https://github.com/mailchimp/mc-magento2/tree/102.3.68)
+
+[Full Changelog](https://github.com/mailchimp/mc-magento2/compare/102.3.67...102.3.68)
+
+**Fixed bugs:**
+
+- SyncStatistics error when the data in mailchimp\_notification is not a valid json [\#2083](https://github.com/mailchimp/mc-magento2/issues/2083)
+
 ## [102.3.67](https://github.com/mailchimp/mc-magento2/tree/102.3.67)
 
 [Full Changelog](https://github.com/mailchimp/mc-magento2/compare/102.3.66...102.3.67)
