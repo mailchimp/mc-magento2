@@ -111,20 +111,24 @@ class GenerateStatistics
         $customerCollection = $this->customerCollectionFactory->create();
         $customerCollection->addFieldToFilter('store_id', ['eq'=>$storeId]);
         $customerCollection->getSelect()->reset(\Magento\Framework\DB\Select::COLUMNS)->columns(['entity_id','store_id']);
-        $totalCustomers = $customerCollection->count();
+        $totalCustomers = $customerCollection->getSize();
         $options['total_customers'] = $totalCustomers;
+        $options['total_subscribers'] = $totalCustomers;
+        unset($customerCollection);
 
         $productCollection = $this->productCollectionFactory->create();
         $productCollection->addStoreFilter($storeId);
         $productCollection->getSelect()->reset(\Magento\Framework\DB\Select::COLUMNS)->columns(['entity_id']);
-        $totalProducts = $productCollection->count();
+        $totalProducts = $productCollection->getSize();
         $options['total_products'] = $totalProducts;
+        unset($productCollection);
 
         $orderCollection = $this->orderCollectionFactory->create();
         $orderCollection->addFieldToFilter('store_id', ['eq' => $storeId]);
         $orderCollection->getSelect()->reset(\Magento\Framework\DB\Select::COLUMNS)->columns(['entity_id']);
-        $totalOrders = $orderCollection->count();
+        $totalOrders = $orderCollection->getSize();
         $options['total_orders'] = $totalOrders;
+        unset($orderCollection);
         $storeUrl = stripslashes($this->storeManager->getStore($storeId)->getUrl());
         $options['store_url'] = stripslashes($storeUrl);
         // get all de configuration
