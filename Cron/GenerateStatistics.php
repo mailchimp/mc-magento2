@@ -113,7 +113,6 @@ class GenerateStatistics
         $customerCollection->getSelect()->reset(\Magento\Framework\DB\Select::COLUMNS)->columns(['entity_id','store_id']);
         $totalCustomers = $customerCollection->getSize();
         $options['total_customers'] = $totalCustomers;
-        $options['total_subscribers'] = $totalCustomers;
         unset($customerCollection);
 
         $productCollection = $this->productCollectionFactory->create();
