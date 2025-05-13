@@ -1,5 +1,13 @@
 # Change Log
 
+## [100.1.69](https://github.com/mailchimp/mc-magento2/tree/HEAD)
+
+[Full Changelog](https://github.com/mailchimp/mc-magento2/compare/100.1.68...100.1.69)
+
+**Fixed bugs:**
+
+- Huge memory usage from ebizmarts\_generate\_statistics cron [\#2098](https://github.com/mailchimp/mc-magento2/issues/2098)
+
 # [100.1.68](https://github.com/mailchimp/mc-magento2/tree/100.1.68)
 
 [Full Changelog](https://github.com/mailchimp/mc-magento2/compare/100.1.67...100.1.68)
