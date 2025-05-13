@@ -1,5 +1,14 @@
 # Changelog
 
+## [103.4.69](https://github.com/mailchimp/mc-magento2/tree/HEAD)
+
+[Full Changelog](https://github.com/mailchimp/mc-magento2/compare/103.4.68...103.4.69)
+
+**Fixed bugs:**
+
+- Strict CSP compatibility [\#2104](https://github.com/mailchimp/mc-magento2/issues/2104)
+- Huge memory usage from ebizmarts\_generate\_statistics cron [\#2098](https://github.com/mailchimp/mc-magento2/issues/2098)
+
 # [103.4.68](https://github.com/mailchimp/mc-magento2/tree/103.4.68)
 
 [Full Changelog](https://github.com/mailchimp/mc-magento2/compare/103.4.67...103.4.68)
