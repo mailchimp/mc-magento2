@@ -6,13 +6,21 @@
                 <value id="mailchiimp_logo" type="host">ebizmarts-website.s3.amazonaws.com</value>
                 <value id="mailchimp_images" type="host">downloads.mailchimp.com</value>
                 <value id="mailchimp_images_gallery" type="host">gallery.mailchimp.com</value>
+                <value id="form-assets-mailchimp" type="host">form-assets.mailchimp.com</value>
             </values>
         </policy>
+        <policy id="connect-src">
+            <values>
+                <value id="form-assets-mailchimp" type="host">form-assets.mailchimp.com</value>
+                <value id="mc-intuit" type="host">*.intuit.com</value>
+                <value id="mc-aws" type="host">*.amazonaws.com</value>
+            </values>
         <policy id="script-src">
             <values>
                 <value id="chimpstatic" type="host">chimpstatic.com</value>
                 <value id="mailchimp-js" type="host">downloads.mailchimp.com</value>
                 <value id="list-management" type="host">*.list-manage.com</value>
+                <value id="form-assets-mailchimp" type="host">form-assets.mailchimp.com</value>
             </values>
         </policy>
         <policy id='style-src'>
