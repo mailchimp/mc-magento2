@@ -15,6 +15,7 @@
                 <value id="mc-intuit" type="host">*.intuit.com</value>
                 <value id="mc-aws" type="host">*.amazonaws.com</value>
             </values>
+        </policy>
         <policy id="script-src">
             <values>
                 <value id="chimpstatic" type="host">chimpstatic.com</value>
