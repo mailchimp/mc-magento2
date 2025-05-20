@@ -14,10 +14,13 @@ namespace Ebizmarts\MailChimp\Model\Api;
 
 use Ebizmarts\MailChimp\Helper\Sync as SyncHelper;
 use Magento\Framework\Exception\NoSuchEntityException;
+use Magento\Bundle\Model\Product\Type as ProductTypeBundle;
+
 
 class Product
 {
     const DOWNLOADABLE = 'downloadable';
+    const GROUPED = 'grouped';
     const PRODUCTIMAGE = 'product_small_image';
     const MAX = 100;
 
@@ -81,6 +84,10 @@ class Product
      * @var \Ebizmarts\MailChimp\Model\ResourceModel\MailChimpSyncEcommerce\CollectionFactory
      */
     private $_chimpSyncEcommerceCollection;
+    /**
+     * @var ProductTypeBundle
+     */
+    private $_productTypeBundle;
 
     /**
      * @param \Magento\Catalog\Model\ResourceModel\Product\CollectionFactory $productCollection
@@ -96,6 +103,7 @@ class Product
      * @param \Magento\Catalog\Model\ResourceModel\Category\CollectionFactory $categoryCollection
      * @param \Magento\Catalog\Helper\Data $taxHelper
      * @param \Magento\Catalog\Model\Product\Option $option
+     * @param ProductTypeBundle $productTypeBundle
      */
     public function __construct(
         \Magento\Catalog\Model\ResourceModel\Product\CollectionFactory $productCollection,
@@ -110,7 +118,8 @@ class Product
         \Magento\ConfigurableProduct\Model\Product\Type\Configurable $configurable,
         \Magento\Catalog\Model\ResourceModel\Category\CollectionFactory $categoryCollection,
         \Magento\Catalog\Helper\Data $taxHelper,
-        \Magento\Catalog\Model\Product\Option $option
+        \Magento\Catalog\Model\Product\Option $option,
+        ProductTypeBundle $productTypeBundle
     ) {
 
         $this->_productRepository   = $productRepository;
@@ -126,6 +135,7 @@ class Product
         $this->_option              = $option;
         $this->_categoryCollection  = $categoryCollection;
         $this->taxHelper            = $taxHelper;
+        $this->_productTypeBundle   = $productTypeBundle;
         $this->_batchId             = \Ebizmarts\MailChimp\Helper\Data::IS_PRODUCT. '_' .
             $this->_helper->getGmtTimeStamp();
     }
@@ -143,7 +153,8 @@ class Product
         $this->_markSpecialPrices($magentoStoreId, $mailchimpStoreId);
         $batchArray = array_merge($batchArray,$this->processDeletedProducts($magentoStoreId, $mailchimpStoreId));
         $collection = $this->_getCollection();
-        $collection->addFieldToFilter("type_id", ["nin"=>[\Magento\Catalog\Model\Product\Type::TYPE_BUNDLE, "grouped"]]);
+//        $collection->addFieldToFilter("type_id", ["nin"=>[\Magento\Catalog\Model\Product\Type::TYPE_BUNDLE, "grouped"]]);
+        $collection->addFieldToFilter("type_id", ["neq"=>self::GROUPED]);
         $collection->addStoreFilter($magentoStoreId);
         $collection->getSelect()->reset(\Magento\Framework\DB\Select::COLUMNS)->columns(['entity_id']);
         $collection->getSelect()->joinLeft(
@@ -353,11 +364,16 @@ class Product
                 }
                 break;
             case \Magento\Catalog\Model\Product\Type::TYPE_VIRTUAL:
-                $variantProducts[] = $product;
-                break;
             case self::DOWNLOADABLE:
+            case \Magento\Catalog\Model\Product\Type::TYPE_BUNDLE:
                 $variantProducts[] = $product;
                 break;
+//            case self::DOWNLOADABLE:
+//                $variantProducts[] = $product;
+//                break;
+//            case \Magento\Catalog\Model\Product\Type::TYPE_BUNDLE:
+//                $variantProducts[] = $product;
+//                break;
             default:
                 return [];
         }
@@ -391,12 +407,11 @@ class Product
         $variantProducts = [];
         if ($product->getTypeId() == \Magento\Catalog\Model\Product\Type::TYPE_SIMPLE ||
             $product->getTypeId() == \Magento\Catalog\Model\Product\Type::TYPE_VIRTUAL ||
-            $product->getTypeId() == "downloadable") {
+            $product->getTypeId() == self::DOWNLOADABLE) {
             $data = $this-> _buildProductData($product, $magentoStoreId);
             $variantProducts [] = $product;
-            // $parentIds = $product->getTypeInstance()->getParentIdsByChild($product->getId());
             $parentIds = $this->_configurable->getParentIdsByChild($product->getId());
-
+//            $this->_helper->log("parentIds: ".print_r($parentIds, true));
             //add or update variant
             foreach ($parentIds as $parentId) {
                 $productSync = $this->_chimpSyncEcommerce->create()->getByStoreIdType(
@@ -431,6 +446,26 @@ class Product
                     $operations[] = $productdata;
                 }
             }
+            $bundleParentIds = $this->_productTypeBundle->getParentIdsByChild($product->getId());
+            foreach ($bundleParentIds as $bundleParentId) {
+                $bundleProduct = $this->_productRepository->getById($bundleParentId, false, $magentoStoreId);
+                $data = $this-> _buildProductData($bundleProduct, $magentoStoreId,false);
+                $body = json_encode($data);
+                if ($body===false) {
+                    $jsonErrorMsg = json_last_error_msg();
+                    $this->_helper->log("");
+                    $this->_helper->log("$jsonErrorMsg for product [".$bundleProduct->getId()."]");
+                    continue;
+                }
+                $productdata = [];
+                $productdata['method'] = "PATCH";
+                $productdata['path'] = "/ecommerce/stores/" . $mailchimpStoreId . "/products/" . $bundleParentId;
+                $productdata['operation_id'] = $batchId . '_' . $bundleParentId;
+                $productdata['body'] = $body;
+                $operations[] = $productdata;
+                $this->_helper->modifyCounter(\Ebizmarts\MailChimp\Helper\Data::PRO_MOD);
+            }
+
         } elseif ($product->getTypeId() == \Magento\ConfigurableProduct\Model\Product\Type\Configurable::TYPE_CODE) {
             $childProducts = $product->getTypeInstance()->getChildrenIds($product->getId());
             $variantProducts[] = $product;
@@ -552,43 +587,48 @@ class Product
             if (!empty($data['image_url'])) {
                 $this->_parentImage = $data['image_url'];
             }
-            //variants
-            $data["variants"] = [];
-            // put the min price of the simples as the price of the parent
-            foreach ($variants as $variant) {
-                if ($variant && $variant->getId() != $product->getId()) {
-                    $variantPrice = $this->_getProductPrice($variant);
-                    if ($this->productPrice) {
-                        if ($variantPrice < $this->productPrice) {
+            if ($product->getTypeId() == \Magento\Catalog\Model\Product\Type::TYPE_BUNDLE) {
+                list($min, $max) = $this->_bundleVariants($product, $magentoStoreId);
+                $data["variants"][] = $this->_variantForBundle($product, $magentoStoreId, $min,$product->getSku().'-min',$product->getId().'-min');
+                $data["variants"][] = $this->_variantForBundle($product, $magentoStoreId, $max,$product->getSku().'-max',$product->getId().'-max');
+            } else {
+                //variants
+                $data["variants"] = [];
+                // put the min price of the simples as the price of the parent
+                foreach ($variants as $variant) {
+                    if ($variant && $variant->getId() != $product->getId()) {
+                        $variantPrice = $this->_getProductPrice($variant);
+                        if ($this->productPrice) {
+                            if ($variantPrice < $this->productPrice) {
+                                $this->productPrice = $variantPrice;
+                            }
+                        } else {
                             $this->productPrice = $variantPrice;
                         }
-                    } else {
-                        $this->productPrice = $variantPrice;
                     }
                 }
-            }
-            /**
-             * @var $variant \Magento\Catalog\Model\Product
-             */
-            foreach ($variants as $variant) {
-                if ($variant) {
-                    if ($variant->getId() != $product->getId()) {
-                        $this->productPrice = null;
+                /**
+                 * @var $variant \Magento\Catalog\Model\Product
+                 */
+                foreach ($variants as $variant) {
+                    if ($variant) {
+                        if ($variant->getId() != $product->getId()) {
+                            $this->productPrice = null;
+                        }
+                        $data["variants"][] = $this->_buildProductData($variant, $magentoStoreId);
                     }
-                    $data["variants"][] = $this->_buildProductData($variant, $magentoStoreId);
                 }
-            }
-            if ($this->_childtUrl) {
-                if ($product->getTypeId() == \Magento\Catalog\Model\Product\Type::TYPE_SIMPLE ||
-                    $product->getTypeId() == \Magento\Catalog\Model\Product\Type::TYPE_VIRTUAL ||
-                    $product->getTypeId() == "downloadable") {
-                    $data["url"] = $this->_childtUrl;
+                if ($this->_childtUrl) {
+                    if ($product->getTypeId() == \Magento\Catalog\Model\Product\Type::TYPE_SIMPLE ||
+                        $product->getTypeId() == \Magento\Catalog\Model\Product\Type::TYPE_VIRTUAL ||
+                        $product->getTypeId() == self::DOWNLOADABLE) {
+                        $data["url"] = $this->_childtUrl;
+                    }
+                    $this->_childtUrl = null;
                 }
-                $this->_childtUrl = null;
+                $this->_parentImage = null;
             }
-            $this->_parentImage = null;
         }
-
         return $data;
     }
 
@@ -654,7 +694,7 @@ class Product
                         $product->getTypeId() != \Magento\Catalog\Model\Product\Type::TYPE_SIMPLE &&
                         $product->getTypeId() != \Magento\Catalog\Model\Product\Type::TYPE_VIRTUAL &&
                         $product->getTypeId() != \Magento\ConfigurableProduct\Model\Product\Type\Configurable::TYPE_CODE &&
-                        $product->getTypeId() != "downloadable")) {
+                        $product->getTypeId() != self::DOWNLOADABLE )) {
                     $this->_helper->log('The product with id [' . $product->getId() .
                         '] is not supported [' . $product->getTypeId() . ']');
                     continue;
@@ -699,7 +739,7 @@ class Product
                     $product->getTypeId() != \Magento\Catalog\Model\Product\Type::TYPE_SIMPLE &&
                     $product->getTypeId() != \Magento\Catalog\Model\Product\Type::TYPE_VIRTUAL &&
                     $product->getTypeId() != \Magento\ConfigurableProduct\Model\Product\Type\Configurable::TYPE_CODE &&
-                    $product->getTypeId() != "downloadable")) {
+                    $product->getTypeId() != self::DOWNLOADABLE)) {
                 $this->_helper->log(
                     'The product with id ['.$product->getId().'] is not supported ['.$product->getTypeId().']'
                 );
@@ -764,5 +804,114 @@ class Product
             $sent,
             $nullifyBatchId
         );
+    }
+    protected function _bundleVariants($product, $magentoStoreId)
+    {
+        $productsArray = [];
+        $simpleProducts = $product->getTypeInstance(true)
+            ->getSelectionsCollection(
+                $product->getTypeInstance(true)->getOptionsIds($product),
+                $product
+            );
+        foreach ($simpleProducts as $item) {
+            $selectionArray = [];
+            $selectionArray['selection_product_name'] = $item->getName();
+            $selectionArray['selection_product_quantity'] = $item->getSelectionQty();
+            $selectionArray['selection_product_price'] = $item->getPrice();
+            $selectionArray['selection_product_id'] = $item->getProductId();
+            $productsArray[$item->getOptionId()]['item'][$item->getSelectionId()] = $selectionArray;
+        }
+        foreach ($productsArray as $key => $productItem) {
+            $min = $max = 0;
+            foreach ($productItem['item'] as $item) {
+                if ($min == 0) {
+                    $min = $item['selection_product_price']*$item['selection_product_quantity'];
+                }
+                if ($item['selection_product_price']*$item['selection_product_quantity'] < $min) {
+                    $min = $item['selection_product_price']*$item['selection_product_quantity'];
+                }
+                if ($item['selection_product_price']*$item['selection_product_quantity'] > $max) {
+                    $max = $item['selection_product_price']*$item['selection_product_quantity'];
+                }
+            }
+            $productsArray[$key]['min'] = $min;
+            $productsArray[$key]['max'] = $max;
+        }
+        $min = $max = 0;
+        foreach ($productsArray as $key => $productItem) {
+            $min += $productItem['min'];
+            $max += $productItem['max'];
+        }
+        return [$min, $max];
+    }
+    protected function _variantForBundle($product, $magentoStoreId, $price, $sku, $id)
+    {
+        $data = [];
+        $parent = null;
+
+        //data applied for both root and varient products
+        $data["id"] = $id;
+        $data["title"] = $product->getName();
+        $data["url"] = $product->getProductUrl();
+        $data["image_url"] = '';
+        if ($product->getImage() && $product->getImage()!='no_selection') {
+            $filePath = 'catalog/product/'.ltrim($product->getImage(), '/');
+            $data["image_url"] = $this->_helper->getBaserUrl(
+                    $magentoStoreId,
+                    \Magento\Framework\UrlInterface::URL_TYPE_MEDIA
+                ).$filePath;
+        } elseif ($this->_parentImage) {
+            $data['image_url'] = $this->_parentImage;
+        } else {
+            $parent = $this->_getParent($product->getId(), $magentoStoreId);
+            if ($parent && $parent->getImage() && $parent->getImage()!='no_selection') {
+                $filePath = 'catalog/product/'.ltrim($parent->getImage(), '/');
+                $data["image_url"] = $this->_helper->getBaserUrl(
+                        $magentoStoreId,
+                        \Magento\Framework\UrlInterface::URL_TYPE_MEDIA
+                    ).$filePath;
+            }
+        }
+        $data["published_at_foreign"] = "";
+        $data["sku"] = $sku;
+        if ($this->productPrice) {
+            $data['price'] = $this->productPrice;
+        } else {
+            $data['price'] = $price;
+        }
+
+        //stock
+        $stock = $this->_stockRegistry->getStockItem($product->getId(), $magentoStoreId);
+        $data["inventory_quantity"] = (int)$stock->getQty();
+        $data["backorders"] = (string)$stock->getBackorders();
+        if ($product->getVisibility() == \Magento\Catalog\Model\Product\Visibility::VISIBILITY_NOT_VISIBLE) {
+            $tailUrl = '';
+            $data["visibility"] = 'false';
+            if (!$parent) {
+                $parent = $this->_getParent($product->getId(), $magentoStoreId);
+            }
+            if ($parent) {
+                $options = $parent->getTypeInstance()->getConfigurableAttributesAsArray($parent);
+                foreach ($options as $option) {
+                    if (strlen($tailUrl)) {
+                        $tailUrl .= '&';
+                    } else {
+                        $tailUrl .= '?';
+                    }
+                    $tailUrl .= $option['attribute_code'] . "=" . $product->getData($option['attribute_code']);
+                }
+                $this->_childtUrl = $data['url'] = $parent->getProductUrl() . $tailUrl;
+                if (empty($data['image_url'])) {
+                    $filePath = 'catalog/product'.$parent->getImage();
+                    $data["image_url"] = $this->_helper->getBaserUrl(
+                            $magentoStoreId,
+                            \Magento\Framework\UrlInterface::URL_TYPE_MEDIA
+                        ).$filePath;
+                }
+            }
+        } else {
+            $data["visibility"] = 'true';
+        }
+        return $data;
     }
 }

@@ -14,13 +14,15 @@ use Ebizmarts\MailChimp\Model\ResourceModel\MailChimpSyncEcommerce\CollectionFac
 use Ebizmarts\MailChimp\Model\ResourceModel\MailChimpSyncEcommerce\Collection as SyncCollection;
 use Ebizmarts\MailChimp\Helper\Data as MailChimpHelper;
 
+
 class Products extends Column
 {
     private const SUPPORTED_PRODUCT_TYPES = [
         ProductType::TYPE_SIMPLE,
         ProductType::TYPE_VIRTUAL,
         ProductTypeConfigurable::TYPE_CODE,
-        ProductTypeDownloadable::TYPE_DOWNLOADABLE
+        ProductTypeDownloadable::TYPE_DOWNLOADABLE,
+        ProductType::TYPE_BUNDLE
     ];
 
     /**
