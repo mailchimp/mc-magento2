@@ -694,7 +694,8 @@ class Product
                         $product->getTypeId() != \Magento\Catalog\Model\Product\Type::TYPE_SIMPLE &&
                         $product->getTypeId() != \Magento\Catalog\Model\Product\Type::TYPE_VIRTUAL &&
                         $product->getTypeId() != \Magento\ConfigurableProduct\Model\Product\Type\Configurable::TYPE_CODE &&
-                        $product->getTypeId() != self::DOWNLOADABLE )) {
+                        $product->getTypeId() != self::DOWNLOADABLE &&
+                        $product->getTypeId() != \Magento\Catalog\Model\Product\Type::TYPE_BUNDLE)) {
                     $this->_helper->log('The product with id [' . $product->getId() .
                         '] is not supported [' . $product->getTypeId() . ']');
                     continue;
@@ -739,7 +740,8 @@ class Product
                     $product->getTypeId() != \Magento\Catalog\Model\Product\Type::TYPE_SIMPLE &&
                     $product->getTypeId() != \Magento\Catalog\Model\Product\Type::TYPE_VIRTUAL &&
                     $product->getTypeId() != \Magento\ConfigurableProduct\Model\Product\Type\Configurable::TYPE_CODE &&
-                    $product->getTypeId() != self::DOWNLOADABLE)) {
+                    $product->getTypeId() != self::DOWNLOADABLE &&
+                    $product->getTypeId() != \Magento\Catalog\Model\Product\Type::TYPE_BUNDLE)) {
                 $this->_helper->log(
                     'The product with id ['.$product->getId().'] is not supported ['.$product->getTypeId().']'
                 );
