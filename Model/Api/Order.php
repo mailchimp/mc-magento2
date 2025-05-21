@@ -442,8 +442,6 @@ class Order
             } elseif ($item->getProductType() == \Magento\Bundle\Model\Product\Type::TYPE_CODE) {
                 $bundleProducts = $order->getAllItems();
                 foreach ($bundleProducts as $bundleProduct) {
-                    $this->_helper->log('Item id: '.$item->getProductId());
-                    $this->_helper->log('Parent item id: '.$bundleProduct->getParentItemId());
                     if ($bundleProduct->getParentItemId() == $item->getItemId()) {
                         $itemCount++;
                         $data["lines"][] = [
