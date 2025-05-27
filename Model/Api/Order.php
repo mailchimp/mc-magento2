@@ -16,6 +16,7 @@ namespace Ebizmarts\MailChimp\Model\Api;
 use Magento\SalesRule\Model\RuleRepository;
 use Symfony\Component\Config\Definition\Exception\Exception;
 use Ebizmarts\MailChimp\Helper\Sync as SyncHelper;
+use Magento\Bundle\Model\Product\Type as ProductTypeBundle;
 
 class Order
 {
@@ -438,6 +439,22 @@ class Order
                 if (!$variant) {
                     continue;
                 }
+            } elseif ($item->getProductType() == \Magento\Bundle\Model\Product\Type::TYPE_CODE) {
+                $bundleProducts = $order->getAllItems();
+                foreach ($bundleProducts as $bundleProduct) {
+                    if ($bundleProduct->getParentItemId() == $item->getItemId()) {
+                        $itemCount++;
+                        $data["lines"][] = [
+                            "id" => (string)$itemCount,
+                            "product_id" => $bundleProduct-> getProductId(),
+                            "product_variant_id" => $bundleProduct-> getProductId(),
+                            "quantity" => (int)$bundleProduct->getQtyOrdered(),
+                            "price" => $bundleProduct->getPrice(),
+                            "discount" => $bundleProduct->getDiscountAmount() ? abs($bundleProduct->getDiscountAmount()) : 0
+                        ];
+                    }
+                }
+                continue;
             } else {
                 $variant = $item->getProductId();
             }
