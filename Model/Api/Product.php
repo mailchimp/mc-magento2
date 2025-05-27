@@ -568,43 +568,48 @@ class Product
             if (!empty($data['image_url'])) {
                 $this->_parentImage = $data['image_url'];
             }
-            //variants
-            $data["variants"] = [];
-            // put the min price of the simples as the price of the parent
-            foreach ($variants as $variant) {
-                if ($variant && $variant->getId() != $product->getId()) {
-                    $variantPrice = $this->_getProductPrice($variant);
-                    if ($this->productPrice) {
-                        if ($variantPrice < $this->productPrice) {
+            if ($product->getTypeId() == \Magento\Catalog\Model\Product\Type::TYPE_BUNDLE) {
+                list($min, $max) = $this->_bundleVariants($product, $magentoStoreId);
+                $data["variants"][] = $this->_variantForBundle($product, $magentoStoreId, $min, $product->getSku() . '-min', $product->getId() . '-min');
+                $data["variants"][] = $this->_variantForBundle($product, $magentoStoreId, $max, $product->getSku() . '-max', $product->getId() . '-max');
+            } else {
+                //variants
+                $data["variants"] = [];
+                // put the min price of the simples as the price of the parent
+                foreach ($variants as $variant) {
+                    if ($variant && $variant->getId() != $product->getId()) {
+                        $variantPrice = $this->_getProductPrice($variant);
+                        if ($this->productPrice) {
+                            if ($variantPrice < $this->productPrice) {
+                                $this->productPrice = $variantPrice;
+                            }
+                        } else {
                             $this->productPrice = $variantPrice;
                         }
-                    } else {
-                        $this->productPrice = $variantPrice;
                     }
                 }
-            }
-            /**
-             * @var $variant \Magento\Catalog\Model\Product
-             */
-            foreach ($variants as $variant) {
-                if ($variant) {
-                    if ($variant->getId() != $product->getId()) {
-                        $this->productPrice = null;
+                /**
+                 * @var $variant \Magento\Catalog\Model\Product
+                 */
+                foreach ($variants as $variant) {
+                    if ($variant) {
+                        if ($variant->getId() != $product->getId()) {
+                            $this->productPrice = null;
+                        }
+                        $data["variants"][] = $this->_buildProductData($variant, $magentoStoreId);
                     }
-                    $data["variants"][] = $this->_buildProductData($variant, $magentoStoreId);
                 }
-            }
-            if ($this->_childtUrl) {
-                if ($product->getTypeId() == \Magento\Catalog\Model\Product\Type::TYPE_SIMPLE ||
-                    $product->getTypeId() == \Magento\Catalog\Model\Product\Type::TYPE_VIRTUAL ||
-                    $product->getTypeId() == DownloadableProductType::TYPE_DOWNLOADABLE) {
-                    $data["url"] = $this->_childtUrl;
+                if ($this->_childtUrl) {
+                    if ($product->getTypeId() == \Magento\Catalog\Model\Product\Type::TYPE_SIMPLE ||
+                        $product->getTypeId() == \Magento\Catalog\Model\Product\Type::TYPE_VIRTUAL ||
+                        $product->getTypeId() == DownloadableProductType::TYPE_DOWNLOADABLE) {
+                        $data["url"] = $this->_childtUrl;
+                    }
+                    $this->_childtUrl = null;
                 }
-                $this->_childtUrl = null;
+                $this->_parentImage = null;
             }
-            $this->_parentImage = null;
         }
-
         return $data;
     }
 
