@@ -568,7 +568,7 @@ class Product
             if (!empty($data['image_url'])) {
                 $this->_parentImage = $data['image_url'];
             }
-            if ($product->getTypeId() == \Magento\Catalog\Model\Product\Type::TYPE_BUNDLE) {
+            if ($product->getTypeId() == ProductTypeBundle::TYPE_CODE) {
                 list($min, $max) = $this->_bundleVariants($product, $magentoStoreId);
                 $data["variants"][] = $this->_variantForBundle($product, $magentoStoreId, $min, $product->getSku() . '-min', $product->getId() . '-min');
                 $data["variants"][] = $this->_variantForBundle($product, $magentoStoreId, $max, $product->getSku() . '-max', $product->getId() . '-max');
