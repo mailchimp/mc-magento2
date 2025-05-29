@@ -3,6 +3,9 @@
         xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Store:etc/config.xsd">
     <default>
         <mailchimp>
+            <general>
+                <clean_support_period>7</clean_support_period>
+            </general>
             <ecommerce>
                 <campaign_action>sent,open,click</campaign_action>
                 <all_customers>Yes</all_customers>
