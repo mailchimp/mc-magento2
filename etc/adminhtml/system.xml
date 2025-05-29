@@ -132,6 +132,13 @@
                         <field id="*/*/active">1</field>
                     </depends>
                 </field>
+                <field id="clean_support_period" translate="label comment" type="select" sortOrder="77" showInDefault="1" showInWebsite="0" showInStore="0">
+                    <label>Clean support perdiod</label>
+                    <source_model>Ebizmarts\MailChimp\Model\Config\Source\CleanPeriod</source_model>
+                    <depends>
+                        <field id="*/*/active">1</field>
+                    </depends>
+                </field>
                 <field id="map_fields" translate="label comment tooltip" sortOrder="80" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Customer Fields Mapping</label>
                     <frontend_model>Ebizmarts\MailChimp\Block\Adminhtml\System\Config\Form\Field\CustomerMap</frontend_model>
