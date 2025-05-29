@@ -59,6 +59,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     const XML_ENABLE_SUPPORT         = 'mailchimp/general/enable_support';
     const SYNC_TOKEN                 = 'mailchimp/statistics/token';
     const SYNC_NOTIFICATION_URL       = 'mailchimp/statistics/notification_url';
+    const XML_CLEAN_SUPPORT_PERIOD    = 'mailchimp/general/clean_support_period';
 
     const ORDER_STATE_OK             = 'complete';
 
