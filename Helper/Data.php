@@ -403,7 +403,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
                 'default_billing##state',
                 'default_billing##telephone',
                 'default_billing##company',
-                'default_billing##street'                
+                'default_billing##street'
             ];
 
             foreach($elements as $item) {
@@ -694,7 +694,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
                         } elseif (count($map['options'])) {
                             foreach ($map['options'] as $option) {
                                 if ($option['value'] == $value) {
-                                    $value = $option['label'];
+                                    $value = __($option['label']);
                                     break;
                                 }
                             }
