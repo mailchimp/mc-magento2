@@ -752,7 +752,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
                         } elseif (count($map['options'])) {
                             foreach ($map['options'] as $option) {
                                 if ($option['value'] == $value) {
-                                    $value = $option['label'];
+                                    $value = __($option['label']);
                                     break;
                                 }
                             }
