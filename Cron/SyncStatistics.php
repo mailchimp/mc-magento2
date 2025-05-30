@@ -79,11 +79,12 @@ class SyncStatistics
     }
     private function cleanData()
     {
+        $days = $this->helper->getConfigValue(MailChimpHelper::XML_CLEAN_SUPPORT_PERIOD);
         try {
             $connection = $this->mailchimpNotification->getConnection();
             $tableName = $this->mailchimpNotification->getMainTable();
-            $connection->delete($tableName, ['date_add(generated_at , interval 1 week) <= NOW()']);
-            $connection->delete($tableName, ['processed' => 1]);
+            $quoteInto = $connection->quoteInto('processed = 1 or date_add(generated_at, interval ? day) <= NOW()', $days);
+            $connection->delete($tableName, $quoteInto);
         } catch (\Exception $e) {
             $this->helper->log($e->getMessage());
         }
