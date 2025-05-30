@@ -12,6 +12,7 @@
  */
 namespace Ebizmarts\MailChimp\Model\Api;
 
+use Magento\GroupedProduct\Model\Product\Type\Grouped as GroupedProductType;
 use Symfony\Component\Config\Definition\Exception\Exception;
 use Ebizmarts\MailChimp\Helper\Sync as SyncHelper;
 class Cart
@@ -451,7 +452,7 @@ class Cart
          */
         foreach ($items as $item) {
             $line = [];
-            if ($item->getProductType()=='bundle' || $item->getProductType()=='grouped') {
+            if ($item->getProductType()==GroupedProductType::TYPE_CODE) {
                 continue;
             }
 
@@ -466,6 +467,21 @@ class Cart
                 }
 
                 $variantId = $variant->getId();
+            }  elseif ($item->getProductType() == \Magento\Bundle\Model\Product\Type::TYPE_CODE) {
+                $bundleProducts = $cart->getAllItems();
+                foreach ($bundleProducts as $bundleProduct) {
+                    if ($bundleProduct->getParentItemId() == $item->getItemId()) {
+                        $itemCount++;
+                        $lines[] = [
+                            "id" => (string)$itemCount,
+                            "product_id" => $bundleProduct-> getProductId(),
+                            "product_variant_id" => $bundleProduct-> getProductId(),
+                            "quantity" => (int)$bundleProduct->getQtyOrdered(),
+                            "price" => $bundleProduct->getPrice()
+                        ];
+                    }
+                }
+                continue;
             } else {
                 $variantId = $item->getProductId();
             }
