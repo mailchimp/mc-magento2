@@ -368,12 +368,6 @@ class Product
             case \Magento\Catalog\Model\Product\Type::TYPE_BUNDLE:
                 $variantProducts[] = $product;
                 break;
-//            case self::DOWNLOADABLE:
-//                $variantProducts[] = $product;
-//                break;
-//            case \Magento\Catalog\Model\Product\Type::TYPE_BUNDLE:
-//                $variantProducts[] = $product;
-//                break;
             default:
                 return [];
         }
@@ -411,7 +405,6 @@ class Product
             $data = $this-> _buildProductData($product, $magentoStoreId);
             $variantProducts [] = $product;
             $parentIds = $this->_configurable->getParentIdsByChild($product->getId());
-//            $this->_helper->log("parentIds: ".print_r($parentIds, true));
             //add or update variant
             foreach ($parentIds as $parentId) {
                 $productSync = $this->_chimpSyncEcommerce->create()->getByStoreIdType(
