@@ -537,7 +537,7 @@ class Cart
          */
         foreach ($items as $item) {
             $line = [];
-            if ($item->getProductType()=='bundle' || $item->getProductType()=='grouped') {
+            if ($item->getProductType()=='grouped') {
                 continue;
             }
 
@@ -552,6 +552,21 @@ class Cart
                 }
 
                 $variantId = $variant->getId();
+            } elseif ($item->getProductType() == \Magento\Bundle\Model\Product\Type::TYPE_CODE) {
+                $bundleProducts = $cart->getAllItems();
+                foreach ($bundleProducts as $bundleProduct) {
+                    if ($bundleProduct->getParentItemId() == $item->getItemId()) {
+                        $itemCount++;
+                        $lines[] = [
+                            "id" => (string)$itemCount,
+                            "product_id" => $bundleProduct-> getProductId(),
+                            "product_variant_id" => $bundleProduct-> getProductId(),
+                            "quantity" => (int)$bundleProduct->getQtyOrdered(),
+                            "price" => $bundleProduct->getPrice()
+                        ];
+                    }
+                }
+                continue;
             } else {
                 $variantId = $item->getProductId();
             }
