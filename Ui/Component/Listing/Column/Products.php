@@ -21,7 +21,8 @@ class Products extends Column
         ProductType::TYPE_SIMPLE,
         ProductType::TYPE_VIRTUAL,
         ProductTypeConfigurable::TYPE_CODE,
-        ProductTypeDownloadable::TYPE_DOWNLOADABLE
+        ProductTypeDownloadable::TYPE_DOWNLOADABLE,
+        ProductType::TYPE_BUNDLE
     ];
     /**
      * @var ProductFactory
