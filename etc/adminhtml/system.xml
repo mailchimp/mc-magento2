@@ -132,7 +132,7 @@
                     </depends>
                 </field>
                 <field id="clean_support_period" translate="label comment" type="select" sortOrder="77" showInDefault="1" showInWebsite="0" showInStore="0">
-                    <label>Clean support perdiod</label>
+                    <label>Clean support period</label>
                     <source_model>Ebizmarts\MailChimp\Model\Config\Source\CleanPeriod</source_model>
                     <depends>
                         <field id="*/*/active">1</field>
