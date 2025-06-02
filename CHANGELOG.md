@@ -1,5 +1,18 @@
 # Change Log
 
+## [102.3.70-p1](https://github.com/mailchimp/mc-magento2/tree/102.3.70-p1)
+
+[Full Changelog](https://github.com/mailchimp/mc-magento2/compare/102.3.69-p1...102.3.70-p1)
+
+**Implemented enhancements:**
+
+- Add clean period for mailchimp\_notification table [\#2118](https://github.com/mailchimp/mc-magento2/issues/2118)
+- Add bundle products support [\#2112](https://github.com/mailchimp/mc-magento2/issues/2112)
+
+**Fixed bugs:**
+
+- Add translation for options mergevar [\#2124](https://github.com/mailchimp/mc-magento2/issues/2124)
+
 ## [102.3.69-p1](https://github.com/mailchimp/mc-magento2/tree/HEAD)
 
 [Full Changelog](https://github.com/mailchimp/mc-magento2/compare/102.3.68-p1...102.3.69-p1)
