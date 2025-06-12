@@ -556,8 +556,8 @@ class Cart
                 $itemCount++;
                 $lines[] = [
                     "id" => (string)$itemCount,
-                    "product_id" => $item-> getProductId(),
-                    "product_variant_id" => $item-> getProductId().'-min',
+                    "product_id" => $item->getProductId(),
+                    "product_variant_id" => $item->getProductId().'-min',
                     "quantity" => (int)$item->getQtyOrdered(),
                     "price" => 0
                 ];
