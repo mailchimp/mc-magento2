@@ -472,6 +472,14 @@ class Cart
 
                 $variantId = $variant->getId();
             } elseif ($item->getProductType() == \Magento\Bundle\Model\Product\Type::TYPE_CODE) {
+                $itemCount++;
+                $lines[] = [
+                    "id" => (string)$itemCount,
+                    "product_id" => $item->getProductId(),
+                    "product_variant_id" => $item->getProductId().'-min',
+                    "quantity" => (int)$item->getQtyOrdered(),
+                    "price" => 0
+                ];
                 $bundleProducts = $cart->getAllItems();
                 foreach ($bundleProducts as $bundleProduct) {
                     if ($bundleProduct->getParentItemId() == $item->getItemId()) {
