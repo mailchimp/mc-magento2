@@ -440,6 +440,15 @@ class Order
                     continue;
                 }
             } elseif ($item->getProductType() == \Magento\Bundle\Model\Product\Type::TYPE_CODE) {
+                $itemCount++;
+                $data["lines"][] = [
+                    "id" => (string)$itemCount,
+                    "product_id" => $item->getProductId(),
+                    "product_variant_id" => $item-> getProductId().'-min',
+                    "quantity" => (int)$item->getQtyOrdered(),
+                    "price" => 0,
+                    "discount" => 0
+                ];
                 $bundleProducts = $order->getAllItems();
                 foreach ($bundleProducts as $bundleProduct) {
                     if ($bundleProduct->getParentItemId() == $item->getItemId()) {
