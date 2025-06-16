@@ -1,5 +1,15 @@
 # Changelog
 
+## [103.4.71](https://github.com/mailchimp/mc-magento2/tree/103.4.71)
+
+[Full Changelog](https://github.com/mailchimp/mc-magento2/compare/103.4.70...103.4.71)
+
+**Implemented enhancements:**
+
+- Add the bundle product itself to the lines of the cart [\#2142](https://github.com/mailchimp/mc-magento2/issues/2142)
+- Add the bundle product itself to the lines of the order [\#2136](https://github.com/mailchimp/mc-magento2/issues/2136)
+
+
 ## [103.4.70](https://github.com/mailchimp/mc-magento2/tree/103.4.70)
 
 [Full Changelog](https://github.com/mailchimp/mc-magento2/compare/103.4.69...103.4.70)
