@@ -6,5 +6,5 @@
 $url = $block->getJsUrl();
 $render = $block->getRender();
 ?>
-<?= $render->renderTag('script',['type'=>'text/javascript','src'=>$escaper->escapeUrl($url),'defer'=>'defer'],"\n",true); ?>
+<?= /* @noEscape */ $render->renderTag('script',['type'=>'text/javascript','src'=>$escaper->escapeUrl($url),'defer'=>'defer'],"\n",true); ?>
 
