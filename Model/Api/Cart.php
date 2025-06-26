@@ -537,9 +537,9 @@ class Cart
          */
         foreach ($items as $item) {
             $line = [];
-            if ($item->getProductType()=='grouped') {
-                continue;
-            }
+//            if ($item->getProductType()=='grouped') {
+//                continue;
+//            }
 
             if ($item->getProductType()==\Magento\ConfigurableProduct\Model\Product\Type\Configurable::TYPE_CODE) {
                 $variant = null;
