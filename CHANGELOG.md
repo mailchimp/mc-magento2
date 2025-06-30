@@ -1,5 +1,13 @@
 # Change Log
 
+## [100.1.72](https://github.com/mailchimp/mc-magento2/tree/100.1.72)
+
+[Full Changelog](https://github.com/mailchimp/mc-magento2/compare/100.1.71...100.1.72)
+
+**Implemented enhancements:**
+
+- Add support for grouped products [\#2156](https://github.com/mailchimp/mc-magento2/issues/2156)
+
 ## [100.1.71](https://github.com/mailchimp/mc-magento2/tree/100.1.71)
 
 [Full Changelog](https://github.com/mailchimp/mc-magento2/compare/100.1.70...100.1.71)
