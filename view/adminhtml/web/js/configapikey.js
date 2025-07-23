@@ -367,6 +367,18 @@ define(
                             }
                         }
                     });
+                    confirmation( {
+                            content: "Confirm your data",
+                            actions: {
+                                confirm: function () {
+                                    alert({content: 'you confirm'});
+                                },
+                                cancel: function () {
+                                    alert({content: 'you not confirm'});
+                                }
+                            }
+                        }
+                    );
                 });
             }
         });
