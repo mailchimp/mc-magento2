@@ -319,6 +319,7 @@ define(
                 var apiKey = $('#mailchimp_general_apikey').val();
                 var selectedStore = $('#mailchimp_general_monkeystore').find(':selected').val();
                 var encrypt = 0;
+                var accountdata = [];
                 if (apiKey == '******') {
                     encrypt = 3;
                 }
@@ -334,8 +335,13 @@ define(
                     $.each(data, function (i, item) {
                         if (item.hasOwnProperty('label')) {
                             $('#mailchimp_general_account_details_ul').append('<li>' + item.label + ' ' + item.value + '</li>');
+                        } else if (item.hasOwnProperty('html')) {
+                            accountdata[item.html] = item.value;
                         }
                     });
+                    accountdata.forEach(function (value, index) {
+                        alert({content: index+' '+value});
+                    })
                     if (data.list_id) {
                         $('#mailchimp_general_monkeylist').append($('<option>', {
                             value: data.list_id,
@@ -371,7 +377,9 @@ define(
                             content: "Confirm your data",
                             actions: {
                                 confirm: function () {
-                                    alert({content: 'you confirm'});
+                                    accountdata.forEach(function (value, index) {
+                                        alert({content: index+' '+value});
+                                    })
                                 },
                                 cancel: function () {
                                     alert({content: 'you not confirm'});
