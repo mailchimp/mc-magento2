@@ -6,8 +6,9 @@ use Magento\Framework\Setup\ModuleDataSetupInterface;
 use Magento\Framework\Setup\Patch\DataPatchInterface;
 use Magento\Framework\Setup\Patch\PatchVersionInterface;
 use Ebizmarts\MailChimp\Model\ResourceModel\MailChimpWebhookRequest\CollectionFactory;
+use Magento\Framework\Setup\Patch\PatchRevertableInterface;
 
-class Migrate32 implements DataPatchInterface, PatchVersionInterface
+class Migrate32 implements DataPatchInterface, PatchVersionInterface, PatchRevertableInterface
 {
     /**
      * @var ModuleDataSetupInterface
@@ -90,5 +91,16 @@ class Migrate32 implements DataPatchInterface, PatchVersionInterface
     {
         return '1.2.32';
     }
+
+    /**
+     * Revert data changes
+     *
+     * @return bool
+     */
+    public function revert()
+    {
+        return true;
+    }
+
 }
 
