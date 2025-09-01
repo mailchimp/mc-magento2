@@ -81,11 +81,15 @@ class Http
                 if (!$data['error']) {
                     return self::NO_ERROR;
                 } else {
+                    $this->helper->log("Error found");
+                    $this->helper->log($response);
                     $this->helper->log($data['message']);
                     return self::ERROR_AUTH;
                 }
             }
         } catch (\Exception $e) {
+            $this->helper->log("Exception found");
+            $this->helper->log($response);
             $this->helper->log($e->getMessage());
             return self::ERROR_GENERIC;
         }

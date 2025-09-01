@@ -64,6 +64,8 @@ class SaveAfter implements \Magento\Framework\Event\ObserverInterface
                 $this->_updateProduct($parents);
             }
         }
+        $websites = $product->getWebsiteIds();
+        $stores = $product->getStoreIds();
         $this->_updateProduct($product->getId());
     }
     protected function _updateProduct($entityId)
