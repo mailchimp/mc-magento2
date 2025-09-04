@@ -26,12 +26,18 @@ define(
                 "resyncSubscribersUrl": "",
                 "resyncProductsUrl": "",
                 "fixMailchimpjsUrl": "",
+                "registerUrl": "",
                 "scope": "",
-                "scopeId": ""
+                "scopeId": "",
+                "registerToken": "",
+                "switchurl": ""
             },
 
             _init: function () {
                 var self = this;
+                if(!this.options.registerToken) {
+                    self._showRegistationDetails();
+                }
                 $('#mailchimp_general_apikey').change(function () {
                     var apiKey = $('#mailchimp_general_apikey').val();
                     self._loadStores(apiKey);
@@ -74,6 +80,10 @@ define(
                         self._changeAbandonedCart();
                     }
                 });
+                $('#mailchimp_general_enable_support').change(function () {
+                    var supportenabled = $('#mailchimp_general_enable_support').find(':selected').val();
+                    self._switchsupport(supportenabled);
+                });
                 $('#mailchimp_support').click(function () {
                     self._showSupport();
                 });
@@ -83,6 +93,7 @@ define(
                     self._changeAbandonedCart();
                 }
                 $('#mailchimp_ecommerce_campaign_action').attr('size',3);
+
             },
             _changeEcommerce: function () {
                 var self = this;
@@ -178,9 +189,9 @@ define(
                 $("#row_mailchimp_ecommerce_reset_errors_retry").show();
                 $("#mailchimp_ecommerce_reset_errors_retry").show();
                 $("#row_mailchimp_ecommerce_reset_errors_noretry").show();
+                $("#mailchimp_ecommerce_reset_errors_noretry").show();
                 $("#row_mailchimp_ecommerce_clean_errors_months").show();
                 $("#mailchimp_ecommerce_clean_errors_months").show();
-                $("#mailchimp_ecommerce_reset_errors_noretry").show();
                 $("#row_mailchimp_ecommerce_delete_store").show();
                 $("#mailchimp_ecommerce_delete_store").show();
                 $("#row_mailchimp_ecommerce_resync_products").show();
@@ -312,12 +323,103 @@ define(
             _showSupport: function () {
                 alert({content: "By leveraging remote diagnostics for the Mailchimp for Magento plugin, our technical team can pinpoint and resolve syncing issues while ensuring that no sensitive data is involved in the troubleshooting process."});
             },
+            _showRegistationDetails: function () {
+                var registerUrl = this.options.registerUrl;
+                var detailsUrl = this.options.detailsUrl;
+                var accountdata = {};
+                var apiKey = $('#mailchimp_general_apikey').val();
+                var scope = this.options.scope;
+                var scopeId = this.options.scopeId;
+                var selectedStore = $('#mailchimp_general_monkeystore').find(':selected').val();
+                var encrypt = 0;
+                if (apiKey == '******') {
+                    encrypt = 3;
+                }
+
+                $.ajax({
+                    url: detailsUrl,
+                    data: {'form_key': window.FORM_KEY, 'apikey': apiKey, "store": selectedStore, 'encrypt': encrypt, "scope": scope, "scopeId": scopeId},
+                    type: 'GET',
+                    dataType: 'json',
+                    showLoader: true
+                }).done(function (data) {
+                        $.each(data, function (i, item) {
+                            if (item.hasOwnProperty('label')) {
+                                $('#mailchimp_general_account_details_ul').append('<li>' + item.label + ' ' + item.value + '</li>');
+                            } else if (item.hasOwnProperty('code')) {
+                                accountdata[item.code] = {'value': item.value, 'html': item.html};
+                            }
+                        });
+                        var outputtext = "<table style='border-collapse; margin-left: 10px;' >"
+                        for (const key in accountdata) {
+                            if (accountdata.hasOwnProperty(key)) {
+                                outputtext += '<tr><td style="border: 1px solid black;padding-left: 10px;padding-right: 10px;"><strong>' + accountdata[key]['html'] + '</strong></td><td style="border: 1px solid black;padding-left: 10px;padding-right: 10px;">' + accountdata[key]['value'] + '</td></tr>';
+                            }
+                        }
+                        outputtext += '</table>';
+                        confirmation({
+                                content: "Confirm your data <br><br>" + outputtext,
+                                actions: {
+                                    confirm: function () {
+                                        $.ajax({
+                                            url: registerUrl,
+                                            dataType: 'json',
+                                            data: {
+                                                'form_key': window.FORM_KEY,
+                                                'apikey': apiKey,
+                                                "data": accountdata,
+                                                'scope': scope,
+                                                'scopeId': scopeId
+                                            },
+                                            type: 'POST',
+                                            showLoader: true
+                                        }).done(function (data) {
+                                            if (data.error == 0) {
+                                                alert({content: 'You confirm, thanks ' + data.token});
+                                            } else {
+                                                alert({content: "Something went wrong!"});
+                                            }
+                                        });
+                                    },
+                                    cancel: function () {
+                                        $('#mailchimp_general_monkeystore option[value="-1"]').attr('selected', 'selected');
+                                        $('#mailchimp_general_monkeylist').empty();
+                                    }
+                                }
+                            }
+                        );
+                    }
+                )
+            },
+            _switchsupport: function (supportenabled) {
+                var scope = this.options.scope;
+                var scopeId = this.options.scopeId;
+                var switchurl = this.options.switchurl;
+
+                $.ajax({
+                    url: switchurl,
+                    data: {'form_key': window.FORM_KEY, 'scope': scope, 'scopeId': scopeId,'onoff': supportenabled},
+                    dataType: 'json',
+                    type: 'POST',
+                    showLoader: true
+                }).done(function (data) {
+                    if (data.error == 1) {
+                        alert({content: data.message});
+                        $('#mailchimp_general_enable_support option[value="0"]').prop('selected', 'selected');
+                    }
+                })
+            },
             _loadDetails: function () {
+                var registerUrl = this.options.registerUrl;
                 var detailsUrl = this.options.detailsUrl;
                 var interestUrl = this.options.getInterestUrl;
                 var apiKey = $('#mailchimp_general_apikey').val();
                 var selectedStore = $('#mailchimp_general_monkeystore').find(':selected').val();
                 var encrypt = 0;
+                var accountdata = {};
+                var scope = this.options.scope;
+                var scopeId = this.options.scopeId;
+
                 if (apiKey == '******') {
                     encrypt = 3;
                 }
@@ -325,7 +427,7 @@ define(
                 $('#mailchimp_general_monkeylist').empty();
                 $.ajax({
                     url: detailsUrl,
-                    data: {'form_key': window.FORM_KEY, 'apikey': apiKey, "store": selectedStore, 'encrypt': encrypt},
+                    data: {'form_key': window.FORM_KEY, 'apikey': apiKey, "store": selectedStore, 'encrypt': encrypt, 'scope': scope, 'scopeId': scopeId},
                     type: 'GET',
                     dataType: 'json',
                     showLoader: true
@@ -333,6 +435,8 @@ define(
                     $.each(data, function (i, item) {
                         if (item.hasOwnProperty('label')) {
                             $('#mailchimp_general_account_details_ul').append('<li>' + item.label + ' ' + item.value + '</li>');
+                        } else if (item.hasOwnProperty('code')) {
+                            accountdata[item.code] = {'value': item.value,'html':item.html};
                         }
                     });
                     if (data.list_id) {
@@ -366,6 +470,38 @@ define(
                             }
                         }
                     });
+                    var outputtext = "<table style='border-collapse; margin-left: 10px;' >"
+                    for (const key in accountdata) {
+                        if (accountdata.hasOwnProperty(key)) {
+                            outputtext += '<tr><td style="border: 1px solid black;padding-left: 10px;padding-right: 10px;"><strong>'+accountdata[key]['html'] + '</strong></td><td style="border: 1px solid black;padding-left: 10px;padding-right: 10px;">' + accountdata[key]['value']+'</td></tr>';
+                        }
+                    }
+                    outputtext += '</table>';
+                    confirmation( {
+                            content: "Confirm your data <br><br>"+outputtext,
+                            actions: {
+                                confirm: function () {
+                                    $.ajax({
+                                        url: registerUrl,
+                                        dataType: 'json',
+                                        data: {'form_key': window.FORM_KEY, 'apikey': apiKey, "data": accountdata,'scope': scope, 'scopeId': scopeId},
+                                        type: 'POST',
+                                        showLoader: true
+                                    }).done(function (data) {
+                                        if (data.error == 0) {
+                                            alert({content: 'You confirm, thanks '+data.token});
+                                        } else {
+                                            alert({content: "Something went wrong!"});
+                                        }
+                                    });
+                                },
+                                cancel: function () {
+                                    $('#mailchimp_general_monkeystore option[value="-1"]').attr('selected', 'selected');
+                                    $('#mailchimp_general_monkeylist').empty();
+                                }
+                            }
+                        }
+                    );
                 });
             }
         });
