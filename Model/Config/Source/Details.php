@@ -12,6 +12,8 @@
 
 namespace Ebizmarts\MailChimp\Model\Config\Source;
 
+use Ebizmarts\MailChimp\Helper\Data as MailChimpHelper;
+
 class Details implements \Magento\Framework\Option\ArrayInterface
 {
     /**
@@ -19,7 +21,7 @@ class Details implements \Magento\Framework\Option\ArrayInterface
      */
     private $_options = null;
     /**
-     * @var \Ebizmarts\MailChimp\Helper\Data
+     * @var MailChimpHelper
      */
     private $_helper  = null;
     /**
@@ -30,14 +32,14 @@ class Details implements \Magento\Framework\Option\ArrayInterface
     private $_error = '';
 
     /**
-     * Details constructor.
-     * @param \Ebizmarts\MailChimp\Helper\Data $helper
+     * @param MailChimpHelper $helper
      * @param \Magento\Framework\Message\ManagerInterface $message
      * @param \Magento\Store\Model\StoreManager $storeManager
      * @param \Magento\Framework\App\RequestInterface $request
+     * @throws \Magento\Framework\Exception\LocalizedException
      */
     public function __construct(
-        \Ebizmarts\MailChimp\Helper\Data $helper,
+        MailChimpHelper $helper,
         \Magento\Framework\Message\ManagerInterface $message,
         \Magento\Store\Model\StoreManager $storeManager,
         \Magento\Framework\App\RequestInterface $request
@@ -82,6 +84,8 @@ class Details implements \Magento\Framework\Option\ArrayInterface
                 } else {
                     $this->_options['store_exists'] = false;
                 }
+                $token = $this->_helper->getConfigValue(MailChimpHelper::XML_STATISTICS_TOKEN, $storeId, $scope);
+                $this->_options['token'] = $token;
             } catch (\Mailchimp_Error | \Mailchimp_HttpError $e) {
                 $this->_helper->log($e->getFriendlyMessage());
                 $this->_error = $e->getMessage();
@@ -106,6 +110,7 @@ class Details implements \Magento\Framework\Option\ArrayInterface
                 if (array_key_exists('list_subscribers', $this->_options)) {
                     $ret = array_merge($ret, [['label' => 'Total List Subscribers', 'value' => $this->_options['list_subscribers']]]);
                 }
+                $ret = array_merge($ret, [['label'=> __('Registration ID'), 'value' => $this->_options['token']]]);
                 if (isset($this->_options['store_exists']) && $this->_options['store_exists']) {
                     $ret = array_merge($ret, [
                         ['label' => 'Ecommerce Data uploaded to MailChimp', 'value' => ''],

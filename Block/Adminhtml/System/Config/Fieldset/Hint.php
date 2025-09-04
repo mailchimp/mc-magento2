@@ -98,4 +98,11 @@ class Hint extends \Magento\Backend\Block\Template implements \Magento\Framework
         }
         return $scopeId;
     }
+    public function getRegisterToken()
+    {
+        $scopeId = $this->getScopeId();
+        $scope = $this->getScope();
+        $token = $this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_STATISTICS_TOKEN, $scopeId, $scope);
+        return $token;
+    }
 }
