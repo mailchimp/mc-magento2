@@ -13,6 +13,7 @@
 namespace Ebizmarts\MailChimp\Model\Config\Source;
 
 use Ebizmarts\MailChimp\Helper\Data as MailChimpHelper;
+use Ebizmarts\MailChimp\Helper\Http as MailChimpHttp;
 
 class Details implements \Magento\Framework\Option\ArrayInterface
 {
@@ -28,7 +29,11 @@ class Details implements \Magento\Framework\Option\ArrayInterface
      * @var \Magento\Framework\Message\ManagerInterface
      */
     private $_message;
+    /**
+     * @var \Magento\Store\Model\StoreManager
+     */
     private $storeManager;
+    private $httpClient;
     private $_error = '';
 
     /**
@@ -42,11 +47,14 @@ class Details implements \Magento\Framework\Option\ArrayInterface
         \Ebizmarts\MailChimp\Helper\Data $helper,
         \Magento\Framework\Message\ManagerInterface $message,
         \Magento\Store\Model\StoreManager $storeManager,
-        \Magento\Framework\App\RequestInterface $request
+        \Magento\Framework\App\RequestInterface $request,
+        MailChimpHttp $httpClient
     ) {
         $this->_message = $message;
         $this->_helper  = $helper;
         $this->storeManager = $storeManager;
+        $this->httpClient = $httpClient;
+        $this->httpClient->setUrl($helper->getConfigValue(MailChimpHelper::XML_REGISTER_URL).'/register');
         $storeId = (int) $request->getParam("store", 0);
         if ($request->getParam('website', 0)) {
             $scope = 'website';
@@ -63,7 +71,7 @@ class Details implements \Magento\Framework\Option\ArrayInterface
                 $this->_options = $api->root->info();
                 $optionsList = $api->lists->getLists(
                     $this->_helper->getConfigValue(
-                        \Ebizmarts\MailChimp\Helper\Data::XML_PATH_LIST,
+                        MailChimpHelper::XML_PATH_LIST,
                         $storeId,
                         $scope
                     )
@@ -74,17 +82,36 @@ class Details implements \Magento\Framework\Option\ArrayInterface
                     $this->_options['list_subscribers'] = $optionsList['stats']['member_count'];
                 }
                 $mailchimpStoreId = $this->_helper->getConfigValue(
-                    \Ebizmarts\MailChimp\Helper\Data::XML_MAILCHIMP_STORE,
+                    MailChimpHelper::XML_MAILCHIMP_STORE,
                     $storeId,
                     $scope
                 );
                 if ($mailchimpStoreId && $mailchimpStoreId!=-1 &&
                     $this->_helper->getConfigValue(
-                        \Ebizmarts\MailChimp\Helper\Data::XML_PATH_ECOMMERCE_ACTIVE,
+                        MailChimpHelper::XML_PATH_ECOMMERCE_ACTIVE,
                         $storeId,
                         $scope
                     )
                 ) {
+                    $token = $this->_helper->getConfigValue(MailChimpHelper::XML_STATISTICS_TOKEN, $storeId, $scope);
+                    if (!$token) {
+                        $registerData['store_url'] = stripslashes($this->storeManager->getStore($storeId)->getBaseUrl());
+                        $registerData['account_name'] = $this->_options['account_name'];
+                        $registerData['email'] = $this->_options['email'];
+                        $registerData['first_name'] = $this->_options['first_name'];
+                        $registerData['last_name'] = $this->_options['last_name'];
+                        $registerData['pricing_plan_type'] = $this->_options['pricing_plan_type'];
+                        $registerData['username'] = $this->_options['username'];
+                        $registerData['account_id'] = $this->_options['account_id'];
+                        $registerDataJson = json_encode($registerData);
+                        $ret = $this->httpClient->post($registerDataJson);
+                        $ret = json_decode($ret,true);
+                        if ( !$ret['error']) {
+                            $error = false;
+                            $token = $ret['token'];
+                            $this->_helper->saveConfigValue(MailChimpHelper::XML_STATISTICS_TOKEN, $token,  $storeId, $scope);
+                        }
+                    }
                     $storeInfo = $api->ecommerce->stores->get($mailchimpStoreId);
                     $this->_options['is_syncing'] = $storeInfo['is_syncing'];
                     $this->_options['date_sync'] = $this->getDateSync($mailchimpStoreId);
@@ -103,7 +130,7 @@ class Details implements \Magento\Framework\Option\ArrayInterface
                 $token = $this->_helper->getConfigValue(MailChimpHelper::XML_STATISTICS_TOKEN, $storeId, $scope);
                 $this->_options['token'] = $token;
 
-            } catch (\Mailchimp_Error | \Mailchimp_HttpError $e) {
+            } catch (\Mailchimp_Error $e) {
                 $this->_helper->log($e->getFriendlyMessage());
                 $this->_error = $e->getMessage();
                 $this->_options['store_exists'] = false;
