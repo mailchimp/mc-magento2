@@ -35,7 +35,7 @@ define(
 
             _init: function () {
                 var self = this;
-                if(!this.options.registerToken) {
+                if(!this.options.registerToken && $('#mailchimp_general_monkeystore').find(':selected').val() > 0) {
                     self._showRegistationDetails();
                 }
                 $('#mailchimp_general_apikey').change(function () {
@@ -470,6 +470,10 @@ define(
                             }
                         }
                     });
+                    if ($('#mailchimp_general_monkeystore').find(':selected').val() <= 0) {
+                        return;
+                    }
+
                     var outputtext = "<table style='border-collapse; margin-left: 10px;' >"
                     for (const key in accountdata) {
                         if (accountdata.hasOwnProperty(key)) {
