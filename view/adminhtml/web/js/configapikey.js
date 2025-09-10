@@ -35,7 +35,7 @@ define(
 
             _init: function () {
                 var self = this;
-                if(!this.options.registerToken) {
+                if(!this.options.registerToken && $('#mailchimp_general_monkeystore').find(':selected').val() > 0) {
                     self._showRegistationDetails();
                 }
                 $('#mailchimp_general_apikey').change(function () {
@@ -93,6 +93,7 @@ define(
                     self._changeAbandonedCart();
                 }
                 $('#mailchimp_ecommerce_campaign_action').attr('size',3);
+
             },
             _changeEcommerce: function () {
                 var self = this;
@@ -175,6 +176,8 @@ define(
                 $("#row_mailchimp_abandonedcart_create_abandonedcart_automation").hide();
             },
             _showEcommerce: function () {
+                $("#row_mailchimp_ecommerce_all_customers").show();
+                $("#mailchimp_ecommerce_all_customers").show();
                 $("#row_mailchimp_ecommerce_customer_optin").show();
                 $("#mailchimp_ecommerce_customer_optin").show();
                 $("#row_mailchimp_ecommerce_firstdate").show();
@@ -467,6 +470,10 @@ define(
                             }
                         }
                     });
+                    if ($('#mailchimp_general_monkeystore').find(':selected').val() <= 0) {
+                        return;
+                    }
+
                     var outputtext = "<table style='border-collapse; margin-left: 10px;' >"
                     for (const key in accountdata) {
                         if (accountdata.hasOwnProperty(key)) {
