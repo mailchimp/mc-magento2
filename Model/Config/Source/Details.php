@@ -33,15 +33,19 @@ class Details implements \Magento\Framework\Option\ArrayInterface
      * @var \Magento\Store\Model\StoreManager
      */
     private $storeManager;
+    /**
+     * @var MailChimpHttp
+     */
     private $httpClient;
     private $_error = '';
 
     /**
-     * Details constructor.
-     * @param \Ebizmarts\MailChimp\Helper\Data $helper
+     * @param MailChimpHelper $helper
      * @param \Magento\Framework\Message\ManagerInterface $message
      * @param \Magento\Store\Model\StoreManager $storeManager
      * @param \Magento\Framework\App\RequestInterface $request
+     * @param MailChimpHttp $httpClient
+     * @throws \Magento\Framework\Exception\LocalizedException
      */
     public function __construct(
         \Ebizmarts\MailChimp\Helper\Data $helper,
