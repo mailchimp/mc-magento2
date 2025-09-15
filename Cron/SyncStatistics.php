@@ -119,7 +119,7 @@ class SyncStatistics
     }
     private function syncData($data)
     {
-        $this->helper->log("SyncDada");
+        $this->helper->log("SyncData");
         $batch = [];
         $continue = true;
         foreach ($data as $id => $notification) {
