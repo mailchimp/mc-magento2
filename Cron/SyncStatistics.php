@@ -119,6 +119,7 @@ class SyncStatistics
     }
     private function syncData($data)
     {
+        $this->helper->log("SyncDada");
         $batch = [];
         $continue = true;
         foreach ($data as $id => $notification) {
@@ -127,6 +128,11 @@ class SyncStatistics
                 $jsonData = json_decode($notification, true, 50, JSON_THROW_ON_ERROR);
             } catch (\Exception $e) {
                 $this->helper->log($e->getMessage());
+                $mailchimpNotification = $this->mailchimpNotificationFactory->create();
+                $mailchimpNotification->getResource()->load($mailchimpNotification, $id);
+                $mailchimpNotification->setProcessed(true);
+                $mailchimpNotification->setSyncedAt($this->helper->getGmtDate());
+                $mailchimpNotification->getResource()->save($mailchimpNotification);
                 continue;
             }
             $json['data'] = $jsonData;
@@ -139,7 +145,7 @@ class SyncStatistics
             $rjson = json_decode($response, true);
             if (is_array($rjson)) {
                 foreach ($rjson as $r) {
-                    if (array_key_exists('id', $r)) {
+                    if (is_array($r) && array_key_exists('id', $r)) {
                         $id = $r['id'];
                         if (!$r['error']) {
                             $mailchimpNotification = $this->mailchimpNotificationFactory->create();
@@ -148,6 +154,9 @@ class SyncStatistics
                             $mailchimpNotification->setSyncedAt($this->helper->getGmtDate());
                             $mailchimpNotification->getResource()->save($mailchimpNotification);
                         }
+                    } else {
+                        $this->helper->log("Sync notification failed to sync");
+                        $this->helper->log($r);
                     }
                 }
             } else {
