@@ -23,8 +23,11 @@
      "resyncSubscribersUrl": "<?= $escaper->escapeUrl($block->getUrl('mailchimp/ecommerce/resyncSubscribers'));?>",
      "resyncProductsUrl": "<?= $escaper->escapeUrl($block->getUrl('mailchimp/ecommerce/resyncProducts'));?>",
      "fixMailchimpjsUrl": "<?= $escaper->escapeUrl($block->getUrl('mailchimp/ecommerce/fixMailchimpJS'));?>",
+     "registerUrl": "<?= $escaper->escapeUrl($block->getUrl('mailchimp/ecommerce/register'));?>",
      "scope": "<?= $escaper->escapeHtml($block->getScope());?>",
-     "scopeId": "<?= $escaper->escapeUrl($block->getScopeId()); ?>"
+     "scopeId": "<?= $escaper->escapeUrl($block->getScopeId()); ?>",
+     "registerToken": "<?= $escaper->escapeUrl($block->getRegisterToken()); ?>",
+     "switchurl": "<?= $escaper->escapeUrl($block->getUrl('mailchimp/ecommerce/SyncLog'));?>"
     }}'>
 </div>
 <div style="background:#EAF0EE;border:1px solid #CCCCCC;margin-bottom:10px;padding:11px 0 0 10px;">

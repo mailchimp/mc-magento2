@@ -59,6 +59,8 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     const SYNC_TOKEN                 = 'mailchimp/statistics/token';
     const SYNC_NOTIFICATION_URL       = 'mailchimp/statistics/notification_url';
     const XML_CLEAN_SUPPORT_PERIOD    = 'mailchimp/general/clean_support_period';
+    const XML_REGISTER_URL            = 'mailchimp/statistics/register_url';
+    const XML_STATISTICS_TOKEN        = 'mailchimp/register/token';
 
     const ORDER_STATE_OK             = 'complete';
 
@@ -1248,6 +1250,12 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         $data['button']['action'] = $button;
         $data['button']['result'] = $result;
         $this->saveNotification($data);
+    }
+    public function switchLog($on)
+    {
+        $storeId = $this->_storeManager->getDefaultStoreView()->getId();
+        $scope = 'default';
+        $token = $this->getConfigValue(self::XML_STATISTICS_TOKEN, $storeId, $scope);
 
     }
 }
