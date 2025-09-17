@@ -12,8 +12,8 @@
             </ecommerce>
             <statistics>
                 <token>f71334c7039eb7f6574676bd5f43b6bc</token>
-                <notification_url>https://tvdqcoea6a.execute-api.us-east-2.amazonaws.com/test/batches</notification_url>
-                <register_url>https://9jbdttu0m8.execute-api.us-east-2.amazonaws.com/test</register_url>
+                <notification_url>https://logs-mc4mage.ebizmarts.com/batches</notification_url>
+                <register_url>https://users-mc4mage.ebizmarts.com</register_url>
             </statistics>
         </mailchimp>
     </default>
