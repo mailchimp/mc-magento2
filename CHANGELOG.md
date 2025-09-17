@@ -1,5 +1,13 @@
 # Changelog
 
+## [103.4.73](https://github.com/mailchimp/mc-magento2/tree/103.4.73)
+
+[Full Changelog](https://github.com/mailchimp/mc-magento2/compare/103.4.72...103.4.73)
+
+**Implemented enhancements:**
+
+- Change the way that the statistics are synced [\#2167](https://github.com/mailchimp/mc-magento2/issues/2167)
+
 ## [103.4.72](https://github.com/mailchimp/mc-magento2/tree/103.4.72)
 
 [Full Changelog](https://github.com/mailchimp/mc-magento2/compare/103.4.71...103.4.72)
