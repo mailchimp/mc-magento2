@@ -6,8 +6,9 @@ use Magento\Framework\Setup\ModuleDataSetupInterface;
 use Magento\Framework\Setup\Patch\DataPatchInterface;
 use Magento\Framework\Setup\Patch\PatchVersionInterface;
 use Magento\Config\Model\ResourceModel\Config\Data\CollectionFactory as ConfigFactory;
+use Magento\Framework\Setup\Patch\PatchRevertableInterface;
 
-class Migrate35 implements DataPatchInterface, PatchVersionInterface
+class Migrate35 implements DataPatchInterface, PatchVersionInterface, PatchRevertableInterface
 {
     /**
      * @var ModuleDataSetupInterface
@@ -79,5 +80,16 @@ class Migrate35 implements DataPatchInterface, PatchVersionInterface
     {
         return '102.3.35';
     }
+
+    /**
+     * Revert data changes
+     *
+     * @return bool
+     */
+    public function revert()
+    {
+        return true;
+    }
+
 }
 
