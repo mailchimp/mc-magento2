@@ -140,6 +140,7 @@ class Product
         $batchArray = [];
         $mailchimpStoreId = $this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_MAILCHIMP_STORE, $magentoStoreId);
         $this->includingTaxes = $this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_INCLUDING_TAXES, $magentoStoreId);
+        $syncSalable = $this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_SYNC_SALABLE, $magentoStoreId);
         $this->_markSpecialPrices($magentoStoreId, $mailchimpStoreId);
         $batchArray = array_merge($batchArray,$this->processDeletedProducts($magentoStoreId, $mailchimpStoreId));
         $collection = $this->_getCollection();
@@ -162,7 +163,7 @@ class Product
             $product = $this->_productRepository->getById($item->getId(), false, $magentoStoreId);
             if ($item->getMailchimpSyncModified() && $item->getMailchimpSyncDelta() &&
                 $item->getMailchimpSyncDelta() > $this->_helper->getMCMinSyncDateFlag()) {
-                if ($product->isSalable()) {
+                if ($product->isSalable() || $syncSalable) {
                     if (!$item->getMailchimpSyncDeleted()) {
                         $batchArray = array_merge($this->_buildOldProductRequest(
                             $product,
@@ -183,7 +184,7 @@ class Product
                 }
                 continue;
             } else {
-                if ($product->isSalable()) {
+                if ($product->isSalable() || $syncSalable) {
                     $data = $this->_buildNewProductRequest($product, $mailchimpStoreId, $magentoStoreId);
                 } else {
                     $this->_updateProduct(
