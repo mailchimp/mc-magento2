@@ -1,5 +1,18 @@
 # Changelog
 
+## [103.4.74](https://github.com/mailchimp/mc-magento2/tree/103.4.74)
+
+[Full Changelog](https://github.com/mailchimp/mc-magento2/compare/103.4.73...103.4.74)
+
+**Implemented enhancements:**
+
+- Add flag to sync not salable products [\#2181](https://github.com/mailchimp/mc-magento2/issues/2181)
+
+*Fixed bugs:**
+
+- Patches are not removed after the module uninstallation [\#2170](https://github.com/mailchimp/mc-magento2/pull/2170)
+- Add config checking in afterLoadByCustomer [\#2168](https://github.com/mailchimp/mc-magento2/pull/2168)
+
 ## [103.4.73](https://github.com/mailchimp/mc-magento2/tree/103.4.73)
 
 [Full Changelog](https://github.com/mailchimp/mc-magento2/compare/103.4.72...103.4.73)
