@@ -1,5 +1,13 @@
 # Change Log
 
+## [101.2.74](https://github.com/mailchimp/mc-magento2/tree/101.2.74)
+
+[Full Changelog](https://github.com/mailchimp/mc-magento2/compare/101.2.73...101.2.74)
+
+**Implemented enhancements:**
+
+- Add flag to sync not salable products [\#2181](https://github.com/mailchimp/mc-magento2/issues/2181)
+
 ## [101.2.73](https://github.com/mailchimp/mc-magento2/tree/101.2.73)
 
 [Full Changelog](https://github.com/mailchimp/mc-magento2/compare/101.2.72...101.2.73)
