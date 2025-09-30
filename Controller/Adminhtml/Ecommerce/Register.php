@@ -7,6 +7,7 @@ use Magento\Framework\App\Config\ScopeConfigInterface;
 use Magento\Framework\Controller\ResultFactory;
 use Magento\Store\Model\StoreManager;
 use Magento\Backend\App\Action\Context;
+use Magento\Directory\Helper\Data as DirectoryHelper;
 use Magento\Config\Model\ResourceModel\Config;
 use Ebizmarts\MailChimp\Helper\Data as Helper;
 use Ebizmarts\MailChimp\Helper\Http as MailChimpHttp;
@@ -33,6 +34,7 @@ class Register extends Action
      * @var StoreManager
      */
     protected $_storeManager;
+    protected $_directoryHelper;
 
     /**
      * @param Context $context
@@ -40,6 +42,7 @@ class Register extends Action
      * @param MailChimpHttp $http
      * @param Config $config
      * @param StoreManager $storeManager
+     * @param DirectoryHelper $directoryHelper
      * @throws \Magento\Framework\Exception\LocalizedException
      */
     public function __construct(
@@ -47,7 +50,8 @@ class Register extends Action
         Helper $helper,
         MailChimpHttp $http,
         Config $config,
-        StoreManager $storeManager
+        StoreManager $storeManager,
+        DirectoryHelper $directoryHelper
     )
     {
         parent::__construct($context);
@@ -57,6 +61,7 @@ class Register extends Action
         $this->_http->setUrl($helper->getConfigValue(Helper::XML_REGISTER_URL).'/register');
         $this->_config = $config;
         $this->_storeManager = $storeManager;
+        $this->_directoryHelper = $directoryHelper;
     }
     public function execute()
     {
@@ -70,6 +75,8 @@ class Register extends Action
             $registerData[$index] = $value['value'];
         }
         $registerData['store_url'] = stripslashes($this->_storeManager->getStore($scopeId)->getBaseUrl());
+        $registerData['city'] = $this->_helper->getConfigValue(\Magento\Store\Model\Information::XML_PATH_STORE_INFO_CITY,$scopeId, $scope);
+        $registerData['country'] = $this->_directoryHelper->getDefaultCountry($scopeId);
         $registerDataJson = json_encode($registerData);
         $resultJson = $this->_resultFactory->create(ResultFactory::TYPE_JSON);
         if ($token) {
