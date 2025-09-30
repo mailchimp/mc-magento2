@@ -45,6 +45,7 @@ class Register extends Action
      * @param MailChimpHttp $http
      * @param Config $config
      * @param StoreManager $storeManager
+     * @param DirectoryHelper $directoryHelper
      * @throws \Magento\Framework\Exception\LocalizedException
      */
     public function __construct(
