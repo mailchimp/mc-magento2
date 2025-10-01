@@ -34,7 +34,10 @@ class Register extends Action
      * @var StoreManager
      */
     protected $_storeManager;
-    protected $_messageManager;
+    /**
+     * @var DirectoryHelper
+     */
+    protected $_directoryHelper;
     /**
      * @param Context $context
      * @param Helper $helper
