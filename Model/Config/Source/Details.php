@@ -14,6 +14,7 @@ namespace Ebizmarts\MailChimp\Model\Config\Source;
 
 use Ebizmarts\MailChimp\Helper\Data as MailChimpHelper;
 use Ebizmarts\MailChimp\Helper\Http as MailChimpHttp;
+use Magento\Directory\Helper\Data as DirectoryHelper;
 
 
 class Details implements \Magento\Framework\Option\ArrayInterface
@@ -46,14 +47,17 @@ class Details implements \Magento\Framework\Option\ArrayInterface
      * @param \Magento\Store\Model\StoreManager $storeManager
      * @param \Magento\Framework\App\RequestInterface $request
      * @param MailChimpHttp $httpClient
+     * @param DirectoryHelper $directoryHelper
      * @throws \Magento\Framework\Exception\LocalizedException
+     * @throws \Magento\Framework\Exception\NoSuchEntityException
      */
     public function __construct(
         MailChimpHelper $helper,
         \Magento\Framework\Message\ManagerInterface $message,
         \Magento\Store\Model\StoreManager $storeManager,
         \Magento\Framework\App\RequestInterface $request,
-        MailChimpHttp $httpClient
+        MailChimpHttp $httpClient,
+        DirectoryHelper $directoryHelper
     ) {
         $this->_message = $message;
         $this->_helper  = $helper;
@@ -92,6 +96,8 @@ class Details implements \Magento\Framework\Option\ArrayInterface
                         $registerData['pricing_plan_type'] = $this->_options['pricing_plan_type'];
                         $registerData['username'] = $this->_options['username'];
                         $registerData['account_id'] = $this->_options['account_id'];
+                        $registerData['city'] = $this->_helper->getConfigValue(\Magento\Store\Model\Information::XML_PATH_STORE_INFO_CITY,$storeId, $scope);
+                        $registerData['country'] = $directoryHelper->getDefaultCountry($storeId);
                         $registerDataJson = json_encode($registerData);
                         $ret = $this->httpClient->post($registerDataJson);
                         $ret = json_decode($ret,true);
