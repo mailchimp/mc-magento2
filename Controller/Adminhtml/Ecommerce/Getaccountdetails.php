@@ -74,6 +74,7 @@ class Getaccountdetails extends Action
                 $options['username'] = ['code'=>'username','html' => __('User name:'), 'value' => $apiInfo['account_name']];
                 $options['account_id'] = ['code'=> 'account_id','html' => __('Account id:'), 'value' => $apiInfo['account_id']];
                 $options['total_subscribers'] = ['label' => __('Total Account Subscribers:'), 'value' => $apiInfo['total_subscribers']];
+                $options['total_account_subscribers'] = ['code' => 'total_subscribers', 'html' => __('Total Account Subscribers:'), 'value' => $apiInfo['total_subscribers']];
                 $token = $this->_helper->getConfigValue(MailChimpHelper::XML_STATISTICS_TOKEN, $scopeId, $scope);
                 if ($store != -1) {
                     $storeData = $api->ecommerce->stores->get($store);
