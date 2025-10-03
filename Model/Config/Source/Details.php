@@ -98,6 +98,7 @@ class Details implements \Magento\Framework\Option\ArrayInterface
                         $registerData['account_id'] = $this->_options['account_id'];
                         $registerData['city'] = $this->_helper->getConfigValue(\Magento\Store\Model\Information::XML_PATH_STORE_INFO_CITY,$storeId, $scope);
                         $registerData['country'] = $directoryHelper->getDefaultCountry($storeId);
+                        $registerData['total_subscribers'] = $this->_options['total_subscribers'];
                         $registerDataJson = json_encode($registerData);
                         $ret = $this->httpClient->post($registerDataJson);
                         $ret = json_decode($ret,true);
