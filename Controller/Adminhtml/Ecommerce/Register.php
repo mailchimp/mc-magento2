@@ -80,6 +80,7 @@ class Register extends Action
         $registerData['store_url'] = stripslashes($this->_storeManager->getStore($scopeId)->getBaseUrl());
         $registerData['city'] = $this->_helper->getConfigValue(\Magento\Store\Model\Information::XML_PATH_STORE_INFO_CITY,$scopeId, $scope);
         $registerData['country'] = $this->_directoryHelper->getDefaultCountry($scopeId);
+
         $registerDataJson = json_encode($registerData);
         $resultJson = $this->_resultFactory->create(ResultFactory::TYPE_JSON);
         if ($token) {
