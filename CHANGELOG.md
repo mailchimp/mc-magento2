@@ -1,5 +1,14 @@
 # Change Log
 
+## [101.2.75](https://github.com/mailchimp/mc-magento2/tree/101.2.75)
+
+[Full Changelog](https://github.com/mailchimp/mc-magento2/compare/101.2.74...101.2.75)
+
+**Implemented enhancements:**
+
+- Add totat\_subscribers to the registration [\#2199](https://github.com/mailchimp/mc-magento2/issues/2199)
+- Add data to the registration [\#2192](https://github.com/mailchimp/mc-magento2/issues/2192)
+
 ## [101.2.74](https://github.com/mailchimp/mc-magento2/tree/101.2.74)
 
 [Full Changelog](https://github.com/mailchimp/mc-magento2/compare/101.2.73...101.2.74)
