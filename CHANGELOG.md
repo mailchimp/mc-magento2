@@ -6,7 +6,7 @@
 
 **Implemented enhancements:**
 
-- Add totat\_subscribers to the registration [\#2199](https://github.com/mailchimp/mc-magento2/issues/2199)
+- Add total amount of subscribers to the registration [\#2199](https://github.com/mailchimp/mc-magento2/issues/2199)
 - Add data to the registration [\#2192](https://github.com/mailchimp/mc-magento2/issues/2192)
 
 ## [102.3.74-p1](https://github.com/mailchimp/mc-magento2/tree/102.3.74-p1)
