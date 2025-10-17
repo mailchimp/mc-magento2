@@ -1,5 +1,14 @@
 # Change Log
 
+## [102.3.75](https://github.com/mailchimp/mc-magento2/tree/102.3.75)
+
+[Full Changelog](https://github.com/mailchimp/mc-magento2/compare/102.3.74...102.3.75)
+
+**Implemented enhancements:**
+
+- Add total amount of subscribers to the registration [\#2199](https://github.com/mailchimp/mc-magento2/issues/2199)
+- Add data to the registration [\#2192](https://github.com/mailchimp/mc-magento2/issues/2192)
+
 ## [102.3.74](https://github.com/mailchimp/mc-magento2/tree/102.3.74)
 
 [Full Changelog](https://github.com/mailchimp/mc-magento2/compare/102.3.73...102.3.74)
