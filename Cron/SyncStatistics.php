@@ -71,9 +71,11 @@ class SyncStatistics
             $res = json_decode($response, true);
             if (key_exists('error',$res) && $res['error']) {
                 $this->helper->log("Something went wrong while syncing statistics");
+                $this->cleanData();
                 return;
             } elseif (key_exists('enabled',$res) && !$res['enabled']) {
                 $this->helper->log("You are not authorized to sync statistics");
+                $this->cleanData();
                 return;
             }
             $this->helper->log("Processing sync statistics");
