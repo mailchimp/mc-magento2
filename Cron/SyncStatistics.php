@@ -64,6 +64,7 @@ class SyncStatistics
             $token = $this->helper->getConfigValue(MailChimpHelper::XML_STATISTICS_TOKEN, $scopeId, $scope);
             if (!$token) {
                 $this->helper->log("You must first register your copy to sync statistics");
+                $this->cleanData();
                 return;
             }
             $this->mailchimpHttp->setUrl($this->helper->getConfigValue(MailChimpHelper::XML_REGISTER_URL).'/logenabled');
