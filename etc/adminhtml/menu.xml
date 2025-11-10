@@ -48,5 +48,13 @@
              parent="Ebizmarts_MailChimp::mailchimp_menu"
              action="mailchimp/cron"
         />
+        <add id="Ebizmarts_MailChimp::carts_menu"
+             title="Abandoned Carts"
+             module="Ebizmarts_MailChimp"
+             sortOrder="60"
+             resource="Ebizmarts_MailChimp::carts_grid"
+             parent="Ebizmarts_MailChimp::mailchimp_menu"
+             action="mailchimp/carts"
+        />
     </menu>
 </config>
