@@ -70,7 +70,7 @@
                 <item name="config" xsi:type="array">
                     <item name="bodyTmpl" xsi:type="string">ui/grid/cells/html</item>
                     <item name="sortable" xsi:type="boolean">false</item>
-                    <item name="label" xsi:type="string" translate="true">Custonmer Email</item>
+                    <item name="label" xsi:type="string" translate="true">Customer Email</item>
                 </item>
             </argument>
         </column>
