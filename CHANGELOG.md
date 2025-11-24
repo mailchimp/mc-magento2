@@ -1,5 +1,17 @@
 # Change Log
 
+## [100.1.76](https://github.com/mailchimp/mc-magento2/tree/100.1.76)
+
+[Full Changelog](https://github.com/mailchimp/mc-magento2/compare/100.1.75...100.1.76)
+
+**Implemented enhancements:**
+
+- Feature Request: Store customers email in logs for abandoned baskets. [\#2084](https://github.com/mailchimp/mc-magento2/issues/2084)
+
+**Fixed bugs:**
+
+- Error cleaning the mailchimp\_statistics table [\#2210](https://github.com/mailchimp/mc-magento2/issues/2210)
+
 ## [100.1.75](https://github.com/mailchimp/mc-magento2/tree/100.1.75)
 
 [Full Changelog](https://github.com/mailchimp/mc-magento2/compare/100.1.74...100.1.75)
