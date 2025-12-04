@@ -1,0 +1,80 @@
+<?php
+/**
+ * @var $block \Ebizmarts\MailChimp\Block\Customer\Account\Groups
+ * @var $escaper \Magento\Framework\Escaper
+ */
+$groups = $block->getGroups();
+//echo $interest;
+?>
+<div id="monkey_registration" style="display:none;"
+     data-mage-init='{"mailchimpregistration":{"checkCampaignUrl": "<?= $escaper->escapeUrl($block->getUrl('mailchimp/campaign/check'));?>"}}'>
+</div>
+<div class="field maichimp_groups" style="display:none;" id="mailchimp_groups" name="mailchimp_groups">
+    <label class="label" for="maichimp_groups">
+        <span><?= $block->escapeHtml(__('Interests')) ?></span>
+    </label>
+
+    <div class="control">
+        <?php foreach ($groups as $i): ?>
+            <div class="field">
+                <label class="label" for="<?= $escaper->escapeHtml($i['interest']['id']) ?>">
+                    <span><?= $escaper->escapeHtml($i['interest']['title']) ?></span>
+                </label>
+                <div class="control">
+                    <div class="fields">
+                        <?php switch ($i['interest']['type']):
+                            case 'checkboxes': ?>
+                                <ul class="field" style="list-style: none">
+                                    <?php foreach ($i['category'] as $c): ?>
+                                        <li class="field no-label">
+                                            <input class=""
+                                                   name="group[<?=  $escaper->escapeHtml($i['interest']['id']) ?>][<?= $escaper->escapeHtml($c['id'])?>]"
+                                                   type="checkbox"
+                                                   value="<?= $escaper->escapeHtml($c['id']) ?>"
+                                                   id="<?= $escaper->escapeHtml('mailchimp_group_'.$c['id']) ?>"
+                                                   title="<?= $escaper->escapeHtml($c['name']) ?>"
+                                                <?php if($c['checked']) { echo $escaper->escapeHtml('checked');} ?>
+                                            />
+                                            <label class="field label"><?= $escaper->escapeHtml($c['name']) ?></label>
+                                        </li>
+                                    <?php endforeach; ?>
+                                </ul>
+                                <?php       break;
+                            case 'dropdown': ?>
+                                <div class="field no-label">
+                                    <select class="field"
+                                            name="group[<?= $escaper->escapeHtml($i['interest']['id']) ?>]"
+                                            id="<?= $escaper->escapeHtml('mailchimp_group_'.$i['interest']['id']) ?>"
+                                            title="<?= $escaper->escapeHtml($i['interest']['title']) ?>">
+                                        <option value=""></option>
+                                        <?php foreach ($i['category'] as $c): ?>
+                                            <option value="<?= $escaper->escapeHtml($c['id']) ?>" <?php if ($c['checked']) { echo $escaper->escapeHtml('selected'); } ?>><?= $escaper->escapeHtml($c['name']) ?></option>
+                                        <?php endforeach; ?>
+                                    </select>
+
+                                </div>
+                                <?php       break;
+                            case 'radio': ?>
+                                <ul class="field">
+                                    <?php foreach ($i['category'] as $c): ?>
+                                        <li class="field no-label" style="list-style: none">
+                                            <input class=""
+                                                   name="group[<?= $escaper->escapeHtml($i['interest']['id']) ?>]"
+                                                   type="radio"
+                                                   value="<?= $escaper->escapeHtml($c['id']) ?>"
+                                                   id="<?= $escaper->escapeHtml('mailchimp_group_'.$c['id']) ?>"
+                                                   title="<?= $escaper->escapeHtml($c['name']) ?>"
+                                                <?php if ($c['checked']) { echo $escaper->escapeHtml('checked');} ?>
+                                            />
+                                            <label class="field label"><?= $escaper->escapeHtml($c['name']) ?></label>
+                                        </li>
+                                    <?php endforeach; ?>
+                                </ul>
+                                <?php       break; ?>
+                            <?php endswitch; ?>
+                    </div>
+                </div>
+            </div>
+        <?php endforeach; ?>
+    </div>
+</div>

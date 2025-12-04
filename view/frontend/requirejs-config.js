@@ -11,7 +11,8 @@
 var config = {
     "map": {
         "*": {
-            campaigncatcher: 'Ebizmarts_MailChimp/js/campaigncatcher'
+            campaigncatcher: 'Ebizmarts_MailChimp/js/campaigncatcher',
+            mailchimpregistration: 'Ebizmarts_MailChimp/js/mailchimpregistration'
         }
     }
 };
