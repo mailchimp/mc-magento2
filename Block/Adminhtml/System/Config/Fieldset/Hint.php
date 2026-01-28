@@ -69,6 +69,15 @@ class Hint extends \Magento\Backend\Block\Template implements
     {
         return $this->_moduleVersion->getModuleVersion('Ebizmarts_MailChimp');
     }
+    public function checkLibVersion()
+    {
+        $version = $this->_moduleVersion->getLibVersion('ebizmarts/mailchimp-lib');
+        if (\Ebizmarts\MailChimp\Helper\Data::MIN_LIB_VERSION > $version) {
+            return $version;
+        } else {
+            return false;
+        }
+    }
     public function getHasApiKey()
     {
         $apikey = $this->_helper->getApiKey($this->_context->getStoreManager()->getStore()->getId());

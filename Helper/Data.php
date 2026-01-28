@@ -104,6 +104,8 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
 
     const MAX_MERGEFIELDS = 100;
 
+    const MIN_LIB_VERSION = '3.0.45';
+
     protected $counters = [];
     /**
      * @var \Magento\Store\Model\StoreManagerInterface
@@ -1258,5 +1260,25 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         $scope = 'default';
         $token = $this->getConfigValue(self::XML_STATISTICS_TOKEN, $storeId, $scope);
 
+    }
+
+    /**
+     * @param \Magento\Quote\Model\Quote $quote
+     * @return void
+     */
+    public function sendCartEvent($quote)
+    {
+        $storeId = $quote->getStoreId();
+        $api = $this->getApi($storeId);
+        $list = $this->getDefaultList($storeId);
+        $customerMailchimpId = hash('md5', strtolower($quote->getCustomerEmail()));
+        $properties = [];
+        $properties['quote_id'] = $quote->getId();
+        $properties['store_id'] = $this->getConfigValue(self::XML_MAILCHIMP_STORE, $storeId);
+        $properties['customer_email'] = $quote->getCustomerEmail();
+        $properties['total'] = $quote->getGrandTotal();
+        $properties['currency'] = $quote->getQuoteCurrencyCode();
+        $properties['customer_id'] = $quote->getCustomerId();
+        $api->lists->members->memberEvent->add($list, $customerMailchimpId, "abandoned_cart_visit",$properties,false,$this->getGmtDate());
     }
 }
