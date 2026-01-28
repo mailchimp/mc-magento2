@@ -90,4 +90,7 @@
         <plugin name="mailchimp_save_creditmemo" type="Ebizmarts\MailChimp\Model\Plugin\Creditmemo" sortOrder="10"/>
     </type>
     <preference for="Magento\Newsletter\Block\Subscribe" type="Ebizmarts\MailChimp\Block\Subscribe"/>
+    <type name="Magento\Customer\Api\CustomerRepositoryInterface">
+        <plugin name="ebizmarts_mailchimp_plugin_customer_repository" type="Ebizmarts\MailChimp\Model\Plugin\CustomerRepositoryPlugin"/>
+    </type>
 </config>
