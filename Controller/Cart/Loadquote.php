@@ -140,6 +140,7 @@ class Loadquote extends Action
                 }
                 $quote->setData('mailchimp_abandonedcart_flag', true);
                 $quote->getResource()->save($quote);
+                $this->_helper->sendCartEvent($quote);
                 if (!$quote->getCustomerId()) {
                     $this->_checkoutSession->setQuoteId($quote->getId());
                     $this->_redirect($url);
