@@ -50,7 +50,6 @@ class CustomerRepositoryPlugin
         CustomerRepositoryInterface $customerRepository,
         CustomerInterface $customer
     ) {
-        $this->mailChimpHelper->log(__METHOD__);
         $extensionAttributes = $customer->getExtensionAttributes()?: $this->customerExtensionFactory->create();
         if ($extensionAttributes !== null && $extensionAttributes->getMailchimpGroups() !== null) {
             /**
