@@ -483,7 +483,7 @@ class Product
         \Magento\Catalog\Model\Product $product,
         $magentoStoreId,
         $isVarient = true,
-        $variants = null
+        $variants = []
     ) {
 
         $data = [];
