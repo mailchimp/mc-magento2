@@ -1,5 +1,18 @@
 # Change Log
 
+## [102.3.77-p1](https://github.com/mailchimp/mc-magento2/tree/102.3.77-p1)
+
+[Full Changelog](https://github.com/mailchimp/mc-magento2/compare/102.3.76-p1...102.3.77-p1)
+
+**Implemented enhancements:**
+
+- Send an event every time visit an abandoned cart [\#2233](https://github.com/mailchimp/mc-magento2/issues/2233)
+
+**Fixed bugs:**
+
+- Ebizmarts\MailChimp\Model\Api\Product.php can break during iteration [\#2239](https://github.com/mailchimp/mc-magento2/issues/2239)
+- Incorrect DATETIME value: '' [\#2227](https://github.com/mailchimp/mc-magento2/issues/2227)
+
 ## [102.3.76-p1](https://github.com/mailchimp/mc-magento2/tree/102.3.76-p1)
 
 [Full Changelog](https://github.com/mailchimp/mc-magento2/compare/102.3.75-p1...102.3.76-p1)
