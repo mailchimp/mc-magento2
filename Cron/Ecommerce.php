@@ -145,7 +145,7 @@ class Ecommerce
         foreach ($this->_storeManager->getStores() as $storeId => $val) {
             $mailchimpStoreId = $this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_MAILCHIMP_STORE, $storeId);
             if ($mailchimpStoreId != -1 && $mailchimpStoreId != '') {
-                $dateSync = $this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_PATH_IS_SYNC, $storeId);
+                $dateSync = $this->_helper->getMCMinSyncDateFlag($storeId);
                 if (isset($syncs[$mailchimpStoreId])) {
                     if ($syncs[$mailchimpStoreId] && $syncs[$mailchimpStoreId]['datesync'] < $dateSync) {
                         $syncs[$mailchimpStoreId]['datesync'] = $dateSync;
@@ -160,7 +160,12 @@ class Ecommerce
             }
         }
         foreach ($syncs as $mailchimpStoreId => $val) {
-            if ($val && !$this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_PATH_IS_SYNC . "/$mailchimpStoreId", 0, 'default')) {
+            $flag = $this->_helper->getMCMinSyncDateFlagByMailchimpStore(
+                $mailchimpStoreId,
+                0,
+                'default'
+            );
+            if ($val && !$flag) {
                 $this->updateSyncFlagData($val['storeid'], $mailchimpStoreId);
             }
         }
@@ -193,7 +198,7 @@ class Ecommerce
             $countOrders = count($orders);
             $results = array_merge($results, $orders);
 
-            if ($this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_PATH_IS_SYNC, $storeId)) {
+            if ($this->_helper->getMCMinSyncDateFlag($storeId)) {
                 $this->_helper->log('Generate Carts payload');
                 $carts = $this->_apiCart->createBatchJson($storeId);
                 $results = array_merge($results, $carts);
@@ -265,9 +270,13 @@ class Ecommerce
         }
 
         $countTotal = $this->_helper->getTotalNewItemsSent();
-        $syncing = $this->_helper->getMCMinSyncing($storeId);
+        $syncing = $this->_helper->getMCMinSyncDateFlag($storeId);
         if ($countTotal == 0 && $syncing) {
-            $this->_helper->saveConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_PATH_IS_SYNC, date('Y-m-d'), $storeId);
+            $this->_helper->saveMCMinSyncing(
+                null,
+                date('Y-m-d'),
+                $storeId
+            );
         }
 
         return $batchId;
@@ -280,7 +289,11 @@ class Ecommerce
     protected function updateSyncFlagData($storeId, $mailchimpStoreId)
     {
         $this->apiUpdateSyncFlag($storeId, $mailchimpStoreId);
-        $this->_helper->saveConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_PATH_IS_SYNC . "/$mailchimpStoreId", date('Y-m-d'), 0, 'default');
+        $this->_helper->saveMCMinSyncing(
+            $mailchimpStoreId,
+            date('Y-m-d'),
+            0,
+            'default');
     }
 
     /**
