@@ -163,7 +163,7 @@ class Order
             \Ebizmarts\MailChimp\Helper\Data::XML_MAILCHIMP_STORE,
             $magentoStoreId
         );
-        $isSynced = $this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_PATH_IS_SYNC, $magentoStoreId);
+        $isSynced = $this->_helper->getMCMinSyncDateFlag($magentoStoreId);
         $modifiedOrders = $this->_getCollection();
         // select orders for the current Magento store id
         $modifiedOrders->addFieldToFilter('store_id', ['eq' => $magentoStoreId]);
@@ -239,7 +239,7 @@ class Order
             \Ebizmarts\MailChimp\Helper\Data::XML_MAILCHIMP_STORE,
             $magentoStoreId
         );
-        $isSynced = $this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_PATH_IS_SYNC, $magentoStoreId);
+        $isSynced = $this->_helper->getMCMinSyncDateFlag($magentoStoreId);
         $newOrders = $this->_getCollection();
         // select carts for the current Magento store id
         $newOrders->addFieldToFilter('store_id', ['eq' => $magentoStoreId]);
