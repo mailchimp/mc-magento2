@@ -122,8 +122,8 @@ class Cart
             $magentoStoreId
         );
         if (!$this->_firstDate) {
-            $this->_firstDate = $this->_helper->getConfigValue(
-                \Ebizmarts\MailChimp\Helper\Data::XML_PATH_IS_SYNC . "/$mailchimpStoreId",
+            $this->_firstDate = $this->_helper->getMCMinSyncDateFlagByMailchimpStore(
+                $mailchimpStoreId,
                 0,
                 'default'
             );
