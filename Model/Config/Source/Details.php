@@ -204,8 +204,8 @@ class Details implements \Magento\Framework\Option\ArrayInterface
     }
     private function getDateSync($mailchimpStoreId)
     {
-        return $this->_helper->getConfigValue(
-            \Ebizmarts\MailChimp\Helper\Data::XML_PATH_IS_SYNC."/$mailchimpStoreId",
+        return $this->_helper->getMCMinSyncDateFlagByMailchimpStore(
+            $mailchimpStoreId,
             0,
             "default"
         );
