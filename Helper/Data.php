@@ -521,10 +521,13 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         }
         $this->_cacheTypeList->cleanType('config');
     }
-    public function getMCMinSyncing($storeId)
+    public function saveMCMinSyncing($mailchimpStoreId, $value, $storeId = null, $scope = null)
     {
-        $ret = $this->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_PATH_IS_SYNC, $storeId);
-        return !$ret;
+        if ($mailchimpStoreId) {
+            $this->saveConfigValue(self::XML_PATH_IS_SYNC . "/$mailchimpStoreId", $value, $storeId, $scope);
+        } else {
+            $this->saveConfigValue(self::XML_PATH_IS_SYNC, $value, $storeId, $scope);
+        }
     }
     public function getCartUrl($storeId, $cartId, $token)
     {
@@ -538,6 +541,11 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
             ]
         );
         return $rc;
+    }
+    public function getMCMinSyncDateFlagByMailchimpStore($mailchimpStoreId = null, $storeId = null, $scope = null)
+    {
+        $syncDate = $this->getConfigValue(self::XML_PATH_IS_SYNC. "/$mailchimpStoreId", $storeId, $scope);
+        return $syncDate;
     }
     public function getRedemptionUrl($storeId, $couponId, $token)
     {

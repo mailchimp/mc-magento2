@@ -103,7 +103,7 @@ class Customer
             ['m4m.*']
         );
         $collection->getSelect()->where("m4m.mailchimp_sync_delta IS null ".
-            "OR (m4m.mailchimp_sync_delta > '".$this->_helper->getMCMinSyncDateFlag().
+            "OR (m4m.mailchimp_sync_delta > '".$this->_helper->getMCMinSyncDateFlag($storeId).
             "' and m4m.mailchimp_sync_modified = 1)");
         $collection->getSelect()->limit(self::MAX);
         $counter = 0;
