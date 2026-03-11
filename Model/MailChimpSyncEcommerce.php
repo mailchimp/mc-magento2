@@ -50,6 +50,11 @@ class MailChimpSyncEcommerce extends \Magento\Framework\Model\AbstractModel
     {
         $this->getResource()->deleteAllByBatchid($this, $batchId);
     }
+    public function deleteByTypeAndId($type, $id, $mailchimpStoreId)
+    {
+        $this->getResource()->deleteByTypeAndId($this, $type, $id, $mailchimpStoreId);
+    }
+
     public function markAllAsModifiedByIds($mailchimpStoreId, $ids, $type)
     {
         $this->getResource()->markAllAsModifiedByIds($this, $mailchimpStoreId, $ids, $type);
