@@ -115,7 +115,7 @@ class Sync extends AbstractHelper
     }
     public function deleteByTypeAndId($type, $id, $mailchimpStoreId)
     {
-        $this->chimpSyncEcommerce->deleteByTypeAndId($type, $id,$mailchimpStoreId);
+        $this->chimpSyncEcommerce->deleteByTypeAndId($type, $id, $mailchimpStoreId);
     }
     public function markRegisterAsModified($registerId, $type)
     {
