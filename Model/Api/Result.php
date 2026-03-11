@@ -14,6 +14,7 @@
 namespace Ebizmarts\MailChimp\Model\Api;
 
 use Ebizmarts\MailChimp\Helper\Sync as SyncHelper;
+use Ebizmarts\Mailchimp\Helper\Data as Helper;
 
 class Result
 {
@@ -178,7 +179,18 @@ class Result
                         }
 
                         $error = $response->title . " : " . $response->detail;
-                        $this->_updateSyncData($mailchimpStoreId,$listId,$type,$id,$error,\Ebizmarts\MailChimp\Helper\Data::SYNCERROR);
+                        if ($type == Helper::IS_PRODUCT and $item->status_code == 404) {
+                            $this->syncHelper->deleteByTypeAndId($type, $id, $mailchimpStoreId);
+                        } else {
+                            $this->_updateSyncData(
+                                $mailchimpStoreId,
+                                $listId,
+                                $type,
+                                $id,
+                                $error,
+                                \Ebizmarts\MailChimp\Helper\Data::SYNCERROR
+                            );
+                        }
                         if (property_exists($response, 'type')){
                             $mailchimpErrors->setType($response->type);
                         } else {
