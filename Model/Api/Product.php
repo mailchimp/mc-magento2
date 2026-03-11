@@ -164,17 +164,15 @@ class Product
             "' and m4m.mailchimp_store_id = '".$mailchimpStoreId."'",
             ['m4m.*']
         );
-        $collection->getSelect()->where("m4m.mailchimp_sync_delta IS null OR (m4m.mailchimp_sync_delta > '".
-            $this->_helper->getMCMinSyncDateFlag().
-            "' and m4m.mailchimp_sync_modified = 1)");
+        $collection->getSelect()->where("m4m.mailchimp_sync_delta IS null OR m4m.mailchimp_sync_modified = 1");
         $collection->getSelect()->limit(self::MAX);
         foreach ($collection as $item) {
             /**
              * @var $product \Magento\Catalog\Model\Product
              */
             $product = $this->_productRepository->getById($item->getId(), false, $magentoStoreId);
-            if ($item->getMailchimpSyncModified() && $item->getMailchimpSyncDelta() &&
-                $item->getMailchimpSyncDelta() > $this->_helper->getMCMinSyncDateFlag()) {
+
+            if ($item->getMailchimpSyncModified() && $item->getMailchimpSyncDelta()) {
                 if ($product->isSalable() || $syncSalable) {
                     if (!$item->getMailchimpSyncDeleted()) {
                         $batchArray = array_merge($this->_buildOldProductRequest(
