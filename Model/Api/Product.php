@@ -684,15 +684,13 @@ class Product
                         '] is not supported [' . $product->getTypeId() . ']');
                     continue;
                 }
-                if ($productSyncData->getMailchimpSyncModified() &&
-                    $productSyncData->getMailchimpSyncDelta() > $this->_helper->getMCMinSyncDateFlag()) {
+                if ($productSyncData->getMailchimpSyncModified()) {
                     $data = array_merge(
                         $data,
                         $this->_buildOldProductRequest($product, $batchId, $mailchimpStoreId, $magentoStoreId)
                     );
                     $this->_updateProduct($mailchimpStoreId, $product->getId());
-                } elseif (!$productSyncData->getMailchimpSyncDelta() ||
-                    $productSyncData->getMailchimpSyncDelta() < $this->_helper->getMCMinSyncDateFlag()) {
+                } elseif (!$productSyncData->getMailchimpSyncDelta()) {
                     $data[] = $this->_buildNewProductRequest($product, $mailchimpStoreId, $magentoStoreId);
                     $this->_updateProduct($mailchimpStoreId, $product->getId());
                 }
@@ -732,15 +730,13 @@ class Product
                 continue;
             }
 
-            if ($productSyncData->getMailchimpSyncModified() &&
-                $productSyncData->getMailchimpSyncDelta() > $this->_helper->getMCMinSyncDateFlag()) {
+            if ($productSyncData->getMailchimpSyncModified()) {
                 $data = array_merge(
                     $data,
                     $this->_buildOldProductRequest($product, $batchId, $mailchimpStoreId, $magentoStoreId)
                 );
                 $this->_updateProduct($mailchimpStoreId, $product->getId());
-            } elseif (!$productSyncData->getMailchimpSyncDelta() ||
-                $productSyncData->getMailchimpSyncDelta() < $this->_helper->getMCMinSyncDateFlag()) {
+            } elseif (!$productSyncData->getMailchimpSyncDelta()) {
                 $data[] = $this->_buildNewProductRequest($product, $mailchimpStoreId, $magentoStoreId);
                 $this->_updateProduct($mailchimpStoreId, $product->getId());
             }
