@@ -141,7 +141,9 @@ class Details implements \Magento\Framework\Option\ArrayInterface
     public function toOptionArray()
     {
         $ret = '';
-        if (is_array($this->_options)) {
+        if ($this->_error != '') {
+            $ret = [['label' => 'Important', 'value' => __("Store not found")]];
+        } elseif(is_array($this->_options)) {
             if (isset($this->_options['account_name'])) {
                 $ret = [
                     ['label' => __('Username'), 'value' => $this->_options['account_name']],
