@@ -1,5 +1,16 @@
 # Change Log
 
+## [102.3.78](https://github.com/mailchimp/mc-magento2/tree/102.3.78)
+
+[Full Changelog](https://github.com/mailchimp/mc-magento2/compare/102.3.77...102.3.78)
+
+**Fixed bugs:**
+
+- Error when delete the current mailchimp store and access the configuration [\#2268](https://github.com/mailchimp/mc-magento2/issues/2268)
+- New order/cart send product as new [\#2262](https://github.com/mailchimp/mc-magento2/issues/2262)
+- Products permanently stuck in SYNCERROR or NEEDTORESYNC [\#2256](https://github.com/mailchimp/mc-magento2/issues/2256)
+- Array to string conversion warning [\#2250](https://github.com/mailchimp/mc-magento2/issues/2250)
+
 ## [102.3.77](https://github.com/mailchimp/mc-magento2/tree/102.3.77)
 
 [Full Changelog](https://github.com/mailchimp/mc-magento2/compare/102.3.76...102.3.77)
