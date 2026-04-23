@@ -74,9 +74,7 @@ class Subscriber
             "' and m4m.mailchimp_store_id = '".$listId."'",
             ['m4m.*']
         );
-        $collection->getSelect()->where("m4m.mailchimp_sync_delta IS null ".
-            "OR (m4m.mailchimp_sync_delta > '".$this->_helper->getMCMinSyncDateFlag().
-            "' and m4m.mailchimp_sync_modified = 1)");
+        $collection->getSelect()->where("m4m.mailchimp_sync_delta IS null OR m4m.mailchimp_sync_modified = 1");
         $collection->getSelect()->limit(self::BATCH_LIMIT);
         $subscriberArray = [];
         $date = $this->_helper->getDateMicrotime();
