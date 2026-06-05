@@ -59,7 +59,7 @@ class Getaccountdetails extends Action
         $scopeId = $param['scopeId'];
         try {
             if ($encrypt == 3) {
-                $api = $this->_helper->getApi($this->_storeManager->getStore()->getId());
+                $api = $this->_helper->getApi($scopeId, $scope);
             } else {
                 $api = $this->_helper->getApiByApiKey($apiKey, $encrypt);
             }
