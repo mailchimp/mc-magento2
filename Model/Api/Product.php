@@ -255,7 +255,7 @@ class Product
             'left'
         );
         foreach ($collection as $item) {
-            $productId = $this->_productRepository->get($item->getSku(),false, $magentoStoreId)->getId();
+            $productId = $item->getId();
             $mailchimpSync = $this->syncHelper->getChimpSyncEcommerce($mailchimpStoreId, $productId, 'PRO');
             if ($mailchimpSync->getMailchimpSyncDelta() < $item->getSpecialFromDate()) {
                 $this->_updateProduct($mailchimpStoreId, $productId, null, null, 1);
@@ -284,7 +284,7 @@ class Product
             'left'
         );
         foreach ($collection2 as $item) {
-            $productId = $this->_productRepository->get($item->getSku(),false, $magentoStoreId)->getId();
+            $productId = $item->getId();
             $mailchimpSync = $this->syncHelper->getChimpSyncEcommerce($mailchimpStoreId, $productId, 'PRO');
             if ($mailchimpSync->getMailchimpSyncDelta() < $item->getSpecialToDate()) {
                 $this->_updateProduct($mailchimpStoreId, $productId, null, null, 1);
