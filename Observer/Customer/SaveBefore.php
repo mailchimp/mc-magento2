@@ -54,6 +54,16 @@ class SaveBefore implements \Magento\Framework\Event\ObserverInterface
         $storeId  = $customer->getStoreId();
         $websiteId = $customer->getWebsiteId();
         if ($this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_PATH_ACTIVE)) {
+            // Mark subscriber before customer to match the cron lock-acquisition order
+            // (IS_SUBSCRIBER first, then IS_CUSTOMER) and prevent deadlocks.
+            $subscriber = $this->subscriberFactory->create();
+            $subscriber->loadBySubscriberEmail($customer->getEmail(), $websiteId);
+            if ($subscriber->getEmail() == $customer->getEmail()) {
+                $this->syncHelper->markRegisterAsModified(
+                    $subscriber->getId(),
+                    \Ebizmarts\MailChimp\Helper\Data::IS_SUBSCRIBER
+                );
+            }
             if ($this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_PATH_ECOMMERCE_ACTIVE)) {
                 $mailchimpStoreId = $this->_helper->getConfigValue(
                     \Ebizmarts\MailChimp\Helper\Data::XML_MAILCHIMP_STORE,
@@ -66,14 +76,6 @@ class SaveBefore implements \Magento\Framework\Event\ObserverInterface
                     null,
                     null,
                     1
-                );
-            }
-            $subscriber = $this->subscriberFactory->create();
-            $subscriber->loadBySubscriberEmail($customer->getEmail(), $websiteId);
-            if ($subscriber->getEmail() == $customer->getEmail()) {
-                $this->syncHelper->markRegisterAsModified(
-                    $subscriber->getId(),
-                    \Ebizmarts\MailChimp\Helper\Data::IS_SUBSCRIBER
                 );
             }
         }
