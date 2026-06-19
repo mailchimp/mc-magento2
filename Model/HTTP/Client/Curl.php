@@ -415,7 +415,10 @@ class Curl implements \Magento\Framework\HTTP\ClientInterface
         if ($err) {
             $this->doError(curl_error($this->_ch));
         }
-        curl_close($this->_ch);
+
+        if (PHP_VERSION_ID < 80000) {
+            curl_close($this->_ch);
+        }
     }
 
     /**
@@ -427,8 +430,11 @@ class Curl implements \Magento\Framework\HTTP\ClientInterface
      */
     public function doError($string)
     {
+        if (PHP_VERSION_ID < 80000) {
+            curl_close($this->_ch);
+        }
+
         //  phpcs:ignore Magento2.Exceptions.DirectThrow
-        curl_close($this->_ch);
         throw new \Exception($string);
     }
 
