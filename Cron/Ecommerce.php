@@ -125,8 +125,8 @@ class Ecommerce
         foreach ($this->_storeManager->getStores() as $storeId => $val) {
             if ($this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_PATH_ACTIVE, $storeId)) {
                 if (!$this->_ping($storeId)) {
-                    $this->_helper->log('MailChimp is not available');
-                    return;
+                    $this->_helper->log("MailChimp is not available for store $storeId, skipping");
+                    continue;
                 }
                 $this->_storeManager->setCurrentStore($storeId);
                 $listId = $this->_helper->getGeneralList($storeId);
