@@ -14,7 +14,6 @@ namespace Ebizmarts\MailChimp\Helper;
 use Magento\Framework\App\ResourceConnection;
 use Magento\Framework\Exception\ValidatorException;
 use Magento\Store\Model\Store;
-use Symfony\Component\Config\Definition\Exception\Exception;
 use Ebizmarts\MailChimp\Model\MailchimpNotificationFactory as MailchimpNotificationFactory;
 
 class Data extends \Magento\Framework\App\Helper\AbstractHelper
