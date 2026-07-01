@@ -692,7 +692,11 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     public function getMCMinSyncDateFlag($storeId = null)
     {
         $syncDate = $this->getConfigValue(self::XML_PATH_IS_SYNC, $storeId);
-        if ($syncDate=='') {
+        // When a per-Mailchimp-store flag has been written under issync/<mailchimpStoreId>
+        // at default scope, this path resolves to an array for any store with no scalar
+        // override of its own. Such a store has not recorded a completion date, so treat
+        // it as "not yet synced" instead of returning the array to the callers.
+        if (is_array($syncDate) || $syncDate === null || $syncDate == '') {
             $syncDate = '1900-01-01';
         }
         return $syncDate;
