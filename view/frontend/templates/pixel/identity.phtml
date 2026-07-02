@@ -1,0 +1,17 @@
+<?php
+/**
+ * Ebizmarts_MailChimp — Pixel identify template
+ *
+ * Emits a minimal JSON island with the logged-in customer email.
+ * identify.js (loaded globally via script.phtml) reads this island and calls
+ * identify() on the Pixel SDK, hashing the email with SHA-256 when available.
+ *
+ * Block: Ebizmarts\MailChimp\Block\Pixel\Identity
+ *
+ * @var \Ebizmarts\MailChimp\Block\Pixel\Identity $block
+ */
+$identityData = $block->getIdentityData();
+?>
+<?php if ($identityData): ?>
+<script type="application/json" id="mailchimp-pixel-identity-data"><?= /* @noEscape */ json_encode($identityData, JSON_HEX_TAG | JSON_HEX_AMP) ?></script>
+<?php endif; ?>

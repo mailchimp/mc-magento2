@@ -63,6 +63,10 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     const XML_REGISTER_URL            = 'mailchimp/statistics/register_url';
     const XML_STATISTICS_TOKEN        = 'mailchimp/register/token';
 
+    const XML_PIXEL_ENABLED_FOR_STORE = 'mailchimp/pixel/enabled_for_store';
+    const XML_PIXEL_SCRIPT_URL        = 'mailchimp/pixel/script_url';
+    const XML_PIXEL_SCRIPT_FRAGMENT   = 'mailchimp/pixel/script_fragment';
+
     const ORDER_STATE_OK             = 'complete';
 
     const GUEST_GROUP                = 'NOT LOGGED IN';
@@ -1288,5 +1292,27 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         $properties['currency'] = $quote->getQuoteCurrencyCode();
         $properties['customer_id'] = $quote->getCustomerId();
         $api->lists->members->memberEvent->add($list, $customerMailchimpId, "abandoned_cart_visit",$properties,false,$this->getGmtDate());
+    }
+
+    /**
+     * Returns true when the Mailchimp Pixel is enabled for the given store.
+     *
+     * @param int $storeId
+     * @return bool
+     */
+    public function isPixelEnabled($storeId)
+    {
+        return (bool)$this->getConfigValue(self::XML_PIXEL_ENABLED_FOR_STORE, $storeId);
+    }
+
+    /**
+     * Returns the Pixel SDK script URL saved for the given store.
+     *
+     * @param int $storeId
+     * @return string
+     */
+    public function getPixelScriptUrl($storeId)
+    {
+        return (string)$this->getConfigValue(self::XML_PIXEL_SCRIPT_URL, $storeId);
     }
 }

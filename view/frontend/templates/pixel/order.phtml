@@ -1,0 +1,15 @@
+<?php
+/**
+ * Ebizmarts_MailChimp — Pixel PURCHASED template
+ *
+ * Block: Ebizmarts\MailChimp\Block\Pixel\Order
+ *
+ * @var \Ebizmarts\MailChimp\Block\Pixel\Order $block
+ * @var \Magento\Framework\Escaper $escaper
+ */
+$orderData = $block->getOrderData();
+?>
+<?php if (!empty($orderData)): ?>
+<script type="application/json" id="mailchimp-pixel-order-data"><?= /* @noEscape */ json_encode($orderData, JSON_HEX_TAG | JSON_HEX_AMP) ?></script>
+<script src="<?= $escaper->escapeUrl($block->getViewFileUrl('Ebizmarts_MailChimp::js/pixel/order.js')) ?>" defer="defer"></script>
+<?php endif; ?>

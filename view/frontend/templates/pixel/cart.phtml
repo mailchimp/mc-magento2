@@ -1,0 +1,15 @@
+<?php
+/**
+ * Ebizmarts_MailChimp — Pixel CART_VIEWED template
+ *
+ * Block: Ebizmarts\MailChimp\Block\Pixel\Cart
+ *
+ * @var \Ebizmarts\MailChimp\Block\Pixel\Cart $block
+ * @var \Magento\Framework\Escaper $escaper
+ */
+$cartData = $block->getCartData();
+?>
+<?php if (!empty($cartData)): ?>
+<script type="application/json" id="mailchimp-pixel-cart-data"><?= /* @noEscape */ json_encode($cartData, JSON_HEX_TAG | JSON_HEX_AMP) ?></script>
+<script src="<?= $escaper->escapeUrl($block->getViewFileUrl('Ebizmarts_MailChimp::js/pixel/cart.js')) ?>" defer="defer"></script>
+<?php endif; ?>

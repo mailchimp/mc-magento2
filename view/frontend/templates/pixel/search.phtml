@@ -1,0 +1,15 @@
+<?php
+/**
+ * Ebizmarts_MailChimp — Pixel SEARCH_SUBMITTED template
+ *
+ * Block: Ebizmarts\MailChimp\Block\Pixel\Search
+ *
+ * @var \Ebizmarts\MailChimp\Block\Pixel\Search $block
+ * @var \Magento\Framework\Escaper $escaper
+ */
+$searchData = $block->getSearchData();
+?>
+<?php if (!empty($searchData)): ?>
+<script type="application/json" id="mailchimp-pixel-search-data"><?= /* @noEscape */ json_encode($searchData, JSON_HEX_TAG | JSON_HEX_AMP) ?></script>
+<script src="<?= $escaper->escapeUrl($block->getViewFileUrl('Ebizmarts_MailChimp::js/pixel/search.js')) ?>" defer="defer"></script>
+<?php endif; ?>
