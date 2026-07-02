@@ -95,8 +95,8 @@
                 });
                 prevSnap = curr;
             });
-            var current = cart();
-            if (current && current.items && current.items.length > 0) { prevSnap = snapshot(current); initialized = true; }
+            prevSnap = snapshot(cart());
+            initialized = true;
         });
     }
 
