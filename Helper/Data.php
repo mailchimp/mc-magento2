@@ -534,13 +534,57 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         }
         $this->_cacheTypeList->cleanType('config');
     }
-    public function saveMCMinSyncing($mailchimpStoreId, $value, $storeId = null, $scope = null)
+
+    /**
+     * Atomically upsert a single config row using INSERT … ON DUPLICATE KEY UPDATE.
+     *
+     * core_config_data has a UNIQUE KEY on (scope, scope_id, path), so a plain
+     * INSERT … ON DUPLICATE KEY UPDATE is one round-trip and race-free — unlike
+     * Magento's ResourceModel\Config::saveConfig() which does a SELECT then
+     * INSERT/UPDATE (TOCTOU window under concurrent cron workers).
+     *
+     * Does NOT flush the config cache — callers that need an immediate cache
+     * refresh should call $this->_cacheTypeList->cleanType('config') themselves.
+     */
+    private function saveConfigValueAtomic(string $path, string $value, string $scope, int $scopeId): void
     {
-        if ($mailchimpStoreId) {
-            $this->saveConfigValue(self::XML_PATH_IS_SYNC . "/$mailchimpStoreId", $value, $storeId, $scope);
-        } else {
-            $this->saveConfigValue(self::XML_PATH_IS_SYNC, $value, $storeId, $scope);
+        $table = $this->_resource->getTableName('core_config_data');
+        $this->connection->insertOnDuplicate(
+            $table,
+            ['scope' => $scope, 'scope_id' => $scopeId, 'path' => $path, 'value' => $value],
+            ['value']
+        );
+    }
+
+    /**
+     * Write the issync flag for a Mailchimp store.
+     *
+     * Only the per-mailchimpStore path (issync/<mcStoreId>) is ever written.
+     * Writing the bare scalar issync alongside issync/<id> children at the
+     * same scope causes Magento\Framework\App\Config\Scope\Converter to throw
+     * "Cannot access offset of type string on string" — a site-wide fatal.
+     *
+     * The write is atomic (INSERT … ON DUPLICATE KEY UPDATE) to prevent the
+     * check-then-write race that produces duplicate core_config_data rows under
+     * concurrent cron workers.
+     *
+     * @param string $mailchimpStoreId
+     * @param string $value
+     * @param int    $scopeId
+     * @param string $scope
+     */
+    public function saveMCMinSyncing($mailchimpStoreId, $value, $scopeId = 0, $scope = 'default')
+    {
+        if (!$mailchimpStoreId) {
+            // Bare-scalar write intentionally removed — see docblock above.
+            return;
         }
+        $this->saveConfigValueAtomic(
+            self::XML_PATH_IS_SYNC . '/' . $mailchimpStoreId,
+            (string) $value,
+            (string) $scope,
+            (int) $scopeId
+        );
     }
     public function getCartUrl($storeId, $cartId, $token)
     {

@@ -291,10 +291,14 @@ class Ecommerce
         $countTotal = $this->_helper->getTotalNewItemsSent();
         $syncing = $this->_helper->getMCMinSyncDateFlag($storeId);
         if ($countTotal == 0 && $syncing) {
+            // Pass $mailchimpStoreId so the write goes to issync/<id> only —
+            // writing the bare scalar issync alongside issync/<id> children at
+            // the same scope causes a fatal in Magento's Scope\Converter.
             $this->_helper->saveMCMinSyncing(
-                null,
+                $mailchimpStoreId,
                 date('Y-m-d'),
-                $storeId
+                0,
+                'default'
             );
         }
 
@@ -308,6 +312,14 @@ class Ecommerce
     protected function updateSyncFlagData($storeId, $mailchimpStoreId)
     {
         $this->apiUpdateSyncFlag($storeId, $mailchimpStoreId);
+        // Defensively remove any bare scalar issync row at default scope before
+        // writing the per-store issync/<id> child. If both coexist at the same
+        // scope Magento's Scope\Converter throws a site-wide fatal TypeError.
+        $this->_helper->deleteConfig(
+            \Ebizmarts\MailChimp\Helper\Data::XML_PATH_IS_SYNC,
+            0,
+            'default'
+        );
         $this->_helper->saveMCMinSyncing(
             $mailchimpStoreId,
             date('Y-m-d'),
