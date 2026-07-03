@@ -1,0 +1,15 @@
+<?php
+/**
+ * Ebizmarts_MailChimp — Pixel PRODUCT_CATEGORY_VIEWED template
+ *
+ * Block: Ebizmarts\MailChimp\Block\Pixel\Category
+ *
+ * @var \Ebizmarts\MailChimp\Block\Pixel\Category $block
+ * @var \Magento\Framework\Escaper $escaper
+ */
+$categoryData = $block->getCategoryData();
+?>
+<?php if (!empty($categoryData)): ?>
+<script type="application/json" id="mailchimp-pixel-category-data"><?= /* @noEscape */ json_encode($categoryData, JSON_HEX_TAG | JSON_HEX_AMP) ?></script>
+<script src="<?= $escaper->escapeUrl($block->getViewFileUrl('Ebizmarts_MailChimp::js/pixel/category.js')) ?>" defer="defer"></script>
+<?php endif; ?>

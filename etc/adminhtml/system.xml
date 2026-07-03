@@ -341,6 +341,21 @@
                     </depends>
                 </field>
             </group>
+            <group id="pixel" translate="label" type="text" sortOrder="100" showInDefault="0" showInWebsite="0" showInStore="1">
+                <label>Mailchimp Pixel</label>
+                <field id="enabled_for_store" translate="label comment" type="select" sortOrder="10" showInDefault="0" showInWebsite="0" showInStore="1">
+                    <label>Pixel Enabled</label>
+                    <comment><![CDATA[Automatically configured when the module connects to a Mailchimp store. Enables behavioral tracking (page views, add to cart, checkout, purchases, etc.).]]></comment>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
+                <field id="script_url" translate="label" type="text" sortOrder="20" showInDefault="0" showInWebsite="0" showInStore="1">
+                    <label>Pixel Script URL</label>
+                    <comment>Set automatically from the Mailchimp connected site. Do not edit manually.</comment>
+                    <depends>
+                        <field id="*/*/enabled_for_store">1</field>
+                    </depends>
+                </field>
+            </group>
         </section>
     </system>
 </config>

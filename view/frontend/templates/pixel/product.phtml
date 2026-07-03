@@ -1,0 +1,15 @@
+<?php
+/**
+ * Ebizmarts_MailChimp — Pixel PRODUCT_VIEWED template
+ *
+ * Block: Ebizmarts\MailChimp\Block\Pixel\Product
+ *
+ * @var \Ebizmarts\MailChimp\Block\Pixel\Product $block
+ * @var \Magento\Framework\Escaper $escaper
+ */
+$productData = $block->getProductData();
+?>
+<?php if (!empty($productData)): ?>
+<script type="application/json" id="mailchimp-pixel-product-data"><?= /* @noEscape */ json_encode($productData, JSON_HEX_TAG | JSON_HEX_AMP) ?></script>
+<script src="<?= $escaper->escapeUrl($block->getViewFileUrl('Ebizmarts_MailChimp::js/pixel/product.js')) ?>" defer="defer"></script>
+<?php endif; ?>

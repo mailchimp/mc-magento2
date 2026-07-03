@@ -1,0 +1,15 @@
+<?php
+/**
+ * Ebizmarts_MailChimp — Pixel CHECKOUT_STARTED template
+ *
+ * Block: Ebizmarts\MailChimp\Block\Pixel\Checkout
+ *
+ * @var \Ebizmarts\MailChimp\Block\Pixel\Checkout $block
+ * @var \Magento\Framework\Escaper $escaper
+ */
+$checkoutData = $block->getCheckoutData();
+?>
+<?php if (!empty($checkoutData)): ?>
+<script type="application/json" id="mailchimp-pixel-checkout-data"><?= /* @noEscape */ json_encode($checkoutData, JSON_HEX_TAG | JSON_HEX_AMP) ?></script>
+<script src="<?= $escaper->escapeUrl($block->getViewFileUrl('Ebizmarts_MailChimp::js/pixel/checkout.js')) ?>" defer="defer"></script>
+<?php endif; ?>

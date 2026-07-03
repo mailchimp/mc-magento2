@@ -1,0 +1,25 @@
+<?php
+/**
+ * Ebizmarts_MailChimp — Pixel loader template
+ *
+ * Emits a JSON config island (data only, not executable) and loads
+ * consent-loader.js, pixel.js (PRODUCT_ADDED_TO_CART watcher), and
+ * identify.js (visitor identification) via <script src defer>.
+ *
+ * WHY <script src defer> instead of inline code:
+ *   Adobe Commerce enforces a strict CSP on checkout pages. Inline scripts
+ *   require a nonce or 'unsafe-inline' — the external src approach is CSP-safe
+ *   because our own domain is implicitly whitelisted.
+ *
+ * Block: Ebizmarts\MailChimp\Block\Pixel\Script
+ *
+ * @var \Ebizmarts\MailChimp\Block\Pixel\Script $block
+ */
+$pixelConfig = $block->getPixelConfig();
+?>
+<?php if ($pixelConfig): ?>
+<script type="application/json" id="mc-pixel-config"><?= /* @noEscape */ json_encode($pixelConfig, JSON_HEX_TAG | JSON_HEX_AMP) ?></script>
+<script src="<?= $block->escapeUrl($block->getViewFileUrl('Ebizmarts_MailChimp::js/pixel/consent-loader.js')) ?>"></script>
+<script src="<?= $block->escapeUrl($block->getViewFileUrl('Ebizmarts_MailChimp::js/pixel.js')) ?>" defer="defer"></script>
+<script src="<?= $block->escapeUrl($block->getViewFileUrl('Ebizmarts_MailChimp::js/pixel/identify.js')) ?>" defer="defer"></script>
+<?php endif; ?>

@@ -93,4 +93,12 @@
         <plugin name="mailchimp_save_creditmemo" type="Ebizmarts\MailChimp\Model\Plugin\Creditmemo" sortOrder="10"/>
     </type>
     <preference for="Magento\Newsletter\Block\Subscribe" type="Ebizmarts\MailChimp\Block\Subscribe"/>
+    <type name="Ebizmarts\MailChimp\Block\Pixel\Script">
+        <arguments>
+            <argument name="helper" xsi:type="object">Ebizmarts\MailChimp\Helper\Data\Proxy</argument>
+        </arguments>
+    </type>
+    <type name="Magento\Checkout\CustomerData\Cart">
+        <plugin name="mailchimp_pixel_cart_data" type="Ebizmarts\MailChimp\Plugin\Checkout\CustomerData\CartPlugin" sortOrder="10"/>
+    </type>
 </config>

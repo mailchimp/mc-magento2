@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Ebizmarts_MailChimp — Hyvä checkout layout
+ *
+ * Hyvä uses Magewire for the reactive checkout, which re-renders components
+ * on state changes. The Pixel Checkout block is mounted at "before.body.end"
+ * which is outside the Magewire re-render scope, so it only fires once on
+ * page load — exactly what CHECKOUT_STARTED requires.
+ *
+ * @category    Ebizmarts
+ * @package     Ebizmarts_MailChimp
+ * @author      Ebizmarts Team <info@ebizmarts.com>
+ * @copyright   Ebizmarts (http://ebizmarts.com)
+ * @license     http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ */
+-->
+<page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
+    <body>
+        <referenceContainer name="before.body.end">
+            <block class="Ebizmarts\MailChimp\Block\Pixel\Checkout" name="mailchimp.pixel.checkout.hyva" template="Ebizmarts_MailChimp::pixel/checkout.phtml" ifconfig="mailchimp/pixel/enabled_for_store" cacheable="false"/>
+        </referenceContainer>
+    </body>
+</page>
