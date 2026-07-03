@@ -136,6 +136,6 @@ class PixelStateWriter
      */
     private function invalidateConfig(): void
     {
-        $this->cacheTypeList->invalidate('config');
+        $this->cacheTypeList->cleanType('config');
     }
 }

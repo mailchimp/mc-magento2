@@ -351,6 +351,9 @@
                 <field id="script_url" translate="label" type="text" sortOrder="20" showInDefault="0" showInWebsite="0" showInStore="1">
                     <label>Pixel Script URL</label>
                     <comment>Set automatically from the Mailchimp connected site. Do not edit manually.</comment>
+                    <depends>
+                        <field id="*/*/enabled_for_store">1</field>
+                    </depends>
                 </field>
             </group>
         </section>

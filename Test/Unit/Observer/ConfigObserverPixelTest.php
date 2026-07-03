@@ -104,6 +104,33 @@ class ConfigObserverPixelTest extends TestCase
                     MailChimpHelper::XML_MAILCHIMP_STORE           => 'mc-store-abc',
                     MailChimpHelper::XML_PIXEL_ENABLED_FOR_STORE   => '1',
                     MailChimpHelper::XML_PIXEL_SCRIPT_FRAGMENT     => '<script>/* pixel */</script>',
+                    MailChimpHelper::XML_PIXEL_SCRIPT_URL          => 'https://chimpstatic.com/mcjs-connected/js/users/abc/def.js',
+                ],
+            ],
+            $provisioner
+        );
+
+        $observer->execute($this->createMock(EventObserver::class));
+    }
+
+    public function testProvisionIsCalledWhenFragmentExistsButUrlIsMissing(): void
+    {
+        $store = $this->makeStore(1, 'https://shop.example.com/');
+
+        $provisioner = $this->createMock(ConnectedSiteProvisioner::class);
+        $provisioner
+            ->expects($this->once())
+            ->method('provision')
+            ->with(1, 'mc-store-abc', 'shop.example.com');
+
+        $observer = $this->makeObserver(
+            [1 => $store],
+            [
+                1 => [
+                    MailChimpHelper::XML_MAILCHIMP_STORE           => 'mc-store-abc',
+                    MailChimpHelper::XML_PIXEL_ENABLED_FOR_STORE   => '1',
+                    MailChimpHelper::XML_PIXEL_SCRIPT_FRAGMENT     => '<script>/* pixel */</script>',
+                    MailChimpHelper::XML_PIXEL_SCRIPT_URL          => '',  // URL missing
                 ],
             ],
             $provisioner
@@ -209,11 +236,13 @@ class ConfigObserverPixelTest extends TestCase
                     MailChimpHelper::XML_MAILCHIMP_STORE           => 'mc-store-1',
                     MailChimpHelper::XML_PIXEL_ENABLED_FOR_STORE   => '1',
                     MailChimpHelper::XML_PIXEL_SCRIPT_FRAGMENT     => '',
+                    MailChimpHelper::XML_PIXEL_SCRIPT_URL          => '',
                 ],
                 2 => [
                     MailChimpHelper::XML_MAILCHIMP_STORE           => 'mc-store-2',
                     MailChimpHelper::XML_PIXEL_ENABLED_FOR_STORE   => '1',
                     MailChimpHelper::XML_PIXEL_SCRIPT_FRAGMENT     => '<script>/* already set */</script>',
+                    MailChimpHelper::XML_PIXEL_SCRIPT_URL          => 'https://chimpstatic.com/mcjs-connected/js/users/abc/def.js',
                 ],
             ],
             $provisioner

@@ -122,6 +122,15 @@ class ConnectedSiteProvisioner
         }
 
         // ── Step 3: persist ───────────────────────────────────────────────────
+        // If the API did not return a URL directly, try to extract it from the
+        // fragment (e.g. src="https://chimpstatic.com/...").
+        if (!$scriptUrl && $scriptFragment) {
+            if (preg_match('/src=["\']([^"\']+)["\']/', $scriptFragment, $m)) {
+                $scriptUrl = $m[1];
+                $this->helper->log('ConnectedSiteProvisioner: script_url extracted from fragment: ' . $scriptUrl);
+            }
+        }
+
         if (!$scriptUrl) {
             $this->helper->log(
                 'ConnectedSiteProvisioner: no script_url for store ' . $storeId .
