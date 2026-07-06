@@ -55,18 +55,19 @@ class CleanIssyncOrphanRows implements DataPatchInterface
         // Find every (scope, scope_id) pair that has BOTH the bare scalar path
         // AND at least one per-store child path.  Only delete the bare scalar
         // from those pairs — leave clean installs untouched.
-        $childExists = $connection->select()
-            ->from(['child' => $table], [])
-            ->where('child.scope   = parent.scope')
-            ->where('child.scope_id = parent.scope_id')
+        $childSelect = $connection->select()
+            ->from(['child' => $table], [new \Zend_Db_Expr('1')])
+            ->where('child.scope    = main.scope')
+            ->where('child.scope_id = main.scope_id')
             ->where('child.path LIKE ?', self::ISSYNC_PATH . '/%');
 
-        $connection->delete(
-            $table,
-            [
-                'path = ?'                    => self::ISSYNC_PATH,
-                'EXISTS (' . $childExists . ')' => null,
-            ]
+        $deleteSelect = $connection->select()
+            ->from(['main' => $table], ['config_id'])
+            ->where('main.path = ?', self::ISSYNC_PATH)
+            ->where('EXISTS (' . $childSelect . ')');
+
+        $connection->query(
+            'DELETE FROM ' . $table . ' WHERE config_id IN (' . $deleteSelect . ')'
         );
 
         return $this;
