@@ -1,5 +1,23 @@
 # Changelog
 
+## [103.4.79](https://github.com/mailchimp/mc-magento2/tree/103.4.79)
+
+[Full Changelog](https://github.com/mailchimp/mc-magento2/compare/103.4.78...103.4.79)
+
+**Implemented enhancements:**
+
+- Pixel integration [\#2280](https://github.com/mailchimp/mc-magento2/issues/2280)
+- PHP 8.5 deprecated usage of curl\_close [\#2287](https://github.com/mailchimp/mc-magento2/issues/2287)
+- Processing products takes too much time in \_markSpecialPrices [\#2294](https://github.com/mailchimp/mc-magento2/issues/2294)
+
+**Fixed bugs:**
+
+- Concurrent cron writes produce duplicate core\_config\_data rows causing site-wide fatal TypeError [\#2312](https://github.com/mailchimp/mc-magento2/issues/2312)
+- Fix deadlock in SaveBefore observer by acquiring IS\_SUBSCRIBER lock before IS\_CUSTOMER [\#2292](https://github.com/mailchimp/mc-magento2/issues/2292)
+- Using a second Mailchimp account on a certain Magento scope makes the dropdown list disappear [\#2288](https://github.com/mailchimp/mc-magento2/issues/2288)
+- Wrong Exception import in Helper/Data.php breaks catch blocks [\#2290](https://github.com/mailchimp/mc-magento2/issues/2290)
+- Array to string conversion warning \(follow-up\) [\#2250](https://github.com/mailchimp/mc-magento2/issues/2250)
+
 ## [103.4.78](https://github.com/mailchimp/mc-magento2/tree/103.4.78)
 
 [Full Changelog](https://github.com/mailchimp/mc-magento2/compare/103.4.77...103.4.78)
