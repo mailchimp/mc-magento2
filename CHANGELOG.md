@@ -8,6 +8,11 @@
 
 - Processing products takes too much time in \_markSpecialPrices [\#2294](https://github.com/mailchimp/mc-magento2/issues/2294)
 
+**Fixed bugs:**
+
+- Using a second Mailchimp account on a certain Magento scope makes the dropdown list disappear [\#2288](https://github.com/mailchimp/mc-magento2/issues/2288)
+- Wrong Exception import in Helper/Data.php breaks catch blocks [\#2290](https://github.com/mailchimp/mc-magento2/issues/2290)
+
 ## [100.1.78](https://github.com/mailchimp/mc-magento2/tree/100.1.78)
 
 [Full Changelog](https://github.com/mailchimp/mc-magento2/compare/100.1.77...100.1.78)
