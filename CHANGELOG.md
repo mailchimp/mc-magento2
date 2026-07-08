@@ -1,5 +1,13 @@
 # Change Log
 
+## [100.1.79](https://github.com/mailchimp/mc-magento2/tree/100.1.79)
+
+[Full Changelog](https://github.com/mailchimp/mc-magento2/compare/100.1.78...100.1.79)
+
+**Implemented enhancements:**
+
+- Processing products takes too much time in \_markSpecialPrices [\#2294](https://github.com/mailchimp/mc-magento2/issues/2294)
+
 ## [100.1.78](https://github.com/mailchimp/mc-magento2/tree/100.1.78)
 
 [Full Changelog](https://github.com/mailchimp/mc-magento2/compare/100.1.77...100.1.78)
