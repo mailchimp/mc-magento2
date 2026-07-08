@@ -16,8 +16,6 @@
 - Fix deadlock in SaveBefore observer by acquiring IS\_SUBSCRIBER lock before IS\_CUSTOMER [\#2292](https://github.com/mailchimp/mc-magento2/issues/2292)
 - Using a second Mailchimp account on a certain Magento scope makes the dropdown list disappear [\#2288](https://github.com/mailchimp/mc-magento2/issues/2288)
 - Wrong Exception import in Helper/Data.php breaks catch blocks [\#2290](https://github.com/mailchimp/mc-magento2/issues/2290)
-- Skip unreachable store instead of aborting whole ecommerce cron
-- Fix getMCMinSyncDateFlag returning an array on multi-store installs
 - Array to string conversion warning \(follow-up\) [\#2250](https://github.com/mailchimp/mc-magento2/issues/2250)
 
 ## [103.4.78](https://github.com/mailchimp/mc-magento2/tree/103.4.78)
