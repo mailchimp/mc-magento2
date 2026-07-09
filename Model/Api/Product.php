@@ -228,67 +228,93 @@ class Product
     }
     protected function _markSpecialPrices($magentoStoreId, $mailchimpStoreId)
     {
+        $syncTable = $this->_helper->getTableName('mailchimp_sync_ecommerce');
+
         /**
-         * get the products with current special price that are not synced and mark it as modified
+         * Products with an active special price whose sync delta is older than
+         * special_from_date (i.e. they need to be re-synced).
+         *
+         * Optimisations vs. the previous implementation:
+         *  - addAttributeToSelect limits EAV joins to only the two date columns
+         *    we actually compare, instead of loading every product attribute.
+         *  - A LEFT JOIN against mailchimp_sync_ecommerce combined with a WHERE
+         *    condition replaces the per-row getChimpSyncEcommerce() call,
+         *    eliminating the N+1 query pattern.
          */
         $collection = $this->_getCollection();
         $collection->addStoreFilter($magentoStoreId);
+        $collection->addAttributeToSelect(['special_from_date', 'special_to_date']);
         $collection->addAttributeToFilter(
             'special_price',
-            ['gt'=>0],
+            ['gt' => 0],
             'left'
         )->addAttributeToFilter(
             'special_from_date',
-            ['or' => [ 0 => ['date' => true,
-                'to' => date('Y-m-d', time()).' 23:59:59'],
-                1 => ['is' => new \Zend_Db_Expr(
-                    'null'
-                )],]],
+            ['or' => [
+                0 => ['date' => true, 'to' => date('Y-m-d', time()) . ' 23:59:59'],
+                1 => ['is' => new \Zend_Db_Expr('null')],
+            ]],
             'left'
         )->addAttributeToFilter(
             'special_to_date',
-            ['or' => [ 0 => ['date' => true,
-                'from' => date('Y-m-d', time()).' 00:00:00'],
-                1 => ['is' => new \Zend_Db_Expr(
-                    'null'
-                )],]],
+            ['or' => [
+                0 => ['date' => true, 'from' => date('Y-m-d', time()) . ' 00:00:00'],
+                1 => ['is' => new \Zend_Db_Expr('null')],
+            ]],
             'left'
         );
+        $collection->getSelect()->joinLeft(
+            ['m4m_sp' => $syncTable],
+            "m4m_sp.related_id = e.entity_id"
+            . " AND m4m_sp.type = '" . \Ebizmarts\MailChimp\Helper\Data::IS_PRODUCT . "'"
+            . " AND m4m_sp.mailchimp_store_id = '" . $mailchimpStoreId . "'",
+            ['m4m_sp.mailchimp_sync_delta']
+        );
+        $collection->getSelect()->where(
+            'm4m_sp.mailchimp_sync_delta IS NULL'
+            . ' OR m4m_sp.mailchimp_sync_delta < at_special_from_date.value'
+        );
         foreach ($collection as $item) {
-            $productId = $item->getId();
-            $mailchimpSync = $this->syncHelper->getChimpSyncEcommerce($mailchimpStoreId, $productId, 'PRO');
-            if ($mailchimpSync->getMailchimpSyncDelta() < $item->getSpecialFromDate()) {
-                $this->_updateProduct($mailchimpStoreId, $productId, null, null, 1);
-            }
+            $this->_updateProduct($mailchimpStoreId, $item->getId(), null, null, 1);
         }
+
         /**
-         * get the products that was synced when it have special price and have no more special price
+         * Products whose special price expired yesterday — need re-sync to
+         * reflect the removal of the discount.
          */
         $collection2 = $this->_getCollection();
         $collection2->addStoreFilter($magentoStoreId);
+        $collection2->addAttributeToSelect(['special_to_date']);
         $collection2->addAttributeToFilter(
             'special_price',
-            ['gt'=>0],
+            ['gt' => 0],
             'left'
         )->addAttributeToFilter(
             'special_to_date',
-            ['or' => [ 0 => ['date' => true,
-                'to' => date('Y-m-d', time()).' 00:00:00'],
+            ['or' => [
+                0 => ['date' => true, 'to' => date('Y-m-d', time()) . ' 00:00:00'],
             ]],
             'left'
         )->addAttributeToFilter(
             'special_to_date',
-            ['or' => [ 0 => ['date' => true,
-                'from' => date('Y-m-d', strtotime('-1 day')).' 00:00:00'],
+            ['or' => [
+                0 => ['date' => true, 'from' => date('Y-m-d', strtotime('-1 day')) . ' 00:00:00'],
             ]],
             'left'
         );
+        $collection2->getSelect()->joinLeft(
+            ['m4m_sp2' => $syncTable],
+            "m4m_sp2.related_id = e.entity_id"
+            . " AND m4m_sp2.type = '" . \Ebizmarts\MailChimp\Helper\Data::IS_PRODUCT . "'"
+            . " AND m4m_sp2.mailchimp_store_id = '" . $mailchimpStoreId . "'",
+            ['m4m_sp2.mailchimp_sync_delta']
+        );
+        $collection2->getSelect()->where(
+            'm4m_sp2.mailchimp_sync_delta IS NULL'
+            . ' OR m4m_sp2.mailchimp_sync_delta < at_special_to_date.value'
+        );
         foreach ($collection2 as $item) {
-            $productId = $item->getId();
-            $mailchimpSync = $this->syncHelper->getChimpSyncEcommerce($mailchimpStoreId, $productId, 'PRO');
-            if ($mailchimpSync->getMailchimpSyncDelta() < $item->getSpecialToDate()) {
-                $this->_updateProduct($mailchimpStoreId, $productId, null, null, 1);
-            }
+            $this->_updateProduct($mailchimpStoreId, $item->getId(), null, null, 1);
         }
     }
     protected function processDeletedProducts($magentoStoreId, $mailchimpStoreId)
