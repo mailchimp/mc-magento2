@@ -527,7 +527,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     private function saveConfigValueAtomic(string $path, string $value, string $scope, int $scopeId): void
     {
         $table = $this->_resource->getTableName('core_config_data');
-        $this->connection->insertOnDuplicate(
+        $this->_resource->getConnection()->insertOnDuplicate(
             $table,
             ['scope' => $scope, 'scope_id' => $scopeId, 'path' => $path, 'value' => $value],
             ['value']
