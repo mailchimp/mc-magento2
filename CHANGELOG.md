@@ -1,5 +1,15 @@
 # Changelog
 
+## [103.4.80](https://github.com/mailchimp/mc-magento2/tree/103.4.80)
+
+[Full Changelog](https://github.com/mailchimp/mc-magento2/compare/103.4.79...103.4.80)
+
+**Fixed bugs:**
+
+- CleanIssyncOrphanRows data patch fails on MySQL with error 1093 [\#2327](https://github.com/mailchimp/mc-magento2/issues/2327)
+- Harden order sync: wrong Exception import in Model/Api/Order.php lets one bad order abort the whole ebizmarts\_ecommerce cron [\#2321](https://github.com/mailchimp/mc-magento2/issues/2321)
+- _markSpecialPrices causes excessive CPU load on large catalogs (full table scan + N+1 queries) [\#2329](https://github.com/mailchimp/mc-magento2/issues/2329)
+
 ## [103.4.79](https://github.com/mailchimp/mc-magento2/tree/103.4.79)
 
 [Full Changelog](https://github.com/mailchimp/mc-magento2/compare/103.4.78...103.4.79)
