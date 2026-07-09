@@ -66,8 +66,11 @@ class CleanIssyncOrphanRows implements DataPatchInterface
             ->where('main.path = ?', self::ISSYNC_PATH)
             ->where('EXISTS (' . $childSelect . ')');
 
+        // Wrap in a derived table to avoid MySQL/MariaDB error 1093
+        // ("You can't specify target table for update in FROM clause")
+        // which is triggered when rows exist that match the DELETE condition.
         $connection->query(
-            'DELETE FROM ' . $table . ' WHERE config_id IN (' . $deleteSelect . ')'
+            'DELETE FROM ' . $table . ' WHERE config_id IN (SELECT config_id FROM (' . $deleteSelect . ') AS _tmp)'
         );
 
         return $this;
