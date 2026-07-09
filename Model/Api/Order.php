@@ -15,7 +15,6 @@ namespace Ebizmarts\MailChimp\Model\Api;
 
 use Magento\SalesRule\Model\RuleRepository;
 use Ebizmarts\MailChimp\Helper\Sync as SyncHelper;
-use Symfony\Component\Config\Definition\Exception\Exception;
 
 class Order
 {
