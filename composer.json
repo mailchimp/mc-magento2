@@ -10,7 +10,7 @@
   "authors": [
     {
       "name": "Ebizmarts Corp",
-      "email": "mailchimp@ebizmarts-desk.zendesk.com",
+      "email": "mailchimp@help.ebizmarts.com",
       "homepage": "http://ebizmarts.com"
     }
   ],
@@ -19,7 +19,7 @@
     "AFL-3.0"
   ],
   "support": {
-    "email": "mailchimp@ebizmarts-desk.zendesk.com",
+    "email": "mailchimp@help.ebizmarts.com",
     "wiki": "https://connect.mailchimp.com/integrations/magento",
     "forum": "http://ebizmarts.com/forums/view/6"
   },

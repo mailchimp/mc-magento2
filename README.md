@@ -10,7 +10,7 @@
 | ![wrong issue format](https://s3.amazonaws.com/ebizmartsgithubimages/wrongissueformat.png) | Issue has not been created according to requirements at the [Issue reporting guidelines](https://github.com/mailchimp/mc-magento2/wiki/Issue-reporting-guidelines). Will be closed until requirements are met. |
 | ![feature request](https://s3.amazonaws.com/ebizmartsgithubimages/featurerequest.png) | Feature request to be considered by the team. After approval will be labeled as enhancement. |
 | ![could not replicate](https://s3.amazonaws.com/ebizmartsgithubimages/couldnotreplicate.png) | The team was not able to replicate issue. It will be closed until missing information is given. |
-| ![contact support](https://s3.amazonaws.com/ebizmartsgithubimages/contactsupport.png) | Contact our support team at mailchimp@ebizmarts-desk.zendesk.com. Issue will be closed with no further action. |
+| ![contact support](https://s3.amazonaws.com/ebizmartsgithubimages/contactsupport.png) | Contact our support team at mailchimp@help.ebizmarts.com. Issue will be closed with no further action. |
 | ![low priority](https://s3.amazonaws.com/ebizmartsgithubimages/lowpriority.png) | Issue is considered as low priority by the team. |
 | ![priority](https://s3.amazonaws.com/ebizmartsgithubimages/priority.png) | Issue is considered as high priority by the team. |
 | ![conflict](https://s3.amazonaws.com/ebizmartsgithubimages/conflict.png) | Issue reports a conflict with other third party extension. |
