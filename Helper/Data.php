@@ -562,6 +562,32 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
             (string) $scope,
             (int) $scopeId
         );
+        // saveConfigValueAtomic writes straight to the table; flush the config
+        // cache so the freshly written flag is visible to the next read (the cart
+        // sync gate depends on this).
+        $this->_cacheTypeList->cleanType('config');
+    }
+
+    /**
+     * Clear the "initial sync complete" flag for a Mailchimp store. After a store
+     * is deleted/reset the cart sync must stay blocked until the store has fully
+     * re-synced, so the per-store issync/<id> flag is removed here.
+     *
+     * @param string $mailchimpStoreId
+     * @param int $scopeId
+     * @param string $scope
+     */
+    public function deleteMCMinSyncing($mailchimpStoreId, $scopeId = 0, $scope = 'default')
+    {
+        if (!$mailchimpStoreId) {
+            return;
+        }
+        $this->deleteConfig(
+            self::XML_PATH_IS_SYNC . '/' . $mailchimpStoreId,
+            (int) $scopeId,
+            (string) $scope
+        );
+        $this->_cacheTypeList->cleanType('config');
     }
     public function getCartUrl($storeId, $cartId, $token)
     {
