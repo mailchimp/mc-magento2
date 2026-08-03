@@ -162,37 +162,6 @@ class Ecommerce
                 }
             }
         }
-        $syncs = [];
-        foreach ($this->_storeManager->getStores() as $storeId => $val) {
-            $mailchimpStoreId = $this->_helper->getConfigValue(
-                \Ebizmarts\MailChimp\Helper\Data::XML_MAILCHIMP_STORE,
-                $storeId
-            );
-            if ($mailchimpStoreId != -1 && $mailchimpStoreId != '') {
-                $dateSync = $this->_helper->getMCMinSyncDateFlag($storeId);
-                if (isset($syncs[$mailchimpStoreId])) {
-                    if ($syncs[$mailchimpStoreId] && $syncs[$mailchimpStoreId]['datesync'] < $dateSync) {
-                        $syncs[$mailchimpStoreId]['datesync'] = $dateSync;
-                        $syncs[$mailchimpStoreId]['storeid'] = $storeId;
-                    }
-                } elseif ($dateSync) {
-                    $syncs[$mailchimpStoreId]['datesync'] = $dateSync;
-                    $syncs[$mailchimpStoreId]['storeid'] = $storeId;
-                } else {
-                    $syncs[$mailchimpStoreId] = false;
-                }
-            }
-        }
-        foreach ($syncs as $mailchimpStoreId => $val) {
-            $flag = $this->_helper->getMCMinSyncDateFlagByMailchimpStore(
-                $mailchimpStoreId,
-                0,
-                'default'
-            );
-            if ($val && !$flag) {
-                $this->updateSyncFlagData($val['storeid'], $mailchimpStoreId);
-            }
-        }
     }
 
     protected function _processStore($storeId, $mailchimpStoreId, $listId)
@@ -220,7 +189,7 @@ class Ecommerce
             $countOrders = count($orders);
             $results = array_merge($results, $orders);
 
-            if ($this->_helper->getMCMinSyncDateFlag($storeId)) {
+            if ($this->_helper->getMCMinSyncDateFlagByMailchimpStore($mailchimpStoreId, 0, 'default')) {
                 $this->_helper->log('Generate Carts payload');
                 $carts = $this->_apiCart->createBatchJson($storeId);
                 $results = array_merge($results, $carts);
@@ -288,17 +257,14 @@ class Ecommerce
             $this->_helper->log("Nothing to sync for store $storeId");
         }
         $countTotal = $this->_helper->getTotalNewItemsSent();
-        $syncing = $this->_helper->getMCMinSyncDateFlag($storeId);
-        if ($countTotal == 0 && $syncing) {
-            // Pass $mailchimpStoreId so the write goes to issync/<id> only —
-            // writing the bare scalar issync alongside issync/<id> children at
-            // the same scope causes a fatal in Magento's Scope\Converter.
-            $this->_helper->saveMCMinSyncing(
-                $mailchimpStoreId,
-                date('Y-m-d'),
-                0,
-                'default'
-            );
+        // Mark the store as fully synced only once, on the first run that has
+        // nothing new left to send. updateSyncFlagData records the completion date
+        // under issync/<id> and tells Mailchimp the store is no longer syncing.
+        // This is the flag the cart sync above waits on.
+        if ($countTotal == 0
+            && !$this->_helper->getMCMinSyncDateFlagByMailchimpStore($mailchimpStoreId, 0, 'default')
+        ) {
+            $this->updateSyncFlagData($storeId, $mailchimpStoreId);
         }
 
         return $batchId;

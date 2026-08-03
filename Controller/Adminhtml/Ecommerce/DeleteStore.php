@@ -85,6 +85,9 @@ class DeleteStore extends \Magento\Backend\App\Action
         try {
             $this->helper->deleteStore($mailchimpStore);
             $this->_config->deleteConfig(\Ebizmarts\MailChimp\Helper\Data::XML_MAILCHIMP_STORE, $scope, $storeId);
+            // Clear the initial-sync-complete flag so carts stay blocked until the
+            // store is fully re-synced after being reconnected.
+            $this->helper->deleteMCMinSyncing($mailchimpStore);
         } catch (ValidatorException $e) {
             $valid = 0;
             $message = $e->getMessage();
