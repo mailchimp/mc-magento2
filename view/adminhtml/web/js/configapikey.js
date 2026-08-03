@@ -16,6 +16,15 @@ define(
     function ($, alert, confirmation) {
         "use strict";
 
+        /**
+         * Escape a value coming from the Mailchimp account (account name, email,
+         * plan, etc.) before it is concatenated into admin HTML, to prevent a
+         * hostile connected account from injecting markup/script.
+         */
+        function escapeHtml(value) {
+            return $('<div>').text(value === null || value === undefined ? '' : value).html();
+        }
+
         $.widget('mage.configmonkeyapikey', {
             "options": {
                 "storeUrl": "",
@@ -345,7 +354,7 @@ define(
                 }).done(function (data) {
                         $.each(data, function (i, item) {
                             if (item.hasOwnProperty('label')) {
-                                $('#mailchimp_general_account_details_ul').append('<li>' + item.label + ' ' + item.value + '</li>');
+                                $('#mailchimp_general_account_details_ul').append($('<li>').text(item.label + ' ' + item.value));
                             } else if (item.hasOwnProperty('code')) {
                                 accountdata[item.code] = {'value': item.value, 'html': item.html};
                             }
@@ -353,7 +362,7 @@ define(
                         var outputtext = "<table style='border-collapse; margin-left: 10px;' >"
                         for (const key in accountdata) {
                             if (accountdata.hasOwnProperty(key)) {
-                                outputtext += '<tr><td style="border: 1px solid black;padding-left: 10px;padding-right: 10px;"><strong>' + accountdata[key]['html'] + '</strong></td><td style="border: 1px solid black;padding-left: 10px;padding-right: 10px;">' + accountdata[key]['value'] + '</td></tr>';
+                                outputtext += '<tr><td style="border: 1px solid black;padding-left: 10px;padding-right: 10px;"><strong>' + escapeHtml(accountdata[key]['html']) + '</strong></td><td style="border: 1px solid black;padding-left: 10px;padding-right: 10px;">' + escapeHtml(accountdata[key]['value']) + '</td></tr>';
                             }
                         }
                         outputtext += '</table>';
@@ -434,7 +443,7 @@ define(
                 }).done(function (data) {
                     $.each(data, function (i, item) {
                         if (item.hasOwnProperty('label')) {
-                            $('#mailchimp_general_account_details_ul').append('<li>' + item.label + ' ' + item.value + '</li>');
+                            $('#mailchimp_general_account_details_ul').append($('<li>').text(item.label + ' ' + item.value));
                         } else if (item.hasOwnProperty('code')) {
                             accountdata[item.code] = {'value': item.value,'html':item.html};
                         }
@@ -477,7 +486,7 @@ define(
                     var outputtext = "<table style='border-collapse; margin-left: 10px;' >"
                     for (const key in accountdata) {
                         if (accountdata.hasOwnProperty(key)) {
-                            outputtext += '<tr><td style="border: 1px solid black;padding-left: 10px;padding-right: 10px;"><strong>'+accountdata[key]['html'] + '</strong></td><td style="border: 1px solid black;padding-left: 10px;padding-right: 10px;">' + accountdata[key]['value']+'</td></tr>';
+                            outputtext += '<tr><td style="border: 1px solid black;padding-left: 10px;padding-right: 10px;"><strong>'+escapeHtml(accountdata[key]['html']) + '</strong></td><td style="border: 1px solid black;padding-left: 10px;padding-right: 10px;">' + escapeHtml(accountdata[key]['value'])+'</td></tr>';
                         }
                     }
                     outputtext += '</table>';
