@@ -162,7 +162,6 @@ class Order
             \Ebizmarts\MailChimp\Helper\Data::XML_MAILCHIMP_STORE,
             $magentoStoreId
         );
-        $isSynced = $this->_helper->getMCMinSyncDateFlag($magentoStoreId);
         $modifiedOrders = $this->_getCollection();
         // select orders for the current Magento store id
         $modifiedOrders->addFieldToFilter('store_id', ['eq' => $magentoStoreId]);
@@ -204,7 +203,7 @@ class Order
                     }
                 }
 
-                $payLoadReturn = $this->generatePOSTPayload($order, $mailchimpStoreId, $magentoStoreId, true, $isSynced);
+                $payLoadReturn = $this->generatePOSTPayload($order, $mailchimpStoreId, $magentoStoreId);
                 $orderJson = $payLoadReturn['jsonOrder'];
                 $payLoadError = $payLoadReturn['error'];
                 if ($orderJson) {
@@ -238,7 +237,6 @@ class Order
             \Ebizmarts\MailChimp\Helper\Data::XML_MAILCHIMP_STORE,
             $magentoStoreId
         );
-        $isSynced = $this->_helper->getMCMinSyncDateFlag($magentoStoreId);
         $newOrders = $this->_getCollection();
         // select carts for the current Magento store id
         $newOrders->addFieldToFilter('store_id', ['eq' => $magentoStoreId]);
@@ -281,7 +279,7 @@ class Order
                         $this->_counter++;
                     }
                 }
-                $payLoadReturn = $this->generatePOSTPayload($order, $mailchimpStoreId, $magentoStoreId, false, $isSynced);
+                $payLoadReturn = $this->generatePOSTPayload($order, $mailchimpStoreId, $magentoStoreId);
                 $orderJson = $payLoadReturn['jsonOrder'];
                 $payLoadError = $payLoadReturn['error'];
                 if ($orderJson) {
@@ -313,31 +311,21 @@ class Order
      * @param $order
      * @param $mailchimpStoreId
      * @param $magentoStoreId
-     * @param $isModifiedOrder
      * @return array
      * @throws \Exception
      */
     protected function generatePOSTPayload(
         \Magento\Sales\Model\Order $order,
         $mailchimpStoreId,
-        $magentoStoreId,
-        $isModifiedOrder,
-        $isSynced
+        $magentoStoreId
     ) {
         if (!$order->getCustomerEmail()) {
             return ['error' => 'Customer email is empty', 'jsonOrder' => null];
         }
         $data = [];
         $data['id'] = $order->getIncrementId();
-        if ($order->getMailchimpCampaignId()) {
-            $data['campaign_id'] = $order->getMailchimpCampaignId();
-        } elseif ($isSynced) {
-            if (!$isModifiedOrder && $campaignId = $this->getCampaign($magentoStoreId, $order->getCustomerEmail())) {
-                $data['campaign_id'] = $campaignId;
-                $order->setMailchimpCampaignId($campaignId);
-                $order->setMailchimpFlag(1);
-            }
-        }
+        // Do not send an explicit campaign_id: Mailchimp performs order/revenue
+        // attribution internally, and sending one would override it.
 
         if ($order->getMailchimpLandingPage()) {
             $data['landing_site'] = $order->getMailchimpLandingPage();
@@ -764,26 +752,6 @@ class Order
             $this->_helper->log($e->getMessage());
         }
         return $promo;
-    }
-    protected function getCampaign($store, $email)
-    {
-        $campaign_id = null;
-        $api = $this->_helper->getApi($store);
-        $actions = $this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_CAMPAIGN_ACTION, $store);
-        try {
-            $activity = $api->lists->members->memberActivity->get($this->_helper->getDefaultList($store), hash('md5',$email), null, null, $actions);
-            if ($activity) {
-                foreach ($activity['activity'] as $act) {
-                    if (key_exists('action', $act) && key_exists('campaign_id', $act) && $act['campaign_id']) {
-                        $campaign_id = $act['campaign_id'];
-                        break;
-                    }
-                }
-            }
-        } catch (\Mailchimp_Error $e) {
-            $this->_helper->log("No activity for $email");
-        }
-        return $campaign_id;
     }
     protected function _updateOrder($storeId, $entityId, $sync_delta = null, $sync_error = null, $sync_modified = null)
     {

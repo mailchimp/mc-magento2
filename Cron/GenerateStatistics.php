@@ -161,7 +161,6 @@ class GenerateStatistics
         $config['ecommerce']['first_date'] = $this->helper->getConfigValue(Data::XML_ECOMMERCE_FIRSTDATE, $storeId);
         $config['ecommerce']['send_promo'] = $this->helper->getConfigValue(Data::XML_SEND_PROMO, $storeId);
         $config['ecommerce']['include_taxes'] = $this->helper->getConfigValue(Data::XML_INCLUDING_TAXES, $storeId);
-        $config['ecommerce']['campaign_attribution'] = $this->helper->getConfigValue(Data::XML_CAMPAIGN_ACTION, $storeId);
         $config['ecommerce']['monts_to_clear_error_table'] = $this->helper->getConfigValue(Data::XML_CLEAN_ERROR_MONTHS, $storeId);
         $config['ac']['enabled'] = $this->helper->getConfigValue(Data::XML_ABANDONEDCART_ACTIVE, $storeId);
         $config['ac']['first_date'] = $this->helper->getConfigValue(Data::XML_ABANDONEDCART_FIRSTDATE, $storeId);
