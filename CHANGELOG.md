@@ -1,5 +1,19 @@
 # Changelog
 
+## [103.4.81](https://github.com/mailchimp/mc-magento2/tree/103.4.81)
+
+[Full Changelog](https://github.com/mailchimp/mc-magento2/compare/103.4.80...103.4.81)
+
+**Fixed bugs:**
+
+- Remove usage of campaign\_id as an attribute in orders API requests [\#2293](https://github.com/mailchimp/mc-magento2/issues/2293)
+
+**Merged pull requests:**
+
+- Fix cart sync gate: block carts until the store is fully synced [\#2336](https://github.com/mailchimp/mc-magento2/pull/2336)
+- Harden abandoned-cart restore and escape admin account details [\#2333](https://github.com/mailchimp/mc-magento2/pull/2333)
+- Migrate support email to mailchimp@help.ebizmarts.com [\#2332](https://github.com/mailchimp/mc-magento2/pull/2332)
+
 ## [103.4.80](https://github.com/mailchimp/mc-magento2/tree/103.4.80)
 
 [Full Changelog](https://github.com/mailchimp/mc-magento2/compare/103.4.79...103.4.80)
