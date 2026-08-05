@@ -1047,7 +1047,10 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         $sources = [
             'user' => true,
             'admin' => true,
-            'api' => true
+            // Do not subscribe to API-originated events: the extension writes members
+            // through the API (customer/subscriber sync), and echoing those changes back
+            // as webhooks creates a feedback loop that recreates newsletter subscribers.
+            'api' => false
         ];
         try {
             $api = $this->getApiByApiKey($apikey);

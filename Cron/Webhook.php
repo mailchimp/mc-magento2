@@ -286,18 +286,13 @@ class Webhook
                     $serializedGroups = $this->_helper->serialize($groups);
                     $subscriber = $this->_subscriberFactory->create();
                     $subscriber->loadByCustomer($customer->getId(),$websiteId);
-                    $interestGroup = $this->interestGroupFactory->create();
+                    // Only sync interest groups for customers who are already newsletter
+                    // subscribers. Never subscribe from a profile webhook: the customer may
+                    // be an ecommerce-only contact, and core subscribe() would add a
+                    // "Not Activated" row and send a confirmation email when double opt-in is
+                    // on, which Mailchimp then echoes back, recreating the row on every run.
                     if ($subscriber->getEmail()==$customer->getEmail()) {
-                        $interestGroup->getBySubscriberIdStoreId($subscriber->getSubscriberId(), $subscriber->getStoreId());
-                        $interestGroup->setGroupdata($serializedGroups);
-                        $interestGroup->setSubscriberId($subscriber->getSubscriberId());
-                        $interestGroup->setStoreId($subscriber->getStoreId());
-                        $interestGroup->setUpdatedAt($this->_helper->getGmtDate());
-                        $interestGroup->getResource()->save($interestGroup);
-                        $listId = $this->_helper->getGeneralList($subscriber->getStoreId());
-                    } else {
-                        $this->_subscriberFactory->create()->subscribe($customer->getEmail());
-                        $subscriber->loadBySubscriberEmail($customer->getEmail(), $websiteId);
+                        $interestGroup = $this->interestGroupFactory->create();
                         $interestGroup->getBySubscriberIdStoreId($subscriber->getSubscriberId(), $subscriber->getStoreId());
                         $interestGroup->setGroupdata($serializedGroups);
                         $interestGroup->setSubscriberId($subscriber->getSubscriberId());
