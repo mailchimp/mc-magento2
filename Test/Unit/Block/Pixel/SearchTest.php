@@ -15,6 +15,8 @@ use Ebizmarts\MailChimp\Block\Pixel\Search;
 use Ebizmarts\MailChimp\Helper\Data as MailChimpHelper;
 use Magento\Framework\App\RequestInterface;
 use Magento\Framework\View\Element\Template;
+use Magento\Search\Model\Query;
+use Magento\Search\Model\QueryFactory;
 use PHPUnit\Framework\TestCase;
 
 class SearchTest extends TestCase
@@ -33,14 +35,29 @@ class SearchTest extends TestCase
 
         $helper = $this->createMock(MailChimpHelper::class);
 
-        return new Search($context, $helper);
+        // getSearchData() reads the result count off the current search query.
+        $query = $this->getMockBuilder(Query::class)
+            ->disableOriginalConstructor()
+            ->addMethods(['getNumResults'])
+            ->getMock();
+        $query->method('getNumResults')->willReturn(7);
+
+        $queryFactory = $this->getMockBuilder(QueryFactory::class)
+            ->disableOriginalConstructor()
+            ->onlyMethods(['get'])
+            ->getMock();
+        $queryFactory->method('get')->willReturn($query);
+
+        return new Search($context, $helper, $queryFactory);
     }
 
     public function testGetSearchDataReturnsQueryWhenPresent(): void
     {
         $block = $this->makeBlock('red shoes');
 
-        $this->assertSame(['query' => 'red shoes'], $block->getSearchData());
+        // The block also reports the result count (added with QueryFactory);
+        // the stubbed query returns 7.
+        $this->assertSame(['query' => 'red shoes', 'resultsCount' => 7], $block->getSearchData());
     }
 
     public function testGetSearchDataReturnsEmptyArrayWhenNoQuery(): void

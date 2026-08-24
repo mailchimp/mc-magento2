@@ -13,9 +13,13 @@ namespace Ebizmarts\MailChimp\Test\Unit\Block\Pixel;
 
 use Ebizmarts\MailChimp\Block\Pixel\Checkout;
 use Ebizmarts\MailChimp\Helper\Data as MailChimpHelper;
+use Ebizmarts\MailChimp\Model\Product\LeafProductIdResolver;
+use Magento\Catalog\Model\Product;
 use Magento\Checkout\Model\Session as CheckoutSession;
-use Magento\Framework\DataObject;
+use Magento\Framework\UrlInterface;
 use Magento\Framework\View\Element\Template;
+use Magento\Quote\Model\Quote\Item as QuoteItem;
+use Magento\Quote\Model\Quote\Item\Option;
 use Magento\Store\Model\Store;
 use Magento\Store\Model\StoreManagerInterface;
 use PHPUnit\Framework\TestCase;
@@ -60,6 +64,59 @@ class CheckoutTest extends TestCase
         return $quote;
     }
 
+    /**
+     * Real QuoteItem mocks: the block hands the item to LeafProductIdResolver,
+     * which type-hints QuoteItem, so a plain DataObject no longer fits.
+     *
+     * @param  string   $productId
+     * @param  string   $name
+     * @param  float    $price
+     * @param  string   $sku
+     * @param  int      $qty
+     * @param  string   $productType
+     * @param  int|null $childProductId
+     * @return QuoteItem
+     */
+    private function makeItem(
+        string $productId,
+        string $name,
+        float $price,
+        string $sku,
+        int $qty,
+        string $productType = 'simple',
+        $childProductId = null
+    ): QuoteItem {
+        $option = null;
+        if ($childProductId !== null) {
+            $child = $this->createMock(Product::class);
+            $child->method('getId')->willReturn($childProductId);
+
+            $option = $this->getMockBuilder(Option::class)
+                ->disableOriginalConstructor()
+                ->onlyMethods(['getProduct'])
+                ->getMock();
+            $option->method('getProduct')->willReturn($child);
+        }
+
+        $item = $this->getMockBuilder(QuoteItem::class)
+            ->disableOriginalConstructor()
+            ->onlyMethods(
+                ['getProductType', 'getOptionByCode', 'getProduct', 'getName', 'getPrice', 'getSku', 'getQty']
+            )
+            ->addMethods(['getProductId'])
+            ->getMock();
+        $item->method('getProductId')->willReturn($productId);
+        $item->method('getProductType')->willReturn($productType);
+        $item->method('getOptionByCode')->willReturn($option);
+        $item->method('getProduct')->willReturn(null);
+        $item->method('getName')->willReturn($name);
+        $item->method('getPrice')->willReturn($price);
+        $item->method('getSku')->willReturn($sku);
+        $item->method('getQty')->willReturn($qty);
+
+        return $item;
+    }
+
     private function makeBlock(\Magento\Quote\Model\Quote $quote, string $currency = 'USD'): Checkout
     {
         $store = $this->createMock(Store::class);
@@ -76,9 +133,15 @@ class CheckoutTest extends TestCase
             ->getMock();
         $context->method('getStoreManager')->willReturn($storeManager);
 
+        // getCheckoutData() reads the media base URL; without this the block hits
+        // getBaseUrl() on null.
+        $urlBuilder = $this->createMock(UrlInterface::class);
+        $urlBuilder->method('getBaseUrl')->willReturn('https://example.com/media/');
+        $context->method('getUrlBuilder')->willReturn($urlBuilder);
+
         $helper = $this->createMock(MailChimpHelper::class);
 
-        return new Checkout($context, $helper, $checkoutSession);
+        return new Checkout($context, $helper, $checkoutSession, new LeafProductIdResolver());
     }
 
     public function testGetCheckoutDataStructure(): void
@@ -88,7 +151,9 @@ class CheckoutTest extends TestCase
 
         $result = $block->getCheckoutData();
 
-        $this->assertSame('5', $result['id']);
+        // The checkout event namespaces its id to keep it distinct from the cart
+        // event; the raw quote id travels in cartId.
+        $this->assertSame('checkout_5', $result['id']);
         $this->assertSame('5', $result['cartId']);
         $this->assertSame('GBP', $result['currency']);
         $this->assertSame(100.0, $result['subtotalPrice']);
@@ -121,13 +186,7 @@ class CheckoutTest extends TestCase
 
     public function testGetCheckoutDataWithLineItems(): void
     {
-        $item  = new DataObject([
-            'product_id' => '99',
-            'name'       => 'Sneaker',
-            'price'      => 60.0,
-            'sku'        => 'SNKR-1',
-            'qty'        => 1,
-        ]);
+        $item  = $this->makeItem('99', 'Sneaker', 60.0, 'SNKR-1', 1);
         $quote = $this->makeQuote('8', [$item], 60.0, 60.0, null, 0.0, 0.0, 0.0);
         $block = $this->makeBlock($quote);
 
@@ -138,5 +197,17 @@ class CheckoutTest extends TestCase
         $this->assertSame('Sneaker', $lineItems[0]['item']['title']);
         $this->assertSame(60.0, $lineItems[0]['item']['price']);
         $this->assertSame(1, $lineItems[0]['quantity']);
+    }
+
+    public function testGetCheckoutDataConfigurableSendsChosenChildAsVariantId(): void
+    {
+        $item  = $this->makeItem('62', 'Chaz Kangeroo Hoodie', 52.0, 'MH01-XS-Black', 1, 'configurable', 47);
+        $quote = $this->makeQuote('13', [$item], 52.0, 52.0, null, 0.0, 0.0, 0.0);
+        $block = $this->makeBlock($quote);
+
+        $lineItem = $block->getCheckoutData()['lineItems'][0];
+
+        $this->assertSame('47', $lineItem['item']['id'], 'id must be the chosen child simple');
+        $this->assertSame('62', $lineItem['item']['productId'], 'productId must stay the parent');
     }
 }

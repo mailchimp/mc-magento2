@@ -12,6 +12,7 @@
 namespace Ebizmarts\MailChimp\Block\Pixel;
 
 use Ebizmarts\MailChimp\Helper\Data as MailChimpHelper;
+use Ebizmarts\MailChimp\Model\Product\LeafProductIdResolver;
 use Magento\Catalog\Api\ProductRepositoryInterface;
 use Magento\Checkout\Model\Session as CheckoutSession;
 use Magento\Framework\View\Element\Template;
@@ -38,10 +39,16 @@ class Order extends Template
     protected $productRepository;
 
     /**
+     * @var LeafProductIdResolver
+     */
+    protected $leafProductIdResolver;
+
+    /**
      * @param Template\Context           $context
      * @param MailChimpHelper            $helper
      * @param CheckoutSession            $checkoutSession
      * @param ProductRepositoryInterface $productRepository
+     * @param LeafProductIdResolver      $leafProductIdResolver
      * @param array                      $data
      */
     public function __construct(
@@ -49,12 +56,14 @@ class Order extends Template
         MailChimpHelper $helper,
         CheckoutSession $checkoutSession,
         ProductRepositoryInterface $productRepository,
+        LeafProductIdResolver $leafProductIdResolver,
         array $data = []
     ) {
         parent::__construct($context, $data);
-        $this->helper            = $helper;
-        $this->checkoutSession   = $checkoutSession;
-        $this->productRepository = $productRepository;
+        $this->helper                = $helper;
+        $this->checkoutSession       = $checkoutSession;
+        $this->productRepository     = $productRepository;
+        $this->leafProductIdResolver = $leafProductIdResolver;
     }
 
     /**
@@ -77,6 +86,10 @@ class Order extends Template
         $lineItems = [];
         foreach ($order->getAllVisibleItems() as $item) {
             $productId  = (string)$item->getProductId();
+            // Mailchimp variant identity: the child order-item row for a
+            // configurable, the parent id for everything else.
+            $leafId     = $this->leafProductIdResolver->forOrderItem($item);
+            $variantId  = $leafId !== null ? (string)$leafId : $productId;
             $imageUrl   = '';
             $productUrl = '';
             try {
@@ -91,7 +104,7 @@ class Order extends Template
             }
             $lineItems[] = [
                 'item'     => [
-                    'id'         => $productId,
+                    'id'         => $variantId,
                     'productId'  => $productId,
                     'title'      => (string)$item->getName(),
                     'price'      => (float)$item->getPrice(),

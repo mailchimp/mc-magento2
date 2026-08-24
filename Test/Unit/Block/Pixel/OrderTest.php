@@ -13,16 +13,31 @@ namespace Ebizmarts\MailChimp\Test\Unit\Block\Pixel;
 
 use Ebizmarts\MailChimp\Block\Pixel\Order;
 use Ebizmarts\MailChimp\Helper\Data as MailChimpHelper;
+use Ebizmarts\MailChimp\Model\Product\LeafProductIdResolver;
+use Magento\Catalog\Api\ProductRepositoryInterface;
+use Magento\Catalog\Model\Product;
 use Magento\Checkout\Model\Session as CheckoutSession;
-use Magento\Framework\DataObject;
+use Magento\Framework\UrlInterface;
 use Magento\Framework\View\Element\Template;
 use Magento\Sales\Model\Order as SalesOrder;
+use Magento\Sales\Model\Order\Item as OrderItem;
 use PHPUnit\Framework\TestCase;
 
 class OrderTest extends TestCase
 {
     /**
-     * Uses DataObject to avoid fighting magic-getter mocking on OrderItem.
+     * Real OrderItem mocks: the block hands the item to LeafProductIdResolver,
+     * which type-hints OrderItemInterface, so a plain DataObject no longer fits.
+     *
+     * @param  string   $productId
+     * @param  string   $name
+     * @param  float    $price
+     * @param  string   $sku
+     * @param  float    $qtyOrdered
+     * @param  float    $rowTotal
+     * @param  string   $productType
+     * @param  int|null $childProductId
+     * @return OrderItem
      */
     private function makeItem(
         string $productId,
@@ -30,16 +45,39 @@ class OrderTest extends TestCase
         float $price,
         string $sku,
         float $qtyOrdered,
-        float $rowTotal
-    ): DataObject {
-        return new DataObject([
-            'product_id'   => $productId,
-            'name'         => $name,
-            'price'        => $price,
-            'sku'          => $sku,
-            'qty_ordered'  => $qtyOrdered,
-            'row_total'    => $rowTotal,
-        ]);
+        float $rowTotal,
+        string $productType = 'simple',
+        $childProductId = null
+    ): OrderItem {
+        $children = [];
+        if ($childProductId !== null) {
+            $child = $this->getMockBuilder(OrderItem::class)
+                ->disableOriginalConstructor()
+                ->onlyMethods(['getProductId'])
+                ->getMock();
+            $child->method('getProductId')->willReturn($childProductId);
+            $children[] = $child;
+        }
+
+        $item = $this->getMockBuilder(OrderItem::class)
+            ->disableOriginalConstructor()
+            ->onlyMethods(
+                [
+                    'getProductId', 'getProductType', 'getChildrenItems',
+                    'getName', 'getPrice', 'getSku', 'getQtyOrdered', 'getRowTotal',
+                ]
+            )
+            ->getMock();
+        $item->method('getProductId')->willReturn($productId);
+        $item->method('getProductType')->willReturn($productType);
+        $item->method('getChildrenItems')->willReturn($children);
+        $item->method('getName')->willReturn($name);
+        $item->method('getPrice')->willReturn($price);
+        $item->method('getSku')->willReturn($sku);
+        $item->method('getQtyOrdered')->willReturn($qtyOrdered);
+        $item->method('getRowTotal')->willReturn($rowTotal);
+
+        return $item;
     }
 
     private function makeBlock(?SalesOrder $order): Order
@@ -51,9 +89,28 @@ class OrderTest extends TestCase
             ->disableOriginalConstructor()
             ->getMock();
 
+        // getOrderData() reads the media base URL; without this the block hits
+        // getBaseUrl() on null.
+        $urlBuilder = $this->createMock(UrlInterface::class);
+        $urlBuilder->method('getBaseUrl')->willReturn('https://example.com/media/');
+        $context->method('getUrlBuilder')->willReturn($urlBuilder);
+
         $helper = $this->createMock(MailChimpHelper::class);
 
-        return new Order($context, $helper, $checkoutSession);
+        $product = $this->createMock(Product::class);
+        $product->method('getImage')->willReturn('no_selection');
+        $product->method('getProductUrl')->willReturn('https://example.com/p.html');
+
+        $productRepository = $this->createMock(ProductRepositoryInterface::class);
+        $productRepository->method('getById')->willReturn($product);
+
+        return new Order(
+            $context,
+            $helper,
+            $checkoutSession,
+            $productRepository,
+            new LeafProductIdResolver()
+        );
     }
 
     // All methods listed here ARE declared on Sales\Order (confirmed via reflection)
@@ -149,5 +206,29 @@ class OrderTest extends TestCase
         $block = $this->makeBlock($order);
 
         $this->assertArrayNotHasKey('customerId', $block->getOrderData());
+    }
+
+    public function testGetOrderDataConfigurableSendsChildAsVariantId(): void
+    {
+        $item  = $this->makeItem('62', 'Chaz Kangeroo Hoodie', 52.0, 'MH01-XS-Black', 1.0, 52.0, 'configurable', 47);
+        $order = $this->makeOrder('9', '100000099', 'USD', 52.0, 0.0, 5.0, 57.0, [$item]);
+        $block = $this->makeBlock($order);
+
+        $lineItem = $block->getOrderData()['lineItems'][0];
+
+        $this->assertSame('47', $lineItem['item']['id'], 'id must be the child order-item row');
+        $this->assertSame('62', $lineItem['item']['productId'], 'productId must stay the parent');
+    }
+
+    public function testGetOrderDataConfigurableWithoutChildRowFallsBackToParent(): void
+    {
+        $item  = $this->makeItem('62', 'Chaz Kangeroo Hoodie', 52.0, 'MH01', 1.0, 52.0, 'configurable', null);
+        $order = $this->makeOrder('9', '100000099', 'USD', 52.0, 0.0, 5.0, 57.0, [$item]);
+        $block = $this->makeBlock($order);
+
+        $lineItem = $block->getOrderData()['lineItems'][0];
+
+        $this->assertSame('62', $lineItem['item']['id']);
+        $this->assertSame('62', $lineItem['item']['productId']);
     }
 }

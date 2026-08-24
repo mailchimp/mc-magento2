@@ -52,9 +52,14 @@
         ) || 0;
         var imageUrl = (item.product_image && item.product_image.src) ? item.product_image.src : '';
         var productId = String(item.product_id || item.item_id || '');
+        // Mailchimp variant identity. mc_variant_id is attached server side by
+        // Ebizmarts\MailChimp\Model\Plugin\CustomerData\CartItemVariantId, because the
+        // customer-data cart section only carries the PARENT id for a configurable
+        // and the chosen child cannot be resolved in the browser.
+        var variantId = String(item.mc_variant_id || '') || productId;
         var product = {
             item: {
-                id: productId, productId: productId,
+                id: variantId, productId: productId,
                 title: item.product_name || item.name || '',
                 price: unitPrice, currency: currency || '',
                 sku: String(item.product_sku || item.sku || ''),
