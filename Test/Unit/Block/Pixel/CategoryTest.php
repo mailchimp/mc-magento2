@@ -54,9 +54,11 @@ class CategoryTest extends TestCase
 
         $result = $block->getCategoryData();
 
-        $this->assertSame('5', $result['id']);
-        $this->assertSame('Women', $result['name']);
-        $this->assertSame('https://example.com/women', $result['url']);
+        // The payload keys are categoryId/categoryName — that is what
+        // view/frontend/web/js/pixel/category.js reads. There is no url field.
+        $this->assertSame('5', $result['categoryId']);
+        $this->assertSame('Women', $result['categoryName']);
+        $this->assertArrayNotHasKey('url', $result);
     }
 
     public function testGetCategoryDataReturnsEmptyArrayWhenNoCategory(): void
@@ -73,8 +75,7 @@ class CategoryTest extends TestCase
 
         $result = $block->getCategoryData();
 
-        $this->assertIsString($result['id']);
-        $this->assertIsString($result['name']);
-        $this->assertIsString($result['url']);
+        $this->assertIsString($result['categoryId']);
+        $this->assertIsString($result['categoryName']);
     }
 }

@@ -12,6 +12,7 @@
 namespace Ebizmarts\MailChimp\Block\Pixel;
 
 use Ebizmarts\MailChimp\Helper\Data as MailChimpHelper;
+use Ebizmarts\MailChimp\Model\Product\LeafProductIdResolver;
 use Magento\Checkout\Model\Session as CheckoutSession;
 use Magento\Framework\View\Element\Template;
 
@@ -32,20 +33,28 @@ class Checkout extends Template
     protected $checkoutSession;
 
     /**
-     * @param Template\Context $context
-     * @param MailChimpHelper  $helper
-     * @param CheckoutSession  $checkoutSession
-     * @param array            $data
+     * @var LeafProductIdResolver
+     */
+    protected $leafProductIdResolver;
+
+    /**
+     * @param Template\Context      $context
+     * @param MailChimpHelper       $helper
+     * @param CheckoutSession       $checkoutSession
+     * @param LeafProductIdResolver $leafProductIdResolver
+     * @param array                 $data
      */
     public function __construct(
         Template\Context $context,
         MailChimpHelper $helper,
         CheckoutSession $checkoutSession,
+        LeafProductIdResolver $leafProductIdResolver,
         array $data = []
     ) {
         parent::__construct($context, $data);
-        $this->helper          = $helper;
-        $this->checkoutSession = $checkoutSession;
+        $this->helper                = $helper;
+        $this->checkoutSession       = $checkoutSession;
+        $this->leafProductIdResolver = $leafProductIdResolver;
     }
 
     /**
@@ -65,6 +74,9 @@ class Checkout extends Template
         $lineItems = [];
         foreach ($quote->getAllVisibleItems() as $item) {
             $productId  = (string)$item->getProductId();
+            // Mailchimp variant identity: the chosen child for a configurable, the
+            // product itself otherwise. Must match what the REST sync publishes.
+            $variantId  = (string)$this->leafProductIdResolver->forQuoteItem($item);
             $product    = $item->getProduct();
             $imageUrl   = '';
             $productUrl = '';
@@ -77,7 +89,7 @@ class Checkout extends Template
             }
             $lineItems[] = [
                 'item'     => [
-                    'id'         => $productId,
+                    'id'         => $variantId,
                     'productId'  => $productId,
                     'title'      => (string)$item->getName(),
                     'price'      => (float)$item->getPrice(),
