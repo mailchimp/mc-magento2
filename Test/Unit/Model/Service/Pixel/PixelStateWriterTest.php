@@ -45,19 +45,20 @@ class PixelStateWriterTest extends TestCase
         $callOrder = [];
 
         $this->configWriter
-            ->expects($this->exactly(3))
+            ->expects($this->exactly(4))
             ->method('save')
             ->willReturnCallback(function (string $path) use (&$callOrder) {
                 $callOrder[] = $path;
             });
 
-        $this->cacheTypeList->expects($this->once())->method('invalidate')->with('config');
+        $this->cacheTypeList->expects($this->once())->method('cleanType')->with('config');
 
         $this->writer->enable($storeId, $scriptUrl, $scriptFragment);
 
         $this->assertSame(
             [
                 MailChimpHelper::XML_PIXEL_SCRIPT_URL,
+                MailChimpHelper::XML_MAILCHIMP_JS_URL,
                 MailChimpHelper::XML_PIXEL_SCRIPT_FRAGMENT,
                 MailChimpHelper::XML_PIXEL_ENABLED_FOR_STORE,
             ],
@@ -108,7 +109,7 @@ class PixelStateWriterTest extends TestCase
                 $callOrder[] = $path;
             });
 
-        $this->cacheTypeList->expects($this->once())->method('invalidate')->with('config');
+        $this->cacheTypeList->expects($this->once())->method('cleanType')->with('config');
 
         $this->writer->disable($storeId);
 
@@ -139,7 +140,7 @@ class PixelStateWriterTest extends TestCase
     public function testEnableInvalidatesConfigCache(): void
     {
         $this->configWriter->method('save');
-        $this->cacheTypeList->expects($this->once())->method('invalidate')->with('config');
+        $this->cacheTypeList->expects($this->once())->method('cleanType')->with('config');
 
         $this->writer->enable(1, 'https://example.com/pixel.js', '<script></script>');
     }
@@ -147,7 +148,7 @@ class PixelStateWriterTest extends TestCase
     public function testDisableInvalidatesConfigCache(): void
     {
         $this->configWriter->method('save');
-        $this->cacheTypeList->expects($this->once())->method('invalidate')->with('config');
+        $this->cacheTypeList->expects($this->once())->method('cleanType')->with('config');
 
         $this->writer->disable(1);
     }
