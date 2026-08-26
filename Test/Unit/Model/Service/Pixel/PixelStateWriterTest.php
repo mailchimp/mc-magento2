@@ -137,7 +137,7 @@ class PixelStateWriterTest extends TestCase
         $this->assertSame(0,  $saved[MailChimpHelper::XML_PIXEL_ENABLED_FOR_STORE]);
     }
 
-    public function testEnableInvalidatesConfigCache(): void
+    public function testEnableCleansConfigCacheType(): void
     {
         $this->configWriter->method('save');
         $this->cacheTypeList->expects($this->once())->method('cleanType')->with('config');
@@ -145,7 +145,7 @@ class PixelStateWriterTest extends TestCase
         $this->writer->enable(1, 'https://example.com/pixel.js', '<script></script>');
     }
 
-    public function testDisableInvalidatesConfigCache(): void
+    public function testDisableCleansConfigCacheType(): void
     {
         $this->configWriter->method('save');
         $this->cacheTypeList->expects($this->once())->method('cleanType')->with('config');
