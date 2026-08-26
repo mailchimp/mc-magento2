@@ -61,6 +61,16 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     const XML_REGISTER_URL            = 'mailchimp/statistics/register_url';
     const XML_STATISTICS_TOKEN        = 'mailchimp/register/token';
 
+    /**
+     * Status reporting beacon. The token is per store view; the cron expression is
+     * per install; the delivery uid is the last notification actually written
+     * to the admin inbox. Deliberately NOT mailchimp/register/token, which
+     * holds a token from the previous relay and is meaningless to this service.
+     */
+    const XML_EDGE_TOKEN              = 'mailchimp/register/edge_token';
+    const XML_EDGE_BEACON_CRON        = 'mailchimp/register/beacon_cron';
+    const XML_EDGE_DELIVERY_UID       = 'mailchimp/register/last_delivery_uid';
+
     const XML_PIXEL_ENABLED_FOR_STORE = 'mailchimp/pixel/enabled_for_store';
     const XML_PIXEL_SCRIPT_URL        = 'mailchimp/pixel/script_url';
     const XML_PIXEL_SCRIPT_FRAGMENT   = 'mailchimp/pixel/script_fragment';
