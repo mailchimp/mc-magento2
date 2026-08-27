@@ -14,6 +14,9 @@
                 <notification_url>https://logs-mc4mage.ebizmarts.com/batches</notification_url>
                 <register_url>https://users-mc4mage.ebizmarts.com</register_url>
             </statistics>
+            <telemetry>
+                <share_contact>1</share_contact>
+            </telemetry>
             <pixel>
                 <enabled_for_store>0</enabled_for_store>
                 <script_url></script_url>
