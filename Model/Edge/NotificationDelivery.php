@@ -53,6 +53,11 @@ class NotificationDelivery
     private $notifier;
 
     /**
+     * @var array uids already written to the inbox by this process
+     */
+    private $written = [];
+
+    /**
      * @param Client            $client
      * @param MailChimpHelper   $helper
      * @param NotifierInterface $notifier
@@ -102,8 +107,10 @@ class NotificationDelivery
                 continue;
             }
 
+            $uid = isset($item['id']) ? (string)$item['id'] : '';
+
             try {
-                $written = $this->deliver($item);
+                $written = $this->deliverOnce($uid, $item);
             } catch (\Exception $e) {
                 // A message we could not write must not be confirmed, so stop
                 // here and let the unconfirmed uid tell the service the truth.
@@ -114,13 +121,18 @@ class NotificationDelivery
             // Only what actually reached the inbox may be acknowledged. A
             // message with no subject is never written, and confirming it
             // would tell the service it was seen when nobody saw it.
+            //
+            // A message suppressed as a duplicate IS acknowledged, and must be:
+            // it did reach the inbox, once. The service tracks delivery per
+            // store view, so every view has to confirm its own copy or it will
+            // keep offering the same message forever.
             if (!$written) {
                 continue;
             }
 
             // `id` IS the opaque delivery_uid on the wire.
-            if (isset($item['id']) && $item['id'] !== '') {
-                $delivered[] = (string)$item['id'];
+            if ($uid !== '') {
+                $delivered[] = $uid;
             }
         }
 
@@ -201,6 +213,50 @@ class NotificationDelivery
         }
 
         return [];
+    }
+
+    /**
+     * Write a notification to the inbox unless this process already has.
+     *
+     * The service addresses store views, not installations — every target but
+     * a single-view one fans out, so one message arrives once per registered
+     * view of the same install. Magento's inbox is install-wide and has no
+     * scope column, so writing each arrival would put the same message in the
+     * merchant's bell N times.
+     *
+     * Deduplication is per process, which covers the normal case exactly: one
+     * cron run walks every store view. It does not cover views handled by
+     * separate processes.
+     *
+     * Checking the inbox itself instead would cover that, but it cannot be done
+     * through NotifierInterface. Inbox::add() always sets an `internal` key, and
+     * Inbox::parse() skips its duplicate lookup whenever that key is set — so
+     * the notifier never deduplicates. Passing null to reach the other branch
+     * hits `Unknown column 'internal'`, because parse() only unsets the key on
+     * the branch it did not take. Querying the table directly would work, but
+     * would cost the property that made NotifierInterface the right choice
+     * here: it degrades to doing nothing when Magento_AdminNotification is
+     * disabled, rather than fataling.
+     *
+     * @param  string $uid  delivery uid, stable across the views of one message
+     * @param  array  $item
+     * @return bool   whether the merchant now has this message
+     */
+    private function deliverOnce($uid, array $item)
+    {
+        if ($uid !== '' && isset($this->written[$uid])) {
+            return true;
+        }
+
+        if (!$this->deliver($item)) {
+            return false;
+        }
+
+        if ($uid !== '') {
+            $this->written[$uid] = true;
+        }
+
+        return true;
     }
 
     /**
