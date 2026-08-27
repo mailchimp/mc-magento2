@@ -1,0 +1,9 @@
+# Keep development-only paths out of release archives.
+#
+# `export-ignore` applies to `git archive`, which is what GitHub builds release
+# tarballs from and what Composer downloads on a dist install. It does NOT
+# affect `git clone`, so a developer cloning the repo — or an app/code install
+# done by cloning — still gets everything listed here.
+
+/Test               export-ignore
+/.gitattributes     export-ignore
