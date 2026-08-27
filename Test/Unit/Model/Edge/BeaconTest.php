@@ -183,7 +183,7 @@ class BeaconTest extends TestCase
     public function testAFailingAccountCallDoesNotSuppressThePing(): void
     {
         // Hour chosen so this tick IS one of the store's two account slots.
-        $slot   = crc32(self::STORE_ID . self::STORE_URL) % Beacon::ACCOUNT_BLOCK_PERIOD_HOURS;
+        $slot   = (crc32(self::STORE_ID . self::STORE_URL) & 0x7fffffff) % Beacon::ACCOUNT_BLOCK_PERIOD_HOURS;
         $beacon = $this->makeBeacon('ebz_live', true, $slot);
 
         $this->client->expects($this->once())
@@ -191,7 +191,8 @@ class BeaconTest extends TestCase
             ->with(
                 'ebz_live',
                 $this->callback(function ($body) {
-                    return !array_key_exists('account', $body);
+                    return !array_key_exists('account_id', $body)
+                        && !array_key_exists('account', $body);
                 })
             )
             ->willReturn(new Response(Response::OK, 200, ['notifications' => 0]));
@@ -201,7 +202,7 @@ class BeaconTest extends TestCase
 
     public function testAccountBlockRidesTheStoresOwnSlot(): void
     {
-        $slot   = crc32(self::STORE_ID . self::STORE_URL) % Beacon::ACCOUNT_BLOCK_PERIOD_HOURS;
+        $slot   = (crc32(self::STORE_ID . self::STORE_URL) & 0x7fffffff) % Beacon::ACCOUNT_BLOCK_PERIOD_HOURS;
         $beacon = $this->makeBeacon('ebz_live', false, $slot);
 
         $this->client->expects($this->once())
@@ -209,7 +210,9 @@ class BeaconTest extends TestCase
             ->with(
                 'ebz_live',
                 $this->callback(function ($body) {
-                    return isset($body['account']['account_id']) && $body['account']['account_id'] === 'acc-1';
+                    return ($body['account_id'] ?? null) === 'acc-1'
+                        && ($body['account_name'] ?? null) === 'Shop'
+                        && !array_key_exists('account', $body);
                 })
             )
             ->willReturn(new Response(Response::OK, 200, ['notifications' => 0]));
@@ -219,7 +222,7 @@ class BeaconTest extends TestCase
 
     public function testNoAccountBlockOutsideTheSlot(): void
     {
-        $slot   = crc32(self::STORE_ID . self::STORE_URL) % Beacon::ACCOUNT_BLOCK_PERIOD_HOURS;
+        $slot   = (crc32(self::STORE_ID . self::STORE_URL) & 0x7fffffff) % Beacon::ACCOUNT_BLOCK_PERIOD_HOURS;
         $beacon = $this->makeBeacon('ebz_live', false, ($slot + 1) % Beacon::ACCOUNT_BLOCK_PERIOD_HOURS);
 
         $this->client->expects($this->once())
@@ -227,7 +230,8 @@ class BeaconTest extends TestCase
             ->with(
                 'ebz_live',
                 $this->callback(function ($body) {
-                    return !array_key_exists('account', $body);
+                    return !array_key_exists('account_id', $body)
+                        && !array_key_exists('account', $body);
                 })
             )
             ->willReturn(new Response(Response::OK, 200, ['notifications' => 0]));
@@ -352,5 +356,32 @@ class BeaconTest extends TestCase
         $this->client->method('ping')->willReturn(new Response(Response::OK, 200, ['notifications' => 0]));
 
         $beacon->execute();
+    }
+
+    /**
+     * crc32() is negative on 32-bit PHP builds. Unmasked, the derived minute
+     * would be negative and the written cron expression invalid, so the job
+     * would never be scheduled and the install would never report — silently.
+     */
+    public function testTheClaimedCronExpressionIsAlwaysValid(): void
+    {
+        $beacon = $this->makeBeacon('');
+
+        $this->client->method('register')->willReturn(new Response(Response::OK, 201, ['token' => 'ebz_new']));
+        $this->client->method('ping')->willReturn(new Response(Response::OK, 200, ['notifications' => 0]));
+
+        $written = null;
+        $this->helper->method('saveConfigValue')->willReturnCallback(
+            function ($path, $value) use (&$written) {
+                if (strpos($path, 'beacon_cron') !== false) {
+                    $written = $value;
+                }
+            }
+        );
+
+        $beacon->execute();
+
+        $this->assertNotNull($written, 'the first successful register must claim a slot');
+        $this->assertMatchesRegularExpression('/^([0-9]|[1-5][0-9]) \* \* \* \*$/', $written);
     }
 }

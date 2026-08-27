@@ -218,7 +218,11 @@ class Beacon
             // Mailchimp outage must not make every installation look dead.
             $account = $this->accountBlock($storeId);
             if ($account !== null) {
-                $body['account'] = $account;
+                // Top level, not nested: the receiving side reads these as
+                // first-class keys and drops anything it does not recognise, so
+                // an `account` wrapper would be accepted with a 200 and thrown
+                // away. Same shape the register already sends.
+                $body = array_merge($body, $account);
             }
         }
 
@@ -318,7 +322,11 @@ class Beacon
      */
     private function shouldSendAccountBlock($storeId, $storeUrl)
     {
-        $slot = crc32($storeId . $storeUrl) % self::ACCOUNT_BLOCK_PERIOD_HOURS;
+        // Sign-masked: crc32() returns a NEGATIVE int on 32-bit PHP builds, and a
+        // negative slot can never equal an hour, so those installs would never
+        // refresh their account data. Silent, and 32-bit builds still exist on
+        // older shared hosting.
+        $slot = (crc32($storeId . $storeUrl) & 0x7fffffff) % self::ACCOUNT_BLOCK_PERIOD_HOURS;
         $hour = (int)$this->helper->getGmtDate('G');
 
         return $hour % self::ACCOUNT_BLOCK_PERIOD_HOURS === $slot;
@@ -349,7 +357,9 @@ class Beacon
 
         // Concatenation, not addition: on PHP 8 "abc" + "def" is a TypeError,
         // and for all-numeric ids it would silently produce a different slot.
-        $minute = crc32($accountId . $storeUrl) % 60;
+        // Sign-masked for the same reason as the slot above: a negative minute
+        // writes an invalid cron expression, and the job then never runs at all.
+        $minute = (crc32($accountId . $storeUrl) & 0x7fffffff) % 60;
 
         $this->helper->saveConfigValue(
             MailChimpHelper::XML_EDGE_BEACON_CRON,
