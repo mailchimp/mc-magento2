@@ -204,6 +204,15 @@
                     </depends>
                 </field>
             </group>
+            <group id="telemetry" translate="label comment" type="text" sortOrder="105" showInDefault="1" showInWebsite="1" showInStore="1">
+                <label>Diagnostics</label>
+                <comment>Helps us find and fix problems with the Mailchimp connection.</comment>
+                <field id="share_contact" translate="label comment" type="select" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Include your account contact details</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <comment><![CDATA[The extension reports how the Mailchimp API is performing for your store &mdash; how many requests were made, how many failed and how long they took &mdash; so problems can be diagnosed without asking you for logs. No customer or order data is ever included. Set this to No to leave the account owner's name and email address out of those reports; everything else keeps working.]]></comment>
+                </field>
+            </group>
             <group id="ecommerce" translate="label" type="text" sortOrder="110" showInDefault="1" showInWebsite="1" showInStore="1">
                 <label>Ecommerce Configuration</label>
                 <field id="active" translate="label" type="select" sortOrder="110" showInDefault="1" showInWebsite="1" showInStore="1">
