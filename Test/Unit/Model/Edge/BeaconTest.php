@@ -632,13 +632,16 @@ class BeaconTest extends TestCase
         $body = [];
         $this->makeBeaconCapturingRegistration('0', $body)->execute();
 
-        foreach (['email', 'first_name', 'last_name', 'username'] as $field) {
+        // account_name is here too: on an account opened by an individual it
+        // commonly carries their name, and the API library withholds the same
+        // value behind the same switch.
+        foreach (['account_name', 'email', 'first_name', 'last_name', 'username'] as $field) {
             $this->assertArrayNotHasKey($field, $body, $field . ' was sent after the merchant opted out');
         }
 
-        // Everything that is not about the person keeps working, as promised.
+        // What is not about a person keeps working, as promised — and the
+        // account stays identifiable, so reports remain countable.
         $this->assertSame('acc-1', $body['account_id']);
-        $this->assertSame('Shop', $body['account_name']);
         $this->assertSame('monthly', $body['pricing_plan_type']);
         $this->assertSame(4200, $body['total_subscribers']);
     }
@@ -648,6 +651,7 @@ class BeaconTest extends TestCase
         $body = [];
         $this->makeBeaconCapturingRegistration('1', $body)->execute();
 
+        $this->assertSame('Shop', $body['account_name']);
         $this->assertSame('owner@example.com', $body['email']);
         $this->assertSame('Ada', $body['first_name']);
         $this->assertSame('Lovelace', $body['last_name']);
