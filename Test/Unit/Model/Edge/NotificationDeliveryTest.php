@@ -254,4 +254,79 @@ class NotificationDeliveryTest extends TestCase
         (new NotificationDelivery($client, $helper, $this->createMock(NotifierInterface::class)))
             ->handle(1, 'token', ['notifications' => 2], []);
     }
+
+    /**
+     * The service addresses store views, so one message arrives once per
+     * registered view of the same install. Magento's inbox is install-wide,
+     * so writing every arrival would put the same message in the bell N times.
+     */
+    public function testTheSameMessageIsWrittenToTheInboxOnlyOnce(): void
+    {
+        $client = $this->createMock(Client::class);
+        $client->method('pullNotifications')->willReturn(
+            new Response(Response::OK, 200, ['notifications' => [$this->wireItem('notice', 'uid-broadcast')]])
+        );
+
+        $notifier = $this->createMock(NotifierInterface::class);
+        $notifier->expects($this->once())->method('addNotice');
+
+        $delivery = new NotificationDelivery($client, $this->createMock(MailChimpHelper::class), $notifier);
+
+        // Five store views of one install, one cron process, same message.
+        foreach ([1, 2, 3, 4, 5] as $storeId) {
+            $delivery->handle($storeId, 'token', ['notifications' => 1], []);
+        }
+    }
+
+    /**
+     * A suppressed duplicate must still be acknowledged. It did reach the
+     * inbox once, and the service tracks delivery per store view — a view that
+     * never confirms is offered the same message forever.
+     */
+    public function testASuppressedDuplicateIsStillAcknowledgedByEveryStoreView(): void
+    {
+        $client = $this->createMock(Client::class);
+        $client->method('pullNotifications')->willReturn(
+            new Response(Response::OK, 200, ['notifications' => [$this->wireItem('notice', 'uid-broadcast')]])
+        );
+
+        $acked = [];
+        $helper = $this->createMock(MailChimpHelper::class);
+        $helper->method('saveConfigValue')->willReturnCallback(
+            function ($path, $value, $storeId) use (&$acked) {
+                $acked[] = $storeId;
+            }
+        );
+
+        $delivery = new NotificationDelivery($client, $helper, $this->createMock(NotifierInterface::class));
+
+        foreach ([1, 2, 3] as $storeId) {
+            $delivery->handle($storeId, 'token', ['notifications' => 1], []);
+        }
+
+        $this->assertSame([1, 2, 3], $acked, 'every store view has to confirm its own copy');
+    }
+
+    /**
+     * Suppression is by uid, not by content — two genuinely different messages
+     * must both reach the merchant even in the same run.
+     */
+    public function testDifferentMessagesAreNotSuppressed(): void
+    {
+        $client = $this->createMock(Client::class);
+        $client->method('pullNotifications')->willReturn(
+            new Response(
+                Response::OK,
+                200,
+                ['notifications' => [$this->wireItem('notice', 'uid-a'), $this->wireItem('notice', 'uid-b')]]
+            )
+        );
+
+        $notifier = $this->createMock(NotifierInterface::class);
+        $notifier->expects($this->exactly(2))->method('addNotice');
+
+        (new NotificationDelivery($client, $this->createMock(MailChimpHelper::class), $notifier))
+            ->handle(1, 'token', ['notifications' => 2], []);
+    }
+
 }
