@@ -146,13 +146,93 @@ class NotificationDeliveryTest extends TestCase
         );
 
         $helper = $this->createMock(MailChimpHelper::class);
-        $helper->method('getConfigValue')->willReturn('uid-0,uid-1');
         $helper->expects($this->once())
             ->method('saveConfigValue')
             ->with($this->anything(), 'uid-0,uid-1,uid-2', 1, $this->anything());
 
         (new NotificationDelivery($client, $helper, $this->createMock(NotifierInterface::class)))
-            ->handle(1, 'token', ['notifications' => 1]);
+            ->handle(1, 'token', ['notifications' => 1], ['uid-0', 'uid-1']);
+    }
+
+    /**
+     * What is still pending comes from the caller, never from configuration.
+     *
+     * The caller clears that value immediately before calling in, and reading
+     * it back here would not reliably see the clear: within one process a scope
+     * already loaded is refreshed only as a side effect of the cache-warming
+     * path, which is skipped when the config cache type is disabled. A read
+     * would return the pre-clear list and re-send uids already acknowledged on
+     * every tick, forever.
+     */
+    public function testWhatIsStillPendingIsNeverReadBackFromConfig(): void
+    {
+        $client = $this->createMock(Client::class);
+        $client->method('pullNotifications')->willReturn(
+            new Response(Response::OK, 200, ['notifications' => [$this->wireItem('notice', 'uid-2')]])
+        );
+
+        $helper = $this->createMock(MailChimpHelper::class);
+        // A stale read would hand back a list the caller has just cleared.
+        $helper->method('getConfigValue')->willReturn('uid-0,uid-1');
+        $helper->expects($this->once())
+            ->method('saveConfigValue')
+            ->with($this->anything(), 'uid-2', 1, $this->anything());
+
+        (new NotificationDelivery($client, $helper, $this->createMock(NotifierInterface::class)))
+            ->handle(1, 'token', ['notifications' => 1], []);
+    }
+
+    /**
+     * A message with no subject is never written to the inbox, so it must not
+     * be acknowledged either — that would tell the service somebody saw it.
+     */
+    public function testAnEmptySubjectIsNeitherDeliveredNorConfirmed(): void
+    {
+        $empty            = $this->wireItem('notice', 'uid-empty');
+        $empty['subject'] = '';
+
+        $client = $this->createMock(Client::class);
+        $client->method('pullNotifications')->willReturn(
+            new Response(Response::OK, 200, ['notifications' => [$empty]])
+        );
+
+        $notifier = $this->createMock(NotifierInterface::class);
+        $notifier->expects($this->never())->method('addNotice');
+        $notifier->expects($this->never())->method('addMajor');
+        $notifier->expects($this->never())->method('addCritical');
+
+        $helper = $this->createMock(MailChimpHelper::class);
+        $helper->expects($this->never())->method('saveConfigValue');
+
+        (new NotificationDelivery($client, $helper, $notifier))
+            ->handle(1, 'token', ['notifications' => 1], []);
+    }
+
+    /**
+     * An unwritable message in the middle of a batch must not take down the
+     * one before it, nor confirm the one after.
+     */
+    public function testAnEmptySubjectDoesNotStopTheRestOfTheBatch(): void
+    {
+        $empty            = $this->wireItem('notice', 'uid-empty');
+        $empty['subject'] = '';
+
+        $client = $this->createMock(Client::class);
+        $client->method('pullNotifications')->willReturn(
+            new Response(
+                Response::OK,
+                200,
+                ['notifications' => [$this->wireItem('notice', 'uid-a'), $empty, $this->wireItem('major', 'uid-b')]]
+            )
+        );
+
+        $helper = $this->createMock(MailChimpHelper::class);
+        $helper->expects($this->once())
+            ->method('saveConfigValue')
+            ->with($this->anything(), 'uid-a,uid-b', 1, $this->anything());
+
+        (new NotificationDelivery($client, $helper, $this->createMock(NotifierInterface::class)))
+            ->handle(1, 'token', ['notifications' => 3], []);
     }
 
     public function testEveryDeliveredUidIsQueuedNotJustTheLast(): void
@@ -167,12 +247,11 @@ class NotificationDeliveryTest extends TestCase
         );
 
         $helper = $this->createMock(MailChimpHelper::class);
-        $helper->method('getConfigValue')->willReturn('');
         $helper->expects($this->once())
             ->method('saveConfigValue')
             ->with($this->anything(), 'uid-a,uid-b', 1, $this->anything());
 
         (new NotificationDelivery($client, $helper, $this->createMock(NotifierInterface::class)))
-            ->handle(1, 'token', ['notifications' => 2]);
+            ->handle(1, 'token', ['notifications' => 2], []);
     }
 }

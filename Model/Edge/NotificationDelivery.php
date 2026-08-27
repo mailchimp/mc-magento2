@@ -76,9 +76,10 @@ class NotificationDelivery
      * @param  int    $storeId
      * @param  string $token
      * @param  array  $pingData
+     * @param  array  $stillPending uids the caller has NOT just acknowledged
      * @return void
      */
-    public function handle($storeId, $token, array $pingData)
+    public function handle($storeId, $token, array $pingData, array $stillPending = [])
     {
         if ($this->pendingCount($pingData) < 1) {
             return;
@@ -102,12 +103,19 @@ class NotificationDelivery
             }
 
             try {
-                $this->deliver($item);
+                $written = $this->deliver($item);
             } catch (\Exception $e) {
                 // A message we could not write must not be confirmed, so stop
                 // here and let the unconfirmed uid tell the service the truth.
                 $this->helper->log('Edge notification could not be delivered: ' . $e->getMessage());
                 break;
+            }
+
+            // Only what actually reached the inbox may be acknowledged. A
+            // message with no subject is never written, and confirming it
+            // would tell the service it was seen when nobody saw it.
+            if (!$written) {
+                continue;
             }
 
             // `id` IS the opaque delivery_uid on the wire.
@@ -117,7 +125,7 @@ class NotificationDelivery
         }
 
         if (!empty($delivered)) {
-            $this->rememberForAck($storeId, $delivered);
+            $this->rememberForAck($storeId, $delivered, $stillPending);
         }
     }
 
@@ -131,16 +139,23 @@ class NotificationDelivery
      * Written only when a notification actually landed in the inbox, which is
      * rare, so the config cache flush this causes is rare too.
      *
+     * What is still pending arrives as an argument rather than being read back
+     * from configuration. The caller clears that value just before calling in,
+     * and a read here would not reliably see the clear: within one process the
+     * config a scope has already loaded is only refreshed as a side effect of
+     * the cache-warming path, which is skipped entirely when the config cache
+     * type is disabled. Reading it back there returns the pre-clear list, and
+     * the uids just acknowledged would be merged in and sent again on every
+     * tick. Taking it as an argument makes the behaviour the same either way.
+     *
      * @param  int   $storeId
      * @param  array $delivered
+     * @param  array $stillPending uids the caller has not just acknowledged
      * @return void
      */
-    private function rememberForAck($storeId, array $delivered)
+    private function rememberForAck($storeId, array $delivered, array $stillPending = [])
     {
-        $pending = $this->helper->getConfigValue(MailChimpHelper::XML_EDGE_DELIVERY_UID, $storeId);
-        $pending = $pending === null || $pending === '' ? [] : explode(',', (string)$pending);
-
-        $merged = array_values(array_unique(array_merge($pending, $delivered)));
+        $merged = array_values(array_unique(array_merge($stillPending, $delivered)));
         if (count($merged) > self::MAX_PENDING_ACKS) {
             $merged = array_slice($merged, -self::MAX_PENDING_ACKS);
         }
@@ -192,7 +207,7 @@ class NotificationDelivery
      * Hand one notification to Magento, mapped from the service's priority.
      *
      * @param  array $item
-     * @return void
+     * @return bool  whether it was written to the inbox
      */
     private function deliver(array $item)
     {
@@ -202,7 +217,7 @@ class NotificationDelivery
         $url         = isset($item['url']) ? (string)$item['url'] : '';
 
         if ($title === '') {
-            return;
+            return false;
         }
 
         $priority = isset($item['priority']) ? strtolower((string)$item['priority']) : '';
@@ -218,5 +233,7 @@ class NotificationDelivery
                 $this->notifier->addNotice($title, $description, $url);
                 break;
         }
+
+        return true;
     }
 }

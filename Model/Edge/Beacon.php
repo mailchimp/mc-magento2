@@ -68,6 +68,11 @@ class Beacon
     private $scopeConfig;
 
     /**
+     * @var bool the cron slot has been settled for this process
+     */
+    private $slotClaimed = false;
+
+    /**
      * @param StoreManagerInterface    $storeManager
      * @param MailChimpHelper          $helper
      * @param Client                   $client
@@ -256,7 +261,10 @@ class Beacon
             );
         }
 
-        $this->notifications->handle($storeId, $token, $response->getData());
+        // The acks just sent are gone as far as the service is concerned, so
+        // nothing is still pending. Passed in rather than re-read: see
+        // NotificationDelivery::rememberForAck.
+        $this->notifications->handle($storeId, $token, $response->getData(), []);
     }
 
     /**
@@ -350,8 +358,21 @@ class Beacon
      */
     private function claimBeaconSlot($accountId, $storeUrl)
     {
+        // The read below cannot be trusted to see a write made earlier in this
+        // same process: within one request the config a scope has already
+        // loaded is refreshed only as a side effect of the cache-warming path,
+        // which is skipped when the config cache type is disabled. On a fresh
+        // multi-store-view install every view registers on the first tick, each
+        // read returns empty, and each writes a different minute — the last one
+        // winning, after N full config-cache flushes. This flag makes the claim
+        // once per process regardless.
+        if ($this->slotClaimed) {
+            return;
+        }
+
         $existing = $this->scopeConfig->getValue(MailChimpHelper::XML_EDGE_BEACON_CRON);
         if ($existing) {
+            $this->slotClaimed = true;
             return;
         }
 
@@ -367,6 +388,8 @@ class Beacon
             0,
             'default'
         );
+
+        $this->slotClaimed = true;
     }
 
     /**

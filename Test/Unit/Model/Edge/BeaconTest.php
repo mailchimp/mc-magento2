@@ -19,6 +19,7 @@ use Ebizmarts\MailChimp\Model\Edge\NotificationDelivery;
 use Ebizmarts\MailChimp\Model\Edge\Response;
 use Magento\Framework\App\Config\ScopeConfigInterface;
 use Magento\Framework\App\ProductMetadataInterface;
+use Magento\Framework\Notification\NotifierInterface;
 use Magento\Store\Model\Store;
 use Magento\Store\Model\StoreManagerInterface;
 use PHPUnit\Framework\TestCase;
@@ -384,4 +385,166 @@ class BeaconTest extends TestCase
         $this->assertNotNull($written, 'the first successful register must claim a slot');
         $this->assertMatchesRegularExpression('/^([0-9]|[1-5][0-9]) \* \* \* \*$/', $written);
     }
+
+    /**
+     * The ack queue must actually empty.
+     *
+     * Driven through a REAL NotificationDelivery, because the seam being tested
+     * is the one between the two objects: ping() clears the pending uids and
+     * then calls in, and delivery must not resurrect them. The helper double
+     * models configuration the way Magento behaves within a single process —
+     * writes land, but reads keep returning the value the scope was loaded
+     * with. Mocking NotificationDelivery would skip the seam entirely, which is
+     * how this went unnoticed.
+     */
+    public function testAcknowledgedUidsAreNotResurrectedByANewDelivery(): void
+    {
+        $stored = [
+            'mailchimp/register/edge_token'        => 'ebz_tok',
+            'mailchimp/register/last_delivery_uid' => 'uid-0,uid-1',
+        ];
+        // What a scope already loaded keeps returning, whatever is written after.
+        $stale = $stored;
+        $saved = [];
+
+        $store = $this->createMock(Store::class);
+        $store->method('getId')->willReturn(self::STORE_ID);
+        $store->method('getBaseUrl')->willReturn(self::STORE_URL);
+        $storeManager = $this->createMock(StoreManagerInterface::class);
+        $storeManager->method('getStores')->willReturn([$store]);
+
+        $helper = $this->createMock(MailChimpHelper::class);
+        $helper->method('isMailChimpEnabled')->willReturn(true);
+        $helper->method('getApiKey')->willReturn('key-123');
+        $helper->method('getModuleVersion')->willReturn('103.4.81');
+        $helper->method('getGmtDate')->willReturn('0');
+        $helper->method('getConfigValue')->willReturnCallback(
+            function ($path) use (&$stale) {
+                foreach ($stale as $known => $value) {
+                    if (strpos($path, substr($known, strrpos($known, '/') + 1)) !== false) {
+                        return $value;
+                    }
+                }
+                return '';
+            }
+        );
+        $helper->method('saveConfigValue')->willReturnCallback(
+            function ($path, $value) use (&$saved) {
+                $saved[$path] = $value;
+            }
+        );
+
+        $client = $this->createMock(Client::class);
+        $client->method('ping')->willReturn(
+            new Response(Response::OK, 200, ['ok' => true, 'notifications' => 1])
+        );
+        $client->method('pullNotifications')->willReturn(
+            new Response(
+                Response::OK,
+                200,
+                ['notifications' => [[
+                    'id'       => 'uid-2',
+                    'subject'  => 'Scheduled maintenance',
+                    'message'  => 'Maintenance window this weekend.',
+                    'priority' => 'notice',
+                ]]]
+            )
+        );
+
+        $signals = $this->createMock(LivenessSignals::class);
+        $signals->method('forStore')->willReturn(['last_error_type' => null]);
+        $metadata = $this->createMock(ProductMetadataInterface::class);
+        $metadata->method('getVersion')->willReturn('2.4.8');
+        $metadata->method('getEdition')->willReturn('Community');
+
+        $beacon = new Beacon(
+            $storeManager,
+            $helper,
+            $client,
+            $signals,
+            new NotificationDelivery($client, $helper, $this->createMock(NotifierInterface::class)),
+            $metadata,
+            $this->createMock(ScopeConfigInterface::class)
+        );
+
+        $beacon->execute();
+
+        $this->assertSame(
+            'uid-2',
+            $saved['mailchimp/register/last_delivery_uid'],
+            'uids already acknowledged were merged back in and would be sent again forever'
+        );
+    }
+
+    /**
+     * The cron slot is one install-wide value, so a first tick across N store
+     * views must settle on one minute and write it once — not write N different
+     * minutes, each read having missed the one before it.
+     */
+    public function testTheCronSlotIsClaimedOncePerProcessAcrossStoreViews(): void
+    {
+        $stores = [];
+        foreach ([1, 2, 3] as $id) {
+            $store = $this->createMock(Store::class);
+            $store->method('getId')->willReturn($id);
+            $store->method('getBaseUrl')->willReturn('https://view' . $id . '.example.com/');
+            $stores[] = $store;
+        }
+        $storeManager = $this->createMock(StoreManagerInterface::class);
+        $storeManager->method('getStores')->willReturn($stores);
+
+        $slotWrites = [];
+
+        $helper = $this->createMock(MailChimpHelper::class);
+        $helper->method('isMailChimpEnabled')->willReturn(true);
+        $helper->method('getApiKey')->willReturn('key-123');
+        $helper->method('getModuleVersion')->willReturn('103.4.81');
+        $helper->method('getGmtDate')->willReturn('0');
+        $helper->method('getConfigValue')->willReturn('');
+        $helper->method('saveConfigValue')->willReturnCallback(
+            function ($path, $value) use (&$slotWrites) {
+                if (strpos($path, 'beacon_cron') !== false) {
+                    $slotWrites[] = $value;
+                }
+            }
+        );
+
+        $root = $this->getMockBuilder(\Mailchimp_Root::class)
+            ->disableOriginalConstructor()
+            ->onlyMethods(['info'])
+            ->getMock();
+        $root->method('info')->willReturn(['account_id' => 'acc-1', 'account_name' => 'Shop']);
+        $api = $this->getMockBuilder(\Mailchimp::class)->disableOriginalConstructor()->getMock();
+        $api->root = $root;
+        $helper->method('getApi')->willReturn($api);
+
+        $client = $this->createMock(Client::class);
+        $client->method('register')->willReturn(new Response(Response::OK, 201, ['token' => 'ebz_new']));
+        $client->method('ping')->willReturn(new Response(Response::OK, 200, ['ok' => true, 'notifications' => 0]));
+
+        $signals = $this->createMock(LivenessSignals::class);
+        $signals->method('forStore')->willReturn(['last_error_type' => null]);
+        $metadata = $this->createMock(ProductMetadataInterface::class);
+        $metadata->method('getVersion')->willReturn('2.4.8');
+        $metadata->method('getEdition')->willReturn('Community');
+
+        // Every read returns empty, which is what a stale in-process config
+        // looks like on a first tick: without the guard each view would write.
+        $scopeConfig = $this->createMock(ScopeConfigInterface::class);
+        $scopeConfig->method('getValue')->willReturn('');
+
+        (new Beacon(
+            $storeManager,
+            $helper,
+            $client,
+            $signals,
+            $this->createMock(NotificationDelivery::class),
+            $metadata,
+            $scopeConfig
+        ))->execute();
+
+        $this->assertCount(1, $slotWrites, 'the cron slot was written once per store view instead of once');
+        $this->assertMatchesRegularExpression('/^([0-9]|[1-5][0-9]) \* \* \* \*$/', $slotWrites[0]);
+    }
+
 }
