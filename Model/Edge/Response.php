@@ -15,9 +15,12 @@ namespace Ebizmarts\MailChimp\Model\Edge;
  * Outcome of a single call to the reporting service.
  *
  * The outcome is deliberately coarser than the HTTP status, because only three
- * distinctions change what the caller does: the token is dead (401), we were
- * asked to back off (429), or something else went wrong and the token must be
- * left exactly as it is.
+ * distinctions change what the caller does: the token is dead (401), the
+ * service is refusing for now (429), or something else went wrong and the
+ * token must be left exactly as it is.
+ *
+ * The last two lead to the same action — leave everything alone and stop — so
+ * they are separate only because they mean different things in the log.
  */
 class Response
 {
@@ -81,7 +84,7 @@ class Response
     }
 
     /**
-     * Whether the service asked us to back off.
+     * Whether the service refused this attempt for the time being.
      *
      * @return bool
      */
@@ -112,6 +115,13 @@ class Response
 
     /**
      * Retry-After in seconds when the service sent one.
+     *
+     * Recorded and logged, not obeyed. Nothing schedules against it: the next
+     * attempt is the next hourly tick whatever the header said. That is longer
+     * than any back-off worth honouring in the common case, so waiting on it
+     * would only ever mean waiting longer than an hour — and a value asking
+     * for that is currently ignored. Kept here rather than only in the log so
+     * the caller has it if that ever needs to change.
      *
      * @return int|null
      */
