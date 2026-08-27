@@ -73,6 +73,11 @@ class Beacon
     private $slotClaimed = false;
 
     /**
+     * @var bool a config value was written and the cache still shows the old one
+     */
+    private $configDirty = false;
+
+    /**
      * @param StoreManagerInterface    $storeManager
      * @param MailChimpHelper          $helper
      * @param Client                   $client
@@ -120,6 +125,17 @@ class Beacon
             } catch (\Exception $e) {
                 $this->helper->log('Edge beacon failed for store ' . $storeId . ': ' . $e->getMessage());
             }
+        }
+
+        // One refresh for the whole run rather than one per value written.
+        // A flush re-reads the entire config and then serialises and encrypts
+        // every scope under a lock, so its cost grows with the number of store
+        // views; flushing per write would make a token expiry across N views
+        // pay that N times over. Nothing above reads back what it wrote, so
+        // deferring to here changes no behaviour.
+        if ($this->configDirty) {
+            $this->helper->flushConfigCache();
+            $this->configDirty = false;
         }
     }
 
@@ -181,12 +197,13 @@ class Beacon
             return null;
         }
 
-        $this->helper->saveConfigValue(
+        $this->helper->saveConfigValueWithoutCacheFlush(
             MailChimpHelper::XML_EDGE_TOKEN,
             $token,
             $storeId,
             ScopeInterface::SCOPE_STORES
         );
+        $this->configDirty = true;
 
         $this->claimBeaconSlot(isset($account['account_id']) ? (string)$account['account_id'] : '', $storeUrl);
 
@@ -235,12 +252,13 @@ class Beacon
 
         if ($response->isUnauthorized()) {
             // The only condition that clears the token. Next tick re-registers.
-            $this->helper->saveConfigValue(
+            $this->helper->saveConfigValueWithoutCacheFlush(
                 MailChimpHelper::XML_EDGE_TOKEN,
                 '',
                 $storeId,
                 ScopeInterface::SCOPE_STORES
             );
+            $this->configDirty = true;
             return;
         }
 
@@ -253,12 +271,13 @@ class Beacon
         // Cleared only once the service has actually seen them, and before the
         // pull below can queue a fresh batch.
         if (!empty($pendingAcks)) {
-            $this->helper->saveConfigValue(
+            $this->helper->saveConfigValueWithoutCacheFlush(
                 MailChimpHelper::XML_EDGE_DELIVERY_UID,
                 '',
                 $storeId,
                 ScopeInterface::SCOPE_STORES
             );
+            $this->configDirty = true;
         }
 
         // The acks just sent are gone as far as the service is concerned, so
@@ -412,7 +431,7 @@ class Beacon
         // writes an invalid cron expression, and the job then never runs at all.
         $minute = (crc32($accountId . $storeUrl) & 0x7fffffff) % 60;
 
-        $this->helper->saveConfigValue(
+        $this->helper->saveConfigValueWithoutCacheFlush(
             MailChimpHelper::XML_EDGE_BEACON_CRON,
             $minute . ' * * * *',
             0,
@@ -420,6 +439,7 @@ class Beacon
         );
 
         $this->slotClaimed = true;
+        $this->configDirty = true;
     }
 
     /**

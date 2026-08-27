@@ -135,7 +135,7 @@ class BeaconTest extends TestCase
 
         $this->client->method('register')->willReturn(new Response(Response::FAILED, 503));
         $this->client->expects($this->never())->method('ping');
-        $this->helper->expects($this->never())->method('saveConfigValue');
+        $this->helper->expects($this->never())->method('saveConfigValueWithoutCacheFlush');
 
         $beacon->execute();
     }
@@ -147,7 +147,7 @@ class BeaconTest extends TestCase
         $this->client->method('ping')->willReturn(new Response(Response::UNAUTHORIZED, 401));
 
         $this->helper->expects($this->once())
-            ->method('saveConfigValue')
+            ->method('saveConfigValueWithoutCacheFlush')
             ->with($this->stringContains('edge_token'), '', self::STORE_ID, $this->anything());
 
         $beacon->execute();
@@ -162,7 +162,7 @@ class BeaconTest extends TestCase
         $beacon = $this->makeBeacon('ebz_live');
 
         $this->client->method('ping')->willReturn(new Response(Response::RATE_LIMITED, 429, [], 60));
-        $this->helper->expects($this->never())->method('saveConfigValue');
+        $this->helper->expects($this->never())->method('saveConfigValueWithoutCacheFlush');
 
         $beacon->execute();
     }
@@ -172,7 +172,7 @@ class BeaconTest extends TestCase
         $beacon = $this->makeBeacon('ebz_live');
 
         $this->client->method('ping')->willReturn(new Response(Response::FAILED, 500));
-        $this->helper->expects($this->never())->method('saveConfigValue');
+        $this->helper->expects($this->never())->method('saveConfigValueWithoutCacheFlush');
 
         $beacon->execute();
     }
@@ -296,7 +296,7 @@ class BeaconTest extends TestCase
         $this->client->method('ping')->willReturn(new Response(Response::OK, 200, ['notifications' => 0]));
 
         $this->helper->expects($this->once())
-            ->method('saveConfigValue')
+            ->method('saveConfigValueWithoutCacheFlush')
             ->with($this->stringContains('last_delivery_uid'), '', self::STORE_ID, $this->anything());
 
         $beacon->execute();
@@ -310,7 +310,7 @@ class BeaconTest extends TestCase
         $beacon = $this->makeBeacon('ebz_live', false, 0, 'uid-1');
 
         $this->client->method('ping')->willReturn(new Response(Response::FAILED, 500));
-        $this->helper->expects($this->never())->method('saveConfigValue');
+        $this->helper->expects($this->never())->method('saveConfigValueWithoutCacheFlush');
 
         $beacon->execute();
     }
@@ -372,7 +372,7 @@ class BeaconTest extends TestCase
         $this->client->method('ping')->willReturn(new Response(Response::OK, 200, ['notifications' => 0]));
 
         $written = null;
-        $this->helper->method('saveConfigValue')->willReturnCallback(
+        $this->helper->method('saveConfigValueWithoutCacheFlush')->willReturnCallback(
             function ($path, $value) use (&$written) {
                 if (strpos($path, 'beacon_cron') !== false) {
                     $written = $value;
@@ -428,11 +428,12 @@ class BeaconTest extends TestCase
                 return '';
             }
         );
-        $helper->method('saveConfigValue')->willReturnCallback(
-            function ($path, $value) use (&$saved) {
-                $saved[$path] = $value;
-            }
-        );
+        $registrar = function ($path, $value) use (&$saved) {
+            $saved[$path] = $value;
+        };
+        // El beacon difiere sus escrituras; el NotificationDelivery real no.
+        $helper->method('saveConfigValueWithoutCacheFlush')->willReturnCallback($registrar);
+        $helper->method('saveConfigValue')->willReturnCallback($registrar);
 
         $client = $this->createMock(Client::class);
         $client->method('ping')->willReturn(
@@ -501,7 +502,7 @@ class BeaconTest extends TestCase
         $helper->method('getModuleVersion')->willReturn('103.4.81');
         $helper->method('getGmtDate')->willReturn('0');
         $helper->method('getConfigValue')->willReturn('');
-        $helper->method('saveConfigValue')->willReturnCallback(
+        $helper->method('saveConfigValueWithoutCacheFlush')->willReturnCallback(
             function ($path, $value) use (&$slotWrites) {
                 if (strpos($path, 'beacon_cron') !== false) {
                     $slotWrites[] = $value;
@@ -664,6 +665,79 @@ class BeaconTest extends TestCase
         $this->makeBeaconCapturingRegistration(null, $body)->execute();
 
         $this->assertSame('owner@example.com', $body['email']);
+    }
+
+
+    /**
+     * A run refreshes the config cache once, however many store views wrote.
+     *
+     * A flush is not cheap: the config module intercepts it to re-read the
+     * whole system config and then serialise and encrypt every scope under a
+     * lock, so its cost rises with the number of views. Flushing per write
+     * would make a token expiry across N views pay that N times over, which is
+     * quadratic work for one refresh.
+     */
+    public function testTheConfigCacheIsFlushedOncePerRunNotOncePerWrite(): void
+    {
+        $stores = [];
+        foreach ([1, 2, 3, 4, 5] as $id) {
+            $store = $this->createMock(Store::class);
+            $store->method('getId')->willReturn($id);
+            $store->method('getBaseUrl')->willReturn('https://view' . $id . '.example.com/');
+            $stores[] = $store;
+        }
+        $storeManager = $this->createMock(StoreManagerInterface::class);
+        $storeManager->method('getStores')->willReturn($stores);
+
+        $helper = $this->createMock(MailChimpHelper::class);
+        $helper->method('isMailChimpEnabled')->willReturn(true);
+        $helper->method('getApiKey')->willReturn('key-123');
+        $helper->method('getModuleVersion')->willReturn('103.4.81');
+        $helper->method('getGmtDate')->willReturn('0');
+        // Every view holds a token, and every ping is refused as expired — the
+        // wave this is about. Five views, five token clears, one refresh.
+        $helper->method('getConfigValue')->willReturnCallback(
+            function ($path) {
+                return strpos($path, 'edge_token') !== false ? 'ebz_tok' : '';
+            }
+        );
+        $helper->expects($this->exactly(5))->method('saveConfigValueWithoutCacheFlush');
+        $helper->expects($this->once())->method('flushConfigCache');
+
+        $client = $this->createMock(Client::class);
+        $client->method('ping')->willReturn(new Response(Response::UNAUTHORIZED, 401));
+
+        $signals = $this->createMock(LivenessSignals::class);
+        $signals->method('forStore')->willReturn(['last_error_type' => null]);
+        $metadata = $this->createMock(ProductMetadataInterface::class);
+        $metadata->method('getVersion')->willReturn('2.4.8');
+        $metadata->method('getEdition')->willReturn('Community');
+
+        (new Beacon(
+            $storeManager,
+            $helper,
+            $client,
+            $signals,
+            $this->createMock(NotificationDelivery::class),
+            $metadata,
+            $this->createMock(ScopeConfigInterface::class)
+        ))->execute();
+    }
+
+    /**
+     * A run that writes nothing — the steady state, every hour of every day —
+     * must not touch the cache at all.
+     */
+    public function testARunThatWritesNothingDoesNotFlush(): void
+    {
+        $beacon = $this->makeBeacon('ebz_tok');
+
+        $this->client->method('ping')->willReturn(
+            new Response(Response::OK, 200, ['ok' => true, 'notifications' => 0])
+        );
+        $this->helper->expects($this->never())->method('flushConfigCache');
+
+        $beacon->execute();
     }
 
 }

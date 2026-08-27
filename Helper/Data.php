@@ -539,6 +539,46 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     }
 
     /**
+     * Write a config value now and leave the cache flush to the caller.
+     *
+     * saveConfigValue() flushes on every call, and a flush is not cheap: the
+     * config module intercepts it to re-read the whole system config and then
+     * serialise and encrypt every scope in turn, under a lock. That cost grows
+     * with the number of store views, so a job that writes once per view pays
+     * it once per view — quadratic work for what should be one refresh.
+     *
+     * Callers that write several values in one pass should use this and then
+     * call flushConfigCache() once. Nothing they write is visible to a read
+     * until they do, so this is only safe where the caller does not read back
+     * what it has just written.
+     *
+     * @param  string      $path
+     * @param  string      $value
+     * @param  int|null    $storeId
+     * @param  string|null $scope
+     * @return void
+     */
+    public function saveConfigValueWithoutCacheFlush($path, $value, $storeId = null, $scope = null)
+    {
+        $this->saveConfigValueAtomic(
+            (string)$path,
+            (string)$value,
+            (string)($scope ?: \Magento\Store\Model\ScopeInterface::SCOPE_STORES),
+            (int)$storeId
+        );
+    }
+
+    /**
+     * Refresh the config cache once, after a run of deferred writes.
+     *
+     * @return void
+     */
+    public function flushConfigCache()
+    {
+        $this->_cacheTypeList->cleanType('config');
+    }
+
+    /**
      * Atomically upsert a single config row using INSERT … ON DUPLICATE KEY UPDATE.
      *
      * core_config_data has a UNIQUE KEY on (scope, scope_id, path), so a plain
