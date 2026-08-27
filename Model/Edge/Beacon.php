@@ -268,6 +268,31 @@ class Beacon
     }
 
     /**
+     * Whether the account owner's name and address may travel with a report.
+     *
+     * Only an explicit no counts as a refusal. An absent value means the
+     * question has never been answered on this installation — which is what an
+     * upgrade from a version that predates the switch looks like — and that is
+     * not the same as declining. config.xml supplies the default, so in
+     * practice the absent case only arises if configuration cannot be read at
+     * all, and failing open there matches how the API library reads the very
+     * same path.
+     *
+     * @param  int $storeId
+     * @return bool
+     */
+    private function contactAllowed($storeId)
+    {
+        $value = $this->helper->getConfigValue(MailChimpHelper::XML_TELEMETRY_SHARE_CONTACT, $storeId);
+
+        if ($value === null || $value === '') {
+            return true;
+        }
+
+        return (bool)$value;
+    }
+
+    /**
      * Delivery uids waiting to be acknowledged, queued by the last pull.
      *
      * @param  int $storeId
@@ -303,13 +328,18 @@ class Beacon
             return null;
         }
 
+        $fields = ['account_id', 'account_name', 'pricing_plan_type', 'total_subscribers'];
+
+        // Everything that names or reaches the person behind the account is
+        // sent only while the merchant allows it. The admin switch says it
+        // leaves the owner's name and address out of these reports, and a
+        // switch that is not obeyed is worse than no switch at all.
+        if ($this->contactAllowed($storeId)) {
+            $fields = array_merge($fields, ['email', 'first_name', 'last_name', 'username']);
+        }
+
         $block = [];
-        foreach (
-            [
-                'account_id', 'account_name', 'email', 'first_name',
-                'last_name', 'username', 'pricing_plan_type', 'total_subscribers',
-            ] as $field
-        ) {
+        foreach ($fields as $field) {
             if (isset($root[$field])) {
                 $block[$field] = $root[$field];
             }

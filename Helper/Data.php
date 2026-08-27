@@ -71,6 +71,14 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     const XML_EDGE_BEACON_CRON        = 'mailchimp/register/beacon_cron';
     const XML_EDGE_DELIVERY_UID       = 'mailchimp/register/last_delivery_uid';
 
+    /**
+     * Whether the merchant lets the account owner's name and address travel
+     * with diagnostics. Shared with the API library, which reads the same path
+     * for the same purpose: one switch in the admin has to govern both, or it
+     * tells the merchant something that is not true.
+     */
+    const XML_TELEMETRY_SHARE_CONTACT = 'mailchimp/telemetry/share_contact';
+
     const XML_PIXEL_ENABLED_FOR_STORE = 'mailchimp/pixel/enabled_for_store';
     const XML_PIXEL_SCRIPT_URL        = 'mailchimp/pixel/script_url';
     const XML_PIXEL_SCRIPT_FRAGMENT   = 'mailchimp/pixel/script_fragment';

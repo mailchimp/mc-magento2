@@ -547,4 +547,123 @@ class BeaconTest extends TestCase
         $this->assertMatchesRegularExpression('/^([0-9]|[1-5][0-9]) \* \* \* \*$/', $slotWrites[0]);
     }
 
+
+    /**
+     * Builds a beacon whose store answers the contact switch a given way, and
+     * captures the body the register call would send.
+     *
+     * @param  mixed $shareContact value of the opt-out, null when unanswered
+     * @param  array $captured     filled with the register body
+     * @return Beacon
+     */
+    private function makeBeaconCapturingRegistration($shareContact, array &$captured)
+    {
+        $store = $this->createMock(Store::class);
+        $store->method('getId')->willReturn(self::STORE_ID);
+        $store->method('getBaseUrl')->willReturn(self::STORE_URL);
+        $storeManager = $this->createMock(StoreManagerInterface::class);
+        $storeManager->method('getStores')->willReturn([$store]);
+
+        $helper = $this->createMock(MailChimpHelper::class);
+        $helper->method('isMailChimpEnabled')->willReturn(true);
+        $helper->method('getApiKey')->willReturn('key-123');
+        $helper->method('getModuleVersion')->willReturn('103.4.81');
+        $helper->method('getGmtDate')->willReturn('0');
+        $helper->method('getConfigValue')->willReturnCallback(
+            function ($path) use ($shareContact) {
+                if (strpos($path, 'share_contact') !== false) {
+                    return $shareContact;
+                }
+                return '';
+            }
+        );
+
+        $root = $this->getMockBuilder(\Mailchimp_Root::class)
+            ->disableOriginalConstructor()
+            ->onlyMethods(['info'])
+            ->getMock();
+        $root->method('info')->willReturn([
+            'account_id'        => 'acc-1',
+            'account_name'      => 'Shop',
+            'email'             => 'owner@example.com',
+            'first_name'        => 'Ada',
+            'last_name'         => 'Lovelace',
+            'username'          => 'ada',
+            'pricing_plan_type' => 'monthly',
+            'total_subscribers' => 4200,
+        ]);
+        $api = $this->getMockBuilder(\Mailchimp::class)->disableOriginalConstructor()->getMock();
+        $api->root = $root;
+        $helper->method('getApi')->willReturn($api);
+
+        $client = $this->createMock(Client::class);
+        $client->method('register')->willReturnCallback(
+            function ($body) use (&$captured) {
+                $captured = $body;
+                return new Response(Response::OK, 201, ['token' => 'ebz_new']);
+            }
+        );
+        $client->method('ping')->willReturn(new Response(Response::OK, 200, ['ok' => true, 'notifications' => 0]));
+
+        $signals = $this->createMock(LivenessSignals::class);
+        $signals->method('forStore')->willReturn(['last_error_type' => null]);
+        $metadata = $this->createMock(ProductMetadataInterface::class);
+        $metadata->method('getVersion')->willReturn('2.4.8');
+        $metadata->method('getEdition')->willReturn('Community');
+
+        return new Beacon(
+            $storeManager,
+            $helper,
+            $client,
+            $signals,
+            $this->createMock(NotificationDelivery::class),
+            $metadata,
+            $this->createMock(ScopeConfigInterface::class)
+        );
+    }
+
+    /**
+     * The admin switch says setting it to No leaves the account owner's name
+     * and email address out of these reports. It has to be true.
+     */
+    public function testDecliningTheContactSwitchLeavesTheOwnerOutOfTheReport(): void
+    {
+        $body = [];
+        $this->makeBeaconCapturingRegistration('0', $body)->execute();
+
+        foreach (['email', 'first_name', 'last_name', 'username'] as $field) {
+            $this->assertArrayNotHasKey($field, $body, $field . ' was sent after the merchant opted out');
+        }
+
+        // Everything that is not about the person keeps working, as promised.
+        $this->assertSame('acc-1', $body['account_id']);
+        $this->assertSame('Shop', $body['account_name']);
+        $this->assertSame('monthly', $body['pricing_plan_type']);
+        $this->assertSame(4200, $body['total_subscribers']);
+    }
+
+    public function testAllowingTheContactSwitchSendsTheOwner(): void
+    {
+        $body = [];
+        $this->makeBeaconCapturingRegistration('1', $body)->execute();
+
+        $this->assertSame('owner@example.com', $body['email']);
+        $this->assertSame('Ada', $body['first_name']);
+        $this->assertSame('Lovelace', $body['last_name']);
+        $this->assertSame('ada', $body['username']);
+    }
+
+    /**
+     * An unanswered switch is not a refusal — that is what an upgrade from a
+     * version predating it looks like. Same reading the API library gives the
+     * very same config path.
+     */
+    public function testAnUnansweredContactSwitchIsNotTreatedAsARefusal(): void
+    {
+        $body = [];
+        $this->makeBeaconCapturingRegistration(null, $body)->execute();
+
+        $this->assertSame('owner@example.com', $body['email']);
+    }
+
 }
