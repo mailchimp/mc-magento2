@@ -347,14 +347,29 @@ class Beacon
             return null;
         }
 
-        $fields = ['account_id', 'account_name', 'pricing_plan_type', 'total_subscribers'];
+        $fields = ['account_id', 'pricing_plan_type', 'total_subscribers'];
 
         // Everything that names or reaches the person behind the account is
         // sent only while the merchant allows it. The admin switch says it
         // leaves the owner's name and address out of these reports, and a
         // switch that is not obeyed is worse than no switch at all.
+        //
+        // account_name is in that list even though it is the account's name
+        // rather than a field about a person. Accounts opened by a business
+        // carry a company there, but accounts opened by an individual commonly
+        // carry their name — and a field that may or may not name someone has
+        // to be treated as though it does once they have asked us not to. The
+        // API library reads the same switch and withholds the same value, so
+        // gating it here is also what keeps one switch from meaning two things.
+        //
+        // account_id still travels, so reports remain countable and joinable
+        // with the account opted out. What is lost is a human-readable name on
+        // a dashboard, which is precisely what was declined.
         if ($this->contactAllowed($storeId)) {
-            $fields = array_merge($fields, ['email', 'first_name', 'last_name', 'username']);
+            $fields = array_merge(
+                $fields,
+                ['account_name', 'email', 'first_name', 'last_name', 'username']
+            );
         }
 
         $block = [];
