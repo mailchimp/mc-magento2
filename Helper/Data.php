@@ -73,9 +73,17 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
 
     /**
      * Whether the merchant lets the account owner's name and address travel
-     * with diagnostics. Shared with the API library, which reads the same path
-     * for the same purpose: one switch in the admin has to govern both, or it
-     * tells the merchant something that is not true.
+     * with diagnostics.
+     *
+     * The path is shared with the API library on purpose: one switch in the
+     * admin has to govern every lane that reports, or it describes only part
+     * of what leaves the server.
+     *
+     * The library reads it from the release that first gives it anything to
+     * report — the constant and the reporting arrived in the same commit
+     * there, so no version of it can send contact details while ignoring this.
+     * Until that release is the one installed, the switch governs this
+     * extension's reports and there is nothing else for it to govern.
      */
     const XML_TELEMETRY_SHARE_CONTACT = 'mailchimp/telemetry/share_contact';
 
