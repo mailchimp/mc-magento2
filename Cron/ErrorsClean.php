@@ -43,9 +43,14 @@ class ErrorsClean
      * a store erroring hard enough to reach this has a bigger problem than the
      * one this prevents.
      *
-     * Note it bounds rows, not bytes: `type` and `errors` are TEXT, so a store
-     * whose failures carry large bodies still holds more than a store whose do
-     * not.
+     * It bounds bytes too, but loosely, and the distinction is worth stating
+     * rather than glossing. `type` and `errors` are TEXT, whose own ceiling is
+     * 65,535 bytes, so a store view cannot exceed roughly 128 KB per row —
+     * about 640 MB here, against the ~110 bytes an error body actually
+     * measures in practice. What this removes is the unbounded case, which was
+     * the real problem; what it leaves is a constant that may or may not be
+     * comfortable. If it ever proves not to be, the answer is to cap the
+     * stored body rather than the row count.
      */
     const MAX_ROWS_PER_STORE = 5000;
 
