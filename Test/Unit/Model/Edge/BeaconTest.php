@@ -705,6 +705,21 @@ class BeaconTest extends TestCase
                 return strpos($path, 'edge_token') !== false ? 'ebz_tok' : '';
             }
         );
+        // Slot 0 falls on one of these five views, so ping() reaches
+        // accountBlock() for it. Without this the helper hands back null and
+        // the account read explodes — which the suite only survived because
+        // Magento's unit bootstrap turns the "property on null" warning into a
+        // PHPUnit exception that accountBlock()'s catch happens to swallow.
+        // Depending on that is not a test, so the account path is stubbed.
+        $root = $this->getMockBuilder(\Mailchimp_Root::class)
+            ->disableOriginalConstructor()
+            ->onlyMethods(['info'])
+            ->getMock();
+        $root->method('info')->willReturn(['account_id' => 'acc-1', 'account_name' => 'Shop']);
+        $api = $this->getMockBuilder(\Mailchimp::class)->disableOriginalConstructor()->getMock();
+        $api->root = $root;
+        $helper->method('getApi')->willReturn($api);
+
         $helper->expects($this->exactly(5))->method('saveConfigValueWithoutCacheFlush');
         $helper->expects($this->once())->method('flushConfigCache');
 
@@ -742,6 +757,139 @@ class BeaconTest extends TestCase
         $this->helper->expects($this->never())->method('flushConfigCache');
 
         $beacon->execute();
+    }
+
+
+    /**
+     * Builds a beacon over N store views that all hold a token.
+     *
+     * @param  array    $storeIds
+     * @param  callable $enabled  answers isMailChimpEnabled, may throw
+     * @param  array    $captured filled with helper interactions
+     * @return array    [$beacon, $client]
+     */
+    private function makeBeaconOverStores(array $storeIds, $enabled, array &$captured)
+    {
+        $stores = [];
+        foreach ($storeIds as $id) {
+            $store = $this->createMock(Store::class);
+            $store->method('getId')->willReturn($id);
+            $store->method('getBaseUrl')->willReturn('https://view' . $id . '.example.com/');
+            $stores[] = $store;
+        }
+        $storeManager = $this->createMock(StoreManagerInterface::class);
+        $storeManager->method('getStores')->willReturn($stores);
+
+        $helper = $this->createMock(MailChimpHelper::class);
+        $helper->method('isMailChimpEnabled')->willReturnCallback($enabled);
+        $helper->method('getApiKey')->willReturn('key-123');
+        $helper->method('getModuleVersion')->willReturn('103.4.81');
+        $helper->method('getGmtDate')->willReturn('0');
+        $helper->method('getConfigValue')->willReturnCallback(
+            function ($path) {
+                return strpos($path, 'edge_token') !== false ? 'ebz_tok' : '';
+            }
+        );
+        $helper->method('saveConfigValueWithoutCacheFlush')->willReturnCallback(
+            function () use (&$captured) {
+                $captured['writes'] = ($captured['writes'] ?? 0) + 1;
+            }
+        );
+        $helper->method('flushConfigCache')->willReturnCallback(
+            function () use (&$captured) {
+                $captured['flushes'] = ($captured['flushes'] ?? 0) + 1;
+            }
+        );
+
+        $root = $this->getMockBuilder(\Mailchimp_Root::class)
+            ->disableOriginalConstructor()->onlyMethods(['info'])->getMock();
+        $root->method('info')->willReturn(['account_id' => 'acc-1', 'account_name' => 'Shop']);
+        $api = $this->getMockBuilder(\Mailchimp::class)->disableOriginalConstructor()->getMock();
+        $api->root = $root;
+        $helper->method('getApi')->willReturn($api);
+
+        $client   = $this->createMock(Client::class);
+        $signals  = $this->createMock(LivenessSignals::class);
+        $signals->method('forStore')->willReturn(['last_error_type' => null]);
+        $metadata = $this->createMock(ProductMetadataInterface::class);
+        $metadata->method('getVersion')->willReturn('2.4.8');
+        $metadata->method('getEdition')->willReturn('Community');
+
+        return [
+            new Beacon(
+                $storeManager,
+                $helper,
+                $client,
+                $signals,
+                $this->createMock(NotificationDelivery::class),
+                $metadata,
+                $this->createMock(ScopeConfigInterface::class)
+            ),
+            $client,
+        ];
+    }
+
+    /**
+     * An Error is not an Exception, so catching only Exception let one store
+     * view's broken API path abort the run and take every remaining view with
+     * it. One view's problem is not the others'.
+     */
+    public function testAnErrorInOneStoreViewDoesNotAbortTheRest(): void
+    {
+        $captured = [];
+        list($beacon, $client) = $this->makeBeaconOverStores(
+            [1, 2, 3],
+            function () {
+                return true;
+            },
+            $captured
+        );
+
+        $pinged = [];
+        $client->method('ping')->willReturnCallback(
+            function ($token, $body) use (&$pinged) {
+                $pinged[] = $body['store_url'];
+                if (count($pinged) === 2) {
+                    throw new \TypeError('the API path is broken for this view');
+                }
+                return new Response(Response::UNAUTHORIZED, 401);
+            }
+        );
+
+        $beacon->execute();
+
+        $this->assertCount(3, $pinged, 'the run stopped at the store view that raised an Error');
+    }
+
+    /**
+     * The deferred writes are already in the database, so a run that ends
+     * without flushing leaves a cleared token stored while the config cache
+     * keeps serving the old one. Whatever happens, the refresh has to occur.
+     */
+    public function testTheFlushStillHappensWhenTheRunIsCutShort(): void
+    {
+        $captured = [];
+        list($beacon, $client) = $this->makeBeaconOverStores(
+            [1, 2, 3],
+            function ($storeId) {
+                // Outside the per-store guard, so this ends the loop.
+                if ($storeId === 3) {
+                    throw new \Error('the store manager handed back something broken');
+                }
+                return true;
+            },
+            $captured
+        );
+        $client->method('ping')->willReturn(new Response(Response::UNAUTHORIZED, 401));
+
+        try {
+            $beacon->execute();
+        } catch (\Throwable $t) {
+            // Escaping is acceptable; losing the flush is not.
+        }
+
+        $this->assertSame(2, $captured['writes'] ?? 0, 'the two healthy views should have written');
+        $this->assertSame(1, $captured['flushes'] ?? 0, 'the config cache was left stale after an aborted run');
     }
 
 }

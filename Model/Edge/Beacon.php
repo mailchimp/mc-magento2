@@ -113,29 +113,43 @@ class Beacon
      */
     public function execute()
     {
-        foreach ($this->storeManager->getStores() as $store) {
-            $storeId = (int)$store->getId();
+        try {
+            foreach ($this->storeManager->getStores() as $store) {
+                $storeId = (int)$store->getId();
 
-            if (!$this->helper->isMailChimpEnabled($storeId) || !$this->helper->getApiKey($storeId)) {
-                continue;
+                if (!$this->helper->isMailChimpEnabled($storeId) || !$this->helper->getApiKey($storeId)) {
+                    continue;
+                }
+
+                try {
+                    $this->processStore($storeId, (string)$store->getBaseUrl());
+                } catch (\Exception $e) {
+                    $this->helper->log('Edge beacon failed for store ' . $storeId . ': ' . $e->getMessage());
+                } catch (\Throwable $t) {
+                    // On PHP 7+ an Error is not an Exception, so catching only
+                    // Exception here let a TypeError out of the API path abort
+                    // the run and take every remaining store view with it.
+                    // One store view's problem is not the other views'.
+                    $this->helper->log('Edge beacon failed for store ' . $storeId . ': ' . $t->getMessage());
+                }
             }
-
-            try {
-                $this->processStore($storeId, (string)$store->getBaseUrl());
-            } catch (\Exception $e) {
-                $this->helper->log('Edge beacon failed for store ' . $storeId . ': ' . $e->getMessage());
+        } finally {
+            // One refresh for the whole run rather than one per value written.
+            // A flush re-reads the entire config and then serialises and
+            // encrypts every scope under a lock, so its cost grows with the
+            // number of store views; flushing per write would make a token
+            // expiry across N views pay that N times over. Nothing above reads
+            // back what it wrote, so deferring to here changes no behaviour.
+            //
+            // In `finally` because the deferred writes are already in the
+            // database. Anything that leaves this method without flushing —
+            // and something reaching here uncaught is exactly that case —
+            // would leave a cleared token stored while the config cache keeps
+            // serving the old one, until something unrelated happens to flush.
+            if ($this->configDirty) {
+                $this->helper->flushConfigCache();
+                $this->configDirty = false;
             }
-        }
-
-        // One refresh for the whole run rather than one per value written.
-        // A flush re-reads the entire config and then serialises and encrypts
-        // every scope under a lock, so its cost grows with the number of store
-        // views; flushing per write would make a token expiry across N views
-        // pay that N times over. Nothing above reads back what it wrote, so
-        // deferring to here changes no behaviour.
-        if ($this->configDirty) {
-            $this->helper->flushConfigCache();
-            $this->configDirty = false;
         }
     }
 
@@ -341,6 +355,11 @@ class Beacon
         } catch (\Exception $e) {
             $this->helper->log('Edge beacon could not read the Mailchimp account: ' . $e->getMessage());
             return null;
+        } catch (\Throwable $t) {
+            // Reading the account must not be able to end the run: an Error
+            // here is a broken API path, not a reason to stop reporting.
+            $this->helper->log('Edge beacon could not read the Mailchimp account: ' . $t->getMessage());
+            return null;
         }
 
         if (!is_array($root)) {
@@ -467,6 +486,8 @@ class Beacon
         try {
             $moduleVersion = (string)$this->helper->getModuleVersion();
         } catch (\Exception $e) {
+            $moduleVersion = '';
+        } catch (\Throwable $t) {
             $moduleVersion = '';
         }
 
