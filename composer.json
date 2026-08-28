@@ -1,12 +1,8 @@
 {
   "name": "mailchimp/mc-magento2",
   "autoload": {
-    "psr-4": {
-      "Ebizmarts\\MailChimp\\": ""
-    },
-    "files": [
-      "registration.php"
-    ]
+    "psr-4": {"Ebizmarts\\MailChimp\\":""},
+    "files": ["registration.php"]
   },
   "description": "Connect MailChimp with Magento",
   "type": "magento2-module",
@@ -27,12 +23,9 @@
     "wiki": "https://connect.mailchimp.com/integrations/magento",
     "forum": "http://ebizmarts.com/forums/view/6"
   },
-  "require": {
+  "require" : {
     "magento/framework": "103.0.*",
     "ebizmarts/mailchimp-lib": ">=3.0.44",
     "ext-json": "*"
-  },
-  "require-dev": {
-    "phpunit/phpunit": "^10.5"
   }
 }
