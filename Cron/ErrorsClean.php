@@ -30,6 +30,26 @@ class ErrorsClean
     const LIMIT = 1000;
 
     /**
+     * Rows kept per store view, whatever the merchant asked for.
+     *
+     * The age-based clean below answers "how long do I want errors kept?", and
+     * keeping them forever is a legitimate answer — it is also the answer every
+     * install carries by default, since the field has no default and saving the
+     * configuration section stores a 0. So on its own it bounds nothing.
+     *
+     * This bounds it regardless, without overriding anyone: a merchant who
+     * wants errors kept still gets them kept, up to here. The number is
+     * generous on purpose — the table exists to diagnose recent failures, and
+     * a store erroring hard enough to reach this has a bigger problem than the
+     * one this prevents.
+     *
+     * Note it bounds rows, not bytes: `type` and `errors` are TEXT, so a store
+     * whose failures carry large bodies still holds more than a store whose do
+     * not.
+     */
+    const MAX_ROWS_PER_STORE = 5000;
+
+    /**
      * @param \Ebizmarts\MailChimp\Helper\Data $helper
      * @param \Ebizmarts\MailChimp\Model\MailChimpErrors $chimpErrors
      * @param \Magento\Store\Model\StoreManager $storeManager
@@ -56,6 +76,26 @@ class ErrorsClean
                 } catch (\Exception $e) {
                     $this->helper->log($e->getMessage());
                 }
+            }
+
+            // Deliberately outside the check above. The age-based clean is a
+            // preference and can legitimately be switched off; the ceiling is
+            // not, and a store that has switched the preference off is exactly
+            // the store that needs it.
+            try {
+                $removed = $this->chimpErrors->deleteOverflowByStore(
+                    $storeId,
+                    self::MAX_ROWS_PER_STORE,
+                    self::LIMIT
+                );
+                if ($removed > 0) {
+                    $this->helper->log(
+                        "Store [$storeId] held more than " . self::MAX_ROWS_PER_STORE
+                        . " errors, removed $removed of the oldest"
+                    );
+                }
+            } catch (\Exception $e) {
+                $this->helper->log($e->getMessage());
             }
         }
     }
