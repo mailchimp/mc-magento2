@@ -61,6 +61,32 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     const XML_REGISTER_URL            = 'mailchimp/statistics/register_url';
     const XML_STATISTICS_TOKEN        = 'mailchimp/register/token';
 
+    /**
+     * Status reporting beacon. The token is per store view; the cron expression is
+     * per install; the delivery uid is the last notification actually written
+     * to the admin inbox. Deliberately NOT mailchimp/register/token, which
+     * holds a token from the previous relay and is meaningless to this service.
+     */
+    const XML_EDGE_TOKEN              = 'mailchimp/register/edge_token';
+    const XML_EDGE_BEACON_CRON        = 'mailchimp/register/beacon_cron';
+    const XML_EDGE_DELIVERY_UID       = 'mailchimp/register/last_delivery_uid';
+
+    /**
+     * Whether the merchant lets the account owner's name and address travel
+     * with diagnostics.
+     *
+     * The path is shared with the API library on purpose: one switch in the
+     * admin has to govern every lane that reports, or it describes only part
+     * of what leaves the server.
+     *
+     * The library reads it from the release that first gives it anything to
+     * report — the constant and the reporting arrived in the same commit
+     * there, so no version of it can send contact details while ignoring this.
+     * Until that release is the one installed, the switch governs this
+     * extension's reports and there is nothing else for it to govern.
+     */
+    const XML_TELEMETRY_SHARE_CONTACT = 'mailchimp/telemetry/share_contact';
+
     const XML_PIXEL_ENABLED_FOR_STORE = 'mailchimp/pixel/enabled_for_store';
     const XML_PIXEL_SCRIPT_URL        = 'mailchimp/pixel/script_url';
     const XML_PIXEL_SCRIPT_FRAGMENT   = 'mailchimp/pixel/script_fragment';
@@ -509,6 +535,46 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         } else {
             $this->_config->saveConfig($path, $value, \Magento\Store\Model\ScopeInterface::SCOPE_STORES, $storeId);
         }
+        $this->_cacheTypeList->cleanType('config');
+    }
+
+    /**
+     * Write a config value now and leave the cache flush to the caller.
+     *
+     * saveConfigValue() flushes on every call, and a flush is not cheap: the
+     * config module intercepts it to re-read the whole system config and then
+     * serialise and encrypt every scope in turn, under a lock. That cost grows
+     * with the number of store views, so a job that writes once per view pays
+     * it once per view — quadratic work for what should be one refresh.
+     *
+     * Callers that write several values in one pass should use this and then
+     * call flushConfigCache() once. Nothing they write is visible to a read
+     * until they do, so this is only safe where the caller does not read back
+     * what it has just written.
+     *
+     * @param  string      $path
+     * @param  string      $value
+     * @param  int|null    $storeId
+     * @param  string|null $scope
+     * @return void
+     */
+    public function saveConfigValueWithoutCacheFlush($path, $value, $storeId = null, $scope = null)
+    {
+        $this->saveConfigValueAtomic(
+            (string)$path,
+            (string)$value,
+            (string)($scope ?: \Magento\Store\Model\ScopeInterface::SCOPE_STORES),
+            (int)$storeId
+        );
+    }
+
+    /**
+     * Refresh the config cache once, after a run of deferred writes.
+     *
+     * @return void
+     */
+    public function flushConfigCache()
+    {
         $this->_cacheTypeList->cleanType('config');
     }
 
