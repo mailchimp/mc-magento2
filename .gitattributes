@@ -7,3 +7,5 @@
 
 /Test               export-ignore
 /.gitattributes     export-ignore
+/phpunit.xml.dist   export-ignore
+/.gitignore         export-ignore

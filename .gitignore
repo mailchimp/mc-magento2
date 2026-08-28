@@ -1,0 +1,5 @@
+# Written while the unit suite runs: generated factories and PHPUnit's cache.
+/Test/tmp/
+/.phpunit.cache/
+/vendor/
+/composer.lock
