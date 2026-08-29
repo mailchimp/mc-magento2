@@ -74,8 +74,9 @@ class ErrorsClean
      * keeps every statement small and still converges within a single run.
      *
      * Larger than the age-based limit because each pass also runs the offset
-     * query that finds the cut-off, and on a table far above the ceiling that
-     * query is the expensive half. Fewer, bigger passes means fewer of them.
+     * query that finds the cut-off. That query is served by the
+     * (store_id, id) index, but it is still a query per pass, so fewer and
+     * bigger passes means fewer of them.
      *
      * Up to a million rows per store view per run — measured at about 16
      * seconds of work for that, with no single statement holding locks longer

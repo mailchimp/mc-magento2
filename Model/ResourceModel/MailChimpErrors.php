@@ -66,6 +66,11 @@ class MailChimpErrors extends AbstractDb
 
         // The id of the first row past the ceiling. Absent means the store is
         // under it and there is nothing to do.
+        //
+        // Served by MAILCHIMP_ERRORS_STORE_ID_ID. Without it the existing
+        // index cannot order by id within a store, so the optimiser walks the
+        // primary key backwards through every other store view's rows to reach
+        // this one's.
         $oldest = $connection->fetchOne(
             $connection->select()
                 ->from($table, 'id')
