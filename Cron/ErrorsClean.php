@@ -38,21 +38,53 @@ class ErrorsClean
      * configuration section stores a 0. So on its own it bounds nothing.
      *
      * This bounds it regardless, without overriding anyone: a merchant who
-     * wants errors kept still gets them kept, up to here. The number is
+     * wants errors kept still gets them kept, up to here.
+     *
+     * It bounds the store views the extension can see. `store_id` carries no
+     * foreign key and getStores() returns neither deleted views nor the admin
+     * store, so rows left behind by a removed store view are visited by neither
+     * cleaner. That was already true of the age-based clean; it is written down
+     * here because this is the change that claims the table is bounded, and for
+     * those rows it is not. The number is
      * generous on purpose — the table exists to diagnose recent failures, and
      * a store erroring hard enough to reach this has a bigger problem than the
      * one this prevents.
      *
      * It bounds bytes too, but loosely, and the distinction is worth stating
      * rather than glossing. `type` and `errors` are TEXT, whose own ceiling is
-     * 65,535 bytes, so a store view cannot exceed roughly 128 KB per row —
-     * about 640 MB here, against the ~110 bytes an error body actually
-     * measures in practice. What this removes is the unbounded case, which was
+     * 65,535 bytes, so a row cannot exceed roughly 128 KB and one store view
+     * about 640 MB — per view, so a fifty-view install has a 250,000 row
+     * ceiling, not 5,000. Against the ~110 bytes an error body measures in
+     * practice. What this removes is the unbounded case, which was
      * the real problem; what it leaves is a constant that may or may not be
      * comfortable. If it ever proves not to be, the answer is to cap the
      * stored body rather than the row count.
      */
     const MAX_ROWS_PER_STORE = 5000;
+
+    /**
+     * Rows the ceiling deletes per statement, and how many statements it may
+     * issue in one run per store view.
+     *
+     * Its own limit rather than the age-based clean's. Each statement stays
+     * bounded so it holds locks for milliseconds rather than for as long as the
+     * table is large — the table this exists for is exactly the one where an
+     * unbounded delete would be worst, and its cost there depends on row sizes,
+     * replication and purge, none of which are knowable from here. Iterating
+     * keeps every statement small and still converges within a single run.
+     *
+     * Larger than the age-based limit because each pass also runs the offset
+     * query that finds the cut-off, and on a table far above the ceiling that
+     * query is the expensive half. Fewer, bigger passes means fewer of them.
+     *
+     * Up to a million rows per store view per run — measured at about 16
+     * seconds of work for that, with no single statement holding locks longer
+     * than a third of a second. A table that has been growing for years is back
+     * under the ceiling within a tick or two, not after weeks of hourly
+     * nibbling. A store already under the ceiling costs one query and stops.
+     */
+    const OVERFLOW_LIMIT = 10000;
+    const MAX_PASSES     = 100;
 
     /**
      * @param \Ebizmarts\MailChimp\Helper\Data $helper
@@ -88,11 +120,18 @@ class ErrorsClean
             // not, and a store that has switched the preference off is exactly
             // the store that needs it.
             try {
-                $removed = $this->chimpErrors->deleteOverflowByStore(
-                    $storeId,
-                    self::MAX_ROWS_PER_STORE,
-                    self::LIMIT
-                );
+                $removed = 0;
+                for ($pass = 0; $pass < self::MAX_PASSES; $pass++) {
+                    $deleted = $this->chimpErrors->deleteOverflowByStore(
+                        $storeId,
+                        self::MAX_ROWS_PER_STORE,
+                        self::OVERFLOW_LIMIT
+                    );
+                    if ($deleted < 1) {
+                        break;
+                    }
+                    $removed += $deleted;
+                }
                 if ($removed > 0) {
                     $this->helper->log(
                         "Store [$storeId] held more than " . self::MAX_ROWS_PER_STORE

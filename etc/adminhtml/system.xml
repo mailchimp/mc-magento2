@@ -282,7 +282,7 @@
                 <field id="clean_errors_months" translate="label comment" type="select" sortOrder="175" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Months to clear the error table</label>
                     <source_model>Ebizmarts\MailChimp\Model\Config\Source\Months</source_model>
-                    <comment><![CDATA[How many month before clean the error from the error table automatically and not retry]]></comment>
+                    <comment><![CDATA[How many month before clean the error from the error table automatically and not retry. Whatever you choose here, the oldest errors of a store view are removed once it holds more than 5,000 of them, so the table cannot grow without limit. Errors are what the Mailchimp columns on the product, customer and order grids show, so removing them removes those explanations.]]></comment>
                     <depends>
                         <field id="*/*/active">1</field>
                     </depends>

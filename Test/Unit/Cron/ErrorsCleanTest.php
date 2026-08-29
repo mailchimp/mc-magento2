@@ -50,7 +50,7 @@ class ErrorsCleanTest extends TestCase
         $errors->expects($this->never())->method('deleteByStorePeriod');
         $errors->expects($this->once())
             ->method('deleteOverflowByStore')
-            ->with(1, ErrorsClean::MAX_ROWS_PER_STORE, ErrorsClean::LIMIT)
+            ->with(1, ErrorsClean::MAX_ROWS_PER_STORE, ErrorsClean::OVERFLOW_LIMIT)
             ->willReturn(0);
 
         $cron->execute();
@@ -104,4 +104,42 @@ class ErrorsCleanTest extends TestCase
 
         $this->assertSame([1, 2, 3], $seen);
     }
+
+    /**
+     * A run keeps going until the store is under the ceiling. Deleting a fixed
+     * slice per run and stopping would leave a table that has been growing for
+     * years to come down over weeks, which is the case the ceiling exists for.
+     */
+    public function testTheCeilingKeepsGoingUntilThereIsNothingLeftToDelete(): void
+    {
+        list($cron, $errors) = $this->make(0);
+
+        $remaining = 3;
+        $errors->expects($this->exactly(4))
+            ->method('deleteOverflowByStore')
+            ->willReturnCallback(
+                function () use (&$remaining) {
+                    return $remaining-- > 0 ? ErrorsClean::OVERFLOW_LIMIT : 0;
+                }
+            );
+
+        $cron->execute();
+    }
+
+    /**
+     * But one run is still bounded. Without a cap a store far enough past the
+     * ceiling would hold the cron for as long as it took, and the whole reason
+     * the delete is chunked is to keep any single run predictable.
+     */
+    public function testOneRunIsBoundedEvenIfTheStoreNeverComesDown(): void
+    {
+        list($cron, $errors) = $this->make(0);
+
+        $errors->expects($this->exactly(ErrorsClean::MAX_PASSES))
+            ->method('deleteOverflowByStore')
+            ->willReturn(ErrorsClean::OVERFLOW_LIMIT);
+
+        $cron->execute();
+    }
+
 }
