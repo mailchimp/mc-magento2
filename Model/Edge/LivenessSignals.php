@@ -127,11 +127,12 @@ class LivenessSignals
      * counts. That index continues into regtype and original_id, so it cannot
      * serve `ORDER BY id DESC`, and the optimiser walks the primary key
      * backwards through every other store view's rows instead: measured at
-     * 52 ms on MariaDB 10.6 against a bounded 250,000 row table. And nothing
-     * bounded the table at all until the row ceiling was added.
+     * 52 ms on MariaDB 10.6 against a 250,000 row table.
      *
-     * It is cheap given `MAILCHIMP_ERRORS_STORE_ID_ID`, which that same change
-     * adds. Before it, this runs hourly per store view and is not.
+     * What makes it cheap is `MAILCHIMP_ERRORS_STORE_ID_ID`, which serves the
+     * sort directly — 0.04 ms on the same table — and the row ceiling that
+     * bounds how large the table gets. Both are in place. This runs hourly per
+     * store view, so neither is optional.
      *
      * @param  int $storeId
      * @return array|null
