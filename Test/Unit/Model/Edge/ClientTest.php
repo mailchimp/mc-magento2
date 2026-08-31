@@ -139,5 +139,4 @@ class ClientTest extends TestCase
         $this->assertFalse($response->isUnauthorized(), 'a broken client must not look like a dead token');
         $this->assertFalse($response->isRateLimited());
     }
-
 }
