@@ -116,6 +116,12 @@ class NotificationDelivery
                 // here and let the unconfirmed uid tell the service the truth.
                 $this->helper->log('Edge notification could not be delivered: ' . $e->getMessage());
                 break;
+            } catch (\Throwable $t) {
+                // Same rule for an Error. Without this it escapes the loop, and
+                // the uids already delivered in this batch are lost with it
+                // rather than being queued for acknowledgement.
+                $this->helper->log('Edge notification could not be delivered: ' . $t->getMessage());
+                break;
             }
 
             // Only what actually reached the inbox may be acknowledged. A

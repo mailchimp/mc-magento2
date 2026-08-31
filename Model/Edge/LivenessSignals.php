@@ -111,6 +111,12 @@ class LivenessSignals
         } catch (\Exception $e) {
             $this->helper->log('Edge beacon could not read the sync delta: ' . $e->getMessage());
             return null;
+        } catch (\Throwable $t) {
+            // These signals are optional; the report is not. An Error escaping
+            // here would cost the whole store view its beacon rather than one
+            // field of it.
+            $this->helper->log('Edge beacon could not read the sync delta: ' . $t->getMessage());
+            return null;
         }
 
         return $value ?: null;
@@ -139,6 +145,12 @@ class LivenessSignals
             $row = $connection->fetchRow($select);
         } catch (\Exception $e) {
             $this->helper->log('Edge beacon could not read the last error: ' . $e->getMessage());
+            return null;
+        } catch (\Throwable $t) {
+            // These signals are optional; the report is not. An Error escaping
+            // here would cost the whole store view its beacon rather than one
+            // field of it.
+            $this->helper->log('Edge beacon could not read the last error: ' . $t->getMessage());
             return null;
         }
 

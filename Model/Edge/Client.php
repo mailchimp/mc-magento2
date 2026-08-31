@@ -121,6 +121,13 @@ class Client
         } catch (\Exception $e) {
             $this->helper->log('Edge beacon transport failure on ' . $path . ': ' . $e->getMessage());
             return new Response(Response::FAILED);
+        } catch (\Throwable $t) {
+            // The point of this catch is to turn a transport problem into a
+            // failed response, not to end the run. An Error escaping it would
+            // skip the whole store view instead, and lose the log line saying
+            // why.
+            $this->helper->log('Edge beacon transport failure on ' . $path . ': ' . $t->getMessage());
+            return new Response(Response::FAILED);
         }
 
         $status = (int)$curl->getStatus();
