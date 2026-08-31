@@ -158,9 +158,10 @@ class ErrorsCleanTest extends TestCase
         $storeManager = $this->createMock(StoreManager::class);
         $storeManager->method('getStores')->willReturn([1 => new \stdClass()]);
 
-        // A clock that jumps a third of the budget per reading, so the third
-        // pass is past the deadline. Anything counting passes alone runs 100.
-        $step = ErrorsClean::MAX_RUNTIME_SECONDS / 3;
+        // A clock that jumps a quarter of the budget per reading. One reading
+        // sets the deadline, one guards the store loop, then the third pass
+        // lands on it. Anything counting passes alone would run 100.
+        $step = ErrorsClean::MAX_RUNTIME_SECONDS / 4;
         $cron = new class ($helper, $errors, $storeManager, $step) extends ErrorsClean {
             private $tick = 0;
             private $step;
@@ -182,6 +183,71 @@ class ErrorsCleanTest extends TestCase
             ->willReturn(ErrorsClean::OVERFLOW_LIMIT);
 
         $cron->execute();
+    }
+
+
+    /**
+     * The budget has to cover the whole job, not the ceiling alone. The
+     * age-based delete runs first for each store view and is the more
+     * expensive half — it filters on a function of the column, so it cannot
+     * seek and walks the partition even when it deletes nothing. A sync marked
+     * missed does not care which half spent the window.
+     */
+    public function testTheBudgetCoversTheAgeBasedCleanToo(): void
+    {
+        $helper = $this->createMock(MailChimpHelper::class);
+        $helper->method('getConfigValue')->willReturn(3);
+        $errors = $this->createMock(MailChimpErrors::class);
+        $storeManager = $this->createMock(StoreManager::class);
+        $storeManager->method('getStores')->willReturn(array_fill_keys([1, 2, 3, 4, 5], new \stdClass()));
+
+        // Already past the deadline on the very first reading.
+        $cron = new class ($helper, $errors, $storeManager) extends ErrorsClean {
+            protected function now()
+            {
+                static $tick = 0;
+                return $tick++ === 0 ? 0 : ErrorsClean::MAX_RUNTIME_SECONDS + 1;
+            }
+        };
+
+        $errors->expects($this->never())->method('deleteByStorePeriod');
+        $errors->expects($this->never())->method('deleteOverflowByStore');
+
+        $cron->execute();
+    }
+
+    /**
+     * And it stops the loop rather than spinning through the remaining views
+     * to do nothing with each of them.
+     */
+    public function testAnExhaustedBudgetStopsTheLoopInsteadOfSkippingEachView(): void
+    {
+        $helper = $this->createMock(MailChimpHelper::class);
+        $reads = 0;
+        $helper->method('getConfigValue')->willReturnCallback(
+            function () use (&$reads) {
+                $reads++;
+                return 0;
+            }
+        );
+        $errors = $this->createMock(MailChimpErrors::class);
+        $errors->method('deleteOverflowByStore')->willReturn(0);
+        $storeManager = $this->createMock(StoreManager::class);
+        $storeManager->method('getStores')->willReturn(array_fill_keys(range(1, 20), new \stdClass()));
+
+        // Budget runs out after the second view.
+        $cron = new class ($helper, $errors, $storeManager) extends ErrorsClean {
+            private $tick = 0;
+
+            protected function now()
+            {
+                return $this->tick++ < 2 ? 0 : ErrorsClean::MAX_RUNTIME_SECONDS + 1;
+            }
+        };
+
+        $cron->execute();
+
+        $this->assertLessThan(20, $reads, 'the loop kept visiting store views after the budget ran out');
     }
 
 }

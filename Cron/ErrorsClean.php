@@ -89,7 +89,7 @@ class ErrorsClean
     const MAX_PASSES     = 100;
 
     /**
-     * Seconds the ceiling may spend across every store view in one run.
+     * Seconds the whole job may spend across every store view in one run.
      *
      * A pass cap bounds work, not time, and how long a pass takes depends on
      * row sizes, replication and purge — the things this cannot know. That
@@ -99,9 +99,21 @@ class ErrorsClean
      * jobs are in that group and run every five minutes, so a long drain does
      * not delay them, it skips them.
      *
-     * Well inside the two-minute window, so the ceiling can never be the reason
-     * a sync did not run. A table far past the ceiling then comes down over two
+     * Well inside the two-minute window, so this job can never be the reason a
+     * sync did not run. A table far past the ceiling then comes down over two
      * or three ticks instead of one, which is the cheaper mistake.
+     *
+     * It covers the age-based delete as well as the ceiling, deliberately. That
+     * one filters on `date_add(added_at, ...)`, a function on the column, so it
+     * cannot seek: on a store whose errors are all recent it walks the whole
+     * partition to delete nothing. It has always done that, and it is the more
+     * expensive half here. The sync it would starve does not care which half
+     * spent the window.
+     *
+     * Spent in getStores() order, so while a drain is running the earlier views
+     * are favoured and a later one can get nothing on a given tick. It still
+     * converges, because the drain is finite and the next tick starts where
+     * this one stopped.
      */
     const MAX_RUNTIME_SECONDS = 30;
 
@@ -136,6 +148,16 @@ class ErrorsClean
 
         foreach ($this->storeManager->getStores() as $storeId => $val)
         {
+            if ($this->now() >= $deadline) {
+                // At the top, so the budget covers the whole job rather than
+                // only the ceiling below it — the age-based delete is the more
+                // expensive half on the tables this exists for, and a job that
+                // overruns is one whose siblings get marked missed, whichever
+                // half spent the window. Breaking rather than continuing also
+                // stops walking the remaining views to do nothing.
+                break;
+            }
+
             $period = $this->helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_CLEAN_ERROR_MONTHS, $storeId);
             if ($period > 0) {
                 try {
