@@ -25,6 +25,8 @@ class MailChimpErrors extends \Magento\Framework\Model\AbstractModel
         return $this;
     }
     /**
+     * Drop the oldest errors of a store once it holds more than $keep of them.
+     *
      * @param  int $storeId
      * @param  int $keep
      * @param  int $limit

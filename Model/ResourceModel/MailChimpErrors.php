@@ -45,22 +45,18 @@ class MailChimpErrors extends AbstractDb
      * the table does not grow without bound. Both can hold at once, which is
      * why neither has to guess what the other meant.
      *
-     * Bounded per run by $limit, like the age-based delete, so a table that is
-     * already far past the ceiling comes down over several runs instead of in
-     * one statement.
+     * Deletes at most $limit rows per call. The caller repeats until the store
+     * is under the ceiling or its time budget is spent, so each statement holds
+     * its locks briefly and no single one grows with the size of the table.
      *
      * @param  \Ebizmarts\MailChimp\Model\MailChimpErrors $errors
-     * @param  int $storeId
-     * @param  int $keep  newest rows to leave in place
-     * @param  int $limit most rows to delete in one run
+     * @param  int                                        $storeId
+     * @param  int                                        $keep    newest rows to leave in place
+     * @param  int                                        $limit   most rows to delete in one run
      * @return int rows deleted
      */
-    public function deleteOverflowByStore(
-        \Ebizmarts\MailChimp\Model\MailChimpErrors $errors,
-        $storeId,
-        $keep,
-        $limit
-    ) {
+    public function deleteOverflowByStore(\Ebizmarts\MailChimp\Model\MailChimpErrors $errors, $storeId, $keep, $limit)
+    {
         $connection = $this->getConnection();
         $table      = $this->getTable('mailchimp_errors');
 

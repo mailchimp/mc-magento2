@@ -119,7 +119,12 @@ class ErrorsCleanTest extends TestCase
             ->method('deleteOverflowByStore')
             ->willReturnCallback(
                 function () use (&$remaining) {
-                    return $remaining-- > 0 ? ErrorsClean::OVERFLOW_LIMIT : 0;
+                    if ($remaining < 1) {
+                        return 0;
+                    }
+                    $remaining--;
+
+                    return ErrorsClean::OVERFLOW_LIMIT;
                 }
             );
 
@@ -142,7 +147,6 @@ class ErrorsCleanTest extends TestCase
         $cron->execute();
     }
 
-
     /**
      * A pass caps work, not time, and how long a pass takes depends on things
      * this cannot know. The cron group gives this job a two-minute window and
@@ -163,7 +167,10 @@ class ErrorsCleanTest extends TestCase
         // lands on it. Anything counting passes alone would run 100.
         $step = ErrorsClean::MAX_RUNTIME_SECONDS / 4;
         $cron = new class ($helper, $errors, $storeManager, $step) extends ErrorsClean {
+            /** @var int */
             private $tick = 0;
+
+            /** @var float */
             private $step;
 
             public function __construct($helper, $errors, $storeManager, $step)
@@ -174,7 +181,10 @@ class ErrorsCleanTest extends TestCase
 
             protected function now()
             {
-                return $this->tick++ * $this->step;
+                $reading = $this->tick * $this->step;
+                $this->tick++;
+
+                return $reading;
             }
         };
 
@@ -184,7 +194,6 @@ class ErrorsCleanTest extends TestCase
 
         $cron->execute();
     }
-
 
     /**
      * The budget has to cover the whole job, not the ceiling alone. The
@@ -203,6 +212,7 @@ class ErrorsCleanTest extends TestCase
 
         // Already past the deadline on the very first reading.
         $cron = new class ($helper, $errors, $storeManager) extends ErrorsClean {
+            /** @var int */
             private $tick = 0;
 
             protected function now()
@@ -236,7 +246,10 @@ class ErrorsCleanTest extends TestCase
         $storeManager->method('getStores')->willReturn(array_fill_keys(range(1, 20), new \stdClass()));
 
         $cron = new class ($helper, $errors, $storeManager) extends ErrorsClean {
+            /** @var int */
             public $readings = 0;
+
+            /** @var int */
             private $tick = 0;
 
             protected function now()
@@ -290,5 +303,4 @@ class ErrorsCleanTest extends TestCase
 
         $this->assertSame(['ceiling', 'age'], $orden);
     }
-
 }
