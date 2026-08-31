@@ -24,6 +24,19 @@ class MailChimpErrors extends \Magento\Framework\Model\AbstractModel
         $this->getResource()->getByStoreIdType($this, $storeId, $id, $type);
         return $this;
     }
+    /**
+     * Drop the oldest errors of a store once it holds more than $keep of them.
+     *
+     * @param  int $storeId
+     * @param  int $keep
+     * @param  int $limit
+     * @return int rows deleted
+     */
+    public function deleteOverflowByStore($storeId, $keep, $limit)
+    {
+        return $this->getResource()->deleteOverflowByStore($this, $storeId, $keep, $limit);
+    }
+
     public function deleteByStorePeriod($storeId, $interval, $limit)
     {
         return $this->getResource()->deleteByStorePeriod($this, $storeId, $interval, $limit);

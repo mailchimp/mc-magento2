@@ -35,6 +35,10 @@
             <column name="regtype"/>
             <column name="original_id"/>
         </index>
+        <index referenceId="MAILCHIMP_ERRORS_STORE_ID_ID" indexType="btree">
+            <column name="store_id"/>
+            <column name="id"/>
+        </index>
     </table>
     <table name="mailchimp_interest_group">
         <column xsi:type="int" name="id" padding="10" nullable="false" identity="true" comment="Table Id"/>
