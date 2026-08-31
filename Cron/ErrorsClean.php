@@ -158,20 +158,16 @@ class ErrorsClean
                 break;
             }
 
-            $period = $this->helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_CLEAN_ERROR_MONTHS, $storeId);
-            if ($period > 0) {
-                try {
-                    $this->helper->log("Cleaning errors for store [$storeId] older than $period months");
-                    $this->chimpErrors->deleteByStorePeriod($storeId,$period,self::LIMIT);
-                } catch (\Exception $e) {
-                    $this->helper->log($e->getMessage());
-                }
-            }
-
-            // Deliberately outside the check above. The age-based clean is a
-            // preference and can legitimately be switched off; the ceiling is
-            // not, and a store that has switched the preference off is exactly
-            // the store that needs it.
+            // The ceiling goes first. It is the safety property, so it gets the
+            // budget before the preference does — and the age-based delete
+            // below cannot seek, so every row the ceiling removes here is a row
+            // that one does not have to scan. Running it second also means it
+            // is never the half that starves the ceiling of passes.
+            //
+            // It also runs unconditionally. The age-based clean is a preference
+            // and can legitimately be switched off; the ceiling is not, and a
+            // store that has switched the preference off is exactly the store
+            // that needs it.
             try {
                 $removed = 0;
                 for ($pass = 0; $pass < self::MAX_PASSES; $pass++) {
@@ -198,6 +194,16 @@ class ErrorsClean
                 }
             } catch (\Exception $e) {
                 $this->helper->log($e->getMessage());
+            }
+
+            $period = $this->helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_CLEAN_ERROR_MONTHS, $storeId);
+            if ($period > 0) {
+                try {
+                    $this->helper->log("Cleaning errors for store [$storeId] older than $period months");
+                    $this->chimpErrors->deleteByStorePeriod($storeId,$period,self::LIMIT);
+                } catch (\Exception $e) {
+                    $this->helper->log($e->getMessage());
+                }
             }
         }
     }

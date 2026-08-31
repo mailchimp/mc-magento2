@@ -203,10 +203,11 @@ class ErrorsCleanTest extends TestCase
 
         // Already past the deadline on the very first reading.
         $cron = new class ($helper, $errors, $storeManager) extends ErrorsClean {
+            private $tick = 0;
+
             protected function now()
             {
-                static $tick = 0;
-                return $tick++ === 0 ? 0 : ErrorsClean::MAX_RUNTIME_SECONDS + 1;
+                return $this->tick++ === 0 ? 0 : ErrorsClean::MAX_RUNTIME_SECONDS + 1;
             }
         };
 
@@ -235,7 +236,9 @@ class ErrorsCleanTest extends TestCase
         $storeManager = $this->createMock(StoreManager::class);
         $storeManager->method('getStores')->willReturn(array_fill_keys(range(1, 20), new \stdClass()));
 
-        // Budget runs out after the second view.
+        // Readings: deadline, the first view's guard, then the first view's
+        // pass loop is already past it. The second view's guard breaks the
+        // loop, so exactly one view is ever visited.
         $cron = new class ($helper, $errors, $storeManager) extends ErrorsClean {
             private $tick = 0;
 
@@ -247,7 +250,39 @@ class ErrorsCleanTest extends TestCase
 
         $cron->execute();
 
-        $this->assertLessThan(20, $reads, 'the loop kept visiting store views after the budget ran out');
+        $this->assertSame(1, $reads, 'the loop kept visiting store views after the budget ran out');
+    }
+
+
+    /**
+     * The ceiling runs before the age-based clean, not after.
+     *
+     * The ceiling is the safety property and the age clean is a preference, so
+     * the safety property draws on the budget first. It also means every row
+     * the ceiling removes is a row the age clean — which cannot seek — does not
+     * have to scan, and that the preference can never starve the ceiling of
+     * passes on a store where it matches nothing.
+     */
+    public function testTheCeilingRunsBeforeTheAgeBasedClean(): void
+    {
+        list($cron, $errors) = $this->make(3);
+
+        $orden = [];
+        $errors->method('deleteOverflowByStore')->willReturnCallback(
+            function () use (&$orden) {
+                $orden[] = 'ceiling';
+                return 0;
+            }
+        );
+        $errors->method('deleteByStorePeriod')->willReturnCallback(
+            function () use (&$orden) {
+                $orden[] = 'age';
+            }
+        );
+
+        $cron->execute();
+
+        $this->assertSame(['ceiling', 'age'], $orden);
     }
 
 }
