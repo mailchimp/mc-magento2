@@ -220,39 +220,45 @@ class ErrorsCleanTest extends TestCase
     /**
      * And it stops the loop rather than spinning through the remaining views
      * to do nothing with each of them.
+     *
+     * Counted in clock readings rather than config reads: a view can now be
+     * entered and abandoned without ever reaching the configuration, so the
+     * number of reads no longer tells you how many views were visited. Each
+     * view costs one reading at its guard, so twenty views cannot cost five.
      */
     public function testAnExhaustedBudgetStopsTheLoopInsteadOfSkippingEachView(): void
     {
         $helper = $this->createMock(MailChimpHelper::class);
-        $reads = 0;
-        $helper->method('getConfigValue')->willReturnCallback(
-            function () use (&$reads) {
-                $reads++;
-                return 0;
-            }
-        );
+        $helper->method('getConfigValue')->willReturn(0);
         $errors = $this->createMock(MailChimpErrors::class);
         $errors->method('deleteOverflowByStore')->willReturn(0);
         $storeManager = $this->createMock(StoreManager::class);
         $storeManager->method('getStores')->willReturn(array_fill_keys(range(1, 20), new \stdClass()));
 
-        // Readings: deadline, the first view's guard, then the first view's
-        // pass loop is already past it. The second view's guard breaks the
-        // loop, so exactly one view is ever visited.
         $cron = new class ($helper, $errors, $storeManager) extends ErrorsClean {
+            public $readings = 0;
             private $tick = 0;
 
             protected function now()
             {
+                $this->readings++;
                 return $this->tick++ < 2 ? 0 : ErrorsClean::MAX_RUNTIME_SECONDS + 1;
             }
         };
 
         $cron->execute();
 
-        $this->assertSame(1, $reads, 'the loop kept visiting store views after the budget ran out');
+        // One to set the deadline, then the first view is entered and
+        // abandoned, and the second view's guard breaks the loop.
+        // Five: the deadline, the first view's guard, its pass loop, its
+        // age-clean guard, and the second view's guard, which breaks. Twenty
+        // views would be at least twenty-one.
+        $this->assertSame(
+            5,
+            $cron->readings,
+            'the loop kept visiting store views after the budget ran out'
+        );
     }
-
 
     /**
      * The ceiling runs before the age-based clean, not after.

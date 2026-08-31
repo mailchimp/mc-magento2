@@ -32,7 +32,7 @@ class ErrorsClean
     /**
      * Rows kept per store view, whatever the merchant asked for.
      *
-     * The age-based clean below answers "how long do I want errors kept?", and
+     * The age-based clean answers "how long do I want errors kept?", and
      * keeping them forever is a legitimate answer — it is also the answer every
      * install carries by default, since the field has no default and saving the
      * configuration section stores a 0. So on its own it bounds nothing.
@@ -108,7 +108,8 @@ class ErrorsClean
      * cannot seek: on a store whose errors are all recent it walks the whole
      * partition to delete nothing. It has always done that, and it is the more
      * expensive half here. The sync it would starve does not care which half
-     * spent the window.
+     * spent the window, which is why the budget covers both and why the ceiling
+     * draws on it first.
      *
      * Spent in getStores() order, so while a drain is running the earlier views
      * are favoured and a later one can get nothing on a given tick. It still
@@ -194,6 +195,17 @@ class ErrorsClean
                 }
             } catch (\Exception $e) {
                 $this->helper->log($e->getMessage());
+            } catch (\Throwable $t) {
+                // An Error is not an Exception, and one store view's failure
+                // must not end the run for the views after it.
+                $this->helper->log($t->getMessage());
+            }
+
+            if ($this->now() >= $deadline) {
+                // The ceiling used the window. One age-based statement can walk
+                // a whole partition, so starting one here would overshoot by
+                // however long that takes; the next tick runs it instead.
+                continue;
             }
 
             $period = $this->helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_CLEAN_ERROR_MONTHS, $storeId);
@@ -203,6 +215,8 @@ class ErrorsClean
                     $this->chimpErrors->deleteByStorePeriod($storeId,$period,self::LIMIT);
                 } catch (\Exception $e) {
                     $this->helper->log($e->getMessage());
+                } catch (\Throwable $t) {
+                    $this->helper->log($t->getMessage());
                 }
             }
         }
