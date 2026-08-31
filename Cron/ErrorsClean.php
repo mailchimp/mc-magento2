@@ -40,15 +40,9 @@ class ErrorsClean
      * This bounds it regardless, without overriding anyone: a merchant who
      * wants errors kept still gets them kept, up to here.
      *
-     * It bounds the store views the extension can see. `store_id` carries no
-     * foreign key and getStores() returns neither deleted views nor the admin
-     * store, so rows left behind by a removed store view are visited by neither
-     * cleaner. That was already true of the age-based clean; it is written down
-     * here because this is the change that claims the table is bounded, and for
-     * those rows it is not. The number is
-     * generous on purpose — the table exists to diagnose recent failures, and
-     * a store erroring hard enough to reach this has a bigger problem than the
-     * one this prevents.
+     * The number is generous on purpose — the table exists to diagnose recent
+     * failures, and a store erroring hard enough to reach this has a bigger
+     * problem than the one this prevents.
      *
      * It bounds bytes too, but loosely, and the distinction is worth stating
      * rather than glossing. `type` and `errors` are TEXT, whose own ceiling is
@@ -59,6 +53,13 @@ class ErrorsClean
      * the real problem; what it leaves is a constant that may or may not be
      * comfortable. If it ever proves not to be, the answer is to cap the
      * stored body rather than the row count.
+     *
+     * It bounds the store views the extension can see, and only those.
+     * `store_id` carries no foreign key and getStores() returns neither deleted
+     * views nor the admin store, so rows left behind by a removed store view
+     * are visited by neither cleaner. That was already true of the age-based
+     * clean; it is written here because this is the change that claims the
+     * table is bounded, and for those rows it is not.
      */
     const MAX_ROWS_PER_STORE = 5000;
 
@@ -88,6 +89,23 @@ class ErrorsClean
     const MAX_PASSES     = 100;
 
     /**
+     * Seconds the ceiling may spend across every store view in one run.
+     *
+     * A pass cap bounds work, not time, and how long a pass takes depends on
+     * row sizes, replication and purge — the things this cannot know. That
+     * matters because cron_groups.xml gives this group a schedule_lifetime of
+     * two minutes and runs it in a single process: a job scheduled while this
+     * is still going does not wait, it is marked missed. The sync and webhook
+     * jobs are in that group and run every five minutes, so a long drain does
+     * not delay them, it skips them.
+     *
+     * Well inside the two-minute window, so the ceiling can never be the reason
+     * a sync did not run. A table far past the ceiling then comes down over two
+     * or three ticks instead of one, which is the cheaper mistake.
+     */
+    const MAX_RUNTIME_SECONDS = 30;
+
+    /**
      * @param \Ebizmarts\MailChimp\Helper\Data $helper
      * @param \Ebizmarts\MailChimp\Model\MailChimpErrors $chimpErrors
      * @param \Magento\Store\Model\StoreManager $storeManager
@@ -102,8 +120,20 @@ class ErrorsClean
         $this->chimpErrors = $chimpErrors;
         $this->storeManager = $storeManager;
     }
+    /**
+     * Seam so the budget can be exercised without a test that waits for it.
+     *
+     * @return float
+     */
+    protected function now()
+    {
+        return microtime(true);
+    }
+
     public function execute()
     {
+        $deadline = $this->now() + self::MAX_RUNTIME_SECONDS;
+
         foreach ($this->storeManager->getStores() as $storeId => $val)
         {
             $period = $this->helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_CLEAN_ERROR_MONTHS, $storeId);
@@ -123,6 +153,11 @@ class ErrorsClean
             try {
                 $removed = 0;
                 for ($pass = 0; $pass < self::MAX_PASSES; $pass++) {
+                    if ($this->now() >= $deadline) {
+                        // Out of time rather than out of work. The next tick
+                        // picks up where this one stopped.
+                        break;
+                    }
                     $deleted = $this->chimpErrors->deleteOverflowByStore(
                         $storeId,
                         self::MAX_ROWS_PER_STORE,

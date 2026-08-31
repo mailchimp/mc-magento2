@@ -38,7 +38,8 @@
       "added_at": true
     },
     "index": {
-      "MAILCHIMP_ERRORS_STORE_ID_REGTYPE_ORIGINAL_ID": true
+      "MAILCHIMP_ERRORS_STORE_ID_REGTYPE_ORIGINAL_ID": true,
+      "MAILCHIMP_ERRORS_STORE_ID_ID": true
     },
     "constraint": {
       "PRIMARY": true

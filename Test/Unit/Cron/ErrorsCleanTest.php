@@ -142,4 +142,46 @@ class ErrorsCleanTest extends TestCase
         $cron->execute();
     }
 
+
+    /**
+     * A pass caps work, not time, and how long a pass takes depends on things
+     * this cannot know. The cron group gives this job a two-minute window and
+     * runs it in one process alongside the sync jobs, so a drain that overruns
+     * does not delay them — Magento marks them missed. The ceiling stops on the
+     * clock, and the next tick continues.
+     */
+    public function testTheCeilingStopsOnTheClockNotOnlyOnThePassCap(): void
+    {
+        $helper = $this->createMock(MailChimpHelper::class);
+        $helper->method('getConfigValue')->willReturn(0);
+        $errors = $this->createMock(MailChimpErrors::class);
+        $storeManager = $this->createMock(StoreManager::class);
+        $storeManager->method('getStores')->willReturn([1 => new \stdClass()]);
+
+        // A clock that jumps a third of the budget per reading, so the third
+        // pass is past the deadline. Anything counting passes alone runs 100.
+        $step = ErrorsClean::MAX_RUNTIME_SECONDS / 3;
+        $cron = new class ($helper, $errors, $storeManager, $step) extends ErrorsClean {
+            private $tick = 0;
+            private $step;
+
+            public function __construct($helper, $errors, $storeManager, $step)
+            {
+                parent::__construct($helper, $errors, $storeManager);
+                $this->step = $step;
+            }
+
+            protected function now()
+            {
+                return $this->tick++ * $this->step;
+            }
+        };
+
+        $errors->expects($this->exactly(2))
+            ->method('deleteOverflowByStore')
+            ->willReturn(ErrorsClean::OVERFLOW_LIMIT);
+
+        $cron->execute();
+    }
+
 }
