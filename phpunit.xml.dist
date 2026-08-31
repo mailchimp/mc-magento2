@@ -1,0 +1,35 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Ebizmarts_MailChimp Magento Component
+ *
+ * Runs this extension's unit suite. Invoke from the Magento root:
+ *
+ *   vendor/bin/phpunit -c app/code/Ebizmarts/MailChimp/phpunit.xml.dist
+ *
+ * The bootstrap is Magento's own, so the suite sees exactly what the platform's
+ * unit tests see — the autoloader, the generated-class autoloader that produces
+ * factories on demand, and the error handler. Carrying a copy of that here
+ * would be a second thing to keep correct.
+ *
+ * The result cache is off. With no cacheDirectory, PHPUnit writes it beside
+ * this file, leaving an untracked .phpunit.result.cache in the extension after
+ * every run — sitting where it is easy to commit by accident. Redirecting it or
+ * ignoring it would both work; not producing it is one less thing to keep
+ * correct, and the cache buys nothing on a suite that runs in a tenth of a
+ * second.
+ *
+ * @copyright   Ebizmarts (http://ebizmarts.com)
+ * @license     http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ */
+-->
+<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         bootstrap="../../../../dev/tests/unit/framework/bootstrap.php"
+         colors="true"
+         cacheResult="false">
+    <testsuites>
+        <testsuite name="Ebizmarts_MailChimp unit">
+            <directory>Test/Unit</directory>
+        </testsuite>
+    </testsuites>
+</phpunit>

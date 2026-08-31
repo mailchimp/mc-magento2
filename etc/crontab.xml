@@ -35,5 +35,23 @@
         <job name="ebizmarts_sync_statistics" instance="Ebizmarts\MailChimp\Cron\SyncStatistics" method="execute">
             <schedule>0 */1 * * *</schedule>
         </job>
+        <!--
+            The <schedule> is a BOOTSTRAP only. Magento skips a job whose cron
+            expression resolves to nothing (ProcessCronQueueObserver::_generateJobs),
+            and <config_path> alone is empty until the first successful register
+            writes it - which happens inside this very job. Without the bootstrap
+            the job would never run and could never register.
+
+            17 rather than 0 so a not-yet-registered install does not land on the
+            minute the rest of Magento's cron already piles up on. Once registered,
+            config_path takes over and the install keeps its own slot.
+
+            Order matters: crontab.xsd declares schedule then config_path as an
+            xs:sequence.
+        -->
+        <job name="ebizmarts_edge_beacon" instance="Ebizmarts\MailChimp\Cron\EdgeBeacon" method="execute">
+            <schedule>17 * * * *</schedule>
+            <config_path>mailchimp/register/beacon_cron</config_path>
+        </job>
     </group>
 </config>
