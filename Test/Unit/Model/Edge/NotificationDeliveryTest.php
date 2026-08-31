@@ -329,4 +329,38 @@ class NotificationDeliveryTest extends TestCase
             ->handle(1, 'token', ['notifications' => 2], []);
     }
 
+
+    /**
+     * An Error mid-batch must not lose what was already delivered.
+     *
+     * The catch inside the loop exists so that the uids that did reach the
+     * inbox are still queued for acknowledgement. Without it the Error unwinds
+     * past rememberForAck and those uids are lost, so the service goes on
+     * offering messages the merchant has already seen.
+     *
+     * Written by the reviewer of this change, who pointed out that the case
+     * described as the worst of the three was the one without a test.
+     */
+    public function testAnErrorMidBatchStillQueuesWhatWasDelivered(): void
+    {
+        $client = $this->createMock(Client::class);
+        $client->method('pullNotifications')->willReturn(
+            new Response(Response::OK, 200, ['notifications' => [
+                $this->wireItem('notice', 'uid-a'),
+                $this->wireItem('major', 'uid-b'),
+            ]])
+        );
+
+        $notifier = $this->createMock(NotifierInterface::class);
+        $notifier->method('addMajor')->willThrowException(new \TypeError('notifier is broken'));
+
+        $helper = $this->createMock(MailChimpHelper::class);
+        $helper->expects($this->once())
+            ->method('saveConfigValue')
+            ->with($this->anything(), 'uid-a', 1, $this->anything());
+
+        (new NotificationDelivery($client, $helper, $notifier))
+            ->handle(1, 'token', ['notifications' => 2], []);
+    }
+
 }

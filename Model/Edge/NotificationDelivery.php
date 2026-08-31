@@ -111,16 +111,10 @@ class NotificationDelivery
 
             try {
                 $written = $this->deliverOnce($uid, $item);
-            } catch (\Exception $e) {
+            } catch (\Throwable $e) {
                 // A message we could not write must not be confirmed, so stop
                 // here and let the unconfirmed uid tell the service the truth.
                 $this->helper->log('Edge notification could not be delivered: ' . $e->getMessage());
-                break;
-            } catch (\Throwable $t) {
-                // Same rule for an Error. Without this it escapes the loop, and
-                // the uids already delivered in this batch are lost with it
-                // rather than being queued for acknowledgement.
-                $this->helper->log('Edge notification could not be delivered: ' . $t->getMessage());
                 break;
             }
 
@@ -143,7 +137,15 @@ class NotificationDelivery
         }
 
         if (!empty($delivered)) {
-            $this->rememberForAck($storeId, $delivered, $stillPending);
+            try {
+                $this->rememberForAck($storeId, $delivered, $stillPending);
+            } catch (\Throwable $e) {
+                // Losing this loses exactly what the catch inside the loop was
+                // added to preserve: the uids that did reach the inbox. The
+                // service goes on offering them, which is a duplicate in the
+                // bell rather than a message nobody sees.
+                $this->helper->log('Edge notification acknowledgement could not be stored: ' . $e->getMessage());
+            }
         }
     }
 
