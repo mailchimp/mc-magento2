@@ -368,6 +368,20 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         $this->_api->setApiKey($apiKey);
         $this->_api->setHelper($this);
         $this->_api->setStoreURL($this->_storeManager->getStore($store)->getBaseUrl());
+        // The library cannot observe this one. It is visible in a path only
+        // when a caller addresses a store directly, and the ecommerce sync
+        // posts all of its per-store work to `batches` with the store id in
+        // the body — which the library deliberately never reads.
+        //
+        // Guarded because composer.json is not always what decides which
+        // library is present. An app/code install puts this extension on disk
+        // by clone and the library comes from a separate composer require, so
+        // the `>=3.0.47` constraint below is inert there and the two can be
+        // updated independently. Without this check that pairing is a fatal on
+        // every call into the API, which is most of the extension.
+        if (method_exists($this->_api, 'setMailchimpStoreId')) {
+            $this->_api->setMailchimpStoreId($this->getConfigValue(self::XML_MAILCHIMP_STORE, $store, $scope));
+        }
         $this->_api->setUserAgent('Mailchimp4Magento' . (string)$this->getModuleVersion());
         if ($timeOut) {
             $this->_api->setTimeOut($timeOut);
@@ -504,6 +518,9 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         $this->_api->setUserAgent('Mailchimp4Magento' . (string)$this->getModuleVersion());
         $this->_api->setHelper($this);
         $this->_api->setStoreURL($this->_storeManager->getStore()->getBaseUrl());
+        if (method_exists($this->_api, 'setMailchimpStoreId')) {
+            $this->_api->setMailchimpStoreId($this->getConfigValue(self::XML_MAILCHIMP_STORE));
+        }
 
         return $this->_api;
     }

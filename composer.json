@@ -6,7 +6,7 @@
   },
   "description": "Connect MailChimp with Magento",
   "type": "magento2-module",
-  "version": "103.4.81",
+  "version": "103.4.82",
   "authors": [
     {
       "name": "Ebizmarts Corp",
@@ -25,7 +25,7 @@
   },
   "require" : {
     "magento/framework": "103.0.*",
-    "ebizmarts/mailchimp-lib": ">=3.0.44",
+    "ebizmarts/mailchimp-lib": ">=3.0.47",
     "ext-json": "*"
   }
 }
