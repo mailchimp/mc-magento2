@@ -117,20 +117,14 @@ class Beacon
             foreach ($this->storeManager->getStores() as $store) {
                 $storeId = (int)$store->getId();
 
-                if (!$this->helper->isMailChimpEnabled($storeId) || !$this->helper->getApiKey($storeId)) {
-                    continue;
-                }
-
                 try {
+                    if (!$this->helper->isMailChimpEnabled($storeId) || !$this->helper->getApiKey($storeId)) {
+                        continue;
+                    }
+
                     $this->processStore($storeId, (string)$store->getBaseUrl());
-                } catch (\Exception $e) {
+                } catch (\Throwable $e) {
                     $this->helper->log('Edge beacon failed for store ' . $storeId . ': ' . $e->getMessage());
-                } catch (\Throwable $t) {
-                    // On PHP 7+ an Error is not an Exception, so catching only
-                    // Exception here let a TypeError out of the API path abort
-                    // the run and take every remaining store view with it.
-                    // One store view's problem is not the other views'.
-                    $this->helper->log('Edge beacon failed for store ' . $storeId . ': ' . $t->getMessage());
                 }
             }
         } finally {
@@ -352,13 +346,8 @@ class Beacon
         try {
             $api  = $this->helper->getApi($storeId);
             $root = $api->root->info();
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             $this->helper->log('Edge beacon could not read the Mailchimp account: ' . $e->getMessage());
-            return null;
-        } catch (\Throwable $t) {
-            // Reading the account must not be able to end the run: an Error
-            // here is a broken API path, not a reason to stop reporting.
-            $this->helper->log('Edge beacon could not read the Mailchimp account: ' . $t->getMessage());
             return null;
         }
 
@@ -485,9 +474,7 @@ class Beacon
     {
         try {
             $moduleVersion = (string)$this->helper->getModuleVersion();
-        } catch (\Exception $e) {
-            $moduleVersion = '';
-        } catch (\Throwable $t) {
+        } catch (\Throwable $e) {
             $moduleVersion = '';
         }
 

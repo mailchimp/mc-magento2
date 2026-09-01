@@ -118,19 +118,20 @@ class Client
 
         try {
             $curl->post(self::BASE_URL . $path, json_encode($body));
-        } catch (\Exception $e) {
+            $status  = (int)$curl->getStatus();
+            $headers = $curl->getHeaders();
+            $rawBody = (string)$curl->getBody();
+        } catch (\Throwable $e) {
             $this->helper->log('Edge beacon transport failure on ' . $path . ': ' . $e->getMessage());
             return new Response(Response::FAILED);
         }
-
-        $status = (int)$curl->getStatus();
 
         if ($status === 401) {
             return new Response(Response::UNAUTHORIZED, $status);
         }
 
         if ($status === 429) {
-            $retryAfter = $this->readRetryAfter($curl->getHeaders());
+            $retryAfter = $this->readRetryAfter($headers);
             $this->helper->log('Edge beacon rate limited on ' . $path . ', Retry-After: ' . ($retryAfter ?? 'absent'));
             return new Response(Response::RATE_LIMITED, $status, [], $retryAfter);
         }
@@ -140,7 +141,7 @@ class Client
             return new Response(Response::FAILED, $status);
         }
 
-        $data = json_decode((string)$curl->getBody(), true);
+        $data = json_decode($rawBody, true);
         if (!is_array($data)) {
             $this->helper->log('Edge beacon got a malformed body on ' . $path);
             return new Response(Response::FAILED, $status);

@@ -112,4 +112,31 @@ class ClientTest extends TestCase
 
         $this->assertFalse($response->isOk());
     }
+
+    /**
+     * An Error is not an Exception. This catch exists to turn a transport
+     * problem into a failed response; letting one escape would skip the whole
+     * store view instead, and lose the log line saying why.
+     */
+    public function testAnErrorFromTheTransportBecomesAFailedResponse(): void
+    {
+        $curl = $this->getMockBuilder(\Ebizmarts\MailChimp\Model\HTTP\Client\Curl::class)
+            ->disableOriginalConstructor()
+            ->onlyMethods(['setOption', 'setTimeout', 'setHeaders', 'post'])
+            ->getMock();
+        $curl->method('post')->willThrowException(new \TypeError('the http client is broken'));
+
+        $factory = $this->getMockBuilder(CurlFactory::class)
+            ->disableOriginalConstructor()
+            ->onlyMethods(['create'])
+            ->getMock();
+        $factory->method('create')->willReturn($curl);
+
+        $response = (new Client($factory, $this->createMock(MailChimpHelper::class)))
+            ->ping('tok', ['store_url' => 'https://shop.example.com/']);
+
+        $this->assertFalse($response->isOk());
+        $this->assertFalse($response->isUnauthorized(), 'a broken client must not look like a dead token');
+        $this->assertFalse($response->isRateLimited());
+    }
 }
