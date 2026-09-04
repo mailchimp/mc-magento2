@@ -135,6 +135,18 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     const MIN_LIB_VERSION = '3.0.45';
 
     protected $counters = [];
+
+    /**
+     * API keys that already failed in this process, by fingerprint.
+     *
+     * Process-scoped on purpose. A rejected credential is an answer, not a
+     * blip: it will be just as rejected for the next store view a millisecond
+     * later. Nothing is written anywhere, so the next cron run starts clean and
+     * a key fixed between runs is picked up immediately.
+     *
+     * @var array
+     */
+    private $failedApiKeys = [];
     /**
      * @var \Magento\Store\Model\StoreManagerInterface
      */
@@ -1472,5 +1484,60 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     public function getPixelScriptUrl($storeId)
     {
         return (string)$this->getConfigValue(self::XML_PIXEL_SCRIPT_URL, $storeId);
+    }
+
+    /**
+     * Remember that this store's API key failed, so callers can stop asking.
+     *
+     * Keyed on the credential rather than on the store, which is the whole
+     * point: one key shared across many store views is exactly the shape that
+     * turns a single rejection into one round trip per view.
+     *
+     * @param  int|null    $store
+     * @param  string|null $scope
+     * @return void
+     */
+    public function markApiKeyFailed($store = null, $scope = null)
+    {
+        $fingerprint = $this->apiKeyFingerprint($store, $scope);
+        if ($fingerprint !== null) {
+            $this->failedApiKeys[$fingerprint] = true;
+        }
+    }
+
+    /**
+     * Whether this store's API key has already failed in this process.
+     *
+     * @param  int|null    $store
+     * @param  string|null $scope
+     * @return bool
+     */
+    public function isApiKeyFailed($store = null, $scope = null)
+    {
+        $fingerprint = $this->apiKeyFingerprint($store, $scope);
+
+        return $fingerprint !== null && isset($this->failedApiKeys[$fingerprint]);
+    }
+
+    /**
+     * A stable handle for a key that never holds the key itself.
+     *
+     * Null for an empty key: a store with nothing configured has no credential
+     * to blame, and lumping them all under one empty fingerprint would let an
+     * unconfigured store silence a configured one.
+     *
+     * @param  int|null    $store
+     * @param  string|null $scope
+     * @return string|null
+     */
+    private function apiKeyFingerprint($store = null, $scope = null)
+    {
+        $apiKey = (string)$this->getApiKey($store, $scope);
+        $apiKey = trim($apiKey);
+        if ($apiKey === '') {
+            return null;
+        }
+
+        return hash('sha256', $apiKey);
     }
 }

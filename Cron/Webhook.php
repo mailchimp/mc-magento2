@@ -342,6 +342,12 @@ class Webhook
             if (!$this->_helper->isMailChimpEnabled($storeId)) {
                 continue;
             }
+            // This runs before any webhook work is looked at, so an install
+            // with nothing to process still paid one rejected call per store
+            // view to find that out. One answer per credential is enough.
+            if ($this->_helper->isApiKeyFailed($storeId)) {
+                continue;
+            }
             $listId =$this->_helper->getDefaultList($storeId);
             if (!$listId||$listId==-1) {
                 $this->_helper->log("ListId [$listId] is invalid for Store [$storeId]");
@@ -359,6 +365,7 @@ class Webhook
                 } catch (\Mailchimp_Error $e) {
                     $error = $e->getMessage();
                     $this->_helper->log("Error: [$error] for store [$storeId]");
+                    $this->_helper->markApiKeyFailed($storeId);
                 }
             }
         }
