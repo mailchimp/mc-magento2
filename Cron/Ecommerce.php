@@ -322,11 +322,19 @@ class Ecommerce
     }
     protected function _ping($storeId)
     {
+        // Asked once per credential, not once per store view. A key that was
+        // rejected a moment ago is rejected for the next view too, and this
+        // loop used to pay a full round trip to be told so again.
+        if ($this->_helper->isApiKeyFailed($storeId)) {
+            return false;
+        }
+
         try {
             $api = $this->_helper->getApi($storeId);
             $api->root->info();
         } catch (\Mailchimp_Error | \Mailchimp_HttpError $e) {
             $this->_helper->log($e->getFriendlyMessage());
+            $this->_helper->markApiKeyFailed($storeId);
             return false;
         }
         return true;
