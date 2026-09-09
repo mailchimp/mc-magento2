@@ -332,7 +332,16 @@ class Ecommerce
         try {
             $api = $this->_helper->getApi($storeId);
             $api->root->info();
-        } catch (\Mailchimp_Error | \Mailchimp_HttpError $e) {
+        } catch (\Mailchimp_HttpError $e) {
+            // Ordered first because it is the subclass. DNS, TLS and timeouts
+            // say nothing about the credential, and a single blip must not
+            // silence every store view behind this one.
+            $this->_helper->log($e->getFriendlyMessage());
+            return false;
+        } catch (\Mailchimp_Error $e) {
+            // An answer from Mailchimp about the account itself. This is the
+            // only call in the run that asks about the credential and nothing
+            // else, which is why it is the only one that records a verdict.
             $this->_helper->log($e->getFriendlyMessage());
             $this->_helper->markApiKeyFailed($storeId);
             return false;

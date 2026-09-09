@@ -25,6 +25,9 @@ class WebhookLoadGroupsTest extends TestCase
     /** @var int */
     private $getApiCalls = 0;
 
+    /** @var bool  whether the account call has already returned a verdict */
+    private $credentialAlreadyRejected = false;
+
     /**
      * An API object whose only job is to reject the call, the way a store with
      * a dead key does.
@@ -55,7 +58,7 @@ class WebhookLoadGroupsTest extends TestCase
      */
     private function cronWithViews($storeViews)
     {
-        $failed = [];
+        $failed = $this->credentialAlreadyRejected;
 
         $helper = $this->createMock(MailChimpHelper::class);
         $helper->method('isMailChimpEnabled')->willReturn(true);
@@ -64,13 +67,13 @@ class WebhookLoadGroupsTest extends TestCase
             $this->getApiCalls++;
             return $this->rejectingApi();
         });
-        // One credential across every view, which is the shape that turns a
-        // single rejection into one round trip per view.
-        $helper->method('markApiKeyFailed')->willReturnCallback(function () use (&$failed) {
-            $failed['shared'] = true;
-        });
+        // This loop reads the verdict and never writes one: the call it makes
+        // carries an audience id, so its failure can mean a wrong audience on a
+        // perfectly good key. The verdict comes from the account call in the
+        // ecommerce job, which runs first in the shared cron process.
+        $helper->expects($this->never())->method('markApiKeyFailed');
         $helper->method('isApiKeyFailed')->willReturnCallback(function () use (&$failed) {
-            return isset($failed['shared']);
+            return $failed;
         });
 
         $storeManager = $this->createMock(StoreManager::class);
@@ -100,21 +103,40 @@ class WebhookLoadGroupsTest extends TestCase
 
     /**
      * The defect: this loop runs before any webhook work is looked at, so a
-     * dead key used to cost one rejected call per store view, every run.
+     * dead key cost one rejected call per store view, every run. Once the
+     * account call has returned its verdict, they cost nothing.
      */
-    public function testARejectedKeyIsAskedOnceNotOncePerStoreView()
+    public function testAKnownRejectedKeyCostsNothingHere()
     {
         $this->getApiCalls = 0;
+        $this->credentialAlreadyRejected = true;
         $this->loadGroups($this->cronWithViews(28));
 
-        $this->assertSame(1, $this->getApiCalls);
+        $this->assertSame(0, $this->getApiCalls);
     }
 
-    public function testASingleViewStillAsksOnce()
+    /**
+     * And with no verdict in hand it still does its work rather than guessing.
+     */
+    public function testWithoutAVerdictTheLoopStillRuns()
     {
         $this->getApiCalls = 0;
-        $this->loadGroups($this->cronWithViews(1));
+        $this->credentialAlreadyRejected = false;
+        $this->loadGroups($this->cronWithViews(3));
 
-        $this->assertSame(1, $this->getApiCalls);
+        $this->assertSame(3, $this->getApiCalls);
+    }
+
+    /**
+     * The point of the review: a failure on this call carries an audience id,
+     * so it must not be allowed to condemn the credential.
+     */
+    public function testAFailureHereNeverCondemnsTheCredential()
+    {
+        $this->getApiCalls = 0;
+        $this->credentialAlreadyRejected = false;
+        $this->loadGroups($this->cronWithViews(5));
+
+        $this->assertSame(5, $this->getApiCalls);   // markApiKeyFailed asserted never above
     }
 }

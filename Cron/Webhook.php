@@ -363,9 +363,13 @@ class Webhook
                         }
                     }
                 } catch (\Mailchimp_Error $e) {
+                    // Read, but deliberately not recorded. This call carries an
+                    // audience id, so a failure here can mean the audience is
+                    // wrong while the credential is perfectly good -- which is a
+                    // shape that exists in the field. The verdict is left to the
+                    // account call in the ecommerce job.
                     $error = $e->getMessage();
                     $this->_helper->log("Error: [$error] for store [$storeId]");
-                    $this->_helper->markApiKeyFailed($storeId);
                 }
             }
         }
