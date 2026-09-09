@@ -1104,17 +1104,34 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         $url = $this->getConfigValue(self::XML_MAILCHIMP_JS_URL, $storeId);
         if ($this->getConfigValue(self::XML_PATH_ACTIVE, $storeId) && !$url) {
             $mailChimpStoreId = $this->getConfigValue(self::XML_MAILCHIMP_STORE, $storeId);
+
+            // Two ways to hold a value that is not a store, and both reach
+            // here. -1 is the dropdown's placeholder, left behind by a
+            // merchant who never chose one; 0 is the '---No Data---' option
+            // MonkeyStore offers when there is no API key at that scope or the
+            // listing failed. This runs during page render, so without this
+            // guard every uncached visit pays to be told so again.
+            //
+            // 0 is the quieter of the two and worth the falsy check rather
+            // than another == comparison: the library branches on if($id), so
+            // a 0 does not even ask for that store -- it lists them, gets a
+            // 200 with no connected_site, saves nothing, and repeats with no
+            // error to notice it by.
+            if (!$mailChimpStoreId || $mailChimpStoreId == -1) {
+                return $url;
+            }
+
             try {
                 $api = $this->getApi($storeId);
                 $storeData = $api->ecommerce->stores->get($mailChimpStoreId);
                 if (isset($storeData['connected_site']['site_script']['url'])) {
                     $url = $storeData['connected_site']['site_script']['url'];
-                    $this->_config->saveConfig(
-                        self::XML_MAILCHIMP_JS_URL,
-                        $url,
-                        \Magento\Store\Model\ScopeInterface::SCOPE_STORES,
-                        $storeId
-                    );
+                    // Through the helper, which flushes the config cache. The
+                    // raw saveConfig used to leave the cache serving the old
+                    // empty value, so the very next render read !$url as true
+                    // and called again -- a successful lookup that never
+                    // stopped asking, and left no error behind to notice.
+                    $this->saveConfigValue(self::XML_MAILCHIMP_JS_URL, $url, $storeId);
                 }
             } catch (\Mailchimp_Error | \Mailchimp_HttpError $e) {
                 $this->log($e->getFriendlyMessage());
