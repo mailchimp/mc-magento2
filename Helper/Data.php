@@ -15,6 +15,7 @@ use Magento\Framework\App\ResourceConnection;
 use Magento\Framework\Exception\ValidatorException;
 use Magento\Store\Model\Store;
 use Ebizmarts\MailChimp\Model\MailchimpNotificationFactory as MailchimpNotificationFactory;
+use Magento\Framework\App\ProductMetadataInterface;
 
 class Data extends \Magento\Framework\App\Helper\AbstractHelper
 {
@@ -135,6 +136,11 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     const MIN_LIB_VERSION = '3.0.45';
 
     protected $counters = [];
+
+    /**
+     * @var ProductMetadataInterface
+     */
+    private $productMetadata;
     /**
      * @var \Magento\Store\Model\StoreManagerInterface
      */
@@ -291,7 +297,8 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         \Magento\Framework\Stdlib\DateTime\DateTime $date,
         \Magento\Directory\Model\CountryFactory $countryFactory,
         \Magento\Framework\Locale\Resolver $resolver,
-        MailchimpNotificationFactory $mailchimpNotificationFactory
+        MailchimpNotificationFactory $mailchimpNotificationFactory,
+        ProductMetadataInterface $productMetadata
     ) {
 
         $this->_storeManager  = $storeManager;
@@ -319,6 +326,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         $this->countryFactory           = $countryFactory;
         $this->resolver                 = $resolver;
         $this->mailchimpNotificationFactory = $mailchimpNotificationFactory;
+        $this->productMetadata          = $productMetadata;
         parent::__construct($context);
     }
 
@@ -382,7 +390,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         if (method_exists($this->_api, 'setMailchimpStoreId')) {
             $this->_api->setMailchimpStoreId($this->getConfigValue(self::XML_MAILCHIMP_STORE, $store, $scope));
         }
-        $this->_api->setUserAgent('Mailchimp4Magento' . (string)$this->getModuleVersion());
+        $this->_api->setUserAgent($this->userAgent());
         if ($timeOut) {
             $this->_api->setTimeOut($timeOut);
         }
@@ -515,7 +523,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
             $this->_api->setApiKey($apiKey);
         }
 
-        $this->_api->setUserAgent('Mailchimp4Magento' . (string)$this->getModuleVersion());
+        $this->_api->setUserAgent($this->userAgent());
         $this->_api->setHelper($this);
         $this->_api->setStoreURL($this->_storeManager->getStore()->getBaseUrl());
         if (method_exists($this->_api, 'setMailchimpStoreId')) {
@@ -1001,7 +1009,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
                 continue;
             }
             $this->_api->setApiKey(trim($apiKey));
-            $this->_api->setUserAgent('Mailchimp4Magento' . (string)$this->getModuleVersion());
+            $this->_api->setUserAgent($this->userAgent());
             $this->_api->setHelper($this);
             // Must stay after setApiKey. That call is what opens the library's
             // telemetry bucket, and setStoreURL() writes into an already-open
@@ -1479,5 +1487,37 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     public function getPixelScriptUrl($storeId)
     {
         return (string)$this->getConfigValue(self::XML_PIXEL_SCRIPT_URL, $storeId);
+    }
+
+    /**
+     * The user agent every call to the Mailchimp API carries.
+     *
+     * `Mailchimp4Magento103.4.82` reads to the eye as though the number were
+     * the Magento version. It is the module's. The platform version is added
+     * with a slash so the two cannot be confused by a reader or by a parser,
+     * and so it stays absent rather than wrong on a host that cannot answer.
+     *
+     * Built in one place because the three callers were byte-identical and a
+     * fourth would have had nothing to copy from but one of them.
+     *
+     * @return string
+     */
+    private function userAgent()
+    {
+        $agent = 'Mailchimp4Magento' . (string)$this->getModuleVersion();
+
+        try {
+            $magento = (string)$this->productMetadata->getVersion();
+        } catch (\Throwable $t) {
+            // One arm covers both: Exception implements Throwable, and this
+            // module's floor is Magento 2.4, so PHP 7 or newer is guaranteed.
+            return $agent;
+        }
+
+        if ($magento === '') {
+            return $agent;
+        }
+
+        return $agent . ' Magento/' . $magento;
     }
 }
