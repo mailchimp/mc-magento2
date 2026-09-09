@@ -40,6 +40,15 @@ class Subscriber
     protected $_interest=null;
 
     /**
+     * Whether the interest groups for the store view being synced have been
+     * fetched. Separate from $_interest because [] is a real answer: without
+     * it, a store with no groups configured looks unfetched forever.
+     *
+     * @var bool
+     */
+    protected $_interestLoaded = false;
+
+    /**
      * @param \Ebizmarts\MailChimp\Helper\Data $helper
      * @param SyncHelper $syncHelper
      * @param \Magento\Newsletter\Model\ResourceModel\Subscriber\CollectionFactory $subscriberCollection
@@ -65,7 +74,16 @@ class Subscriber
     {
         //get subscribers
 //        $listId = $this->_helper->getGeneralList($storeId);
-        $this->_interest = $this->_helper->getInterest($storeId);
+        // Reset rather than fetch. This object has no shared="false" in
+        // di.xml, so it is one instance reused for every store view in a cron
+        // run -- carrying one view's groups into the next would sync the wrong
+        // groups, with no error and no log line to show for it.
+        //
+        // And fetching here cost a call on every view of every run, before
+        // anything established there was a subscriber to sync at all.
+        $this->_interest       = null;
+        $this->_interestLoaded = false;
+
         $collection = $this->_subscriberCollection->create();
         $collection->addFieldToFilter('subscriber_status', ['eq' => 1])
             ->addFieldToFilter('store_id', ['eq' => $storeId]);
@@ -140,6 +158,12 @@ class Subscriber
     protected function _getInterest(\Magento\Newsletter\Model\Subscriber $subscriber)
     {
         $rc = [];
+
+        if (!$this->_interestLoaded) {
+            $this->_interest       = $this->_helper->getInterest($subscriber->getStoreId());
+            $this->_interestLoaded = true;
+        }
+
         $interest = $this->_helper->getSubscriberInterest(
             $subscriber->getSubscriberId(),
             $subscriber->getStoreId(),

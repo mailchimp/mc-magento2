@@ -1296,9 +1296,27 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         } else {
             $interest = [];
         }
+
+        // Nothing below can use the answer when no groups are selected: the
+        // first loop matches against an empty list and the second iterates
+        // one, so $rc comes back empty however the call goes. This is the
+        // quiet majority -- an audience configured and no groups chosen is
+        // the default state of an install that never used them.
+        if (!$interest) {
+            return $rc;
+        }
+
+        // And the audience id has the same placeholder problem as the store
+        // id: -1 is the dropdown's, and an empty value builds
+        // `lists//interest-categories`. Cron/Webhook guards this exact call
+        // the same way.
+        $listId = $this->getConfigValue(self::XML_PATH_LIST, $storeId);
+        if (!$listId || $listId == -1) {
+            return $rc;
+        }
+
         try {
             $api = $this->getApi($storeId);
-            $listId = $this->getConfigValue(self::XML_PATH_LIST, $storeId);
             $allInterest = $api->lists->interestCategory->getAll($listId, null, null, 200);
             if (is_array($allInterest) &&
                 array_key_exists('categories', $allInterest) &&
@@ -1327,7 +1345,12 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     }
     public function getSubscriberInterest($subscriberId, $storeId, $interest = null)
     {
-        if (!$interest) {
+        // Strictly null, because [] is an answer and not an absence. Read as
+        // falsy it meant "the caller supplied nothing", so a store with no
+        // groups configured -- where this legitimately returns [] -- re-asked
+        // Mailchimp once per subscriber, on a successful call, with nothing to
+        // show for it and no error to notice it by.
+        if ($interest === null) {
             $interest = $this->getInterest($storeId);
         }
         /**
