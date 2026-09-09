@@ -13,9 +13,9 @@
 
 **Fewer calls to the Mailchimp API from merchant servers:**
 
+- Ask a rejected API key once per run, not once per store view [\#2351](https://github.com/mailchimp/mc-magento2/pull/2351)
 - Stop resolving the connected-site URL on every page render [\#2354](https://github.com/mailchimp/mc-magento2/pull/2354)
 - Fetch interest groups once per store view, and only when they can be used [\#2355](https://github.com/mailchimp/mc-magento2/pull/2355)
-- Ask a rejected API key once per run, not once per store view [\#2351](https://github.com/mailchimp/mc-magento2/pull/2351)
 
 **Fixed bugs:**
 
