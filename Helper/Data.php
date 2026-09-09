@@ -1003,6 +1003,13 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
             $this->_api->setApiKey(trim($apiKey));
             $this->_api->setUserAgent('Mailchimp4Magento' . (string)$this->getModuleVersion());
             $this->_api->setHelper($this);
+            // Must stay after setApiKey. That call is what opens the library's
+            // telemetry bucket, and setStoreURL() writes into an already-open
+            // bucket rather than keeping a copy on the instance -- so moved
+            // above it this line is silently lost and the bucket reports with
+            // no site attached. Verified: before setApiKey the URL comes
+            // through NULL, after it comes through set.
+            $this->_api->setStoreURL($this->_storeManager->getStore()->getBaseUrl());
 
 
             try {
