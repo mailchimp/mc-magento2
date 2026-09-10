@@ -11,8 +11,8 @@
 
 **Fixed bugs:**
 
-- Reject the store dropdown's non-answers, and keep a good list id on a failed lookup [\#2361](https://github.com/mailchimp/mc-magento2/pull/2361)
 - Do not emit a script tag when the connected-site URL is empty [\#2360](https://github.com/mailchimp/mc-magento2/pull/2360)
+- Reject the store dropdown's non-answers, and keep a good list id on a failed lookup [\#2361](https://github.com/mailchimp/mc-magento2/pull/2361)
 - Compare the library version as a version, and align the floor it checks [\#2364](https://github.com/mailchimp/mc-magento2/pull/2364)
 
 **Merged pull requests:**
@@ -21,11 +21,12 @@
 
 **Dependencies:**
 
-The library floor moves to `>=3.0.49` in [\#2364](https://github.com/mailchimp/mc-magento2/pull/2364),
-alongside the `MIN_LIB_VERSION` constant that has to agree with it. 3.0.49 is the
-release that turns contact sharing on wherever nobody has declined. The
-constraint stays a floor rather than a pin, as it has been since 3.0.44, so an
-install already resolving to something newer is unaffected.
+- The `ebizmarts/mailchimp-lib` floor moves from `>=3.0.47` to `>=3.0.49` [\#2364](https://github.com/mailchimp/mc-magento2/pull/2364)
+
+  3.0.49 is the release that turns contact sharing on wherever nobody has declined.
+  It is a floor rather than a pin, as it has been since 3.0.44, so an installation
+  already resolving to something newer is unaffected — but an installation **pinned**
+  to 3.0.48 will not be able to install this release until it moves.
 
 ## [103.4.82](https://github.com/mailchimp/mc-magento2/tree/103.4.82)
 
