@@ -44,31 +44,58 @@ class SubscriberInterestTest extends TestCase
             }
         );
 
+        $helper->method('getTableName')->willReturn('mailchimp_sync_ecommerce');
+        $helper->method('getDateMicrotime')->willReturn('1757000000');
+
+        // Enough of a collection for sendSubscribers() to walk it and find
+        // nothing. An empty view is the case that matters here: it must still
+        // reset, and it must still cost no fetch.
+        $select = new class {
+            public function joinLeft() { return $this; }
+            public function where() { return $this; }
+            public function limit() { return $this; }
+        };
+        $collection = new class($select) implements \IteratorAggregate {
+            private $select;
+            public function __construct($select) { $this->select = $select; }
+            public function addFieldToFilter() { return $this; }
+            public function getSelect() { return $this->select; }
+            public function getIterator(): \Traversable { return new \ArrayIterator([]); }
+        };
+        $collectionFactory = $this->getMockBuilder(\stdClass::class)
+            ->addMethods(['create'])
+            ->getMock();
+        $collectionFactory->method('create')->willReturn($collection);
+
         $api = $this->getMockBuilder(Subscriber::class)
             ->disableOriginalConstructor()
             ->onlyMethods([])
             ->getMock();
 
-        $prop = new \ReflectionProperty(Subscriber::class, '_helper');
-        $prop->setAccessible(true);
-        $prop->setValue($api, $helper);
+        foreach (['_helper' => $helper, '_subscriberCollection' => $collectionFactory] as $name => $value) {
+            $prop = new \ReflectionProperty(Subscriber::class, $name);
+            $prop->setAccessible(true);
+            $prop->setValue($api, $value);
+        }
 
         return [$api, $helper];
     }
 
     /**
+     * Begins a store view the way the cron does — by calling
+     * sendSubscribers() — rather than by resetting the two fields directly.
+     *
+     * That distinction is the whole point: resetting them here would make the
+     * cross-view test pass even if the reset were deleted from the module, so
+     * it would be pinning the test helper rather than the code.
+     *
      * @param  Subscriber $api
      * @param  int        $storeId
      * @return void
      */
     private function beginStore(Subscriber $api, $storeId)
     {
-        $p1 = new \ReflectionProperty(Subscriber::class, '_interest');
-        $p1->setAccessible(true);
-        $p1->setValue($api, null);
-        $p2 = new \ReflectionProperty(Subscriber::class, '_interestLoaded');
-        $p2->setAccessible(true);
-        $p2->setValue($api, false);
+        $api->sendSubscribers($storeId, 'list-' . $storeId);
     }
 
     /**
