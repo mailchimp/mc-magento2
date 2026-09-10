@@ -358,7 +358,18 @@ class Webhook
      * webhook carrying a GROUPINGS merge field, so it is now called from there.
      *
      * The flag is set before the work rather than after, so a run that throws
-     * does not re-enter this once per row.
+     * does not re-enter this once per row. That has a consequence worth stating
+     * because it is invisible when it happens: getApi() is outside the try
+     * below, so a store view whose API construction throws takes this whole
+     * loop with it, and the flag is already set -- leaving $this->groups
+     * half-built and treated as complete for the rest of the process. Later
+     * store views never load, and _getGroups() matches against a partial tree
+     * without knowing it.
+     *
+     * That is deliberate rather than overlooked. Re-entering on failure would
+     * restore exactly the per-row amplification this method was changed to
+     * remove, and the job runs again in five minutes, so a partial load costs
+     * one cycle where a retry loop would cost a call per webhook row.
      *
      * @return void
      */
