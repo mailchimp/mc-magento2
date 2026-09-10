@@ -92,6 +92,28 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     const XML_PIXEL_SCRIPT_URL        = 'mailchimp/pixel/script_url';
     const XML_PIXEL_SCRIPT_FRAGMENT   = 'mailchimp/pixel/script_fragment';
 
+    /**
+     * How long a failed connected-site lookup is remembered for.
+     *
+     * Fifteen minutes is the balance between the two ways this can be wrong.
+     * Too short and a Mailchimp outage is still paid for by visitors, since
+     * the whole point is that a store view attempts once per window instead of
+     * once per render. Too long and a merchant who fixes the cause outside
+     * Magento -- reconnecting the site, restoring a revoked key -- waits for
+     * the window to run out, because nothing inside Magento changes to say so.
+     *
+     * The admin's own fixes do not wait: choosing a different Mailchimp store
+     * and the "Fix Mailchimp JS" button both drop the markers outright, so the
+     * TTL only ever governs repairs made on Mailchimp's side.
+     */
+    const JS_URL_FAILURE_TTL         = 900;
+
+    /**
+     * Tagged so those two admin paths can drop every marker in one call,
+     * without having to work out which store views hold one.
+     */
+    const JS_URL_FAILURE_CACHE_TAG   = 'MAILCHIMP_JS_URL_FAILURE';
+
     const ORDER_STATE_OK             = 'complete';
 
     const GUEST_GROUP                = 'NOT LOGGED IN';
@@ -216,6 +238,10 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
      */
     private $_cacheTypeList;
     /**
+     * @var \Magento\Framework\App\CacheInterface|null
+     */
+    private $_cache;
+    /**
      * @var \Magento\Customer\Model\ResourceModel\Attribute\CollectionFactory
      */
     private $_attCollection;
@@ -311,7 +337,8 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         \Magento\Directory\Model\CountryFactory $countryFactory,
         \Magento\Framework\Locale\Resolver $resolver,
         MailchimpNotificationFactory $mailchimpNotificationFactory,
-        ProductMetadataInterface $productMetadata
+        ProductMetadataInterface $productMetadata,
+        ?\Magento\Framework\App\CacheInterface $cache = null
     ) {
 
         $this->_storeManager  = $storeManager;
@@ -340,6 +367,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         $this->resolver                 = $resolver;
         $this->mailchimpNotificationFactory = $mailchimpNotificationFactory;
         $this->productMetadata          = $productMetadata;
+        $this->_cache                   = $cache;
         parent::__construct($context);
     }
 
@@ -1134,6 +1162,23 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
                 return $url;
             }
 
+            // A store id that is real but does not resolve passes the guard
+            // above and fails below, writing nothing -- so without a marker
+            // the next render repeats it, and so does the one after that. It
+            // gets there by being deleted on Mailchimp's side, by arriving in
+            // a restored database that points at another account, by having no
+            // connected site, or by its key being revoked.
+            //
+            // The widest case is not merchant error at all. While Mailchimp is
+            // down or slow, every uncached render of every store using the
+            // pixel blocks on curl until the library's timeout before the page
+            // is served, cart and checkout included. That is what this bounds:
+            // one attempt per store view per window, rather than one per
+            // visitor.
+            if ($this->jsUrlLookupFailedRecently($storeId)) {
+                return $url;
+            }
+
             try {
                 $api = $this->getApi($storeId);
                 $storeData = $api->ecommerce->stores->get($mailChimpStoreId);
@@ -1145,12 +1190,93 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
                     // and called again -- a successful lookup that never
                     // stopped asking, and left no error behind to notice.
                     $this->saveConfigValue(self::XML_MAILCHIMP_JS_URL, $url, $storeId);
+                } else {
+                    // A 200 carrying no URL -- the store exists but has no
+                    // connected site. The quietest of the failures: nothing
+                    // throws, nothing is logged and nothing is written, so it
+                    // needs the marker at least as much as the loud ones.
+                    $this->rememberJsUrlLookupFailed($storeId);
                 }
             } catch (\Mailchimp_Error | \Mailchimp_HttpError $e) {
+                // Mailchimp_HttpError is what the library throws on a curl
+                // failure as well as on an HTTP one, so marking here is what
+                // covers the outage, not just the 404 and the 401.
+                $this->rememberJsUrlLookupFailed($storeId);
                 $this->log($e->getFriendlyMessage());
             }
         }
         return $url;
+    }
+
+    /**
+     * Whether this store view's lookup failed recently enough not to retry.
+     *
+     * The cache is optional so that a helper built without it -- an older
+     * di.xml, a unit test constructing it by hand -- keeps the behaviour it had
+     * before this existed rather than fataling.
+     *
+     * @param  int|string $storeId
+     * @return bool
+     */
+    private function jsUrlLookupFailedRecently($storeId)
+    {
+        if ($this->_cache === null) {
+            return false;
+        }
+
+        return (bool)$this->_cache->load($this->jsUrlFailureCacheId($storeId));
+    }
+
+    /**
+     * Remember that this store view's lookup failed, for JS_URL_FAILURE_TTL.
+     *
+     * @param  int|string $storeId
+     * @return void
+     */
+    private function rememberJsUrlLookupFailed($storeId)
+    {
+        if ($this->_cache === null) {
+            return;
+        }
+
+        $this->_cache->save(
+            '1',
+            $this->jsUrlFailureCacheId($storeId),
+            [self::JS_URL_FAILURE_CACHE_TAG],
+            self::JS_URL_FAILURE_TTL
+        );
+    }
+
+    /**
+     * Drop every remembered failure, so the next render asks again.
+     *
+     * Called from the two admin paths that change what the lookup would
+     * answer: saving a different Mailchimp store, and the "Fix Mailchimp JS"
+     * button. Both are rare and deliberate, so dropping all of the markers
+     * instead of working out which store views the change reaches costs at
+     * most one call per store view on the next render -- which is exactly what
+     * those store views paid on every render before this existed.
+     *
+     * @return void
+     */
+    public function clearJsUrlFailures()
+    {
+        if ($this->_cache === null) {
+            return;
+        }
+
+        $this->_cache->clean([self::JS_URL_FAILURE_CACHE_TAG]);
+    }
+
+    /**
+     * Cache id of the failure marker for one store view.
+     *
+     * @param  int|string $storeId
+     * @return string
+     */
+    private function jsUrlFailureCacheId($storeId)
+    {
+        return 'mailchimp_js_url_failed_' . (int)$storeId;
     }
 
     public function getWebhooksKey()

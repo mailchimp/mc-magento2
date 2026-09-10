@@ -30,9 +30,10 @@ class JsUrlTest extends TestCase
      * @param  mixed $storeId   value of mailchimp/general/monkeystore
      * @param  mixed $savedUrl  value already in config, or ''
      * @param  mixed $answer    API answer, or a throwable
+     * @param  mixed $cache     cache double, or null for a helper built without one
      * @return MailChimpHelper
      */
-    private function helper($storeId, $savedUrl, $answer = null)
+    private function helper($storeId, $savedUrl, $answer = null, $cache = null)
     {
         $this->apiCalls = 0;
         $this->saved    = [];
@@ -69,7 +70,74 @@ class JsUrlTest extends TestCase
             $this->saved[$path] = $value;
         });
 
+        // The constructor is disabled, so the cache has to go in by hand. A
+        // helper left without one is the pre-upgrade object: it is what proves
+        // the new argument stayed optional.
+        if ($cache !== null) {
+            $property = new \ReflectionProperty(MailChimpHelper::class, '_cache');
+            $property->setAccessible(true);
+            $property->setValue($helper, $cache);
+        }
+
         return $helper;
+    }
+
+    /**
+     * An in-memory CacheInterface.
+     *
+     * clean() honours tags rather than emptying itself, so a production call
+     * that cleaned the wrong tag would fail here instead of passing on a double
+     * that forgives it.
+     *
+     * @return object
+     */
+    private function cache()
+    {
+        return new class implements \Magento\Framework\App\CacheInterface {
+            /** @var array */
+            public $data = [];
+            /** @var array */
+            public $saves = [];
+            /** @var array */
+            public $cleans = [];
+
+            public function getFrontend()
+            {
+                return null;
+            }
+
+            public function load($identifier)
+            {
+                return array_key_exists($identifier, $this->data) ? $this->data[$identifier] : false;
+            }
+
+            public function save($data, $identifier, $tags = [], $lifeTime = null)
+            {
+                $this->data[$identifier] = (string)$data;
+                $this->saves[] = ['id' => $identifier, 'tags' => $tags, 'lifetime' => $lifeTime];
+
+                return true;
+            }
+
+            public function remove($identifier)
+            {
+                unset($this->data[$identifier]);
+
+                return true;
+            }
+
+            public function clean($tags = [])
+            {
+                $this->cleans[] = $tags;
+                foreach ($this->saves as $save) {
+                    if (array_intersect((array)$tags, $save['tags'])) {
+                        unset($this->data[$save['id']]);
+                    }
+                }
+
+                return true;
+            }
+        };
     }
 
     public function countApiCall()
@@ -152,8 +220,8 @@ class JsUrlTest extends TestCase
     }
 
     /**
-     * A real store id that fails is still one call. Not remembering that is a
-     * separate problem and deliberately not fixed here.
+     * A real store id that fails writes nothing and returns empty. What it must
+     * not do is keep asking -- see the negative-cache tests below.
      */
     public function testARealStoreThatFailsIsLoggedAndReturnsEmpty()
     {
@@ -162,5 +230,189 @@ class JsUrlTest extends TestCase
         $this->assertSame('', $helper->getJsUrl(1));
         $this->assertSame(1, $this->apiCalls);
         $this->assertSame([], $this->saved);
+    }
+
+    /**
+     * Bug 3: a store id that is real but does not resolve passes the guards and
+     * fails, saving nothing, so every uncached render asked again.
+     *
+     * These four are the ways to get there. The first three are merchant state;
+     * the fourth is not, and is the reason the others are worth fixing with it.
+     *
+     * @return array
+     */
+    public static function unresolvableStoreProvider()
+    {
+        return [
+            'deleted on Mailchimp\'s side, or a database restored against another account' => [
+                new \Mailchimp_Error('/ecommerce/stores/abc123', 'GET', '', 'Resource Not Found', 'nope'),
+            ],
+            'the key was revoked' => [
+                new \Mailchimp_Error('/ecommerce/stores/abc123', 'GET', '', 'API Key Invalid', 'nope'),
+            ],
+            'Mailchimp is down or slow: curl gives up, and the visitor waited for it' => [
+                new \Mailchimp_HttpError(
+                    '/ecommerce/stores/abc123',
+                    'GET',
+                    '',
+                    '',
+                    'Operation timed out after 10001 milliseconds'
+                ),
+            ],
+            'the store exists but has no connected site: a 200 carrying no URL' => [
+                ['id' => 'abc123', 'name' => 'Store', 'connected_site' => []],
+            ],
+        ];
+    }
+
+    /**
+     * @dataProvider unresolvableStoreProvider
+     * @param mixed $answer
+     */
+    public function testAnUnresolvableStoreIsAskedOnceNotOncePerRender($answer)
+    {
+        $cache  = $this->cache();
+        $helper = $this->helper('abc123', '', $answer, $cache);
+
+        $this->assertSame('', $helper->getJsUrl(1));
+        $this->assertSame('', $helper->getJsUrl(1));
+        $this->assertSame('', $helper->getJsUrl(1));
+
+        $this->assertSame(1, $this->apiCalls);
+        $this->assertSame([], $this->saved);
+    }
+
+    /**
+     * The marker carries the documented lifetime and the tag the admin paths
+     * clean by. Neither is decoration: a missing lifetime would remember the
+     * failure until the cache was flushed, and a missing tag would leave
+     * clearJsUrlFailures() nothing to find.
+     */
+    public function testTheMarkerCarriesTheLifetimeAndTheTag()
+    {
+        $cache  = $this->cache();
+        $helper = $this->helper('abc123', '', new \Mailchimp_Error('/', 'GET', '', 'Not Found', 'nope'), $cache);
+
+        $helper->getJsUrl(1);
+
+        $this->assertCount(1, $cache->saves);
+        $this->assertSame(MailChimpHelper::JS_URL_FAILURE_TTL, $cache->saves[0]['lifetime']);
+        $this->assertSame([MailChimpHelper::JS_URL_FAILURE_CACHE_TAG], $cache->saves[0]['tags']);
+    }
+
+    /**
+     * Store views resolve to different Mailchimp stores, so one failing view
+     * must not silence a working one.
+     */
+    public function testTheMarkerIsPerStoreView()
+    {
+        $cache  = $this->cache();
+        $helper = $this->helper('abc123', '', new \Mailchimp_Error('/', 'GET', '', 'Not Found', 'nope'), $cache);
+
+        $helper->getJsUrl(1);
+        $helper->getJsUrl(2);
+
+        $this->assertSame(2, $this->apiCalls);
+
+        $helper->getJsUrl(1);
+        $helper->getJsUrl(2);
+
+        $this->assertSame(2, $this->apiCalls);
+    }
+
+    public function testASuccessfulLookupLeavesNoMarker()
+    {
+        $cache  = $this->cache();
+        $helper = $this->helper(
+            'abc123',
+            '',
+            ['connected_site' => ['site_script' => ['url' => 'https://chimpstatic.com/mcjs/x.js']]],
+            $cache
+        );
+
+        $this->assertSame('https://chimpstatic.com/mcjs/x.js', $helper->getJsUrl(1));
+        $this->assertSame([], $cache->saves);
+    }
+
+    /**
+     * What the "Fix Mailchimp JS" button and a change of Mailchimp store call.
+     * Without it those two would clear the config value and appear not to have
+     * worked, because the marker would still be telling the helper not to ask.
+     */
+    public function testClearingTheMarkersMakesTheNextRenderAskAgain()
+    {
+        $cache  = $this->cache();
+        $helper = $this->helper('abc123', '', new \Mailchimp_Error('/', 'GET', '', 'Not Found', 'nope'), $cache);
+
+        $helper->getJsUrl(1);
+        $helper->getJsUrl(1);
+        $this->assertSame(1, $this->apiCalls);
+
+        $helper->clearJsUrlFailures();
+
+        $this->assertSame([[MailChimpHelper::JS_URL_FAILURE_CACHE_TAG]], $cache->cleans);
+
+        $helper->getJsUrl(1);
+        $this->assertSame(2, $this->apiCalls);
+    }
+
+    /**
+     * The cache is a new, optional, trailing constructor argument. A helper
+     * built without one -- a stale generated factory, an override that still
+     * lists the old arguments -- has to keep working, calling every render as
+     * it did before, rather than fatal on a null.
+     */
+    public function testAHelperBuiltWithoutACacheStillWorks()
+    {
+        $helper = $this->helper('abc123', '', new \Mailchimp_Error('/', 'GET', '', 'Not Found', 'nope'));
+
+        $this->assertSame('', $helper->getJsUrl(1));
+        $this->assertSame('', $helper->getJsUrl(1));
+
+        $this->assertSame(2, $this->apiCalls);
+
+        $helper->clearJsUrlFailures();
+    }
+
+    /**
+     * The two halves of how the cache reaches the helper, pinned together
+     * because either one alone is a helper that never caches anything.
+     *
+     * The argument has a default so the constructor stays backwards compatible.
+     * The price of that default is that the ObjectManager will not resolve it:
+     * ClassReader records a parameter with a default value as not required
+     * (Code/Reader/ClassReader.php), and AbstractFactory::getResolvedArgument()
+     * hands a not-required parameter its default instead of instantiating its
+     * type. So di.xml has to name it, and every test above would still pass if
+     * nobody did -- they inject the cache themselves.
+     */
+    public function testTheCacheIsOptionalInTheConstructorAndThereforeWiredInDi()
+    {
+        $cache = null;
+        foreach ((new \ReflectionClass(MailChimpHelper::class))->getConstructor()->getParameters() as $parameter) {
+            if ($parameter->getName() === 'cache') {
+                $cache = $parameter;
+            }
+        }
+
+        $this->assertNotNull($cache, 'The helper no longer takes a $cache argument.');
+        $this->assertTrue(
+            $cache->isDefaultValueAvailable(),
+            'Dropping the default makes the argument required, which breaks anything still '
+            . 'calling the constructor with the old argument list.'
+        );
+
+        $di = simplexml_load_file(__DIR__ . '/../../../etc/di.xml');
+        $argument = $di->xpath(
+            '//type[@name="Ebizmarts\MailChimp\Helper\Data"]/arguments/argument[@name="cache"]'
+        );
+
+        $this->assertCount(
+            1,
+            $argument,
+            'di.xml does not name the $cache argument, so it arrives null and getJsUrl() calls '
+            . 'the API on every render again.'
+        );
+        $this->assertSame('Magento\Framework\App\CacheInterface', trim((string)$argument[0]));
     }
 }

@@ -122,6 +122,12 @@ class MonkeyStore extends Value
                     $createWebhook = false;
                 }
             }
+            // The URLs above are gone, but a store view whose lookup had been
+            // failing also holds a marker saying not to ask again for a while.
+            // Leaving it would make this save appear not to have worked until
+            // the marker expired, which is the one thing an admin changing the
+            // store is entitled to see take effect now.
+            $this->_helper->clearJsUrlFailures();
             if ($found==1) {
                 $this->_helper->cancelAllPendingBatches($mailchimpStore);
                 $this->syncHelper->resetErrors($mailchimpStore, $this->getScopeId(), true);
