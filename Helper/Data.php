@@ -155,7 +155,20 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
 
     const MAX_MERGEFIELDS = 100;
 
-    const MIN_LIB_VERSION = '3.0.45';
+    /**
+     * The oldest library this extension is willing to run against without
+     * saying so in the admin.
+     *
+     * This must track the `ebizmarts/mailchimp-lib` floor in composer.json.
+     * They answer for two different populations and only one of them is
+     * enforced: composer holds the floor for installations that were installed
+     * with composer, and this constant is the only thing that says anything at
+     * all to an app/code installation, where the merchant runs whichever
+     * library happens to be present. A constant left behind the floor is
+     * silence aimed at exactly the installations that cannot be told any other
+     * way.
+     */
+    const MIN_LIB_VERSION = '3.0.49';
 
     protected $counters = [];
 
