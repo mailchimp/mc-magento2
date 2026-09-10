@@ -21,6 +21,7 @@ use Magento\Framework\App\Config\ScopeConfigInterface;
 use Magento\Framework\App\Config\Value;
 use Magento\Framework\Data\Collection\AbstractDb;
 use Magento\Framework\Model\Context;
+use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Model\ResourceModel\AbstractResource;
 use Magento\Framework\Registry;
 use Magento\Framework\Stdlib\DateTime\DateTime;
@@ -68,11 +69,47 @@ class MonkeyStore extends Value
         $newListId = null;
         if (isset($data['ecommerce']['fields']['active']['value'])) {
             $active = $data['ecommerce']['fields']['active']['value'];
-        } elseif ($data['ecommerce']['fields']['active']['inherit']) {
-            $active = $data['ecommerce']['fields']['active']['inherit'];
+        } elseif (!empty($data['ecommerce']['fields']['active']['inherit'])) {
+            // 'inherit' is a flag, not a value: Magento posts inherit => 1 with
+            // no 'value' whenever "Use Default" is ticked, whatever the
+            // inherited setting happens to be. Reading the flag made $active
+            // true for every inheriting scope, so a scope inheriting ecommerce
+            // OFF would be told to turn ecommerce off -- with no way to comply
+            // at that scope, since the field it would have to change is the one
+            // it is inheriting. Resolve what is actually inherited instead.
+            $active = $this->_helper->getConfigValue(
+                Data::XML_PATH_ECOMMERCE_ACTIVE,
+                $this->getScopeId(),
+                $this->getScope()
+            );
         } else {
             $active = 0;
         }
+        // The dropdown offers two values that are not stores: -1, its
+        // placeholder (Model/Config/Source/MonkeyStore.php), and 0, the
+        // '---No Data---' option it falls back to when there is no API key at
+        // this scope or the store listing threw. Persisting either leaves a
+        // setting that is not a store, which every later reader has to know to
+        // special-case, and three already do.
+        //
+        // Only while ecommerce is active. With it off, "no store selected" is a
+        // legitimate state, and rejecting it here would stop a merchant saving
+        // any Mailchimp configuration at all -- including the switch that would
+        // turn ecommerce off.
+        //
+        // Above the isValueChanged() gate on purpose, so this fires on every
+        // save of the section rather than only when the dropdown was touched.
+        // An install already holding -1 meets it the next time it saves
+        // anything here, which is what takes the value out of circulation
+        // rather than preserving it until someone happens to reopen that
+        // field.
+        if ($active && !$this->isARealStore($this->getValue())) {
+            throw new LocalizedException(
+                __('Select a Mailchimp store, or turn Mailchimp ecommerce off. '
+                    . 'Ecommerce cannot sync without one.')
+            );
+        }
+
         if ($active && $this->isValueChanged()) {
             $mailchimpStore     = $this->getOldValue();
             // charge the $newListId
@@ -85,12 +122,20 @@ class MonkeyStore extends Value
                 $newListId = $data['general']['fields']['monkeylist']['value'];
             } else {
                 $newListId = $this->getStore($apiKey, $this->getValue());
-                $this->_helper->saveConfigValue(
-                    Data::XML_PATH_LIST,
-                    $newListId,
-                    $this->getScopeId(),
-                    $this->getScope()
-                );
+                // getStore() answers null when its own lookup fails -- a 404 on
+                // a store Mailchimp no longer has, a revoked key. Writing that
+                // replaced a working audience id with nothing, so a failed
+                // lookup did not merely fail: it destroyed the answer it could
+                // not confirm. Keep what is there and let the failure be a
+                // failure.
+                if ($newListId) {
+                    $this->_helper->saveConfigValue(
+                        Data::XML_PATH_LIST,
+                        $newListId,
+                        $this->getScopeId(),
+                        $this->getScope()
+                    );
+                }
             }
             $this->oldListId = $this->_helper->getConfigValue(
                 Data::XML_PATH_LIST,
@@ -133,12 +178,30 @@ class MonkeyStore extends Value
                 $this->syncHelper->resetErrors($mailchimpStore, $this->getScopeId(), true);
             }
             $this->_helper->restoreAllCanceledBatches($this->getValue());
-            if ($createWebhook) {
+            // Same null, one consequence further on: without this the failed
+            // lookup went on to register a webhook against no audience at all.
+            if ($createWebhook && $newListId) {
                 $this->_helper->createWebHook($apiKey, $newListId);
             }
         }
         return parent::beforeSave();
     }
+    /**
+     * Whether a submitted value is a Mailchimp store rather than one of the
+     * dropdown's two non-answers.
+     *
+     * Falsy covers 0, '0' and the empty string; -1 is compared loosely because
+     * the form submits it as a string. This mirrors the guard the read side
+     * already applies in Helper\Data::getJsUrl().
+     *
+     * @param  mixed $value
+     * @return bool
+     */
+    private function isARealStore($value)
+    {
+        return (bool)$value && $value != -1;
+    }
+
     private function getStore($apiKey, $store)
     {
         try {
