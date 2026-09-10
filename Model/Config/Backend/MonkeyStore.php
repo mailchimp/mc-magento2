@@ -69,8 +69,19 @@ class MonkeyStore extends Value
         $newListId = null;
         if (isset($data['ecommerce']['fields']['active']['value'])) {
             $active = $data['ecommerce']['fields']['active']['value'];
-        } elseif ($data['ecommerce']['fields']['active']['inherit']) {
-            $active = $data['ecommerce']['fields']['active']['inherit'];
+        } elseif (!empty($data['ecommerce']['fields']['active']['inherit'])) {
+            // 'inherit' is a flag, not a value: Magento posts inherit => 1 with
+            // no 'value' whenever "Use Default" is ticked, whatever the
+            // inherited setting happens to be. Reading the flag made $active
+            // true for every inheriting scope, so a scope inheriting ecommerce
+            // OFF would be told to turn ecommerce off -- with no way to comply
+            // at that scope, since the field it would have to change is the one
+            // it is inheriting. Resolve what is actually inherited instead.
+            $active = $this->_helper->getConfigValue(
+                Data::XML_PATH_ECOMMERCE_ACTIVE,
+                $this->getScopeId(),
+                $this->getScope()
+            );
         } else {
             $active = 0;
         }
@@ -85,6 +96,13 @@ class MonkeyStore extends Value
         // legitimate state, and rejecting it here would stop a merchant saving
         // any Mailchimp configuration at all -- including the switch that would
         // turn ecommerce off.
+        //
+        // Above the isValueChanged() gate on purpose, so this fires on every
+        // save of the section rather than only when the dropdown was touched.
+        // An install already holding -1 meets it the next time it saves
+        // anything here, which is what takes the value out of circulation
+        // rather than preserving it until someone happens to reopen that
+        // field.
         if ($active && !$this->isARealStore($this->getValue())) {
             throw new LocalizedException(
                 __('Select a Mailchimp store, or turn Mailchimp ecommerce off. '
