@@ -72,7 +72,13 @@ class Hint extends \Magento\Backend\Block\Template implements
     public function checkLibVersion()
     {
         $version = $this->_moduleVersion->getLibVersion('ebizmarts/mailchimp-lib');
-        if (\Ebizmarts\MailChimp\Helper\Data::MIN_LIB_VERSION > $version) {
+        // version_compare, not `>`. Comparing version strings with a relational
+        // operator compares them as strings, so '3.0.45' > '3.0.9' is false and
+        // an installation running 3.0.9 was told nothing -- the oldest
+        // libraries, which are the whole reason this warning exists, were the
+        // ones it could not see. It fails in the other direction too: it would
+        // have warned every installation from 3.0.100 onwards.
+        if (version_compare((string)$version, \Ebizmarts\MailChimp\Helper\Data::MIN_LIB_VERSION, '<')) {
             return $version;
         } else {
             return false;
