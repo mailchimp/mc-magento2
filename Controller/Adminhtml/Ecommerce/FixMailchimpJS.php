@@ -72,6 +72,11 @@ class FixMailchimpJS extends \Magento\Backend\App\Action
         $resultJson = $this->resultJsonFactory->create();
         try {
             $this->config->deleteConfig(\Ebizmarts\MailChimp\Helper\Data::XML_MAILCHIMP_JS_URL, $scope, $scopeId);
+            // This button exists to make the next render look the URL up
+            // again. Dropping the config value alone would not do that for a
+            // store view that had been failing: it would still be holding a
+            // marker telling the helper not to ask.
+            $this->helper->clearJsUrlFailures();
         } catch(ValidatorException $e) {
             $valid = 0;
             $message = $e->getMessage();

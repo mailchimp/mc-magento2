@@ -11,6 +11,20 @@
  */
 -->
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
+    <!--
+        The helper's $cache argument is optional so that anything still building
+        it with the old argument list keeps working. That optionality is exactly
+        why it has to be named here: ClassReader marks a parameter with a default
+        value as not required, and the ObjectManager hands such a parameter its
+        default rather than resolving its type. Without this line the argument
+        would arrive null on every instantiation, and the negative cache in
+        getJsUrl() would silently do nothing.
+    -->
+    <type name="Ebizmarts\MailChimp\Helper\Data">
+        <arguments>
+            <argument name="cache" xsi:type="object">Magento\Framework\App\CacheInterface</argument>
+        </arguments>
+    </type>
     <type name="Ebizmarts\MailChimp\Block\Mailchimpjs">
         <arguments>
             <argument name="helper" xsi:type="object">Ebizmarts\MailChimp\Helper\Data\Proxy</argument>
