@@ -1,5 +1,38 @@
 # Changelog
 
+## [103.4.82](https://github.com/mailchimp/mc-magento2/tree/103.4.82)
+
+[Full Changelog](https://github.com/mailchimp/mc-magento2/compare/103.4.81...103.4.82)
+
+**Implemented enhancements:**
+
+- Report extension status to the ebizmarts service once an hour [\#2341](https://github.com/mailchimp/mc-magento2/pull/2341)
+- Let merchants opt out of sharing account contact details [\#2344](https://github.com/mailchimp/mc-magento2/pull/2344)
+- Tell the library which Mailchimp store this store view syncs into [\#2350](https://github.com/mailchimp/mc-magento2/pull/2350)
+- Report the Magento version in the user agent [\#2353](https://github.com/mailchimp/mc-magento2/pull/2353)
+
+**Fewer calls to the Mailchimp API from merchant servers:**
+
+- Ask a rejected API key once per run, not once per store view [\#2351](https://github.com/mailchimp/mc-magento2/pull/2351)
+- Stop resolving the connected-site URL on every page render [\#2354](https://github.com/mailchimp/mc-magento2/pull/2354)
+- Fetch interest groups once per store view, and only when they can be used [\#2355](https://github.com/mailchimp/mc-magento2/pull/2355)
+
+**Fixed bugs:**
+
+- Fix profile webhook recreating newsletter subscribers as Not Activated [\#2338](https://github.com/mailchimp/mc-magento2/pull/2338)
+- Send the chosen variant in ProductVariantDto.id for configurable products [\#2340](https://github.com/mailchimp/mc-magento2/pull/2340)
+- Write a broadcast notification to the inbox once, not once per store view [\#2345](https://github.com/mailchimp/mc-magento2/pull/2345)
+- Bound mailchimp_errors with a row ceiling, without overriding anyone [\#2347](https://github.com/mailchimp/mc-magento2/pull/2347)
+- Apply the Error fix to the rest of the edge classes [\#2349](https://github.com/mailchimp/mc-magento2/pull/2349)
+- Name the store when loading Mailchimp stores [\#2352](https://github.com/mailchimp/mc-magento2/pull/2352)
+
+**Merged pull requests:**
+
+- Keep tests out of release archives [\#2342](https://github.com/mailchimp/mc-magento2/pull/2342)
+- Update PixelStateWriter tests to the behaviour that shipped [\#2343](https://github.com/mailchimp/mc-magento2/pull/2343)
+- Ship a phpunit configuration for this extension's unit suite [\#2346](https://github.com/mailchimp/mc-magento2/pull/2346)
+- Require performance claims to be measured after ANALYZE TABLE [\#2348](https://github.com/mailchimp/mc-magento2/pull/2348)
+
 ## [103.4.81](https://github.com/mailchimp/mc-magento2/tree/103.4.81)
 
 [Full Changelog](https://github.com/mailchimp/mc-magento2/compare/103.4.80...103.4.81)
