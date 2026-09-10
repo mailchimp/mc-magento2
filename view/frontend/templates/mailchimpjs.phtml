@@ -6,5 +6,13 @@
 $url = $block->getJsUrl();
 $render = $block->getRender();
 ?>
-<?= /* @noEscape */ $render->renderTag('script',['type'=>'text/javascript','src'=>$escaper->escapeUrl($url),'defer'=>'defer'],"\n",true); ?>
-
+<?php // An unresolved connected site leaves $url empty -- null when nothing is
+      // saved, since the config read returns null rather than ''. Rendering
+      // anyway put <script src=""> on the page: inert per the HTML spec, which
+      // fires an error event and fetches nothing, but it is the one symptom of
+      // that state a merchant sees in their own browser console, and it is not
+      // the reason the connected-site script is missing. No tag says the same
+      // thing without inviting the wrong investigation. ?>
+<?php if ($url): ?>
+    <?= /* @noEscape */ $render->renderTag('script',['type'=>'text/javascript','src'=>$escaper->escapeUrl($url),'defer'=>'defer'],"\n",true); ?>
+<?php endif; ?>
