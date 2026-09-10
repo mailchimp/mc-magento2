@@ -57,6 +57,18 @@ class Webhook
     protected $groups = [];
 
     /**
+     * Whether _loadGroups() has already run in this process.
+     *
+     * A flag rather than `if (!$this->groups)`: an audience that defines no
+     * interest categories legitimately loads as [], and a falsy check would
+     * read that as "not loaded yet" and re-fetch the whole tree for every
+     * webhook row that asked.
+     *
+     * @var bool
+     */
+    private $groupsLoaded = false;
+
+    /**
      * Webhook constructor.
      * @param \Ebizmarts\MailChimp\Helper\Data $helper
      * @param \Magento\Newsletter\Model\SubscriberFactory $subscriberFactory
@@ -87,7 +99,6 @@ class Webhook
     }
     public function processWebhooks()
     {
-        $this->_loadGroups();
         /**
          * @var $collection \Ebizmarts\MailChimp\Model\ResourceModel\MailChimpWebhookRequest\Collection
          */
@@ -336,15 +347,35 @@ class Webhook
         $subscriber->setIsStatusChanged(true);
         $subscriber->getResource()->save($subscriber);
     }
+    /**
+     * Fetch every enabled store view's interest-group tree, once per process.
+     *
+     * This used to be the first statement of processWebhooks(), which read the
+     * queue two lines later: an install with nothing to process paid the whole
+     * tree -- one `interest-categories` call per store view plus one
+     * `interests` call per category -- every five minutes, and discarded it.
+     * The single consumer is _getGroups(), reached only from a `profile`
+     * webhook carrying a GROUPINGS merge field, so it is now called from there.
+     *
+     * The flag is set before the work rather than after, so a run that throws
+     * does not re-enter this once per row.
+     *
+     * @return void
+     */
     protected function _loadGroups()
     {
+        if ($this->groupsLoaded) {
+            return;
+        }
+        $this->groupsLoaded = true;
+
         foreach ($this->storeManager->getStores() as $storeId => $val) {
             if (!$this->_helper->isMailChimpEnabled($storeId)) {
                 continue;
             }
-            // This runs before any webhook work is looked at, so an install
-            // with nothing to process still paid one rejected call per store
-            // view to find that out. One answer per credential is enough.
+            // One answer per credential is enough. This loop no longer runs
+            // unless a row actually needs the groups, but when it does run a
+            // dead key would still cost one rejected call per store view.
             if ($this->_helper->isApiKeyFailed($storeId)) {
                 continue;
             }
@@ -376,6 +407,8 @@ class Webhook
     }
     protected function _getGroups($groups, $cat)
     {
+        $this->_loadGroups();
+
         $rc = [];
         $gr = explode(",",$groups);
         foreach ($gr as $g) {
