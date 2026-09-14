@@ -57,7 +57,23 @@ class Get extends Action
         $result = [];
         try {
             $api = $this->_helper->getApiByApiKey($apiKey);
-            $lists = $api->lists->getLists(null, null, null, self::MAX_LISTS);
+            // `total_contacts` is returned only when include_total_contacts is
+            // set, and the collection carries each audience's stats, so this is
+            // the one response that can describe every audience an account has
+            // rather than the one a store view happens to point at.
+            $lists = $api->lists->getLists(
+                null,
+                null,
+                null,
+                self::MAX_LISTS,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                true
+            );
             foreach ($lists['lists'] as $list) {
                 $result['lists'][] = ['id' => $list['id'], 'name' => $list['name']];
             }
