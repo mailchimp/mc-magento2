@@ -1,5 +1,33 @@
 # Changelog
 
+## [103.4.84](https://github.com/mailchimp/mc-magento2/tree/103.4.84)
+
+[Full Changelog](https://github.com/mailchimp/mc-magento2/compare/103.4.83...103.4.84)
+
+**Implemented enhancements:**
+
+- Ask for the audience's total contacts on the call already being made [\#2365](https://github.com/mailchimp/mc-magento2/pull/2365)
+- Ask for total_contacts on the audience collection too [\#2367](https://github.com/mailchimp/mc-magento2/pull/2367)
+
+**Fixed bugs:**
+
+- Ask for total_contacts on every single-audience read, not only the cron [\#2366](https://github.com/mailchimp/mc-magento2/pull/2366)
+
+**Dependencies:**
+
+- The `ebizmarts/mailchimp-lib` floor moves from `>=3.0.49` to `>=3.0.51` [\#2368](https://github.com/mailchimp/mc-magento2/pull/2368)
+
+  3.0.51 is the release that reads the audience collection. Every call site in this
+  version now asks for the contact total, and the collection is where the account's
+  own audience count comes from -- the figure that says whether an audience nobody
+  here looked at exists at all. Against 3.0.50 the extension still asks and nothing
+  reads the collection; against anything older the argument is simply ignored.
+
+  It remains a floor rather than a pin, as it has been since 3.0.44, so an
+  installation already resolving to something newer is unaffected -- but an
+  installation **pinned** below 3.0.51 will not be able to install this release
+  until it moves.
+
 ## [103.4.83](https://github.com/mailchimp/mc-magento2/tree/103.4.83)
 
 [Full Changelog](https://github.com/mailchimp/mc-magento2/compare/103.4.82...103.4.83)
