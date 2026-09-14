@@ -43,8 +43,9 @@ class LibVersionWarningTest extends TestCase
     }
 
     /**
-     * The defect, stated as the case it missed. A store on 3.0.9 is nine
-     * releases behind the floor and was told nothing.
+     * The defect, stated as the case it missed. A store on 3.0.9 is far
+     * behind the floor -- forty-two releases, as of this one -- and was told
+     * nothing, because as strings '3.0.9' sorts above the floor.
      */
     public function testAVersionWithFewerDigitsIsStillOlder()
     {
@@ -57,9 +58,9 @@ class LibVersionWarningTest extends TestCase
     public static function olderProvider()
     {
         return [
-            'nine releases behind'  => ['3.0.9'],
-            'one release behind'    => ['3.0.48'],
-            'normalised by composer' => ['3.0.48.0'],
+            'fewer digits than the floor' => ['3.0.9'],
+            'one release behind'    => ['3.0.50'],
+            'normalised by composer' => ['3.0.50.0'],
             'far behind'            => ['3.0.44'],
         ];
     }
@@ -80,7 +81,7 @@ class LibVersionWarningTest extends TestCase
     {
         return [
             'exactly the floor'      => [MailChimpHelper::MIN_LIB_VERSION],
-            'newer'                  => ['3.0.50'],
+            'newer'                  => ['3.0.52'],
             'newer past the decade'  => ['3.0.100'],
             'a major ahead'          => ['3.1.0'],
         ];
