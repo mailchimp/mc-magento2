@@ -1117,7 +1117,23 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
                     $mcUserName[$apiKey] = $mcInfo['account_name'];
                 }
                 try {
-                    $listInfo = $this->_api->lists->getLists($store['list_id']);
+                    // See the note on the statistics cron: every single-audience
+                    // read asks for total_contacts, because the beacon replaces
+                    // all four counts on each reading and an incomplete one
+                    // blanks the billable figure.
+                    $listInfo = $this->_api->lists->getLists(
+                        $store['list_id'],
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        true
+                    );
                     if (isset($listInfo['name'])) {
                         $mstore->setListName($listInfo['name']);
                         $mstore->setMcAccountName($mcUserName[$apiKey]);

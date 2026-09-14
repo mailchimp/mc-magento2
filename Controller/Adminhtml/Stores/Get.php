@@ -59,7 +59,25 @@ class Get extends Action
                     if ($store['list_id']=='') {
                         continue;
                     }
-                    $list = $api->lists->getLists($store['list_id']);
+                    // The eleventh argument. Every single-audience read asks for
+                    // it, not only the statistics cron: the beacon that observes
+                    // these responses replaces all four counts on each reading,
+                    // so a reading without total_contacts blanks a good one. An
+                    // admin page load must not cost the estate its billable
+                    // figure until the next cron twelve hours later.
+                    $list = $api->lists->getLists(
+                        $store['list_id'],
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        true
+                    );
                     $result['stores'][] = [
                         'id' => $store['id'],
                         'name' => $store['name'],

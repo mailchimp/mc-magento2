@@ -79,7 +79,25 @@ class Getaccountdetails extends Action
                 if ($store != -1) {
                     $storeData = $api->ecommerce->stores->get($store);
                     $options['list_id'] = $storeData['list_id'];
-                    $list = $api->lists->getLists($storeData['list_id']);
+                    // The eleventh argument. Every single-audience read asks for
+                    // it, not only the statistics cron: the beacon that observes
+                    // these responses replaces all four counts on each reading,
+                    // so a reading without total_contacts blanks a good one. An
+                    // admin page load must not cost the estate its billable
+                    // figure until the next cron twelve hours later.
+                    $list = $api->lists->getLists(
+                        $storeData['list_id'],
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        true
+                    );
                     $options['list_name'] = $list['name'];
                     $options['total_list_subscribers'] = ['label' => __('Total List Subscribers:'), 'value' => $list['stats']['member_count']];
                     $options['token'] = ['label' => __('Registration ID:'), 'value' => $token];

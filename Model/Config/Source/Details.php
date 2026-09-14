@@ -78,12 +78,26 @@ class Details implements \Magento\Framework\Option\ArrayInterface
             $api = $this->_helper->getApi($storeId, $scope);
             try {
                 $this->_options = $api->root->info();
+                // See the note on the statistics cron: every single-audience
+                // read asks for total_contacts, because the beacon replaces all
+                // four counts on each reading and an incomplete one blanks the
+                // billable figure.
                 $optionsList = $api->lists->getLists(
                     $this->_helper->getConfigValue(
                         \Ebizmarts\MailChimp\Helper\Data::XML_PATH_LIST,
                         $storeId,
                         $scope
-                    )
+                    ),
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    true
                 );
                 if ($optionsList &&
                     array_key_exists('stats', $optionsList) &&
