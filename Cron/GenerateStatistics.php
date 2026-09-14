@@ -192,7 +192,30 @@ class GenerateStatistics
             if ($storeId != -1) {
                 $storeData = $api->ecommerce->stores->get($mailChimpStoreId);
                 $options['list_id'] = $storeData['list_id'];
-                $list = $api->lists->getLists($storeData['list_id']);
+                // The last argument asks for stats.total_contacts on this same
+                // response. It is the billable figure, and it is the only one
+                // the audience payload cannot be made to yield by arithmetic:
+                // member_count plus unsubscribe_count leaves out non-subscribed
+                // contacts entirely, which on an ecommerce account is most of
+                // the audience.
+                //
+                // Positional because that is the library's signature, and
+                // harmless against a library too old to have the parameter --
+                // PHP ignores surplus arguments to a userland function, so the
+                // field is simply absent there rather than an error.
+                $list = $api->lists->getLists(
+                    $storeData['list_id'],
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    true
+                );
                 $options['list_name'] = $list['name'];
                 $options['total_list_subscribers'] = $list['stats']['member_count'];
                 $totalCustomers = $api->ecommerce->customers->getAll($mailChimpStoreId, 'total_items');
