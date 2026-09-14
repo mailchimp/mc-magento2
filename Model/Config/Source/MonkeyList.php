@@ -39,10 +39,10 @@ class MonkeyList implements \Magento\Framework\Option\ArrayInterface
 
         if ($helper->getApiKey($storeId, $scope)) {
             try {
-                // See the note on the statistics cron: every single-audience
-                // read asks for total_contacts, because the beacon replaces all
-                // four counts on each reading and an incomplete one blanks the
-                // billable figure.
+                // `total_contacts` is returned only when include_total_contacts
+                // is set, so a caller that needs it has to ask on every read.
+                // Asking only on the statistics cron leaves every other
+                // single-audience read returning a response without it.
                 $this->options = $helper->getApi($storeId, $scope)->lists->getLists(
                     $helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_PATH_LIST, $storeId, $scope),
                     null,

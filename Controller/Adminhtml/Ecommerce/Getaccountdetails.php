@@ -79,12 +79,11 @@ class Getaccountdetails extends Action
                 if ($store != -1) {
                     $storeData = $api->ecommerce->stores->get($store);
                     $options['list_id'] = $storeData['list_id'];
-                    // The eleventh argument. Every single-audience read asks for
-                    // it, not only the statistics cron: the beacon that observes
-                    // these responses replaces all four counts on each reading,
-                    // so a reading without total_contacts blanks a good one. An
-                    // admin page load must not cost the estate its billable
-                    // figure until the next cron twelve hours later.
+                    // `total_contacts` is returned only when
+                    // include_total_contacts is set, so a caller that needs it
+                    // has to ask on every read. Asking only on the statistics
+                    // cron leaves every other single-audience read returning a
+                    // response without it.
                     $list = $api->lists->getLists(
                         $storeData['list_id'],
                         null,
