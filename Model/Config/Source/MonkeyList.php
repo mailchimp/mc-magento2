@@ -39,8 +39,22 @@ class MonkeyList implements \Magento\Framework\Option\ArrayInterface
 
         if ($helper->getApiKey($storeId, $scope)) {
             try {
+                // `total_contacts` is returned only when include_total_contacts
+                // is set, so a caller that needs it has to ask on every read.
+                // Asking only on the statistics cron leaves every other
+                // single-audience read returning a response without it.
                 $this->options = $helper->getApi($storeId, $scope)->lists->getLists(
-                    $helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_PATH_LIST, $storeId, $scope)
+                    $helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_PATH_LIST, $storeId, $scope),
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    true
                 );
             } catch (\Mailchimp_Error | \Mailchimp_HttpError $e) {
                 $helper->log($e->getFriendlyMessage());
