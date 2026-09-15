@@ -73,8 +73,19 @@ class GetResponse extends \Magento\Backend\App\Action
         do {
             $counter++;
             $files = $this->_result->getBatchResponse($batchId, $batches->getStoreId());
-            if ($files===false) {
+            if ($files === false) {
                 $fileContent = "Response was deleted from MailChimp servers";
+                break;
+            }
+            // Distinct from the line above, and not merely guarded against:
+            // getBatchResponse() returns null while the batch has not finished,
+            // which is the common thing a merchant clicking this button hits
+            // and was indistinguishable from "no files" until now. Letting it
+            // reach the foreach below warns on PHP 8, leaves $fileContent
+            // empty, and sends the do/while round again -- once per retry, into
+            // the output stream of a JSON download.
+            if ($files === null) {
+                $fileContent = "The batch has not finished on Mailchimp yet, try again in a few minutes";
                 break;
             }
             foreach ($files as &$file) {

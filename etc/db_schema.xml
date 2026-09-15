@@ -86,6 +86,8 @@
         <column xsi:type="varchar" name="mailchimp_store_id" length="50" comment="Mailchimp Store Id"/>
         <column xsi:type="varchar" name="batch_id" length="24" comment="Batch Id"/>
         <column xsi:type="varchar" name="status" length="10" comment="Status"/>
+        <column xsi:type="smallint" name="response_attempts" padding="6" nullable="false" default="0"
+                comment="Attempts to read the result of a finished batch"/>
         <column xsi:type="datetime" name="modified_date" on_update="true" nullable="false" default="CURRENT_TIMESTAMP"
                 comment="Sync Delta"/>
         <column xsi:type="smallint" name="carts_new_count" comment="Carts New Count"/>

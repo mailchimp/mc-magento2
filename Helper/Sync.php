@@ -114,6 +114,10 @@ class Sync extends AbstractHelper
     {
         $this->chimpSyncEcommerce->deleteAllByBatchid($batchId);
     }
+    public function markAllAsModifiedByBatchId($batchId)
+    {
+        $this->chimpSyncEcommerce->markAllAsModifiedByBatchId($batchId);
+    }
     public function deleteByTypeAndId($type, $id, $mailchimpStoreId)
     {
         $this->chimpSyncEcommerce->deleteByTypeAndId($type, $id, $mailchimpStoreId);
