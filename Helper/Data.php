@@ -299,7 +299,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     protected $mailchimpNotificationFactory;
 
     protected $resolver;
-    private $customerAtt    = null;
+    private $customerAtt    = [];
     private $addressAtt     = null;
     private $_mapFields     = [];
 
@@ -574,9 +574,18 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         return is_string($action) && preg_match('/[A-Za-z0-9]/', $action) ? $action : '';
     }
 
-    private function getBindableAttributes()
+    /**
+     * @param  int|null $storeId
+     * @return array
+     */
+    private function getBindableAttributes($storeId = null)
     {
-        $systemAtt = $this->getCustomerAtts();
+        $systemAtt = $this->getCustomerAtts($storeId);
+        // Not passed a store: getAddressAtt() composes a fixed list of address
+        // element names and gives every one of them an empty `options`, so
+        // there is nothing in it that a store view could change. Its shared
+        // memo is correct, and saying so here is cheaper than the next reader
+        // wondering why one of the two took a store and the other did not.
         $extraAtt = $this->getAddressAtt();
 
         // Note: We cannot use array_merge here because we need to hold
@@ -585,39 +594,74 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
 
         return $ret;
     }
-    private function getCustomerAtts()
+    /**
+     * The customer attributes a merge field can be mapped to, for a store view.
+     *
+     * Memoized per store view rather than once per process. The option labels
+     * inside each entry are store-scoped: Source\Table::getAllOptions() filters
+     * the option collection by the attribute's store id and, when the attribute
+     * carries none, falls back to whichever store view the store manager has
+     * current. Cron/Ecommerce sets a different current store on every pass of
+     * the loop it runs, so one shared memo froze the first view's labels for
+     * every view after it.
+     *
+     * Keying alone would not have been enough. The store id is also SET on each
+     * attribute before its source is asked, so the labels come from the store
+     * view that was requested rather than from whichever one happened to be
+     * current. Otherwise the memo would be keyed by one thing and filled from
+     * another, which is worse than not keying it at all, because it looks
+     * deliberate.
+     *
+     * Only attributes with a source are exposed, and on a stock install that is
+     * `gender` alone -- `website_id`, `store_id` and `group_id` have sources
+     * that build from websites, stores and customer groups rather than from
+     * store-scoped option labels. A merchant's own select attributes are the
+     * rest of it.
+     *
+     * @param  int|null $storeId
+     * @return array
+     */
+    private function getCustomerAtts($storeId = null)
     {
+        $key = $storeId === null ? 'default' : (string)$storeId;
+
+        if (array_key_exists($key, $this->customerAtt)) {
+            return $this->customerAtt[$key];
+        }
+
         $ret = [];
-        if (!$this->customerAtt) {
-            $collection = $this->_attCollection->create();
-            /**
-             * @var $item \Magento\Customer\Model\Attribute
-             */
-            foreach ($collection as $item) {
-                try {
-                    if ($item->usesSource()) {
-                        $options = $item->getSource()->getAllOptions();
-                    } else {
-                        $options = [];
+        $collection = $this->_attCollection->create();
+        /**
+         * @var $item \Magento\Customer\Model\Attribute
+         */
+        foreach ($collection as $item) {
+            try {
+                if ($item->usesSource()) {
+                    if ($storeId !== null) {
+                        $item->setStoreId($storeId);
                     }
-                } catch (\Exception $e) {
+                    $options = $item->getSource()->getAllOptions();
+                } else {
                     $options = [];
                 }
-                $isDate = ($item->getBackendModel()==\Magento\Eav\Model\Entity\Attribute\Backend\Datetime::class) ? 1:0;
-                $isAddress = (
-                    $item->getBackendModel()==\Magento\Customer\Model\Customer\Attribute\Backend\Billing::class ||
-                    $item->getBackendModel()==\Magento\Customer\Model\Customer\Attribute\Backend\Shipping::class) ? 1:0;
-                $ret[$item->getId()] = [
-                    'attCode' => $item->getAttributeCode(),
-                    'isDate' =>$isDate,
-                    'isAddress' => $isAddress,
-                    'options'=>$options
-                ] ;
+            } catch (\Exception $e) {
+                $options = [];
             }
-
-            $this->customerAtt = $ret;
+            $isDate = ($item->getBackendModel()==\Magento\Eav\Model\Entity\Attribute\Backend\Datetime::class) ? 1:0;
+            $isAddress = (
+                $item->getBackendModel()==\Magento\Customer\Model\Customer\Attribute\Backend\Billing::class ||
+                $item->getBackendModel()==\Magento\Customer\Model\Customer\Attribute\Backend\Shipping::class) ? 1:0;
+            $ret[$item->getId()] = [
+                'attCode' => $item->getAttributeCode(),
+                'isDate' =>$isDate,
+                'isAddress' => $isAddress,
+                'options'=>$options
+            ] ;
         }
-        return $this->customerAtt;
+
+        $this->customerAtt[$key] = $ret;
+
+        return $ret;
     }
     private function getAddressAtt()
     {
@@ -691,7 +735,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         }
 
         $mapFields = [];
-        $customerAtt = $this->getBindableAttributes();
+        $customerAtt = $this->getBindableAttributes($storeId);
         $data = $this->getConfigValue(self::XML_MERGEVARS, $storeId);
         try {
             $data = $this->unserialize($data);
