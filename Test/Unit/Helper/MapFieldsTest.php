@@ -159,30 +159,32 @@ class MapFieldsTest extends TestCase
     /**
      * The attribute table itself is per store view, one level below the map.
      *
-     * Option labels are store-scoped, and an attribute that carries no store id
-     * has its source fall back to whichever view the store manager has current
-     * -- which the cron changes on every pass. Keying the map without keying
-     * this would have left the shape correct per view and the labels frozen at
-     * whichever view was first.
+     * Option labels are store-scoped, and an attribute carrying no store id has
+     * its source fall back to whichever view the store manager has current --
+     * which the cron changes on every pass. Keying the map without threading
+     * the store down to here would leave the shape correct per view and the
+     * labels frozen at whichever view was resolved first.
+     *
+     * Observed through which memo key the lookup consults: the two tables below
+     * differ, so the map composed from them says which one was used.
      */
-    public function testTheAttributeTableIsMemoizedPerStoreView()
+    public function testTheStoreViewReachesTheAttributeTable()
     {
         $helper = $this->helper([1 => json_encode([10 => 'FNAME'])]);
 
         $property = new \ReflectionProperty(MailChimpHelper::class, 'customerAtt');
         $property->setAccessible(true);
-        $property->setValue($helper, []);
+        $property->setValue($helper, [
+            'default' => [10 => ['attCode' => 'whichever_view_was_first', 'isDate' => false, 'isAddress' => false, 'options' => []]],
+            '1'       => [10 => ['attCode' => 'firstname', 'isDate' => false, 'isAddress' => false, 'options' => []]],
+        ]);
 
-        $method = new \ReflectionMethod(MailChimpHelper::class, 'getCustomerAtts');
-        $method->setAccessible(true);
+        $map = $helper->getMapFields(1);
 
         $this->assertSame(
-            ['storeId'],
-            array_map(
-                function ($p) { return $p->getName(); },
-                $method->getParameters()
-            ),
-            'getCustomerAtts() no longer takes the store view it is resolving for'
+            'firstname',
+            $map[0]['customer_field'],
+            'the store view never reached the attribute table, so its labels come from whichever view was resolved first'
         );
     }
 
