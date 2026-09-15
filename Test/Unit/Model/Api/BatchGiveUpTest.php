@@ -177,6 +177,35 @@ class BatchGiveUpTest extends TestCase
     }
 
     /**
+     * The number itself, pinned against the thing that gives it meaning.
+     *
+     * Every other test here reads the constant, so they would all pass with it
+     * set to five thousand -- they check that the cap is the cap. What the cap
+     * is worth depends on how often the job runs: five attempts at the shipped
+     * cadence is about twenty-five minutes, and the same five at an hourly
+     * cadence would be five hours of re-downloading a result that does not
+     * parse.
+     *
+     * So both halves are read here, and changing either one has to be a
+     * decision rather than an edit.
+     */
+    public function testTheCapAndTheCadenceThatGivesItMeaning()
+    {
+        $this->assertSame(5, Result::MAX_RESPONSE_ATTEMPTS);
+
+        $crontab = simplexml_load_file(__DIR__ . '/../../../../etc/crontab.xml');
+        $schedule = $crontab->xpath('//job[@name="ebizmarts_ecommerce"]/schedule');
+
+        $this->assertCount(1, $schedule, 'the job that reads batch results is no longer named ebizmarts_ecommerce');
+        $this->assertSame(
+            '*/5 * * * *',
+            trim((string)$schedule[0]),
+            'The cadence moved, so five attempts no longer means about twenty-five minutes. '
+            . 'Either the cap or the comment explaining it needs to move with it.'
+        );
+    }
+
+    /**
      * Every attempt is written down, including the ones that do not give up.
      * A count kept only in memory would restart on every cron run and the cap
      * would never be reached.
