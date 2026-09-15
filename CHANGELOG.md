@@ -1,5 +1,57 @@
 # Changelog
 
+## [103.4.86](https://github.com/mailchimp/mc-magento2/tree/103.4.86)
+
+[Full Changelog](https://github.com/mailchimp/mc-magento2/compare/103.4.85...103.4.86)
+
+**This release adds a database column.** `mailchimp_sync_batches` gains
+`response_attempts`, so `bin/magento setup:upgrade` is required after updating.
+
+**Fixed bugs:**
+
+- The merge-field map is per store view, not per process [\#2373](https://github.com/mailchimp/mc-magento2/pull/2373)
+
+  `getMapFields()` remembered its result without the store view in the key, and
+  the ecommerce cron walks every store view with one helper. So on a
+  multi-store-view installation every view after the first synchronised with the
+  **first view's merge-field map** -- wrong merge fields written into the
+  merchant's audience, with nothing logged and no counter moved.
+
+- The attribute options are per store view too [\#2374](https://github.com/mailchimp/mc-magento2/pull/2374)
+
+  One layer down and found in review of the above. Attribute option labels are
+  store-scoped, and an attribute carrying no store id resolves them against
+  whichever store view is current -- which the cron changes on every pass. Only
+  attributes with a source are affected, which on a stock install is `gender`
+  plus any select attribute the merchant added.
+
+- Give up on a batch result that cannot be read, and re-send what it carried [\#2371](https://github.com/mailchimp/mc-magento2/pull/2371)
+
+  A batch whose result could not be downloaded or unpacked was retried on every
+  cron run -- re-fetching the status and re-downloading the archive each time --
+  until Mailchimp expired it about a week later. It now stops after five
+  readings of a finished batch and re-sends what the batch carried rather than
+  deleting the sync rows, and the real cause of the failure is logged instead of
+  a fixed message that pointed at a missing directory.
+
+  The two admin "get response" buttons gained a distinct message for a batch
+  that has not finished yet, which until now could not be told apart from one
+  whose response Mailchimp had deleted.
+
+**Implemented enhancements:**
+
+- Carry the configuration snapshot on the extension beacon [\#2372](https://github.com/mailchimp/mc-magento2/pull/2372), [\#2375](https://github.com/mailchimp/mc-magento2/pull/2375)
+
+  The extension's status report now carries how the store view is configured:
+  the settings, the merge-field map and the interest groups. It is the one
+  diagnostic the older support-log channel held that nothing else replaced, and
+  it exists so that channel can be switched off -- that one also carries request
+  and response bodies, which is shopper data, and writes them into the
+  merchant's own database.
+
+  No merchant-authored text travels: the two settings that are HTML the merchant
+  writes are reported as whether they were customised, never as their content.
+
 ## [103.4.85](https://github.com/mailchimp/mc-magento2/tree/103.4.85)
 
 [Full Changelog](https://github.com/mailchimp/mc-magento2/compare/103.4.84...103.4.85)
