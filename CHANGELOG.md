@@ -1,5 +1,44 @@
 # Changelog
 
+## [103.4.85](https://github.com/mailchimp/mc-magento2/tree/103.4.85)
+
+[Full Changelog](https://github.com/mailchimp/mc-magento2/compare/103.4.84...103.4.85)
+
+**Implemented enhancements:**
+
+- Name the surface the process is serving [\#2369](https://github.com/mailchimp/mc-magento2/pull/2369)
+
+  The library sees `PHP_SAPI` and nothing else, and that answers a different
+  question. `pub/cron.php` refuses to run under the CLI SAPI and then boots the
+  framework's `Cron` application, so an installation running cron over HTTP is a
+  web process doing a full sync -- and nothing downstream could tell it from a
+  shopper's page render.
+
+  The extension now passes the application area and the dispatched action, from
+  the three places that construct the API. Guarded three ways: the library method
+  is checked because an app/code install pairs whichever library is on disk with
+  whichever module is on disk; `getAreaCode()` is allowed to throw, because
+  nothing having set an area yet is a normal state rather than an error; and
+  `getFullActionName()` is checked because it is not on `RequestInterface`.
+
+  The segments are checked one at a time rather than the value they composed.
+  Nothing constrains them to strings, and the concatenation turns whatever they
+  were into an ordinary string -- integers compose `1_2_3` and booleans compose
+  `1_1_1`, both of which name a route that has never existed. An unrouted request
+  composes the bare delimiters and is refused for the same reason.
+
+**Dependencies:**
+
+- The `ebizmarts/mailchimp-lib` floor moves from `>=3.0.51` to `>=3.0.52` [\#2370](https://github.com/mailchimp/mc-magento2/pull/2370)
+
+  3.0.52 is the release that accepts the area and the action. Below it the
+  extension's call is guarded and simply does nothing, so this is a floor for the
+  feature rather than for correctness -- but an installation below it reports no
+  surface at all, which is the state this release exists to end.
+
+  It remains a floor rather than a pin, as it has been since 3.0.44, so an
+  installation already resolving to something newer is unaffected.
+
 ## [103.4.84](https://github.com/mailchimp/mc-magento2/tree/103.4.84)
 
 [Full Changelog](https://github.com/mailchimp/mc-magento2/compare/103.4.83...103.4.84)

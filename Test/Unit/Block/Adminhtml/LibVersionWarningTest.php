@@ -59,8 +59,8 @@ class LibVersionWarningTest extends TestCase
     {
         return [
             'fewer digits than the floor' => ['3.0.9'],
-            'one release behind'    => ['3.0.50'],
-            'normalised by composer' => ['3.0.50.0'],
+            'one release behind'    => ['3.0.51'],
+            'normalised by composer' => ['3.0.51.0'],
             'far behind'            => ['3.0.44'],
         ];
     }
@@ -81,7 +81,7 @@ class LibVersionWarningTest extends TestCase
     {
         return [
             'exactly the floor'      => [MailChimpHelper::MIN_LIB_VERSION],
-            'newer'                  => ['3.0.52'],
+            'newer'                  => ['3.0.53'],
             'newer past the decade'  => ['3.0.100'],
             'a major ahead'          => ['3.1.0'],
         ];
