@@ -34,6 +34,17 @@ use Ebizmarts\MailChimp\Helper\Data as MailChimpHelper;
 class ConfigSnapshot
 {
     /**
+     * The longest a list-shaped value may be.
+     *
+     * Matched to the cap the receiving side applies to a string field, because
+     * that side TRUNCATES rather than refuses: a list cut mid-pair would arrive
+     * looking like a complete map that happens to end on `firstna`. Trimming
+     * whole pairs here means what arrives is always a shorter true list rather
+     * than a damaged one, and the count beside it says how much is missing.
+     */
+    const MAX_LIST_BYTES = 512;
+
+    /**
      * @var MailChimpHelper
      */
     private $helper;
@@ -83,6 +94,35 @@ class ConfigSnapshot
         // in effect and would be read as if it were.
         if ($snapshot['cfg_popup_form']) {
             $snapshot['cfg_popup_url'] = $this->text(MailChimpHelper::XML_POPUP_URL, $storeId);
+        }
+
+        // The merge-field map, as pairs. A count cannot answer the question
+        // this snapshot exists for -- "twelve fields mapped" does not say
+        // whether `firstname -> FNAME` is one of them, and "first name is not
+        // syncing" is the ticket it is meant to settle.
+        //
+        // Both halves of each pair are identifiers: a Magento attribute code
+        // and a Mailchimp merge tag. Schema, not merchant content.
+        $pairs = [];
+        foreach ($this->helper->getMapFields($storeId, false) as $field) {
+            $pairs[] = $field['customer_field'] . ':' . $field['mailchimp'];
+        }
+        $snapshot['cfg_field_map_n'] = count($pairs);
+        $map = $this->bounded($pairs);
+        if ($map !== null) {
+            $snapshot['cfg_field_map'] = $map;
+        }
+
+        // Interest group ids, which the configuration already stores as a
+        // comma-separated list. Read from config rather than through
+        // Helper::getInterest(), which resolves them against Mailchimp -- a
+        // call this must never make.
+        $interest = $this->text(MailChimpHelper::XML_INTEREST, $storeId);
+        $ids = $interest === null ? [] : array_filter(explode(',', $interest));
+        $snapshot['cfg_interest_n'] = count($ids);
+        $groups = $this->bounded($ids);
+        if ($groups !== null) {
+            $snapshot['cfg_interest'] = $groups;
         }
 
         if ($snapshot['cfg_two_way_sync']) {
@@ -136,6 +176,26 @@ class ConfigSnapshot
         $value = $this->helper->getConfigValue($path, $storeId);
 
         return ($value === null || $value === '') ? null : (int)$value;
+    }
+
+    /**
+     * A list of identifiers as one string, short enough to arrive whole.
+     *
+     * Trimmed a whole entry at a time so the bound costs the fewest entries
+     * that satisfy it, and returns null rather than an empty string when there
+     * is nothing to say -- the count emitted beside it is what distinguishes
+     * "none" from "this installation does not report it".
+     *
+     * @param  array $items
+     * @return string|null
+     */
+    private function bounded(array $items)
+    {
+        while ($items && strlen(implode(',', $items)) > self::MAX_LIST_BYTES) {
+            array_pop($items);
+        }
+
+        return $items ? implode(',', $items) : null;
     }
 
     /**

@@ -28,17 +28,20 @@ class ConfigSnapshotTest extends TestCase
 
     /**
      * @param  array $values  config path => value
+     * @param  array $map     resolved merge-field map, as getMapFields returns it
      * @return ConfigSnapshot
      */
-    private function snapshot(array $values)
+    private function snapshot(array $values, array $map = [])
     {
         $this->asked = [];
         $test = $this;
 
         $helper = $this->getMockBuilder(MailChimpHelper::class)
             ->disableOriginalConstructor()
-            ->onlyMethods(['getConfigValue'])
+            ->onlyMethods(['getConfigValue', 'getMapFields'])
             ->getMock();
+
+        $helper->method('getMapFields')->willReturn($map);
 
         $helper->method('getConfigValue')->willReturnCallback(
             function ($path, $storeId = null) use ($values, $test) {
@@ -152,6 +155,87 @@ class ConfigSnapshotTest extends TestCase
         ])->forStore(1);
         $this->assertSame('https://example.test/popup', $on['cfg_popup_url']);
         $this->assertSame('2', $on['cfg_delete_action']);
+    }
+
+    /**
+     * @param  int    $count
+     * @param  string $tag
+     * @return array
+     */
+    private function pairs($count, $tag = 'F')
+    {
+        $map = [];
+        for ($i = 1; $i <= $count; $i++) {
+            $map[] = ['customer_field' => 'attribute_' . $i, 'mailchimp' => $tag . $i];
+        }
+
+        return $map;
+    }
+
+    /**
+     * Pairs, not a count. "Twelve fields mapped" does not say whether
+     * `firstname -> FNAME` is one of them, and that is the question this
+     * snapshot exists to answer.
+     */
+    public function testTheFieldMapIsCarriedAsPairs()
+    {
+        $snapshot = $this->snapshot([], [
+            ['customer_field' => 'firstname', 'mailchimp' => 'FNAME'],
+            ['customer_field' => 'lastname',  'mailchimp' => 'LNAME'],
+        ])->forStore(1);
+
+        $this->assertSame('firstname:FNAME,lastname:LNAME', $snapshot['cfg_field_map']);
+        $this->assertSame(2, $snapshot['cfg_field_map_n']);
+    }
+
+    /**
+     * The receiving side truncates an over-length string rather than refusing
+     * it, so a list cut mid-pair would arrive looking like a complete map that
+     * happens to end on `firstna`. Whole pairs go, and the count beside it is
+     * what says some did.
+     */
+    public function testALongMapIsTrimmedByWholePairsAndSaysSo()
+    {
+        $offered = 60;
+        $snapshot = $this->snapshot([], $this->pairs($offered))->forStore(1);
+
+        $this->assertLessThanOrEqual(512, strlen($snapshot['cfg_field_map']));
+        $this->assertSame($offered, $snapshot['cfg_field_map_n'], 'the offered count must survive the trim');
+
+        $carried = explode(',', $snapshot['cfg_field_map']);
+        $this->assertLessThan($offered, count($carried), 'this map should not have fit');
+        foreach ($carried as $pair) {
+            $this->assertMatchesRegularExpression('/^attribute_\d+:F\d+$/', $pair, 'a pair was cut in half');
+        }
+    }
+
+    /**
+     * Nothing mapped is a fact worth reporting, and it is not the same as an
+     * installation that does not report the map at all.
+     */
+    public function testNothingMappedIsACountOfZeroAndNoList()
+    {
+        $snapshot = $this->snapshot([])->forStore(1);
+
+        $this->assertSame(0, $snapshot['cfg_field_map_n']);
+        $this->assertArrayNotHasKey('cfg_field_map', $snapshot);
+        $this->assertSame(0, $snapshot['cfg_interest_n']);
+        $this->assertArrayNotHasKey('cfg_interest', $snapshot);
+    }
+
+    /**
+     * Interest groups are stored as a comma-separated list of ids. Read from
+     * configuration, never through Helper::getInterest(), which resolves them
+     * against Mailchimp -- a call this must never make.
+     */
+    public function testInterestGroupsAreCarriedWithTheirCount()
+    {
+        $snapshot = $this->snapshot([
+            MailChimpHelper::XML_INTEREST => 'abc123,def456,ghi789',
+        ])->forStore(1);
+
+        $this->assertSame('abc123,def456,ghi789', $snapshot['cfg_interest']);
+        $this->assertSame(3, $snapshot['cfg_interest_n']);
     }
 
     /**
