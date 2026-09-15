@@ -45,22 +45,34 @@ class SurfaceTest extends TestCase
     }
 
     /**
-     * @param  mixed $action  what getFullActionName() returns, or null for a
-     *                        request object that does not have the method
+     * A request double built from its three segments.
+     *
+     * getFullActionName() concatenates rather than formats, exactly as the
+     * platform's does, so a segment that is not a string arrives here as
+     * whatever PHP makes of it -- which is the case these tests exist for.
+     *
+     * @param  mixed $segments  [route, controller, action], or null for a
+     *                          request object without the methods at all
      * @return object
      */
-    private function request($action)
+    private function request($segments)
     {
-        if ($action === null) {
+        if ($segments === null) {
             return new class {
                 public function getParam($k) { return null; }
             };
         }
 
-        return new class($action) {
-            private $action;
-            public function __construct($action) { $this->action = $action; }
-            public function getFullActionName() { return $this->action; }
+        return new class($segments) {
+            private $segments;
+            public function __construct($segments) { $this->segments = $segments; }
+            public function getRouteName() { return $this->segments[0]; }
+            public function getControllerName() { return $this->segments[1]; }
+            public function getActionName() { return $this->segments[2]; }
+            public function getFullActionName()
+            {
+                return $this->segments[0] . '_' . $this->segments[1] . '_' . $this->segments[2];
+            }
         };
     }
 
@@ -117,7 +129,8 @@ class SurfaceTest extends TestCase
     public function testAWebDispatchIsReportedWhole()
     {
         $api = $this->api();
-        $this->apply($this->helper($api, $this->request('mailchimp_campaign_check'), $this->state('frontend')));
+        $request = $this->request(['mailchimp', 'campaign', 'check']);
+        $this->apply($this->helper($api, $request, $this->state('frontend')));
 
         $this->assertSame([['frontend', 'mailchimp_campaign_check']], $api->calls);
     }
@@ -131,10 +144,12 @@ class SurfaceTest extends TestCase
     public function testTheAdminCallSiteIsDistinguishableFromTheStorefrontOne()
     {
         $admin = $this->api();
-        $this->apply($this->helper($admin, $this->request('mailchimp_orders_campaign'), $this->state('adminhtml')));
+        $adminRequest = $this->request(['mailchimp', 'orders', 'campaign']);
+        $this->apply($this->helper($admin, $adminRequest, $this->state('adminhtml')));
 
         $store = $this->api();
-        $this->apply($this->helper($store, $this->request('mailchimp_campaign_check'), $this->state('frontend')));
+        $storeRequest = $this->request(['mailchimp', 'campaign', 'check']);
+        $this->apply($this->helper($store, $storeRequest, $this->state('frontend')));
 
         $this->assertNotSame($admin->calls, $store->calls);
     }
@@ -151,9 +166,65 @@ class SurfaceTest extends TestCase
     public function testTheBareDelimitersAreNotAnActionName()
     {
         $api = $this->api();
-        $this->apply($this->helper($api, $this->request('__'), $this->state('crontab')));
+        $this->apply($this->helper($api, $this->request([null, null, null]), $this->state('crontab')));
 
         $this->assertSame([['crontab', '']], $api->calls);
+    }
+
+    /**
+     * And the other half of that rule, which is why it is written as "carries
+     * something that is not a separator" rather than as anything about
+     * underscores: the route resolved and the controller and action did not.
+     * That is a true thing about the dispatch and it is worth reporting.
+     */
+    public function testARouteWithTheRestUnroutedIsStillWorthReporting()
+    {
+        $api = $this->api();
+        $this->apply($this->helper($api, $this->request(['mailchimp', null, null]), $this->state('frontend')));
+
+        $this->assertSame([['frontend', 'mailchimp__']], $api->calls);
+    }
+
+    /**
+     * @return array
+     */
+    public static function nonStringSegmentProvider()
+    {
+        return [
+            'integers'          => [[1, 2, 3], '1_2_3'],
+            'booleans'          => [[true, true, true], '1_1_1'],
+            'one bad segment'   => [['mailchimp', 2, 3], 'mailchimp_2_3'],
+            'a float'           => [[1.5, 2.5, 3.5], '1.5_2.5_3.5'],
+        ];
+    }
+
+    /**
+     * The check that can only be made here.
+     *
+     * getFullActionName() is three values concatenated and nothing constrains
+     * them to strings -- setRouteName() and its siblings take what they are
+     * handed, and the concatenation turns it into an ordinary string on the
+     * way out. Measured on framework 103.0.8 / PHP 8.3, integers compose
+     * `1_2_3` and booleans compose `1_1_1`.
+     *
+     * Both are ASCII and both carry something that is not a separator, so
+     * every rule downstream accepts them -- and both name a route that has
+     * never existed anywhere. By the time the value leaves this method it is
+     * an unremarkable string and nothing can tell it from a real one.
+     *
+     * @dataProvider nonStringSegmentProvider
+     * @param array  $segments
+     * @param string $composed  what those segments compose, for the record
+     */
+    public function testASegmentThatIsNotAStringIsNotADispatchWeCanName($segments, $composed)
+    {
+        $request = $this->request($segments);
+        $this->assertSame($composed, $request->getFullActionName(), 'the double no longer composes what the platform does');
+
+        $api = $this->api();
+        $this->apply($this->helper($api, $request, $this->state('frontend')));
+
+        $this->assertSame([['frontend', '']], $api->calls);
     }
 
     /**
@@ -162,10 +233,9 @@ class SurfaceTest extends TestCase
     public static function emptyActionProvider()
     {
         return [
-            'bare delimiters' => ['__'],
-            'one delimiter'   => ['_'],
-            'nothing at all'  => [''],
-            'no method'       => [null],
+            'bare delimiters' => [[null, null, null]],
+            'empty strings'   => [['', '', '']],
+            'no methods'      => [null],
         ];
     }
 
@@ -189,7 +259,21 @@ class SurfaceTest extends TestCase
     {
         $api = $this->api();
         $state = $this->state(new \Magento\Framework\Exception\LocalizedException(__('Area code is not set')));
-        $this->apply($this->helper($api, $this->request('checkout_index_index'), $state));
+        $this->apply($this->helper($api, $this->request(['checkout', 'index', 'index']), $state));
+
+        $this->assertSame([['', 'checkout_index_index']], $api->calls);
+    }
+
+    /**
+     * DI resolves an interceptor here, and a plugin on getAreaCode() can throw
+     * anything at all. The principle is about what naming the surface is
+     * allowed to cost -- never the API call -- not about which exception class
+     * the platform happens to use.
+     */
+    public function testAnAreaThatThrowsSomethingElseCostsNothingEither()
+    {
+        $api = $this->api();
+        $this->apply($this->helper($api, $this->request(['checkout', 'index', 'index']), $this->state(new \RuntimeException('plugin'))));
 
         $this->assertSame([['', 'checkout_index_index']], $api->calls);
     }
@@ -201,7 +285,7 @@ class SurfaceTest extends TestCase
     public function testAHelperWithNoStateStillReportsTheAction()
     {
         $api = $this->api();
-        $this->apply($this->helper($api, $this->request('checkout_index_index'), null));
+        $this->apply($this->helper($api, $this->request(['checkout', 'index', 'index']), null));
 
         $this->assertSame([['', 'checkout_index_index']], $api->calls);
     }
@@ -215,7 +299,7 @@ class SurfaceTest extends TestCase
     public function testALibraryWithoutTheMethodIsNotCalled()
     {
         $api = $this->api(false);
-        $this->apply($this->helper($api, $this->request('checkout_index_index'), $this->state('frontend')));
+        $this->apply($this->helper($api, $this->request(['checkout', 'index', 'index']), $this->state('frontend')));
 
         $this->assertSame([], $api->calls);
     }

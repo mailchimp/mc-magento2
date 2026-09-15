@@ -478,7 +478,11 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
      *
      * `getAreaCode()` throws when nothing has set an area yet, which is a
      * normal state early in a request rather than an error. Reporting no area
-     * is the right answer there; failing the API call is not.
+     * is the right answer there; failing the API call is not. The catch is
+     * `\Throwable` rather than the `LocalizedException` the method declares,
+     * because DI resolves an interceptor here and a plugin on `getAreaCode()`
+     * can throw anything at all -- and the principle is about what this method
+     * is allowed to cost, not about which class the platform happens to use.
      *
      * `getFullActionName()` is not on RequestInterface and does not exist on
      * the console request at all. It is reachable here because the object DI
@@ -502,6 +506,26 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
      * whichever module is on disk, so neither end can assume the other's
      * version.
      *
+     * The segments are checked one at a time, and that is the only check that
+     * can be made here rather than downstream. `getFullActionName()` is three
+     * values concatenated, and nothing constrains those values to strings:
+     * `setRouteName()` and its siblings take whatever they are handed, and the
+     * concatenation turns it into an ordinary string on the way out. Measured
+     * on this platform -- framework 103.0.8, PHP 8.3 -- integers compose
+     * `1_2_3` and booleans compose `1_1_1`. Both are ASCII, both carry
+     * something that is not a separator, and both name a route that has never
+     * existed anywhere. Nothing downstream can tell either from a real action,
+     * because by then it is an unremarkable string.
+     *
+     * A segment may be a string, or null for a part that was never routed.
+     * Null is why the rule is per segment rather than all-or-nothing: a route
+     * that resolved with the controller and action that did not composes
+     * `mailchimp__`, which is true and worth reporting.
+     *
+     * An array or an object does not reach any of this -- `setRouteName()`
+     * indexes the route table with what it is given, so both raise a TypeError
+     * inside the platform long before this method runs.
+     *
      * @return void
      */
     private function applySurface()
@@ -513,21 +537,41 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         $area = '';
         if ($this->_state !== null) {
             try {
-                $area = (string)$this->_state->getAreaCode();
-            } catch (\Magento\Framework\Exception\LocalizedException $e) {
+                $areaCode = $this->_state->getAreaCode();
+                if (is_string($areaCode)) {
+                    $area = $areaCode;
+                }
+            } catch (\Throwable $t) {
                 $area = '';
             }
         }
 
-        $action = '';
-        if (method_exists($this->_request, 'getFullActionName')) {
-            $action = (string)$this->_request->getFullActionName();
-            if (!preg_match('/[A-Za-z0-9]/', $action)) {
-                $action = '';
+        $this->_api->setSurface($area, $this->fullActionName());
+    }
+
+    /**
+     * The action this process dispatched, or '' when there is not one to name.
+     *
+     * @return string
+     */
+    private function fullActionName()
+    {
+        foreach (array('getFullActionName', 'getRouteName', 'getControllerName', 'getActionName') as $getter) {
+            if (!method_exists($this->_request, $getter)) {
+                return '';
             }
         }
 
-        $this->_api->setSurface($area, $action);
+        foreach (array('getRouteName', 'getControllerName', 'getActionName') as $getter) {
+            $segment = $this->_request->$getter();
+            if ($segment !== null && !is_string($segment)) {
+                return '';
+            }
+        }
+
+        $action = $this->_request->getFullActionName();
+
+        return is_string($action) && preg_match('/[A-Za-z0-9]/', $action) ? $action : '';
     }
 
     private function getBindableAttributes()
