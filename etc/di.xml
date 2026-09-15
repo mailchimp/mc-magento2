@@ -23,6 +23,7 @@
     <type name="Ebizmarts\MailChimp\Helper\Data">
         <arguments>
             <argument name="cache" xsi:type="object">Magento\Framework\App\CacheInterface</argument>
+            <argument name="state" xsi:type="object">Magento\Framework\App\State</argument>
         </arguments>
     </type>
     <type name="Ebizmarts\MailChimp\Block\Mailchimpjs">

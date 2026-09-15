@@ -255,6 +255,10 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
      */
     private $_cache;
     /**
+     * @var \Magento\Framework\App\State|null
+     */
+    private $_state;
+    /**
      * @var \Magento\Customer\Model\ResourceModel\Attribute\CollectionFactory
      */
     private $_attCollection;
@@ -351,7 +355,8 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         \Magento\Framework\Locale\Resolver $resolver,
         MailchimpNotificationFactory $mailchimpNotificationFactory,
         ProductMetadataInterface $productMetadata,
-        ?\Magento\Framework\App\CacheInterface $cache = null
+        ?\Magento\Framework\App\CacheInterface $cache = null,
+        ?\Magento\Framework\App\State $state = null
     ) {
 
         $this->_storeManager  = $storeManager;
@@ -381,6 +386,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         $this->mailchimpNotificationFactory = $mailchimpNotificationFactory;
         $this->productMetadata          = $productMetadata;
         $this->_cache                   = $cache;
+        $this->_state                   = $state;
         parent::__construct($context);
     }
 
@@ -445,11 +451,129 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
             $this->_api->setMailchimpStoreId($this->getConfigValue(self::XML_MAILCHIMP_STORE, $store, $scope));
         }
         $this->_api->setUserAgent($this->userAgent());
+        $this->applySurface();
         if ($timeOut) {
             $this->_api->setTimeOut($timeOut);
         }
         return $this->_api;
     }
+    /**
+     * Tell the library which surface this process is serving.
+     *
+     * The library cannot work this out for itself. It sees PHP_SAPI and
+     * nothing else, and Magento's own cron entry point refuses to run under
+     * the CLI SAPI -- `pub/cron.php` exits on `php_sapi_name() === 'cli'` and
+     * then boots the framework's Cron application -- so an installation
+     * running cron over HTTP is a web-SAPI process doing a full sync, and it
+     * is indistinguishable from a shopper's page render on the other side.
+     *
+     * Three guards, each for a different failure:
+     *
+     * `setSurface()` is checked because composer.json is not always what
+     * decides which library is present. An app/code install puts this
+     * extension on disk by clone and the library comes from a separate
+     * composer require, so the version constraint is inert there and the two
+     * move independently. Without the check, the pairing is a fatal on every
+     * call into the API.
+     *
+     * `getAreaCode()` throws when nothing has set an area yet, which is a
+     * normal state early in a request rather than an error. Reporting no area
+     * is the right answer there; failing the API call is not. The catch is
+     * `\Throwable` rather than the `LocalizedException` the method declares,
+     * because DI resolves an interceptor here and a plugin on `getAreaCode()`
+     * can throw anything at all -- and the principle is about what this method
+     * is allowed to cost, not about which class the platform happens to use.
+     *
+     * `getFullActionName()` is not on RequestInterface and does not exist on
+     * the console request at all. It is reachable here because the object DI
+     * resolves for RequestInterface in a CLI process is the HTTP request
+     * rather than the console one -- but that is a fact about this
+     * installation's wiring, not a guarantee of the interface.
+     *
+     * And one filter, which the guards do not cover: on that CLI-resolved HTTP
+     * request nothing has been routed, so the three segments are all null and
+     * getFullActionName() returns the bare delimiters -- `__`. That is a
+     * well-formed token under the library's pattern and under the receiver's,
+     * so it would be accepted, stored, and counted as an action name on every
+     * cron run. An action has to carry at least one character that is not a
+     * separator to mean anything.
+     *
+     * The library rejects that shape as well, so this is not the only thing
+     * holding it. It is kept here because the two know different things: the
+     * library sees a token with no name in it, while this end knows why there
+     * is no name -- nothing was routed -- and can decline to send the bytes at
+     * all. And an app/code install pairs whichever library is on disk with
+     * whichever module is on disk, so neither end can assume the other's
+     * version.
+     *
+     * The segments are checked one at a time, and that is the only check that
+     * can be made here rather than downstream. `getFullActionName()` is three
+     * values concatenated, and nothing constrains those values to strings:
+     * `setRouteName()` and its siblings take whatever they are handed, and the
+     * concatenation turns it into an ordinary string on the way out. Measured
+     * on this platform -- framework 103.0.8, PHP 8.3 -- integers compose
+     * `1_2_3` and booleans compose `1_1_1`. Both are ASCII, both carry
+     * something that is not a separator, and both name a route that has never
+     * existed anywhere. Nothing downstream can tell either from a real action,
+     * because by then it is an unremarkable string.
+     *
+     * A segment may be a string, or null for a part that was never routed.
+     * Null is why the rule is per segment rather than all-or-nothing: a route
+     * that resolved with the controller and action that did not composes
+     * `mailchimp__`, which is true and worth reporting.
+     *
+     * An array or an object does not reach any of this -- `setRouteName()`
+     * indexes the route table with what it is given, so both raise a TypeError
+     * inside the platform long before this method runs.
+     *
+     * @return void
+     */
+    private function applySurface()
+    {
+        if (!method_exists($this->_api, 'setSurface')) {
+            return;
+        }
+
+        $area = '';
+        if ($this->_state !== null) {
+            try {
+                $areaCode = $this->_state->getAreaCode();
+                if (is_string($areaCode)) {
+                    $area = $areaCode;
+                }
+            } catch (\Throwable $t) {
+                $area = '';
+            }
+        }
+
+        $this->_api->setSurface($area, $this->fullActionName());
+    }
+
+    /**
+     * The action this process dispatched, or '' when there is not one to name.
+     *
+     * @return string
+     */
+    private function fullActionName()
+    {
+        foreach (array('getFullActionName', 'getRouteName', 'getControllerName', 'getActionName') as $getter) {
+            if (!method_exists($this->_request, $getter)) {
+                return '';
+            }
+        }
+
+        foreach (array('getRouteName', 'getControllerName', 'getActionName') as $getter) {
+            $segment = $this->_request->$getter();
+            if ($segment !== null && !is_string($segment)) {
+                return '';
+            }
+        }
+
+        $action = $this->_request->getFullActionName();
+
+        return is_string($action) && preg_match('/[A-Za-z0-9]/', $action) ? $action : '';
+    }
+
     private function getBindableAttributes()
     {
         $systemAtt = $this->getCustomerAtts();
@@ -583,6 +707,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         if (method_exists($this->_api, 'setMailchimpStoreId')) {
             $this->_api->setMailchimpStoreId($this->getConfigValue(self::XML_MAILCHIMP_STORE));
         }
+        $this->applySurface();
 
         return $this->_api;
     }
@@ -1064,6 +1189,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
             }
             $this->_api->setApiKey(trim($apiKey));
             $this->_api->setUserAgent($this->userAgent());
+            $this->applySurface();
             $this->_api->setHelper($this);
             // Must stay after setApiKey. That call is what opens the library's
             // telemetry bucket, and setStoreURL() writes into an already-open
