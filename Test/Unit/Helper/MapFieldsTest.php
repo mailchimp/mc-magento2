@@ -59,9 +59,12 @@ class MapFieldsTest extends TestCase
             10 => ['attCode' => 'firstname', 'isDate' => false, 'isAddress' => false, 'options' => ['a']],
             11 => ['attCode' => 'lastname',  'isDate' => false, 'isAddress' => false, 'options' => ['b']],
         ];
+        // The memo is keyed by store view, so the table goes in under every
+        // key the test asks for. Injecting it flat would send getCustomerAtts()
+        // to the attribute collection, which is not doubled here.
         $property = new \ReflectionProperty(MailChimpHelper::class, 'customerAtt');
         $property->setAccessible(true);
-        $property->setValue($helper, $attributes);
+        $property->setValue($helper, ['default' => $attributes, '1' => $attributes, '2' => $attributes]);
 
         return $helper;
     }
@@ -151,6 +154,38 @@ class MapFieldsTest extends TestCase
         $this->map($helper, 1);
 
         $this->assertSame($readsAfterFirst, $this->reads);
+    }
+
+    /**
+     * The attribute table itself is per store view, one level below the map.
+     *
+     * Option labels are store-scoped, and an attribute carrying no store id has
+     * its source fall back to whichever view the store manager has current --
+     * which the cron changes on every pass. Keying the map without threading
+     * the store down to here would leave the shape correct per view and the
+     * labels frozen at whichever view was resolved first.
+     *
+     * Observed through which memo key the lookup consults: the two tables below
+     * differ, so the map composed from them says which one was used.
+     */
+    public function testTheStoreViewReachesTheAttributeTable()
+    {
+        $helper = $this->helper([1 => json_encode([10 => 'FNAME'])]);
+
+        $property = new \ReflectionProperty(MailChimpHelper::class, 'customerAtt');
+        $property->setAccessible(true);
+        $property->setValue($helper, [
+            'default' => [10 => ['attCode' => 'whichever_view_was_first', 'isDate' => false, 'isAddress' => false, 'options' => []]],
+            '1'       => [10 => ['attCode' => 'firstname', 'isDate' => false, 'isAddress' => false, 'options' => []]],
+        ]);
+
+        $map = $helper->getMapFields(1);
+
+        $this->assertSame(
+            'firstname',
+            $map[0]['customer_field'],
+            'the store view never reached the attribute table, so its labels come from whichever view was resolved first'
+        );
     }
 
     /**
