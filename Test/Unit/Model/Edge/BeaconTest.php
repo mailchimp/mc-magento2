@@ -14,6 +14,7 @@ namespace Ebizmarts\MailChimp\Test\Unit\Model\Edge;
 use Ebizmarts\MailChimp\Helper\Data as MailChimpHelper;
 use Ebizmarts\MailChimp\Model\Edge\Beacon;
 use Ebizmarts\MailChimp\Model\Edge\Client;
+use Ebizmarts\MailChimp\Model\Edge\ConfigSnapshot;
 use Ebizmarts\MailChimp\Model\Edge\LivenessSignals;
 use Ebizmarts\MailChimp\Model\Edge\NotificationDelivery;
 use Ebizmarts\MailChimp\Model\Edge\Response;
@@ -99,6 +100,9 @@ class BeaconTest extends TestCase
         $signals = $this->createMock(LivenessSignals::class);
         $signals->method('forStore')->willReturn(['last_error_type' => null]);
 
+        $config = $this->createMock(ConfigSnapshot::class);
+        $config->method('forStore')->willReturn(['cfg_active' => true]);
+
         $metadata = $this->createMock(ProductMetadataInterface::class);
         $metadata->method('getVersion')->willReturn('2.4.8');
         $metadata->method('getEdition')->willReturn('Community');
@@ -108,6 +112,7 @@ class BeaconTest extends TestCase
             $this->helper,
             $this->client,
             $signals,
+            $config,
             $this->createMock(NotificationDelivery::class),
             $metadata,
             $this->scopeConfig
@@ -264,6 +269,7 @@ class BeaconTest extends TestCase
             $helper,
             $client,
             $this->createMock(LivenessSignals::class),
+            $this->createMock(ConfigSnapshot::class),
             $this->createMock(NotificationDelivery::class),
             $metadata,
             $this->createMock(ScopeConfigInterface::class)
@@ -454,6 +460,9 @@ class BeaconTest extends TestCase
 
         $signals = $this->createMock(LivenessSignals::class);
         $signals->method('forStore')->willReturn(['last_error_type' => null]);
+
+        $config = $this->createMock(ConfigSnapshot::class);
+        $config->method('forStore')->willReturn(['cfg_active' => true]);
         $metadata = $this->createMock(ProductMetadataInterface::class);
         $metadata->method('getVersion')->willReturn('2.4.8');
         $metadata->method('getEdition')->willReturn('Community');
@@ -463,6 +472,7 @@ class BeaconTest extends TestCase
             $helper,
             $client,
             $signals,
+            $config,
             new NotificationDelivery($client, $helper, $this->createMock(NotifierInterface::class)),
             $metadata,
             $this->createMock(ScopeConfigInterface::class)
@@ -525,6 +535,9 @@ class BeaconTest extends TestCase
 
         $signals = $this->createMock(LivenessSignals::class);
         $signals->method('forStore')->willReturn(['last_error_type' => null]);
+
+        $config = $this->createMock(ConfigSnapshot::class);
+        $config->method('forStore')->willReturn(['cfg_active' => true]);
         $metadata = $this->createMock(ProductMetadataInterface::class);
         $metadata->method('getVersion')->willReturn('2.4.8');
         $metadata->method('getEdition')->willReturn('Community');
@@ -539,6 +552,7 @@ class BeaconTest extends TestCase
             $helper,
             $client,
             $signals,
+            $config,
             $this->createMock(NotificationDelivery::class),
             $metadata,
             $scopeConfig
@@ -608,6 +622,9 @@ class BeaconTest extends TestCase
 
         $signals = $this->createMock(LivenessSignals::class);
         $signals->method('forStore')->willReturn(['last_error_type' => null]);
+
+        $config = $this->createMock(ConfigSnapshot::class);
+        $config->method('forStore')->willReturn(['cfg_active' => true]);
         $metadata = $this->createMock(ProductMetadataInterface::class);
         $metadata->method('getVersion')->willReturn('2.4.8');
         $metadata->method('getEdition')->willReturn('Community');
@@ -617,6 +634,7 @@ class BeaconTest extends TestCase
             $helper,
             $client,
             $signals,
+            $config,
             $this->createMock(NotificationDelivery::class),
             $metadata,
             $this->createMock(ScopeConfigInterface::class)
@@ -728,6 +746,9 @@ class BeaconTest extends TestCase
 
         $signals = $this->createMock(LivenessSignals::class);
         $signals->method('forStore')->willReturn(['last_error_type' => null]);
+
+        $config = $this->createMock(ConfigSnapshot::class);
+        $config->method('forStore')->willReturn(['cfg_active' => true]);
         $metadata = $this->createMock(ProductMetadataInterface::class);
         $metadata->method('getVersion')->willReturn('2.4.8');
         $metadata->method('getEdition')->willReturn('Community');
@@ -737,6 +758,7 @@ class BeaconTest extends TestCase
             $helper,
             $client,
             $signals,
+            $config,
             $this->createMock(NotificationDelivery::class),
             $metadata,
             $this->createMock(ScopeConfigInterface::class)
@@ -811,6 +833,9 @@ class BeaconTest extends TestCase
         $client   = $this->createMock(Client::class);
         $signals  = $this->createMock(LivenessSignals::class);
         $signals->method('forStore')->willReturn(['last_error_type' => null]);
+
+        $config = $this->createMock(ConfigSnapshot::class);
+        $config->method('forStore')->willReturn(['cfg_active' => true]);
         $metadata = $this->createMock(ProductMetadataInterface::class);
         $metadata->method('getVersion')->willReturn('2.4.8');
         $metadata->method('getEdition')->willReturn('Community');
@@ -821,6 +846,7 @@ class BeaconTest extends TestCase
                 $helper,
                 $client,
                 $signals,
+                $config,
                 $this->createMock(NotificationDelivery::class),
                 $metadata,
                 $this->createMock(ScopeConfigInterface::class)

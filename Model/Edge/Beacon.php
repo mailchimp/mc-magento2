@@ -53,6 +53,11 @@ class Beacon
     private $signals;
 
     /**
+     * @var ConfigSnapshot
+     */
+    private $config;
+
+    /**
      * @var NotificationDelivery
      */
     private $notifications;
@@ -91,6 +96,7 @@ class Beacon
         MailChimpHelper $helper,
         Client $client,
         LivenessSignals $signals,
+        ConfigSnapshot $config,
         NotificationDelivery $notifications,
         ProductMetadataInterface $productMetadata,
         ScopeConfigInterface $scopeConfig
@@ -99,6 +105,7 @@ class Beacon
         $this->helper          = $helper;
         $this->client          = $client;
         $this->signals         = $signals;
+        $this->config          = $config;
         $this->notifications   = $notifications;
         $this->productMetadata = $productMetadata;
         $this->scopeConfig     = $scopeConfig;
@@ -231,7 +238,8 @@ class Beacon
         $body = array_merge(
             ['store_url' => $storeUrl],
             $this->versionBlock(),
-            $this->signals->forStore($storeId)
+            $this->signals->forStore($storeId),
+            $this->config->forStore($storeId)
         );
 
         // Two-step ack, opportunistic: the service acknowledges each uid
