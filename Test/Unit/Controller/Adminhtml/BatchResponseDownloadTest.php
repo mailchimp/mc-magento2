@@ -71,6 +71,38 @@ class BatchResponseDownloadTest extends TestCase
     }
 
     /**
+     * Each guard has to leave, not merely assign.
+     *
+     * Both branches set `$fileContent` to a string, and the loop's own
+     * condition is `while (!count($fileContent) …)`. Falling out of a branch
+     * without returning therefore calls count() on a string, which on PHP 8 is
+     * a TypeError rather than a warning -- the admin button 500s instead of
+     * downloading anything. Verified by removing the break and executing the
+     * controller.
+     *
+     * @dataProvider controllerProvider
+     * @param string $path
+     */
+    public function testEachGuardLeavesTheLoop($path)
+    {
+        $source = file_get_contents($path);
+
+        foreach (['$files === false', '$files === null'] as $guard) {
+            $start = strpos($source, $guard);
+            $this->assertNotFalse($start, "the $guard branch is gone");
+
+            $end = strpos($source, '}', $start);
+            $branch = substr($source, $start, $end - $start);
+
+            $this->assertStringContainsString(
+                'break;',
+                $branch,
+                "the $guard branch assigns a message and carries on, so count() is called on a string"
+            );
+        }
+    }
+
+    /**
      * The two states say different things. "Deleted from Mailchimp" is final;
      * "not finished" is the common case and resolves itself, and until
      * getBatchResponse() separated them a merchant was told neither.
