@@ -637,6 +637,16 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         foreach ($collection as $item) {
             try {
                 if ($item->usesSource()) {
+                    // Mutates the attribute model, which is safe only because
+                    // the collection above is built fresh on every call that
+                    // reaches this line -- a memo hit returns before it.
+                    // Hoisting or caching that collection for performance would
+                    // reintroduce cross-store leakage through a different door,
+                    // and nothing would fail when it did.
+                    //
+                    // Guarded on null so a caller that names no store keeps the
+                    // old fallback rather than being pinned silently to a store
+                    // it never asked for.
                     if ($storeId !== null) {
                         $item->setStoreId($storeId);
                     }
