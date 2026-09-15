@@ -301,7 +301,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     protected $resolver;
     private $customerAtt    = null;
     private $addressAtt     = null;
-    private $_mapFields     = null;
+    private $_mapFields     = [];
 
     /**
      * @param \Magento\Framework\App\Helper\Context $context
@@ -654,33 +654,69 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
 
         return $this->addressAtt;
     }
-    public function resetMapFields()
+    /**
+     * The merge-field map for a store view.
+     *
+     * Memoized per store view and per `$options`, because the result depends on
+     * both and the memo used to depend on neither. `Cron/Ecommerce` loops every
+     * store view with one helper instance and the subscriber sync reaches this
+     * through getMergeVarsBySubscriber(), so a store-blind memo meant every
+     * view after the first synchronised with the FIRST view's field map --
+     * wrong merge fields written to Mailchimp, with nothing to show for it.
+     *
+     * `$options` is in the key for the same reason and is the less obvious
+     * half: it changes what each entry carries, and `bin/magento cron:run`
+     * executes every due job of a group in one process, so a caller that asked
+     * without options could be served to one that asked with them.
+     *
+     * A null store id memoizes under its own key. That is correct as long as
+     * the current store does not change between two such calls, and no caller
+     * passes null today -- all three name the store view they mean.
+     *
+     * @param  int|null $storeId
+     * @param  bool     $options
+     * @return array
+     */
+    public function getMapFields($storeId = null, $options = true)
     {
-        $this->_mapFields = null;
-    }
-    public function getMapFields($storeId = null, $options=true)
-    {
-        if (!$this->_mapFields) {
-            $customerAtt = $this->getBindableAttributes();
-            $data = $this->getConfigValue(self::XML_MERGEVARS, $storeId);
-            try {
-                $data = $this->unserialize($data);
-                if (is_array($data)) {
-                    foreach ($data as $customerFieldId => $mailchimpName) {
-                        $this->_mapFields[] = [
-                            'mailchimp' => strtoupper($mailchimpName),
-                            'customer_field' => $customerAtt[$customerFieldId]['attCode'],
-                            'isDate' => $customerAtt[$customerFieldId]['isDate'],
-                            'isAddress' => $customerAtt[$customerFieldId]['isAddress'],
-                            'options' => $options ? $customerAtt[$customerFieldId]['options'] : false
-                        ];
-                    }
-                }
-            } catch (\Exception $e) {
-                $this->log($e->getMessage());
-            }
+        $key = ($storeId === null ? 'default' : (string)$storeId) . '|' . ($options ? '1' : '0');
+
+        // array_key_exists, not a truthiness test: an install with nothing
+        // mapped produces an empty array, which is falsy, so the memo never
+        // fired in exactly the case it is cheapest to serve -- re-reading the
+        // attributes and unserialising on every call, for every subscriber in
+        // the batch.
+        if (array_key_exists($key, $this->_mapFields)) {
+            return $this->_mapFields[$key];
         }
-        return $this->_mapFields;
+
+        $mapFields = [];
+        $customerAtt = $this->getBindableAttributes();
+        $data = $this->getConfigValue(self::XML_MERGEVARS, $storeId);
+        try {
+            $data = $this->unserialize($data);
+            if (is_array($data)) {
+                foreach ($data as $customerFieldId => $mailchimpName) {
+                    $mapFields[] = [
+                        'mailchimp' => strtoupper($mailchimpName),
+                        'customer_field' => $customerAtt[$customerFieldId]['attCode'],
+                        'isDate' => $customerAtt[$customerFieldId]['isDate'],
+                        'isAddress' => $customerAtt[$customerFieldId]['isAddress'],
+                        'options' => $options ? $customerAtt[$customerFieldId]['options'] : false
+                    ];
+                }
+            }
+        } catch (\Exception $e) {
+            $this->log($e->getMessage());
+            // Not memoized: a map that failed to parse is not an empty map,
+            // and remembering it would make one bad read permanent for the
+            // process.
+            return $mapFields;
+        }
+
+        $this->_mapFields[$key] = $mapFields;
+
+        return $mapFields;
     }
     public function getDateFormat()
     {
