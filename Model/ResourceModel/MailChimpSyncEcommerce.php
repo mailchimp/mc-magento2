@@ -87,6 +87,41 @@ class MailChimpSyncEcommerce extends AbstractDb
         );
         return $this;
     }
+    /**
+     * Send everything that went out in a batch again.
+     *
+     * The same three fields markAllAsModified() sets, because one of them is
+     * not enough on its own: a product is only picked up again when
+     * `mailchimp_sent` is NEEDTORESYNC, so marking only `mailchimp_sync_modified`
+     * would leave products behind while re-sending everything else.
+     *
+     * `batch_id` is cleared with them. The row would otherwise still name the
+     * batch it failed in, and would be found again by the next batch that gave
+     * up -- and the evidence it would have preserved lives elsewhere anyway, on
+     * the batch row and in mailchimp_errors.
+     *
+     * @param  \Ebizmarts\MailChimp\Model\MailChimpSyncEcommerce $chimp
+     * @param  string $batchId
+     * @return $this
+     */
+    public function markAllAsModifiedByBatchId(
+        \Ebizmarts\MailChimp\Model\MailChimpSyncEcommerce $chimp,
+        $batchId
+    ) {
+        $connection = $this->getConnection();
+        $connection->update(
+            $this->getTable('mailchimp_sync_ecommerce'),
+            [
+                'mailchimp_sync_modified' => 1,
+                'mailchimp_sent'          => \Ebizmarts\MailChimp\Helper\Data::NEEDTORESYNC,
+                'batch_id'                => null,
+            ],
+            ['batch_id = ?' => $batchId]
+        );
+
+        return $this;
+    }
+
     public function deleteAllByBatchId(\Ebizmarts\MailChimp\Model\MailChimpSyncEcommerce $chimp, $batchId)
     {
         $connection = $this->getConnection();

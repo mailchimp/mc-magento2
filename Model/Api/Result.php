@@ -19,6 +19,25 @@ use Ebizmarts\Mailchimp\Helper\Data as Helper;
 class Result
 {
     const MAILCHIMP_TEMP_DIR = 'Mailchimp';
+
+    /**
+     * How many times a FINISHED batch may fail to give up its result before we
+     * stop asking for it.
+     *
+     * Only readings of a finished batch are counted. Polling a batch that has
+     * not finished is not a retry -- it is the normal case, it is what the
+     * endpoint is for, and it ends on its own: a batch that never finishes is
+     * eventually expired by Mailchimp, and the status call then fails in a way
+     * that is already handled.
+     *
+     * Five, at the five-minute cadence this extension ships with, is about
+     * twenty-five minutes of a condition already known to be wrong, since the
+     * work itself completed on the other side. Long enough for a transient
+     * network or storage fault, and short enough that it does not re-download
+     * a result that never parses, every five minutes, until Mailchimp expires
+     * the batch a week later.
+     */
+    const MAX_RESPONSE_ATTEMPTS = 5;
     /**
      * @var \Ebizmarts\MailChimp\Model\ResourceModel\MailChimpSyncBatches\CollectionFactory
      */
@@ -99,6 +118,15 @@ class Result
                     $item->getResource()->save($item);
                     $this->syncHelper->deleteAllByBatchId($item->getBatchId());
                     continue;
+                } elseif (is_array($files)) {
+                    // Finished on Mailchimp, and we could not read what it
+                    // said. Not the same as `null` above, which is a batch
+                    // still being processed -- that one is waited for, not
+                    // counted, because waiting is the only correct thing to do
+                    // and it ends on its own.
+                    if ($this->giveUpOnResponse($item)) {
+                        continue;
+                    }
                 }
                 $baseDir = $this->_helper->getBaseDir();
                 if ($this->_driver->isDirectory($baseDir . DIRECTORY_SEPARATOR . 'var' . DIRECTORY_SEPARATOR .
@@ -123,6 +151,65 @@ class Result
             }
         }
     }
+    /**
+     * Count one failed reading of a finished batch, and decide whether to stop.
+     *
+     * The operations already ran on Mailchimp, so what is lost by giving up is
+     * the record of which of them failed -- and that is exactly what cannot be
+     * recovered by asking again once the result is unreadable. Asking forever
+     * does not recover it either: it re-downloads the same result every run
+     * until Mailchimp expires the batch, which is the state this exists to end.
+     *
+     * Giving up re-sends everything the batch carried rather than deleting the
+     * sync rows. The entities are found by the batch id they still carry, and
+     * marked so the next run picks them up again -- the same three fields the
+     * rest of the extension uses to say "send this again", because one of them
+     * is not enough on its own.
+     *
+     * @param  \Ebizmarts\MailChimp\Model\MailChimpSyncBatches $item
+     * @return bool  whether this batch was given up on
+     */
+    private function giveUpOnResponse($item)
+    {
+        $attempts = (int)$item->getResponseAttempts() + 1;
+        $item->setResponseAttempts($attempts);
+
+        if ($attempts < self::MAX_RESPONSE_ATTEMPTS) {
+            $item->getResource()->save($item);
+
+            return false;
+        }
+
+        $item->setStatus(\Ebizmarts\MailChimp\Helper\Data::BATCH_ERROR);
+        $item->getResource()->save($item);
+        $this->syncHelper->markAllAsModifiedByBatchId($item->getBatchId());
+        $this->_helper->log(
+            "Giving up on the result of batch [" . $item->getBatchId() . "] after " . $attempts
+            . " attempts; everything it carried has been queued to be sent again"
+        );
+
+        return true;
+    }
+
+    /**
+     * The result files of a batch, or what went wrong getting them.
+     *
+     * Three outcomes, and the caller has to be able to tell them apart:
+     *
+     *   array  the result was read -- empty if the archive carried no files
+     *   null   the batch has not finished; there is nothing to read yet
+     *   false  the status call itself failed
+     *
+     * `null` is new. It used to return the same empty array as a failed read,
+     * so a batch still being processed and a batch whose result could not be
+     * fetched were indistinguishable from the outside -- which is why nobody
+     * could see the second one, and why a count of attempts would have counted
+     * the normal case.
+     *
+     * @param  string $batchId
+     * @param  int|null $storeId
+     * @return array|null|false
+     */
     public function getBatchResponse($batchId, $storeId = null)
     {
         $files = [];
@@ -134,54 +221,64 @@ class Result
             // check the status of the job
             $response = $api->batchOperation->status($batchId);
 
-            if (isset($response['status']) && $response['status'] == 'finished') {
-                // Create temporary directory, if that does not exist
-                if (!$this->_driver->isDirectory($baseDir . DIRECTORY_SEPARATOR . 'var' . DIRECTORY_SEPARATOR . self::MAILCHIMP_TEMP_DIR)) {
-                    $this->_driver->createDirectory($baseDir . DIRECTORY_SEPARATOR . 'var' . DIRECTORY_SEPARATOR . self::MAILCHIMP_TEMP_DIR);
-                }
-                // get the tar.gz file with the results
-                // for AWS S3 use urldecode, for google drive use without urldecode
-                // $fileUrl = urldecode($response['response_body_url']);
-                $fileUrl = $response['response_body_url'];
-                $fd = $this->_driver->fileOpen($fileName . '.tar.gz', 'w');
-                $ch = $this->_curlFactory->create();
-                $ch->setOption(CURLOPT_URL, $fileUrl);
-                $ch->setOption(CURLOPT_FILE, $fd);
-                $ch->setOption(CURLOPT_FOLLOWLOCATION, true);
-                $r =$ch->get($fileUrl);
-                $this->_driver->fileClose($fd);
-
-                $this->_driver->createDirectory($baseDir . DIRECTORY_SEPARATOR . 'var' . DIRECTORY_SEPARATOR .
-                    self::MAILCHIMP_TEMP_DIR . DIRECTORY_SEPARATOR . $batchId);
-                $archive = $this->_archive;
-                $archive->unpack(
-                    $fileName . '.tar.gz',
-                    $baseDir . DIRECTORY_SEPARATOR . 'var' .
-                    DIRECTORY_SEPARATOR . self::MAILCHIMP_TEMP_DIR . DIRECTORY_SEPARATOR . $batchId
-                );
-                $archive->unpack(
-                    $baseDir . DIRECTORY_SEPARATOR . 'var' . DIRECTORY_SEPARATOR .
-                    self::MAILCHIMP_TEMP_DIR . DIRECTORY_SEPARATOR . $batchId . '/' . $batchId . '.tar',
-                    $baseDir . DIRECTORY_SEPARATOR . 'var' . DIRECTORY_SEPARATOR .
-                    self::MAILCHIMP_TEMP_DIR . DIRECTORY_SEPARATOR . $batchId
-                );
-                $dirFiles = $this->_driver->readDirectory($baseDir . DIRECTORY_SEPARATOR . 'var' . DIRECTORY_SEPARATOR .
-                    self::MAILCHIMP_TEMP_DIR . DIRECTORY_SEPARATOR . $batchId);
-                foreach ($dirFiles as $dirFile) {
-                    $name = pathinfo($dirFile);
-                    if ($name['extension'] == 'json') {
-                        $files[] = $dirFile;
-                    }
-                }
-                $this->_driver->deleteFile($baseDir . DIRECTORY_SEPARATOR . 'var' . DIRECTORY_SEPARATOR .
-                    self::MAILCHIMP_TEMP_DIR . DIRECTORY_SEPARATOR . $batchId . '/' . $batchId . '.tar');
-                $this->_driver->deleteFile($fileName . '.tar.gz');
+            if (!isset($response['status']) || $response['status'] != 'finished') {
+                return null;
             }
+
+            // Create temporary directory, if that does not exist
+            if (!$this->_driver->isDirectory($baseDir . DIRECTORY_SEPARATOR . 'var' . DIRECTORY_SEPARATOR . self::MAILCHIMP_TEMP_DIR)) {
+                $this->_driver->createDirectory($baseDir . DIRECTORY_SEPARATOR . 'var' . DIRECTORY_SEPARATOR . self::MAILCHIMP_TEMP_DIR);
+            }
+            // get the tar.gz file with the results
+            // for AWS S3 use urldecode, for google drive use without urldecode
+            // $fileUrl = urldecode($response['response_body_url']);
+            $fileUrl = $response['response_body_url'];
+            $fd = $this->_driver->fileOpen($fileName . '.tar.gz', 'w');
+            $ch = $this->_curlFactory->create();
+            $ch->setOption(CURLOPT_URL, $fileUrl);
+            $ch->setOption(CURLOPT_FILE, $fd);
+            $ch->setOption(CURLOPT_FOLLOWLOCATION, true);
+            $r =$ch->get($fileUrl);
+            $this->_driver->fileClose($fd);
+
+            $this->_driver->createDirectory($baseDir . DIRECTORY_SEPARATOR . 'var' . DIRECTORY_SEPARATOR .
+                self::MAILCHIMP_TEMP_DIR . DIRECTORY_SEPARATOR . $batchId);
+            $archive = $this->_archive;
+            $archive->unpack(
+                $fileName . '.tar.gz',
+                $baseDir . DIRECTORY_SEPARATOR . 'var' .
+                DIRECTORY_SEPARATOR . self::MAILCHIMP_TEMP_DIR . DIRECTORY_SEPARATOR . $batchId
+            );
+            $archive->unpack(
+                $baseDir . DIRECTORY_SEPARATOR . 'var' . DIRECTORY_SEPARATOR .
+                self::MAILCHIMP_TEMP_DIR . DIRECTORY_SEPARATOR . $batchId . '/' . $batchId . '.tar',
+                $baseDir . DIRECTORY_SEPARATOR . 'var' . DIRECTORY_SEPARATOR .
+                self::MAILCHIMP_TEMP_DIR . DIRECTORY_SEPARATOR . $batchId
+            );
+            $dirFiles = $this->_driver->readDirectory($baseDir . DIRECTORY_SEPARATOR . 'var' . DIRECTORY_SEPARATOR .
+                self::MAILCHIMP_TEMP_DIR . DIRECTORY_SEPARATOR . $batchId);
+            foreach ($dirFiles as $dirFile) {
+                $name = pathinfo($dirFile);
+                if ($name['extension'] == 'json') {
+                    $files[] = $dirFile;
+                }
+            }
+            $this->_driver->deleteFile($baseDir . DIRECTORY_SEPARATOR . 'var' . DIRECTORY_SEPARATOR .
+                self::MAILCHIMP_TEMP_DIR . DIRECTORY_SEPARATOR . $batchId . '/' . $batchId . '.tar');
+            $this->_driver->deleteFile($fileName . '.tar.gz');
         } catch (\Mailchimp_Error | \Mailchimp_HttpError $e) {
             $this->_helper->log($e->getFriendlyMessage());
             return false;
         } catch (\Exception $e) {
-            $this->_helper->log("Something went wrong retrieving result for batch [$batchId]");
+            // The message is what says which of the many ways this can fail
+            // actually happened -- the archive could not be written, the
+            // filesystem is full, the download returned something that is not
+            // an archive. Logging a fixed string instead sent whoever read it
+            // looking at the wrong thing, since the only other lines that land
+            // here come from the cleanup below and name a missing directory.
+            $this->_helper->log(
+                "Something went wrong retrieving result for batch [$batchId]: " . $e->getMessage()
+            );
             $this->_helper->log("Deleting temporary files, will retry the next run don't worry");
 
             try {
