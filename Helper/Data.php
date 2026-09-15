@@ -494,6 +494,14 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
      * cron run. An action has to carry at least one character that is not a
      * separator to mean anything.
      *
+     * The library rejects that shape as well, so this is not the only thing
+     * holding it. It is kept here because the two know different things: the
+     * library sees a token with no name in it, while this end knows why there
+     * is no name -- nothing was routed -- and can decline to send the bytes at
+     * all. And an app/code install pairs whichever library is on disk with
+     * whichever module is on disk, so neither end can assume the other's
+     * version.
+     *
      * @return void
      */
     private function applySurface()
