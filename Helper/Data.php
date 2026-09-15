@@ -168,7 +168,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
      * silence aimed at exactly the installations that cannot be told any other
      * way.
      */
-    const MIN_LIB_VERSION = '3.0.51';
+    const MIN_LIB_VERSION = '3.0.52';
 
     protected $counters = [];
 
