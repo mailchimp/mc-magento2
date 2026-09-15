@@ -103,9 +103,21 @@ class ConfigSnapshot
         //
         // Both halves of each pair are identifiers: a Magento attribute code
         // and a Mailchimp merge tag. Schema, not merchant content.
+        // A half-empty pair is dropped rather than carried. An attribute that
+        // was mapped and later deleted leaves its id in the stored map, and the
+        // resolver hands back a null attribute code for it -- which composes
+        // `:GHOST`, a pair that is well formed enough to store and names
+        // nothing. Verified on a running install, where it also emits six PHP
+        // warnings from the resolver; those are not this method's to fix, but
+        // publishing their result is.
         $pairs = [];
         foreach ($this->helper->getMapFields($storeId, false) as $field) {
-            $pairs[] = $field['customer_field'] . ':' . $field['mailchimp'];
+            $attribute = isset($field['customer_field']) ? (string)$field['customer_field'] : '';
+            $tag       = isset($field['mailchimp']) ? (string)$field['mailchimp'] : '';
+            if ($attribute === '' || $tag === '') {
+                continue;
+            }
+            $pairs[] = $attribute . ':' . $tag;
         }
         $snapshot['cfg_field_map_n'] = count($pairs);
         $map = $this->bounded($pairs);
@@ -118,7 +130,15 @@ class ConfigSnapshot
         // Helper::getInterest(), which resolves them against Mailchimp -- a
         // call this must never make.
         $interest = $this->text(MailChimpHelper::XML_INTEREST, $storeId);
-        $ids = $interest === null ? [] : array_filter(explode(',', $interest));
+        // Explicit rather than array_filter()'s truthiness, which would also
+        // drop an id of "0". Mailchimp ids are not numeric today and that is
+        // not a reason to write a filter that depends on it.
+        $ids = [];
+        foreach ($interest === null ? [] : explode(',', $interest) as $id) {
+            if (trim($id) !== '') {
+                $ids[] = trim($id);
+            }
+        }
         $snapshot['cfg_interest_n'] = count($ids);
         $groups = $this->bounded($ids);
         if ($groups !== null) {

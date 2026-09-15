@@ -210,6 +210,52 @@ class ConfigSnapshotTest extends TestCase
     }
 
     /**
+     * An attribute that was mapped and later deleted leaves its id in the
+     * stored map, and the resolver hands back a null attribute code for it.
+     * `:GHOST` is well formed enough to store and names nothing -- the same
+     * shape as every other "valid and meaningless" value found this week.
+     */
+    public function testAHalfEmptyPairIsDroppedRatherThanCarried()
+    {
+        $snapshot = $this->snapshot([], [
+            ['customer_field' => 'firstname', 'mailchimp' => 'FNAME'],
+            ['customer_field' => null,        'mailchimp' => 'GHOST'],
+            ['customer_field' => 'lastname',  'mailchimp' => ''],
+        ])->forStore(1);
+
+        $this->assertSame('firstname:FNAME', $snapshot['cfg_field_map']);
+        $this->assertSame(1, $snapshot['cfg_field_map_n'], 'the count reports what is carryable, not what was stored');
+    }
+
+    /**
+     * One entry longer than the whole budget leaves nothing to carry, and the
+     * count is what still says something was there.
+     */
+    public function testAnEntryTooLongForTheBudgetLeavesTheCount()
+    {
+        $snapshot = $this->snapshot([], [
+            ['customer_field' => str_repeat('a', 600), 'mailchimp' => 'FNAME'],
+        ])->forStore(1);
+
+        $this->assertArrayNotHasKey('cfg_field_map', $snapshot);
+        $this->assertSame(1, $snapshot['cfg_field_map_n']);
+    }
+
+    /**
+     * array_filter() without a callback drops "0", and a rule that depends on
+     * Mailchimp ids never being numeric is a rule waiting to be wrong.
+     */
+    public function testAnIdOfZeroSurvivesTheInterestList()
+    {
+        $snapshot = $this->snapshot([
+            MailChimpHelper::XML_INTEREST => '0,abc123, ,def456',
+        ])->forStore(1);
+
+        $this->assertSame('0,abc123,def456', $snapshot['cfg_interest']);
+        $this->assertSame(3, $snapshot['cfg_interest_n']);
+    }
+
+    /**
      * Nothing mapped is a fact worth reporting, and it is not the same as an
      * installation that does not report the map at all.
      */
