@@ -2,10 +2,35 @@
 /**
  * @var $escaper \Magento\Framework\Escaper
  */
+
+// 1035x800, and both numbers are inherited rather than chosen. Mailchimp for
+// WooCommerce -- Mailchimp's own first-party integration, opening this same
+// consent screen -- uses them, so they have already been tuned against the
+// screen we are opening. 500x700 squashed it.
+//
+// Centred across, but a quarter down rather than half: on a short laptop
+// screen a vertically centred 800px window loses its bottom edge, and the
+// bottom edge is where the consent button is.
+//
+// scrollbars and resizable stay ON, where WooCommerce turns both off. Below
+// 1035 the browser clamps the window, and that is exactly the case where being
+// able to scroll or drag an edge is the difference between a consent screen a
+// merchant can finish and one they cannot.
 ?>
 <div class="actions actions-get-apikey">
     <div id="validation_result" class="message-validation hidden"></div>
-    <button onclick="javascript:window.open('<?= $escaper->escapeUrl($block->authorizeRequestUrl()) ?>', 'apiwizard','toolbar=no, location=no, directories=no, status=no, menubar=no, scrollbars=yes, resizable=yes, ,left=100, top=100, width=500, height=700'); return false;" class="action-get-apikey" type="button" id="<?= $block->getHtmlId() ?>">
+    <button onclick="javascript:(function () {
+                var w = 1035, h = 800;
+                window.open(
+                    '<?= $escaper->escapeUrl($block->authorizeRequestUrl()) ?>',
+                    'apiwizard',
+                    'toolbar=no, location=no, directories=no, status=no, menubar=no,' +
+                    ' scrollbars=yes, resizable=yes,' +
+                    ' width=' + w + ', height=' + h +
+                    ', left=' + Math.max(0, Math.round((screen.width - w) / 2)) +
+                    ', top=' + Math.max(0, Math.round((screen.height - h) / 4))
+                );
+            }()); return false;" class="action-get-apikey" type="button" id="<?= $block->getHtmlId() ?>">
         <span><?= $escaper->escapeHtml($block->getButtonLabel()) ?></span>
     </button>
 </div>
