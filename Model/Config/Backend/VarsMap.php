@@ -72,4 +72,11 @@ class VarsMap extends \Magento\Framework\App\Config\Value
         }
         $this->setValue($value);
     }
+
+    public function afterSave()
+    {
+        $this->_helper->clearMergeFieldDateFormats();
+
+        return parent::afterSave();
+    }
 }
