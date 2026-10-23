@@ -103,6 +103,10 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
 
     const MAX_MERGEFIELDS = 100;
 
+    const MERGEFIELD_DATE_FORMAT_TTL = 3600;
+
+    const MERGEFIELD_DATE_FORMAT_CACHE_TAG = 'MAILCHIMP_MERGEFIELD_DATE_FORMAT';
+
     protected $counters = [];
     /**
      * @var \Magento\Store\Model\StoreManagerInterface
@@ -182,6 +186,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
      * @var \Magento\Framework\App\Cache\TypeListInterface
      */
     private $_cacheTypeList;
+    private $_cache;
     /**
      * @var \Magento\Customer\Model\ResourceModel\Attribute\CollectionFactory
      */
@@ -226,6 +231,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     private $customerAtt    = null;
     private $addressAtt     = null;
     private $_mapFields     = null;
+    private $_mergeFieldDateFormats = [];
 
     /**
      * @param \Magento\Framework\App\Helper\Context $context
@@ -285,7 +291,8 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         \Magento\Framework\Stdlib\DateTime\DateTime $date,
         \Magento\Directory\Model\CountryFactory $countryFactory,
         \Magento\Framework\Locale\Resolver $resolver,
-        MailchimpNotificationFactory $mailchimpNotificationFactory
+        MailchimpNotificationFactory $mailchimpNotificationFactory,
+        \Magento\Framework\App\CacheInterface $cache = null
     ) {
 
         $this->_storeManager  = $storeManager;
@@ -308,6 +315,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         $this->_resource                = $resource;
         $this->connection               = $resource->getConnection();
         $this->_cacheTypeList           = $cacheTypeList;
+        $this->_cache                   = $cache;
         $this->_attCollection           = $attCollection;
         $this->_customerFactory         = $customerFactory;
         $this->_countryInformation      = $countryInformation;
@@ -484,6 +492,151 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     public function getDateFormat()
     {
         return 'm/d/Y';
+    }
+
+    public function getMergeFieldDateFormat($storeId, $tag, $isBirthday = false)
+    {
+        $formats = $this->getMergeFieldDateFormats($storeId);
+        $key = strtoupper((string)$tag);
+
+        if (isset($formats[$key])) {
+            $format = $this->translateMailchimpDateFormat($formats[$key]);
+            if ($format !== null) {
+                return $format;
+            }
+        }
+
+        $format = $this->getDateFormat();
+
+        return $isBirthday ? substr($format, 0, 3) : $format;
+    }
+
+    public function getMergeFieldDateFormats($storeId = null)
+    {
+        $listId = $this->getConfigValue(self::XML_PATH_LIST, $storeId);
+
+        if (empty($listId) || !is_scalar($listId)) {
+            return [];
+        }
+
+        $key = (($storeId === null) ? 'default' : (string)$storeId) . '|' . (string)$listId;
+
+        if (array_key_exists($key, $this->_mergeFieldDateFormats)) {
+            return $this->_mergeFieldDateFormats[$key];
+        }
+
+        $formats = $this->loadMergeFieldDateFormatsFromCache($key);
+
+        if ($formats === null) {
+            $formats = $this->requestMergeFieldDateFormats($storeId, (string)$listId);
+            $this->saveMergeFieldDateFormatsToCache($key, $formats);
+        }
+
+        $this->_mergeFieldDateFormats[$key] = $formats;
+
+        return $formats;
+    }
+
+    public function clearMergeFieldDateFormats()
+    {
+        $this->_mergeFieldDateFormats = [];
+
+        if ($this->_cache === null) {
+            return;
+        }
+
+        $this->_cache->clean([self::MERGEFIELD_DATE_FORMAT_CACHE_TAG]);
+    }
+
+    private function requestMergeFieldDateFormats($storeId, $listId)
+    {
+        $formats = [];
+        $apiKey = $this->getApiKey($storeId);
+
+        if (empty($apiKey)) {
+            return $formats;
+        }
+
+        try {
+            $api = $this->getApi($storeId);
+            $response = $api->lists->mergeFields->getAll(
+                $listId,
+                null,
+                null,
+                self::MAX_MERGEFIELDS
+            );
+
+            if (is_array($response) && array_key_exists('merge_fields', $response)) {
+                foreach ($response['merge_fields'] as $field) {
+                    if (empty($field['tag']) || empty($field['options']['date_format'])) {
+                        continue;
+                    }
+
+                    $formats[strtoupper($field['tag'])] = $field['options']['date_format'];
+                }
+            }
+        } catch (\Mailchimp_Error | \Mailchimp_HttpError $e) {
+            $this->log($e->getFriendlyMessage());
+        } catch (\Exception $e) {
+            $this->log($e->getMessage());
+        }
+
+        return $formats;
+    }
+
+    private function loadMergeFieldDateFormatsFromCache($key)
+    {
+        if ($this->_cache === null) {
+            return null;
+        }
+
+        $cached = $this->_cache->load($this->mergeFieldDateFormatsCacheId($key));
+
+        if (!is_string($cached) || $cached === '') {
+            return null;
+        }
+
+        try {
+            $formats = $this->unserialize($cached);
+        } catch (\Exception $e) {
+            return null;
+        }
+
+        return is_array($formats) ? $formats : null;
+    }
+
+    private function saveMergeFieldDateFormatsToCache($key, array $formats)
+    {
+        if ($this->_cache === null) {
+            return;
+        }
+
+        $this->_cache->save(
+            $this->serialize($formats),
+            $this->mergeFieldDateFormatsCacheId($key),
+            [self::MERGEFIELD_DATE_FORMAT_CACHE_TAG],
+            self::MERGEFIELD_DATE_FORMAT_TTL
+        );
+    }
+
+    private function mergeFieldDateFormatsCacheId($key)
+    {
+        return 'mailchimp_mergefield_date_formats_' . preg_replace('/[^A-Za-z0-9_]/', '_', $key);
+    }
+
+    private function translateMailchimpDateFormat($mailchimpFormat)
+    {
+        if (!is_string($mailchimpFormat)) {
+            return null;
+        }
+
+        $mailchimpFormat = strtoupper(trim($mailchimpFormat));
+
+        if (!preg_match('~^(YYYY|YY|MM|DD)([/.\- ](YYYY|YY|MM|DD))*$~', $mailchimpFormat)) {
+            return null;
+        }
+
+        return strtr($mailchimpFormat, ['YYYY' => 'Y', 'YY' => 'y', 'MM' => 'm', 'DD' => 'd']);
     }
 
     /**
@@ -795,10 +948,11 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
                     $value = $customer->getData($map['customer_field']);
                     if (!is_null($value)) {
                         if ($map['isDate']) {
-                            $format = $this->getDateFormat();
-                            if ($map['customer_field'] == 'dob') {
-                                $format = substr($format, 0, 3);
-                            }
+                            $format = $this->getMergeFieldDateFormat(
+                                $storeId,
+                                $map['mailchimp'],
+                                $map['customer_field'] == 'dob'
+                            );
                             $value = date($format, strtotime($value));
                         } elseif ($map['isAddress']) {
                             $customerAddress = $customer->getPrimaryAddress($map['customer_field']);
