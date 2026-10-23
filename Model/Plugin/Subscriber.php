@@ -162,7 +162,13 @@ class Subscriber
     }
 
     /**
-     * @param \Magento\Newsletter\Model\Subscriber $subscriber
+     * Keep the platform quiet about a subscription this module mirrors.
+     *
+     * All that is left here. Import mode has to be set before the platform
+     * acts, because it is what suppresses Magento's own email; the write to
+     * Mailchimp moved to afterUnsubscribe() and the reason is there.
+     *
+     * @param  \Magento\Newsletter\Model\Subscriber $subscriber
      * @return null
      * @throws \Magento\Framework\Exception\LocalizedException
      */
@@ -174,15 +180,61 @@ class Subscriber
             if (!$this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_MAGENTO_MAIL, $storeId)) {
                 $subscriber->setImportMode(true);
             }
-            $api = $this->_helper->getApi($storeId);
-            try {
-                $md5HashEmail = hash('md5', strtolower($subscriber->getSubscriberEmail()));
-                $api->lists->members->update($this->_helper->getDefaultList($storeId), $md5HashEmail, null, 'unsubscribed');
-            } catch (\Mailchimp_Error $e) {
-                $this->_helper->log($e->getFriendlyMessage());
-            }
         }
         return null;
+    }
+
+    /**
+     * Mirror an unsubscribe to Mailchimp, but only once Magento has made one.
+     *
+     * This write used to run before the platform's method, which meant it ran
+     * ahead of the platform's own rule and sometimes reported something that
+     * never happened: `Subscriber::unsubscribe()` raises on a confirmation code
+     * that does not match, leaving the row subscribed, while this had already
+     * told Mailchimp the shopper was out. Against an address Mailchimp does not
+     * hold, that write is also a PATCH answered 404 and swallowed, once per
+     * attempt.
+     *
+     * The status is read rather than assumed, because the platform only
+     * transitions a row that is not already unsubscribed.
+     *
+     * One case this deliberately still mirrors is the row that was already
+     * unsubscribed. The platform skips both the transition and its email there,
+     * so nothing raises -- and that is what lets this heal itself: if the
+     * unsubscription email fails, the row is saved before the send and the
+     * exception keeps this method from running, so Mailchimp misses that
+     * attempt. The shopper's next attempt, on the row as it now stands, goes
+     * through and mirrors it.
+     *
+     * @param  \Magento\Newsletter\Model\Subscriber $subscriber
+     * @param  mixed $result
+     * @return mixed
+     * @throws \Magento\Framework\Exception\LocalizedException
+     */
+    public function afterUnsubscribe(
+        \Magento\Newsletter\Model\Subscriber $subscriber,
+        $result
+    ) {
+        $storeId = $this->getStoreIdFromSubscriber($subscriber);
+        if (!$this->_helper->isMailChimpEnabled($storeId)) {
+            return $result;
+        }
+
+        if ((int)$subscriber->getSubscriberStatus()
+            !== \Magento\Newsletter\Model\Subscriber::STATUS_UNSUBSCRIBED
+        ) {
+            return $result;
+        }
+
+        $api = $this->_helper->getApi($storeId);
+        try {
+            $md5HashEmail = hash('md5', strtolower($subscriber->getSubscriberEmail()));
+            $api->lists->members->update($this->_helper->getDefaultList($storeId), $md5HashEmail, null, 'unsubscribed');
+        } catch (\Mailchimp_Error $e) {
+            $this->_helper->log($e->getFriendlyMessage());
+        }
+
+        return $result;
     }
 
     /**
