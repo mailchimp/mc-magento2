@@ -89,7 +89,15 @@ class Index extends Action implements CsrfAwareActionInterface
             return $result;
         }
         $key = $this->_helper->getWebhooksKey();
-        if ($key!=$requestKey) {
+        // hash_equals() rather than a comparison operator. The key is a shared
+        // secret, so the comparison has to be constant-time -- and a loose
+        // comparison can also hold between two strings that are not the same
+        // string, which is not a property an authentication check can afford.
+        //
+        // The is_string() guard is not decoration: hash_equals() raises a
+        // TypeError on anything that is not a string, and `wkey` arrives from
+        // the query string, where a caller can make it an array.
+        if (!is_string($requestKey) || !hash_equals($key, $requestKey)) {
             $this->_helper->log('wkey parameter is invalid from ip: '.$this->_remoteAddress->getRemoteAddress());
             $result->setHttpResponseCode(403);
             return $result;
