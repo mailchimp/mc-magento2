@@ -195,30 +195,60 @@ class SubscriptionManager
     }
 
     /**
-     * @param \Magento\Newsletter\Model\Subscriber $subscriber
-     * @return null
+     * Mirror an unsubscribe to Mailchimp, but only once Magento has made one.
+     *
+     * This ran `before` the platform's method, which meant it acted on an
+     * operation that had not happened yet and sometimes never would.
+     * `SubscriptionManager::unsubscribe()` returns early when no subscriber row
+     * exists for the address, and `Subscriber::unsubscribe()` raises on a
+     * mismatched confirmation code. In both cases nothing changes in Magento,
+     * while this plugin had already told Mailchimp the shopper was
+     * unsubscribed -- and when the address is not a member either, that write is
+     * a PATCH answered 404 and swallowed, once per attempt.
+     *
+     * Reading the returned subscriber is what makes the two sides agree. It
+     * carries a row id only if there was a row, and the unsubscribed status
+     * only if the transition went through; a refused confirmation code raises,
+     * so this method is simply never reached.
+     *
+     * @param  \Magento\Newsletter\Model\SubscriptionManager $subscriptionManager
+     * @param  \Magento\Newsletter\Model\Subscriber $result
+     * @param  string $email
+     * @param  int    $storeId
+     * @param  string $confirmCode
+     * @return \Magento\Newsletter\Model\Subscriber
      * @throws \Magento\Framework\Exception\LocalizedException
      */
-    public function beforeUnsubscribe(
+    public function afterUnsubscribe(
         \Magento\Newsletter\Model\SubscriptionManager $subscriptionManager,
+        \Magento\Newsletter\Model\Subscriber $result,
         $email,
         $storeId,
         $confirmCode
     ) {
-        if ($this->_helper->isMailChimpEnabled($storeId)) {
-            $api = $this->_helper->getApi($storeId);
-            try {
-                $md5HashEmail = hash('md5', strtolower($email));
-                $api->lists->members->update(
-                    $this->_helper->getDefaultList($storeId),
-                    $md5HashEmail,
-                    null,
-                    'unsubscribed'
-                );
-            } catch (\Mailchimp_Error | \Mailchimp_HttpError $e) {
-                $this->_helper->log($e->getFriendlyMessage());
-            }
+        if (!$this->_helper->isMailChimpEnabled($storeId)) {
+            return $result;
         }
-        return [$email,$storeId,$confirmCode];
+
+        if (!$result->getId()
+            || (int)$result->getStatus() !== \Magento\Newsletter\Model\Subscriber::STATUS_UNSUBSCRIBED
+        ) {
+            return $result;
+        }
+
+        $api = $this->_helper->getApi($storeId);
+        try {
+            $md5HashEmail = hash('md5', strtolower($email));
+            $api->lists->members->update(
+                $this->_helper->getDefaultList($storeId),
+                $md5HashEmail,
+                null,
+                'unsubscribed'
+            );
+        } catch (\Mailchimp_Error | \Mailchimp_HttpError $e) {
+            $this->_helper->log($e->getFriendlyMessage());
+        }
+
+        return $result;
     }
  }
