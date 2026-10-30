@@ -162,28 +162,77 @@ class Subscriber
     }
 
     /**
-     * @param \Magento\Newsletter\Model\Subscriber $subscriber
-     * @return null
+     * Mirror an unsubscribe to Mailchimp, whatever else the platform does next.
+     *
+     * `around` rather than a before/after pair, with the mirror in a `finally`.
+     * The platform saves the row and then sends its own email, so a mail
+     * transport that raises leaves Magento unsubscribed and would leave an
+     * `after` plugin unreached -- the shopper is out on this side and still
+     * subscribed on Mailchimp's, which is the outcome worth engineering
+     * against. `finally` runs either way and the exception propagates
+     * untouched.
+     *
+     * Import mode stays ahead of the platform, where it has to be: it is what
+     * suppresses Magento's own email.
+     *
+     * Nothing is assumed about whether anything happened -- the status is read
+     * after the fact. A mismatched confirmation code raises before the row is
+     * touched, so the status is still subscribed and nothing is mirrored.
+     *
+     * @param  \Magento\Newsletter\Model\Subscriber $subscriber
+     * @param  callable $proceed
+     * @return mixed
      * @throws \Magento\Framework\Exception\LocalizedException
      */
-    public function beforeUnsubscribe(
-        \Magento\Newsletter\Model\Subscriber $subscriber
+    public function aroundUnsubscribe(
+        \Magento\Newsletter\Model\Subscriber $subscriber,
+        callable $proceed
     ) {
         $storeId = $this->getStoreIdFromSubscriber($subscriber);
-        if ($this->_helper->isMailChimpEnabled($storeId)) {
-            if (!$this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_MAGENTO_MAIL, $storeId)) {
-                $subscriber->setImportMode(true);
-            }
-            $api = $this->_helper->getApi($storeId);
-            try {
-                $md5HashEmail = hash('md5', strtolower($subscriber->getSubscriberEmail()));
-                $api->lists->members->update($this->_helper->getDefaultList($storeId), $md5HashEmail, null, 'unsubscribed');
-            } catch (\Mailchimp_Error $e) {
-                $this->_helper->log($e->getFriendlyMessage());
-            }
+        if ($this->_helper->isMailChimpEnabled($storeId)
+            && !$this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_MAGENTO_MAIL, $storeId)
+        ) {
+            $subscriber->setImportMode(true);
         }
-        return null;
+
+        try {
+            return $proceed();
+        } finally {
+            $this->mirrorUnsubscribe($subscriber);
+        }
     }
+
+    /**
+     * Tell Mailchimp the address is out, if the row says it is.
+     *
+     * @param  \Magento\Newsletter\Model\Subscriber $subscriber
+     * @return void
+     * @throws \Magento\Framework\Exception\LocalizedException
+     */
+    private function mirrorUnsubscribe(\Magento\Newsletter\Model\Subscriber $subscriber)
+    {
+        $storeId = $this->getStoreIdFromSubscriber($subscriber);
+
+        if (!$this->_helper->isMailChimpEnabled($storeId)) {
+            return;
+        }
+
+        if ((int)$subscriber->getSubscriberStatus()
+            !== \Magento\Newsletter\Model\Subscriber::STATUS_UNSUBSCRIBED
+        ) {
+            return;
+        }
+
+        $api = $this->_helper->getApi($storeId);
+
+        try {
+            $md5HashEmail = hash('md5', strtolower($subscriber->getSubscriberEmail()));
+            $api->lists->members->update($this->_helper->getDefaultList($storeId), $md5HashEmail, null, 'unsubscribed');
+        } catch (\Mailchimp_Error $e) {
+            $this->_helper->log($e->getFriendlyMessage());
+        }
+    }
+
 
     /**
      * @param \Magento\Newsletter\Model\Subscriber $subscriber
