@@ -92,7 +92,6 @@ define(
                 if (ecommerceEnabled == 0 && abandonedCartEnabled == 1) {
                     self._changeAbandonedCart();
                 }
-                $('#mailchimp_ecommerce_campaign_action').attr('size',3);
 
             },
             _changeEcommerce: function () {
