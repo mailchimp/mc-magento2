@@ -516,14 +516,11 @@ class Cart
      */
     protected function _makeCart(\Magento\Quote\Model\Quote $cart, $mailchimpStoreId, $magentoStoreId)
     {
-        $campaignId = $cart->getMailchimpCampaignId();
         $oneCart = [];
         $oneCart['id'] = $cart->getEntityId();
         $oneCart['customer'] = $this->_getCustomer($cart, $mailchimpStoreId, $magentoStoreId);
-        if ($campaignId) {
-            $oneCart['campaign_id'] = $campaignId;
-        }
-
+        // No campaign_id: Mailchimp performs order/revenue attribution internally,
+        // so sending one would override it.
         $oneCart['checkout_url'] = $this->_getCheckoutUrl($cart, $magentoStoreId);
         $oneCart['currency_code'] = $cart->getQuoteCurrencyCode();
         $oneCart['order_total'] = $cart->getGrandTotal();
