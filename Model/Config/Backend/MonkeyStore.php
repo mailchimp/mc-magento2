@@ -15,6 +15,8 @@ namespace Ebizmarts\MailChimp\Model\Config\Backend;
 
 use Ebizmarts\MailChimp\Helper\Data;
 use Ebizmarts\MailChimp\Helper\Sync as SyncHelper;
+use Ebizmarts\MailChimp\Model\Service\Admin\ConnectedSiteProvisioner;
+use Magento\Config\Model\ResourceModel\Config\Data\CollectionFactory as ConfigDataCollectionFactory;
 use Magento\Config\Model\ResourceModel\Config;
 use Magento\Framework\App\Cache\TypeListInterface;
 use Magento\Framework\App\Config\ScopeConfigInterface;
@@ -38,6 +40,27 @@ class MonkeyStore extends Value
     private StoreManager $_storeManager;
 
     private $oldListId = null;
+
+    /**
+     * @var ConnectedSiteProvisioner
+     */
+    private ConnectedSiteProvisioner $connectedSiteProvisioner;
+
+    /**
+     * @var ConfigDataCollectionFactory
+     */
+    private ConfigDataCollectionFactory $configDataCollectionFactory;
+
+    /**
+     * Whether this save is the one that connects the store view.
+     *
+     * Read in beforeSave(), where the old value is still readable, and acted on
+     * in afterSave(), once the new one is persisted and the provisioner's own
+     * reads agree with it.
+     *
+     * @var bool
+     */
+    private bool $justConnected = false;
     const MAX_LISTS = 200;
 
     public function __construct(
@@ -50,6 +73,8 @@ class MonkeyStore extends Value
         Data $helper,
         SyncHelper $syncHelper,
         StoreManager $storeManager,
+        ConnectedSiteProvisioner $connectedSiteProvisioner,
+        ConfigDataCollectionFactory $configDataCollectionFactory,
         ?AbstractResource $resource = null,
         ?AbstractDb $resourceCollection = null,
         array $data = []
@@ -59,6 +84,8 @@ class MonkeyStore extends Value
         $this->resourceConfig   = $resourceConfig;
         $this->_date            = $date;
         $this->_storeManager    = $storeManager;
+        $this->connectedSiteProvisioner = $connectedSiteProvisioner;
+        $this->configDataCollectionFactory = $configDataCollectionFactory;
         parent::__construct($context, $registry, $config, $cacheTypeList, $resource, $resourceCollection, $data);
     }
 
@@ -184,8 +211,114 @@ class MonkeyStore extends Value
                 $this->_helper->createWebHook($apiKey, $newListId);
             }
         }
+        // Whether this save is the one that connects the store view. Read here
+        // because the stored value is still the old one; acted on in
+        // afterSave().
+        $this->justConnected = $this->isARealStore($this->getValue())
+            && !$this->_helper->isStoreConnected($this->resolveStoreIdForScope());
+
         return parent::beforeSave();
     }
+
+    /**
+     * Turn the Pixel on for a store view that just connected.
+     *
+     * Mailchimp asks for the Pixel to be active on every new connection, so the
+     * connection itself provisions it rather than waiting for the merchant to
+     * find the toggle. Three rules shape what this does and does not do:
+     *
+     *   - only on a connection. A store view that was already connected is left
+     *     exactly as it is, including its Pixel setting, so an upgrade changes
+     *     nothing for anyone;
+     *   - an explicit No is never overridden. The toggle is locked until the
+     *     view is connected and an untouched save writes no row, so a value
+     *     found here was chosen by someone;
+     *   - the bound connected site only. A standalone site cannot attribute to
+     *     the store, so on a host that already has one the Pixel stays off and
+     *     the reason is logged.
+     *
+     * A provisioning failure never fails the connection: it is logged and the
+     * merchant can still turn the Pixel on by hand, which provisions again.
+     *
+     * @return $this
+     */
+    public function afterSave()
+    {
+        parent::afterSave();
+
+        if (!$this->justConnected) {
+            return $this;
+        }
+
+        $this->justConnected = false;
+        $storeId = $this->resolveStoreIdForScope();
+
+        if ($storeId === null) {
+            // The connection was made at default or website scope, where the
+            // Pixel -- a store-view-only setting -- has no row to write.
+            return $this;
+        }
+
+        if ($this->pixelAlreadyDecided($storeId)) {
+            return $this;
+        }
+
+        try {
+            $baseUrl = $this->_storeManager->getStore($storeId)->getBaseUrl();
+            $this->connectedSiteProvisioner->provision(
+                $storeId,
+                (string)$this->getValue(),
+                (string)parse_url($baseUrl, PHP_URL_HOST),
+                true
+            );
+        } catch (\Throwable $e) {
+            // Deliberately \Throwable and deliberately swallowed. This runs
+            // inside the save of the field that connects the store, and a
+            // Mailchimp outage, a revoked key or an error anywhere in the
+            // provisioner must not leave the merchant unable to connect.
+            $this->_helper->log(
+                'MonkeyStore: could not provision the Pixel for store ' . $storeId
+                . ': ' . $e->getMessage()
+            );
+        }
+
+        return $this;
+    }
+
+    /**
+     * Whether someone has already set the Pixel toggle for this store view.
+     *
+     * The question is whether a ROW exists at that scope, not what the scope
+     * resolves to: every store view resolves to the `0` in config.xml, so
+     * reading the value would answer "decided, and the answer is No" for a
+     * merchant who has never been asked. The toggle is locked until the view is
+     * connected and an untouched save writes nothing
+     * (Model/Config/Backend/PixelEnabled), so a row here was written by someone
+     * choosing.
+     *
+     * @param  int $storeId
+     * @return bool
+     */
+    private function pixelAlreadyDecided(int $storeId): bool
+    {
+        $rows = $this->configDataCollectionFactory->create()
+            ->addFieldToFilter('path', Data::XML_PIXEL_ENABLED_FOR_STORE)
+            ->addFieldToFilter('scope', 'stores')
+            ->addFieldToFilter('scope_id', $storeId);
+
+        return $rows->getSize() > 0;
+    }
+
+    /**
+     * The store view this save applies to, or null when it is wider than one.
+     *
+     * @return int|null
+     */
+    private function resolveStoreIdForScope()
+    {
+        return $this->getScope() === 'stores' ? (int)$this->getScopeId() : null;
+    }
+
     /**
      * Whether a submitted value is a Mailchimp store rather than one of the
      * dropdown's two non-answers.

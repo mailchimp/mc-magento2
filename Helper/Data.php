@@ -1904,6 +1904,35 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     }
 
     /**
+     * Whether this store view is connected to a Mailchimp store.
+     *
+     * One definition, called by both the form that locks the Pixel toggle and
+     * the hook that turns the Pixel on when a store view connects. Two
+     * definitions of "connected" drift, and the two ways they drift are both
+     * silent: a toggle that is never postable on a view the hook treats as
+     * connected, or a view the form opens up and the hook never provisions.
+     *
+     * The store dropdown offers two values that are not stores -- `-1`, its
+     * placeholder, and `0`, the "---No Data---" fallback it shows when there is
+     * no API key at this scope or the store listing threw (see
+     * Model/Config/Source/MonkeyStore). Neither is a connection, and the
+     * backend model already refuses to persist them while ecommerce is on.
+     *
+     * @param  int|null $storeId
+     * @return bool
+     */
+    public function isStoreConnected($storeId = null)
+    {
+        if (!$this->isMailChimpEnabled($storeId)) {
+            return false;
+        }
+
+        $mailchimpStoreId = (string)$this->getConfigValue(self::XML_MAILCHIMP_STORE, $storeId);
+
+        return $mailchimpStoreId !== '' && $mailchimpStoreId !== '-1' && $mailchimpStoreId !== '0';
+    }
+
+    /**
      * Returns the Pixel SDK script URL saved for the given store.
      *
      * @param int $storeId

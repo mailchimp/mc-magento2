@@ -84,8 +84,12 @@ class ConnectedSiteProvisioner
      * @return void
      * @throws LocalizedException
      */
-    public function provision(int $storeId, string $mailchimpStoreId, string $domain): void
-    {
+    public function provision(
+        int $storeId,
+        string $mailchimpStoreId,
+        string $domain,
+        bool $boundSiteOnly = false
+    ): void {
         $api = $this->helper->getApi($storeId);
 
         // ── Step 1: resolve foreignId, scriptUrl, fragment ───────────────────
@@ -101,11 +105,31 @@ class ConnectedSiteProvisioner
         [$foreignId, $scriptUrl, $scriptFragment] = $this->resolveFromEcommerceStore($api, $mailchimpStoreId);
 
         // Fallback: create (or retrieve) a connected site manually.
-        if (!$foreignId) {
+        //
+        // Not taken when the caller asked for the bound site only, and the
+        // connection hook asks for exactly that. Per the binding semantics
+        // above, a standalone site cannot bind store_id afterwards, so on a host
+        // that already has an attributing site this fallback produces a pixel
+        // that attributes to nothing. Reaching that by a merchant's own click is
+        // one thing; reaching it automatically, for every second store view
+        // connected on a shared host, is another.
+        if (!$foreignId && !$boundSiteOnly) {
             [$foreignId, $scriptUrl] = $this->resolveFromConnectedSites($api, $mailchimpStoreId, $domain);
         }
 
         if (!$foreignId) {
+            if ($boundSiteOnly) {
+                // An expected outcome rather than a failure: the host already
+                // has an attributing site. The Pixel stays off and nothing is
+                // written, which leaves the toggle free of a value nobody chose.
+                $this->helper->log(
+                    'ConnectedSiteProvisioner: no connected site bound to Mailchimp store '
+                    . $mailchimpStoreId . ' for store ' . $storeId
+                    . ' — leaving the Pixel off. One host attributes through one site.'
+                );
+                return;
+            }
+
             throw new LocalizedException(
                 __('Unable to determine connected site for store %1.', $storeId)
             );

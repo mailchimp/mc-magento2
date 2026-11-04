@@ -87,6 +87,14 @@ class ConfigSnapshot
             'cfg_ac_first_date'           => $this->text(MailChimpHelper::XML_ABANDONEDCART_FIRSTDATE, $storeId),
             'cfg_ac_redirect_page'        => $this->text(MailChimpHelper::XML_ABANDONEDCART_PAGE, $storeId),
             'cfg_ac_save_email'           => $this->flag(MailChimpHelper::XML_ABANDONEDCART_EMAIL, $storeId),
+            // Two values rather than one, because they answer different
+            // questions and only both together say what a shopper's browser
+            // does. The toggle is what the merchant sees and what the blocks
+            // read; the script is what has to be present for any tag to render
+            // at all. A store view with the toggle on and no script renders
+            // nothing, and counting it as adoption would overstate the fleet.
+            'cfg_pixel'                   => $this->flag(MailChimpHelper::XML_PIXEL_ENABLED_FOR_STORE, $storeId),
+            'cfg_pixel_script'            => $this->customised(MailChimpHelper::XML_PIXEL_SCRIPT_URL, $storeId),
         ];
 
         // Conditional exactly as the old lane had them: a popup url with no
