@@ -38,7 +38,8 @@ use Magento\Framework\Exception\LocalizedException;
  *      Always called as long as foreignId is known.
  *
  *   4. Persist via PixelStateWriter (url → fragment → enabled_for_store=1).
- *      Skipped when no new scriptUrl was retrieved (keeps existing DB value).
+ *      Skipped when no new scriptUrl was retrieved (keeps existing DB value),
+ *      and, for the connection hook ($boundSiteOnly), when step 3 failed.
  *
  * Binding semantics (learned in production):
  *   A connected-site binds to a store only via the auto-nest on creation when
@@ -81,6 +82,10 @@ class ConnectedSiteProvisioner
      * @param int    $storeId          Magento store ID
      * @param string $mailchimpStoreId Mailchimp ecommerce store ID
      * @param string $domain           Store domain (e.g. "example.com")
+     * @param bool   $boundSiteOnly    The connection hook's mode: use only the
+     *                                 site bound to the Mailchimp store, and save
+     *                                 nothing unless Mailchimp enabled the Pixel.
+     *                                 A merchant's own Yes passes false.
      * @return void
      * @throws LocalizedException
      */
@@ -143,6 +148,20 @@ class ConnectedSiteProvisioner
             $api->call('/connected-sites/' . $foreignId . '/actions/enable-pixel', [], \Mailchimp::POST);
         } catch (\Mailchimp_Error | \Mailchimp_HttpError $e) {
             $this->helper->log('ConnectedSiteProvisioner: enable-pixel failed: ' . $e->getMessage());
+
+            // On the connection hook, save nothing. Saving the script would set
+            // the toggle to Yes for a Pixel Mailchimp never turned on, and the
+            // merchant could not fix it from the toggle: a later Yes provisions
+            // only a store view with no script saved (ConfigObserver::
+            // provisionPixelIfNeeded()). With nothing saved the toggle stays No,
+            // and the merchant's own Yes calls enable-pixel again.
+            if ($boundSiteOnly) {
+                $this->helper->log(
+                    'ConnectedSiteProvisioner: leaving the Pixel off for store ' . $storeId
+                    . ' because enable-pixel failed. Turning it on in the admin will try again.'
+                );
+                return;
+            }
         }
 
         // ── Step 3: persist ───────────────────────────────────────────────────
