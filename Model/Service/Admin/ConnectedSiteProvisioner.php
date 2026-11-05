@@ -107,7 +107,8 @@ class ConnectedSiteProvisioner
         $scriptUrl      = null;
         $scriptFragment = '';
 
-        [$foreignId, $scriptUrl, $scriptFragment] = $this->resolveFromEcommerceStore($api, $mailchimpStoreId);
+        [$foreignId, $scriptUrl, $scriptFragment, $lookupFailed] =
+            $this->resolveFromEcommerceStore($api, $mailchimpStoreId);
 
         // Fallback: create (or retrieve) a connected site manually.
         //
@@ -123,6 +124,18 @@ class ConnectedSiteProvisioner
         }
 
         if (!$foreignId) {
+            if ($boundSiteOnly && $lookupFailed) {
+                // The lookup itself failed, so whether the store has a site of
+                // its own is unknown: not the shared-host case below. The error
+                // was logged where it was caught. Nothing is written.
+                $this->helper->log(
+                    'The API request to Mailchimp Store ' . $mailchimpStoreId
+                    . ' failed in Magento Store View ' . $storeId
+                    . '. Turning Pixel on manually on the configuration page will attempt the request again'
+                );
+                return;
+            }
+
             if ($boundSiteOnly) {
                 // An expected outcome rather than a failure: the host already
                 // has an attributing site. The Pixel stays off and nothing is
@@ -198,11 +211,13 @@ class ConnectedSiteProvisioner
     /**
      * Try to read the connected site already bound to the Mailchimp ecommerce store.
      *
-     * Returns [foreignId, scriptUrl, fragment] or [null, null, ''] when unavailable.
+     * Returns [foreignId, scriptUrl, fragment, false] when the store has one,
+     * [null, null, '', false] when the store has none, and [null, null, '', true]
+     * when the request failed, so the caller can tell the two apart.
      *
      * @param object $api
      * @param string $mailchimpStoreId
-     * @return array{0: string|null, 1: string|null, 2: string}
+     * @return array{0: string|null, 1: string|null, 2: string, 3: bool}
      */
     private function resolveFromEcommerceStore($api, string $mailchimpStoreId): array
     {
@@ -213,13 +228,15 @@ class ConnectedSiteProvisioner
             $fragment  = $storeData['connected_site']['site_script']['fragment'] ?? '';
 
             if ($foreignId) {
-                return [$foreignId, $scriptUrl, $fragment];
+                return [$foreignId, $scriptUrl, $fragment, false];
             }
         } catch (\Mailchimp_Error | \Mailchimp_HttpError $e) {
             $this->helper->log('ConnectedSiteProvisioner: GET /ecommerce/stores failed: ' . $e->getMessage());
+
+            return [null, null, '', true];
         }
 
-        return [null, null, ''];
+        return [null, null, '', false];
     }
 
     /**

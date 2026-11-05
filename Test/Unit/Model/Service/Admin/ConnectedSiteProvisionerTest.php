@@ -28,6 +28,10 @@ use PHPUnit\Framework\TestCase;
  *
  * A merchant's own Yes keeps the behaviour it has had since the Pixel shipped.
  *
+ * The same goes for the store lookup before it: a failed lookup saves nothing
+ * and is logged as a failed request, not as the shared-host case, which is
+ * a lookup that answered with no site of the store's own.
+ *
  * Every test runs against a Mailchimp store with a bound connected site that
  * has a script URL and a fragment.
  */
@@ -46,35 +50,51 @@ class ConnectedSiteProvisionerTest extends TestCase
     private $calls = [];
 
     /**
-     * @param  \Throwable|null $enablePixelError what enable-pixel throws, if anything
+     * @param  \Throwable|null  $enablePixelError what enable-pixel throws, if anything
      * @param  PixelStateWriter $writer
+     * @param  mixed            $storeAnswer      what GET ecommerce/stores answers or throws;
+     *                                            null means a store with a bound site
      * @return ConnectedSiteProvisioner
      */
-    private function provisioner(?\Throwable $enablePixelError, PixelStateWriter $writer): ConnectedSiteProvisioner
-    {
+    private function provisioner(
+        ?\Throwable $enablePixelError,
+        PixelStateWriter $writer,
+        $storeAnswer = null
+    ): ConnectedSiteProvisioner {
         $this->logged = [];
         $this->calls  = [];
 
-        $api = new class ($enablePixelError, $this->calls) {
+        if ($storeAnswer === null) {
+            $storeAnswer = ['connected_site' => [
+                'site_foreign_id' => self::SITE,
+                'site_script'     => ['url' => self::URL, 'fragment' => self::FRAGMENT],
+            ]];
+        }
+
+        $api = new class ($enablePixelError, $storeAnswer, $this->calls) {
             public $ecommerce;
             private $error;
             private $calls;
 
-            public function __construct($error, array &$calls)
+            public function __construct($error, $storeAnswer, array &$calls)
             {
                 $this->error = $error;
                 $this->calls = &$calls;
                 $this->ecommerce = new \stdClass();
-                $this->ecommerce->stores = new class {
+                $this->ecommerce->stores = new class ($storeAnswer) {
+                    private $answer;
+
+                    public function __construct($answer)
+                    {
+                        $this->answer = $answer;
+                    }
+
                     public function get($id)
                     {
-                        return ['connected_site' => [
-                            'site_foreign_id' => 'site-foreign-id',
-                            'site_script'     => [
-                                'url'      => 'https://chimpstatic.com/mcjs-connected/js/users/x/y.js',
-                                'fragment' => '<script id="mcjs">x</script>',
-                            ],
-                        ]];
+                        if ($this->answer instanceof \Throwable) {
+                            throw $this->answer;
+                        }
+                        return $this->answer;
                     }
                 };
             }
@@ -104,20 +124,20 @@ class ConnectedSiteProvisionerTest extends TestCase
     /**
      * @return array
      */
-    public static function enablePixelFailureProvider(): array
+    public static function mailchimpFailureProvider(): array
     {
         return [
             'Mailchimp answers with an error' => [
-                new \Mailchimp_Error('/connected-sites/site-foreign-id/actions/enable-pixel', 'POST', '', 'Bad Request', 'nope'),
+                new \Mailchimp_Error('/', 'POST', '', 'Bad Request', 'nope'),
             ],
             'Mailchimp cannot be reached: DNS, TLS or a timeout' => [
-                new \Mailchimp_HttpError('/connected-sites/site-foreign-id/actions/enable-pixel', 'POST', '', '', 'Operation timed out'),
+                new \Mailchimp_HttpError('/', 'POST', '', '', 'Operation timed out'),
             ],
         ];
     }
 
     /**
-     * @dataProvider enablePixelFailureProvider
+     * @dataProvider mailchimpFailureProvider
      */
     public function testAFailedEnablePixelOnConnectionSavesNothing(\Throwable $error): void
     {
@@ -151,6 +171,52 @@ class ConnectedSiteProvisionerTest extends TestCase
         $this->provisioner(null, $writer)->provision(self::STORE_ID, self::MC_STORE, 'example.com', true);
 
         $this->assertSame(['POST /connected-sites/' . self::SITE . '/actions/enable-pixel'], $this->calls);
+    }
+
+    // ── The store lookup, before enable-pixel ────────────────────────────────
+
+    /**
+     * A failed lookup says nothing about whether the store has a site of its
+     * own, so it must not be logged as the shared-host case.
+     *
+     * @dataProvider mailchimpFailureProvider
+     */
+    public function testAFailedStoreLookupOnConnectionIsLoggedAsAFailedRequest(\Throwable $error): void
+    {
+        $writer = $this->createMock(PixelStateWriter::class);
+        $writer->expects($this->never())->method('enable');
+
+        $this->provisioner(null, $writer, $error)
+            ->provision(self::STORE_ID, self::MC_STORE, 'example.com', true);
+
+        $this->assertStringStartsWith('ConnectedSiteProvisioner: GET /ecommerce/stores failed: ', $this->logged[0]);
+        $this->assertSame(
+            'The API request to Mailchimp Store ' . self::MC_STORE . ' failed in Magento Store View '
+            . self::STORE_ID . '. Turning Pixel on manually on the configuration page will attempt the request again',
+            $this->logged[1]
+        );
+        $this->assertCount(2, $this->logged);
+        $this->assertSame([], $this->calls, 'enable-pixel must not be called without a site');
+    }
+
+    /**
+     * The real shared-host case keeps its own line: the lookup answered, and
+     * the store has no connected site of its own.
+     */
+    public function testAStoreWithNoSiteOfItsOwnOnConnectionIsLoggedAsTheSharedHostCase(): void
+    {
+        $writer = $this->createMock(PixelStateWriter::class);
+        $writer->expects($this->never())->method('enable');
+
+        $this->provisioner(null, $writer, ['id' => self::MC_STORE, 'connected_site' => []])
+            ->provision(self::STORE_ID, self::MC_STORE, 'example.com', true);
+
+        $this->assertSame(
+            ['ConnectedSiteProvisioner: no connected site bound to Mailchimp store ' . self::MC_STORE
+                . ' for store ' . self::STORE_ID . ' — leaving the Pixel off. One host attributes through one site.'],
+            $this->logged
+        );
+        $this->assertSame([], $this->calls);
     }
 
     /**
