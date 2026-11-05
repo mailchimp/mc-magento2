@@ -81,6 +81,74 @@ class Subscriber
     }
 
     /**
+     * Mirror an unsubscribe to Mailchimp, whatever else the platform does next.
+     *
+     * The hook is on the model because that is where every path ends: the
+     * emailed unsubscribe link and the admin grid's mass action both call
+     * `Subscriber::unsubscribe()` directly, and nothing on this line had an
+     * unsubscribe hook at all -- so an unsubscribe made in Magento had no way
+     * to reach Mailchimp, which the batch sync cannot cover either because it
+     * filters `subscriber_status = 1`.
+     *
+     * `around` with the mirror in a `finally`, because the platform saves the
+     * row and then sends its own email: a mail transport that raises leaves
+     * Magento unsubscribed and would leave an `after` plugin unreached.
+     *
+     * Nothing is assumed about whether anything happened -- the status is read
+     * after the fact. A mismatched confirmation code raises before the row is
+     * touched, so the status is still subscribed and nothing is mirrored.
+     *
+     * @param  \Magento\Newsletter\Model\Subscriber $subscriber
+     * @param  callable $proceed
+     * @return mixed
+     */
+    public function aroundUnsubscribe(
+        \Magento\Newsletter\Model\Subscriber $subscriber,
+        callable $proceed
+    ) {
+        try {
+            return $proceed();
+        } finally {
+            $this->mirrorUnsubscribe($subscriber);
+        }
+    }
+
+    /**
+     * Tell Mailchimp the address is out, if the row says it is.
+     *
+     * @param  \Magento\Newsletter\Model\Subscriber $subscriber
+     * @return void
+     */
+    private function mirrorUnsubscribe(\Magento\Newsletter\Model\Subscriber $subscriber)
+    {
+        $storeId = $this->getStoreIdFromSubscriber($subscriber);
+
+        if (!$this->_helper->isMailChimpEnabled($storeId)) {
+            return;
+        }
+
+        if ((int)$subscriber->getSubscriberStatus()
+            !== \Magento\Newsletter\Model\Subscriber::STATUS_UNSUBSCRIBED
+        ) {
+            return;
+        }
+
+        $api = $this->_helper->getApi($storeId);
+
+        try {
+            $md5HashEmail = hash('md5', strtolower($subscriber->getSubscriberEmail()));
+            $api->lists->members->update(
+                $this->_helper->getDefaultList($storeId),
+                $md5HashEmail,
+                null,
+                'unsubscribed'
+            );
+        } catch (\Mailchimp_Error | \Mailchimp_HttpError $e) {
+            $this->_helper->log($e->getFriendlyMessage());
+        }
+    }
+
+    /**
      * @param \Magento\Newsletter\Model\Subscriber $subscriber
      * @param $email
      * @param $websiteId
