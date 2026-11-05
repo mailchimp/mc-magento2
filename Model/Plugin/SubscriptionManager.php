@@ -193,31 +193,4 @@ class SubscriptionManager
         return [$email, $storeId];
     }
 
-    /**
-     * @param \Magento\Newsletter\Model\Subscriber $subscriber
-     * @return null
-     * @throws \Magento\Framework\Exception\LocalizedException
-     */
-    public function beforeUnsubscribe(
-        \Magento\Newsletter\Model\SubscriptionManager $subscriptionManager,
-        $email,
-        $storeId,
-        $confirmCode
-    ) {
-        if ($this->_helper->isMailChimpEnabled($storeId)) {
-            $api = $this->_helper->getApi($storeId);
-            try {
-                $md5HashEmail = hash('md5', strtolower($email));
-                $api->lists->members->update(
-                    $this->_helper->getDefaultList($storeId),
-                    $md5HashEmail,
-                    null,
-                    'unsubscribed'
-                );
-            } catch (\Mailchimp_Error | \Mailchimp_HttpError $e) {
-                $this->_helper->log($e->getFriendlyMessage());
-            }
-        }
-        return [$email,$storeId,$confirmCode];
-    }
  }
