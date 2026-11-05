@@ -401,6 +401,34 @@ class ConfigObserverPixelTest extends TestCase
     }
 
     /**
+     * A save at default or website scope queues every store view it covers.
+     * Only the ones that inherit the new connection end up connected; one that
+     * keeps its own store or its own active flag does not, and is skipped.
+     */
+    public function testAWiderSaveProvisionsOnlyTheStoreViewsItConnected(): void
+    {
+        [$observer] = $this->observerForNewConnections(
+            [1, 2, 3],
+            [1, 3],
+            [
+                1 => [MailChimpHelper::XML_MAILCHIMP_STORE => 'mc-store-new'],
+                2 => [MailChimpHelper::XML_MAILCHIMP_STORE => 'mc-store-new'],
+                3 => [MailChimpHelper::XML_MAILCHIMP_STORE => 'mc-store-new'],
+            ]
+        );
+
+        $observer->execute($this->createMock(EventObserver::class));
+
+        $this->assertSame(
+            [
+                [1, 'mc-store-new', 'store1.example', true],
+                [3, 'mc-store-new', 'store3.example', true],
+            ],
+            $this->provisioned
+        );
+    }
+
+    /**
      * \Throwable, not \Exception: a TypeError in the provisioner must not turn
      * the save that connected the store into an error page either.
      */

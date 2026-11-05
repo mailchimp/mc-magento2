@@ -52,14 +52,18 @@ class MonkeyStore extends Value
     private ConfigDataCollectionFactory $configDataCollectionFactory;
 
     /**
-     * Whether this save is the one that connects the store view.
+     * Store views this save may connect: every store view the saved scope
+     * covers that was not connected before it.
      *
-     * Read in beforeSave(), where the old value is still readable, and acted on
-     * in afterSave(), once the new one is persisted.
+     * Read in beforeSave(), where the old configuration is still what the scope
+     * config answers with, and acted on in afterSave(), once the new value is
+     * persisted. Some of these will not end up connected -- a store view with
+     * its own store or its own active flag is not changed by a wider save --
+     * and ConfigObserver drops those once the configuration is re-initialised.
      *
-     * @var bool
+     * @var int[]
      */
-    private bool $justConnected = false;
+    private array $notYetConnectedStoreIds = [];
     const MAX_LISTS = 200;
 
     public function __construct(
@@ -90,6 +94,15 @@ class MonkeyStore extends Value
 
     public function beforeSave()
     {
+        // Which store views this save may connect. Read first, before anything
+        // below writes config: saveConfigValue() flushes the config cache, and
+        // after that the scope config can answer with values this same save has
+        // already written, which would make a store view this save connects
+        // look as if it had been connected all along.
+        $this->notYetConnectedStoreIds = $this->isARealStore($this->getValue())
+            ? $this->storeViewsNotYetConnected()
+            : [];
+
         $data = $this->getData('groups');
         $found = 0;
         $newListId = null;
@@ -210,17 +223,11 @@ class MonkeyStore extends Value
                 $this->_helper->createWebHook($apiKey, $newListId);
             }
         }
-        // Whether this save is the one that connects the store view. Read here
-        // because the stored value is still the old one; acted on in
-        // afterSave().
-        $this->justConnected = $this->isARealStore($this->getValue())
-            && !$this->_helper->isStoreConnected($this->resolveStoreIdForScope());
-
         return parent::beforeSave();
     }
 
     /**
-     * Queue the Pixel for a store view that just connected.
+     * Queue the Pixel for the store views this save may have connected.
      *
      * Mailchimp asks for the Pixel to be active on every new connection, so the
      * connection itself provisions it rather than waiting for the merchant to
@@ -236,14 +243,22 @@ class MonkeyStore extends Value
      *     the store, so on a host that already has one the Pixel stays off and
      *     the reason is logged.
      *
+     * A connection made at default or website scope connects every store view
+     * under it that inherits it, so those are queued too. That is how a
+     * single-store install always connects (the store field is visible at
+     * default scope, so single-store mode saves it there), and how most
+     * installs with one store view are configured. The Pixel itself is still
+     * provisioned and stored per store view.
+     *
      * This only decides; it does not call Mailchimp. afterSave() runs inside
      * Config::save()'s transaction, before Magento re-initialises the
      * configuration, so the provisioner's reads through the scope config would
      * still see the values from before this save. On a first connection that
      * includes the API key, which the OAuth wizard puts in the same Save Config
-     * as the store. The store view is queued instead, and
-     * Observer\ConfigObserver provisions it once the save is committed and the
-     * configuration re-initialised (see Model/Service/Pixel/NewConnectionQueue).
+     * as the store. The store views are queued instead, and
+     * Observer\ConfigObserver provisions the ones that did end up connected,
+     * once the save is committed and the configuration re-initialised (see
+     * Model/Service/Pixel/NewConnectionQueue).
      *
      * @return $this
      */
@@ -251,60 +266,113 @@ class MonkeyStore extends Value
     {
         parent::afterSave();
 
-        if (!$this->justConnected) {
+        $storeIds = $this->notYetConnectedStoreIds;
+        $this->notYetConnectedStoreIds = [];
+
+        if (!$storeIds) {
             return $this;
         }
 
-        $this->justConnected = false;
-        $storeId = $this->resolveStoreIdForScope();
+        $decided = $this->storeViewsWithAPixelDecision($storeIds);
 
-        if ($storeId === null) {
-            // The connection was made at default or website scope, where the
-            // Pixel -- a store-view-only setting -- has no row to write.
-            return $this;
+        foreach ($storeIds as $storeId) {
+            if (!isset($decided[$storeId])) {
+                $this->newConnectionQueue->add($storeId);
+            }
         }
-
-        if ($this->pixelAlreadyDecided($storeId)) {
-            return $this;
-        }
-
-        $this->newConnectionQueue->add($storeId);
 
         return $this;
     }
 
     /**
-     * Whether someone has already set the Pixel toggle for this store view.
+     * The store views covered by the scope being saved that are not connected
+     * yet, read from the configuration as it was before this save.
      *
-     * The question is whether a ROW exists at that scope, not what the scope
+     * Default covers every store view, a website covers its own, and a store
+     * view covers itself. A covered store view may still not be connected by
+     * this save -- it can hold its own store or its own active flag -- which
+     * ConfigObserver checks against the committed configuration.
+     *
+     * @return int[]
+     */
+    private function storeViewsNotYetConnected(): array
+    {
+        $scope = $this->getScope();
+        $scopeId = (int)$this->getScopeId();
+
+        if ($scope === 'stores') {
+            $covered = [$scopeId];
+        } else {
+            $covered = [];
+            foreach ($this->_storeManager->getStores() as $storeId => $store) {
+                if ($scope === 'websites' && (int)$store->getWebsiteId() !== $scopeId) {
+                    continue;
+                }
+                $covered[] = (int)$storeId;
+            }
+        }
+
+        return array_values(array_filter($covered, function ($storeId) {
+            return !$this->_helper->isStoreConnected($storeId);
+        }));
+    }
+
+    /**
+     * The store views among these that already have a Pixel value someone set.
+     *
+     * The question is whether a ROW applies to the store view, not what it
      * resolves to: every store view resolves to the `0` in config.xml, so
      * reading the value would answer "decided, and the answer is No" for a
      * merchant who has never been asked. The toggle is locked until the view is
      * connected and an untouched save writes nothing
-     * (Model/Config/Backend/PixelEnabled), so a row here was written by someone
+     * (Model/Config/Backend/PixelEnabled), so a row was written by someone
      * choosing.
      *
-     * @param  int $storeId
-     * @return bool
+     * A row counts at the store view itself, at its website or at default. The
+     * field is store-view only, but single-store mode saves it at website scope
+     * (Magento\Config\Model\Config::_checkSingleStoreMode()), and a value set
+     * by `config:set` at default applies to every store view. Each is a choice
+     * that reaches the store view, so none is overridden.
+     *
+     * One query for all of them: a default-scope connection can cover many.
+     *
+     * @param  int[] $storeIds
+     * @return true[]  keyed by store view id
      */
-    private function pixelAlreadyDecided(int $storeId): bool
+    private function storeViewsWithAPixelDecision(array $storeIds): array
     {
         $rows = $this->configDataCollectionFactory->create()
             ->addFieldToFilter('path', Data::XML_PIXEL_ENABLED_FOR_STORE)
-            ->addFieldToFilter('scope', 'stores')
-            ->addFieldToFilter('scope_id', $storeId);
+            ->getData();
 
-        return $rows->getSize() > 0;
-    }
+        $stores = [];
+        $websites = [];
+        foreach ($rows as $row) {
+            if ($row['scope'] === 'default') {
+                return array_fill_keys($storeIds, true);
+            }
+            if ($row['scope'] === 'websites') {
+                $websites[(int)$row['scope_id']] = true;
+            } elseif ($row['scope'] === 'stores') {
+                $stores[(int)$row['scope_id']] = true;
+            }
+        }
 
-    /**
-     * The store view this save applies to, or null when it is wider than one.
-     *
-     * @return int|null
-     */
-    private function resolveStoreIdForScope()
-    {
-        return $this->getScope() === 'stores' ? (int)$this->getScopeId() : null;
+        $decided = [];
+        foreach ($storeIds as $storeId) {
+            if (isset($stores[$storeId])) {
+                $decided[$storeId] = true;
+                continue;
+            }
+            if ($websites) {
+                $websiteId = (int)$this->_storeManager->getStore($storeId)->getWebsiteId();
+                if (isset($websites[$websiteId])) {
+                    $decided[$storeId] = true;
+                }
+            }
+        }
+
+        return $decided;
     }
 
     /**

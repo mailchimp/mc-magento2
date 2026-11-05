@@ -102,10 +102,11 @@ class ConfigObserver implements ObserverInterface
     /**
      * Turn the Pixel on for the store views this save connected.
      *
-     * MonkeyStore::afterSave() decides which store views qualify -- a real
-     * connection, at store-view scope, with no Pixel value chosen yet -- and
-     * queues them, because it runs before the configuration is re-initialised
-     * and would provision with the values from before the save. This runs on
+     * MonkeyStore::afterSave() decides which store views qualify -- covered by
+     * the scope the Mailchimp store was saved at, not connected before the
+     * save, with no Pixel value chosen yet -- and queues them, because it runs
+     * before the configuration is re-initialised and would provision with the
+     * values from before the save. This runs on
      * the event Magento dispatches after the commit and the re-init, so the API
      * key, the Mailchimp store and the active flag read here are the ones the
      * merchant just saved.
@@ -123,8 +124,11 @@ class ConfigObserver implements ObserverInterface
     {
         foreach ($this->newConnectionQueue->drain() as $storeId) {
             try {
-                // Checked again against the committed configuration: the
-                // queue was filled before the save was known to have stuck.
+                // Checked again against the committed configuration. The queue
+                // was filled before the save was known to have stuck, and a
+                // save at default or website scope queues every store view it
+                // covers -- including any that keep their own store or their
+                // own active flag, and so are still not connected.
                 if (!$this->_helper->isStoreConnected($storeId)) {
                     continue;
                 }

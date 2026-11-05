@@ -33,43 +33,94 @@ use PHPUnit\Framework\TestCase;
  *
  * The backend model only decides and queues. It runs before Magento
  * re-initialises the configuration, so provisioning happens in ConfigObserver,
- * which has its own tests for that half (ConfigObserverPixelTest).
+ * which has its own tests for that half (ConfigObserverPixelTest). That half
+ * also drops queued store views that the save did not end up connecting.
+ *
+ * Each test runs the backend model's own beforeSave() and afterSave(), against
+ * this install unless it says otherwise:
+ *
+ *   store view 1 and 2 on website 1, store view 3 on website 2.
  */
 class MonkeyStorePixelTest extends TestCase
 {
     /** @var NewConnectionQueue */
     private $queue;
 
+    /** @var int[]  store view id => website id */
+    private const STORES = [1 => 1, 2 => 1, 3 => 2];
+
     /**
-     * @param  bool  $justConnected
-     * @param  int   $existingPixelRows
-     * @param  string $scope
+     * Save the Mailchimp store field at a scope, as Magento's Config::save()
+     * would: beforeSave(), then afterSave().
+     *
+     * @param  string $scope            'default', 'websites' or 'stores'
+     * @param  int    $scopeId
+     * @param  int[]  $connectedBefore  store views connected before the save
+     * @param  array  $pixelRows        enabled_for_store rows, as [scope, scope_id]
+     * @param  string $value            the submitted Mailchimp store
      * @return MonkeyStore
      */
+    private function save(
+        string $scope,
+        int $scopeId,
+        array $connectedBefore = [],
+        array $pixelRows = [],
+        string $value = 'mc-store-id'
+    ): MonkeyStore {
+        $backend = $this->backend($scope, $scopeId, $connectedBefore, $pixelRows, $value);
+
+        $backend->beforeSave();
+        $backend->afterSave();
+
+        return $backend;
+    }
+
     private function backend(
-        bool $justConnected,
-        int $existingPixelRows = 0,
-        string $scope = 'stores'
+        string $scope,
+        int $scopeId,
+        array $connectedBefore,
+        array $pixelRows,
+        string $value
     ): MonkeyStore {
         $this->queue = new NewConnectionQueue();
 
         $helper = $this->createMock(MailChimpHelper::class);
+        $helper->method('isStoreConnected')->willReturnCallback(function ($storeId) use ($connectedBefore) {
+            return in_array((int)$storeId, $connectedBefore, true);
+        });
 
+        $rows = array_map(function ($row) {
+            return ['scope' => $row[0], 'scope_id' => (string)$row[1], 'value' => '0'];
+        }, $pixelRows);
         $collection = $this->createMock(ConfigDataCollection::class);
         $collection->method('addFieldToFilter')->willReturnSelf();
-        $collection->method('getSize')->willReturn($existingPixelRows);
+        $collection->method('getData')->willReturn($rows);
         $collectionFactory = $this->createMock(ConfigDataCollectionFactory::class);
         $collectionFactory->method('create')->willReturn($collection);
 
+        $stores = [];
+        foreach (self::STORES as $storeId => $websiteId) {
+            $store = $this->createMock(\Magento\Store\Model\Store::class);
+            $store->method('getWebsiteId')->willReturn($websiteId);
+            $stores[$storeId] = $store;
+        }
         $storeManager = $this->createMock(StoreManager::class);
+        $storeManager->method('getStores')->willReturn($stores);
+        $storeManager->method('getStore')->willReturnCallback(function ($storeId) use ($stores) {
+            return $stores[$storeId];
+        });
 
-        $backend = new class ($scope) extends MonkeyStore {
+        $backend = new class ($scope, $scopeId) extends MonkeyStore {
             /** @var string */
             private $theScope;
 
-            public function __construct($scope)
+            /** @var int */
+            private $theScopeId;
+
+            public function __construct($scope, $scopeId)
             {
                 $this->theScope = $scope;
+                $this->theScopeId = $scopeId;
             }
 
             public function getScope()
@@ -79,7 +130,7 @@ class MonkeyStorePixelTest extends TestCase
 
             public function getScopeId()
             {
-                return 7;
+                return $this->theScopeId;
             }
 
             public function isValueChanged()
@@ -88,13 +139,12 @@ class MonkeyStorePixelTest extends TestCase
             }
         };
 
-        $backend->setValue('mc-store-id');
+        $backend->setValue($value);
 
         $this->inject($backend, MonkeyStore::class, '_helper', $helper);
         $this->inject($backend, MonkeyStore::class, '_storeManager', $storeManager);
         $this->inject($backend, MonkeyStore::class, 'newConnectionQueue', $this->queue);
         $this->inject($backend, MonkeyStore::class, 'configDataCollectionFactory', $collectionFactory);
-        $this->inject($backend, MonkeyStore::class, 'justConnected', $justConnected);
         $this->inject($backend, \Magento\Framework\App\Config\Value::class, 'cacheTypeList', $this->createMock(TypeListInterface::class));
         $this->inject($backend, AbstractModel::class, '_eventManager', $this->createMock(ManagerInterface::class));
 
@@ -108,13 +158,103 @@ class MonkeyStorePixelTest extends TestCase
         $p->setValue($object, $value);
     }
 
-    public function testAConnectionQueuesTheStoreView(): void
+    // ── Store-view scope ─────────────────────────────────────────────────────
+
+    public function testAStoreViewConnectionQueuesThatStoreView(): void
     {
-        $backend = $this->backend(true);
+        $this->save('stores', 2);
 
-        $backend->afterSave();
+        $this->assertSame([2], $this->queue->drain());
+    }
 
-        $this->assertSame([7], $this->queue->drain());
+    public function testAStoreViewThatWasAlreadyConnectedIsLeftAlone(): void
+    {
+        $this->save('stores', 2, [2]);
+
+        $this->assertSame([], $this->queue->drain());
+    }
+
+    /**
+     * The rule that outranks default-on: a value chosen by someone is never
+     * overridden, and after the toggle was locked until connection a row is
+     * exactly that.
+     */
+    public function testAStoreViewWithAChosenValueIsLeftAlone(): void
+    {
+        $this->save('stores', 2, [], [['stores', 2]]);
+
+        $this->assertSame([], $this->queue->drain());
+    }
+
+    // ── Default scope ────────────────────────────────────────────────────────
+
+    /**
+     * The gap this closes: a connection at default scope -- how every
+     * single-store install connects -- used to queue nothing at all.
+     */
+    public function testADefaultConnectionQueuesEveryStoreViewNotYetConnected(): void
+    {
+        $this->save('default', 0, [2]);
+
+        $this->assertSame([1, 3], $this->queue->drain());
+    }
+
+    public function testADefaultSaveWithEveryStoreViewConnectedQueuesNothing(): void
+    {
+        $this->save('default', 0, [1, 2, 3]);
+
+        $this->assertSame([], $this->queue->drain());
+    }
+
+    // ── Website scope ────────────────────────────────────────────────────────
+
+    public function testAWebsiteConnectionQueuesOnlyItsOwnStoreViews(): void
+    {
+        $this->save('websites', 1);
+
+        $this->assertSame([1, 2], $this->queue->drain());
+    }
+
+    // ── A choice at any scope that reaches the store view ───────────────────
+
+    public function testAStoreViewRowIsAChoiceForThatStoreViewOnly(): void
+    {
+        $this->save('default', 0, [], [['stores', 1]]);
+
+        $this->assertSame([2, 3], $this->queue->drain());
+    }
+
+    /**
+     * Single-store mode saves the store-view-only toggle at website scope, so a
+     * merchant's No on such an install is a website row.
+     */
+    public function testAWebsiteRowIsAChoiceForThatWebsitesStoreViews(): void
+    {
+        $this->save('default', 0, [], [['websites', 1]]);
+
+        $this->assertSame([3], $this->queue->drain());
+    }
+
+    public function testADefaultRowIsAChoiceForEveryStoreView(): void
+    {
+        $this->save('default', 0, [], [['default', 0]]);
+
+        $this->assertSame([], $this->queue->drain());
+    }
+
+    // ── What is not a connection ─────────────────────────────────────────────
+
+    /**
+     * The dropdown's two non-answers (-1, its placeholder, and an empty value)
+     * are not a Mailchimp store, so saving them connects nothing.
+     */
+    public function testANonStoreValueQueuesNothing(): void
+    {
+        $this->save('default', 0, [], [], '-1');
+        $this->assertSame([], $this->queue->drain());
+
+        $this->save('stores', 2, [], [], '');
+        $this->assertSame([], $this->queue->drain());
     }
 
     /**
@@ -137,52 +277,16 @@ class MonkeyStorePixelTest extends TestCase
     }
 
     /**
-     * The rule that outranks default-on: a value chosen by someone is never
-     * overridden, and after the toggle was locked until connection a row is
-     * exactly that.
+     * One save, one attempt: what beforeSave() found is consumed by the first
+     * afterSave().
      */
-    public function testAStoreViewWithAChosenValueIsLeftAlone(): void
+    public function testTheStoreViewsFoundBeforeTheSaveAreConsumed(): void
     {
-        $backend = $this->backend(true, 1);
+        $backend = $this->save('default', 0);
+        $this->assertSame([1, 2, 3], $this->queue->drain());
 
         $backend->afterSave();
 
         $this->assertSame([], $this->queue->drain());
-    }
-
-    public function testAStoreViewThatWasAlreadyConnectedIsLeftAlone(): void
-    {
-        $backend = $this->backend(false);
-
-        $backend->afterSave();
-
-        $this->assertSame([], $this->queue->drain());
-    }
-
-    /**
-     * The Pixel is a store-view setting, so a connection made at default or
-     * website scope has no row to write and nothing to provision.
-     */
-    public function testAConnectionWiderThanAStoreViewQueuesNothing(): void
-    {
-        $backend = $this->backend(true, 0, 'default');
-
-        $backend->afterSave();
-
-        $this->assertSame([], $this->queue->drain());
-    }
-
-    /**
-     * One connection, one attempt: a second save after the first must not
-     * queue again.
-     */
-    public function testTheFlagIsConsumed(): void
-    {
-        $backend = $this->backend(true);
-
-        $backend->afterSave();
-        $backend->afterSave();
-
-        $this->assertSame([7], $this->queue->drain());
     }
 }

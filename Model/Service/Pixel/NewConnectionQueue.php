@@ -35,7 +35,8 @@ namespace Ebizmarts\MailChimp\Model\Service\Pixel;
 class NewConnectionQueue
 {
     /**
-     * @var int[]  store view ids, keyed by themselves so a repeat is a no-op
+     * @var int[]  store view ids, keyed by themselves so a repeat is a no-op.
+     *             A save at default or website scope can queue several.
      */
     private $storeIds = [];
 
