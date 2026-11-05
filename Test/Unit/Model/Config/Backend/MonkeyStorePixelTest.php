@@ -13,7 +13,7 @@ namespace Ebizmarts\MailChimp\Test\Unit\Model\Config\Backend;
 
 use Ebizmarts\MailChimp\Helper\Data as MailChimpHelper;
 use Ebizmarts\MailChimp\Model\Config\Backend\MonkeyStore;
-use Ebizmarts\MailChimp\Model\Service\Admin\ConnectedSiteProvisioner;
+use Ebizmarts\MailChimp\Model\Service\Pixel\NewConnectionQueue;
 use Magento\Config\Model\ResourceModel\Config\Data\Collection as ConfigDataCollection;
 use Magento\Config\Model\ResourceModel\Config\Data\CollectionFactory as ConfigDataCollectionFactory;
 use Magento\Framework\App\Cache\TypeListInterface;
@@ -30,45 +30,30 @@ use PHPUnit\Framework\TestCase;
  * never overridden, and only a connected site bound to the Mailchimp store is
  * used -- a standalone one cannot attribute, so on a shared host the Pixel stays
  * off instead of being switched on and attributing to nothing.
+ *
+ * The backend model only decides and queues. It runs before Magento
+ * re-initialises the configuration, so provisioning happens in ConfigObserver,
+ * which has its own tests for that half (ConfigObserverPixelTest).
  */
 class MonkeyStorePixelTest extends TestCase
 {
-    /** @var array  each provision() call, as [storeId, mailchimpStoreId, domain, boundSiteOnly] */
-    private $provisioned = [];
-
-    /** @var string[] */
-    private $logged = [];
+    /** @var NewConnectionQueue */
+    private $queue;
 
     /**
      * @param  bool  $justConnected
      * @param  int   $existingPixelRows
      * @param  string $scope
-     * @param  \Throwable|null $provisionThrows
      * @return MonkeyStore
      */
     private function backend(
         bool $justConnected,
         int $existingPixelRows = 0,
-        string $scope = 'stores',
-        $provisionThrows = null
+        string $scope = 'stores'
     ): MonkeyStore {
-        $this->provisioned = [];
-        $this->logged = [];
+        $this->queue = new NewConnectionQueue();
 
         $helper = $this->createMock(MailChimpHelper::class);
-        $helper->method('log')->willReturnCallback(function ($message) {
-            $this->logged[] = (string)$message;
-        });
-
-        $provisioner = $this->createMock(ConnectedSiteProvisioner::class);
-        $provisioner->method('provision')->willReturnCallback(
-            function ($storeId, $mailchimpStoreId, $domain, $boundSiteOnly = false) use ($provisionThrows) {
-                $this->provisioned[] = [$storeId, $mailchimpStoreId, $domain, $boundSiteOnly];
-                if ($provisionThrows !== null) {
-                    throw $provisionThrows;
-                }
-            }
-        );
 
         $collection = $this->createMock(ConfigDataCollection::class);
         $collection->method('addFieldToFilter')->willReturnSelf();
@@ -76,14 +61,7 @@ class MonkeyStorePixelTest extends TestCase
         $collectionFactory = $this->createMock(ConfigDataCollectionFactory::class);
         $collectionFactory->method('create')->willReturn($collection);
 
-        $store = new class {
-            public function getBaseUrl()
-            {
-                return 'https://shop.example/en/';
-            }
-        };
         $storeManager = $this->createMock(StoreManager::class);
-        $storeManager->method('getStore')->willReturn($store);
 
         $backend = new class ($scope) extends MonkeyStore {
             /** @var string */
@@ -114,7 +92,7 @@ class MonkeyStorePixelTest extends TestCase
 
         $this->inject($backend, MonkeyStore::class, '_helper', $helper);
         $this->inject($backend, MonkeyStore::class, '_storeManager', $storeManager);
-        $this->inject($backend, MonkeyStore::class, 'connectedSiteProvisioner', $provisioner);
+        $this->inject($backend, MonkeyStore::class, 'newConnectionQueue', $this->queue);
         $this->inject($backend, MonkeyStore::class, 'configDataCollectionFactory', $collectionFactory);
         $this->inject($backend, MonkeyStore::class, 'justConnected', $justConnected);
         $this->inject($backend, \Magento\Framework\App\Config\Value::class, 'cacheTypeList', $this->createMock(TypeListInterface::class));
@@ -130,17 +108,31 @@ class MonkeyStorePixelTest extends TestCase
         $p->setValue($object, $value);
     }
 
-    public function testAConnectionProvisionsTheBoundSiteOnly(): void
+    public function testAConnectionQueuesTheStoreView(): void
     {
         $backend = $this->backend(true);
 
         $backend->afterSave();
 
-        $this->assertCount(1, $this->provisioned);
-        $this->assertSame(
-            [7, 'mc-store-id', 'shop.example', true],
-            $this->provisioned[0],
-            'the connection path must ask for the bound site only'
+        $this->assertSame([7], $this->queue->drain());
+    }
+
+    /**
+     * afterSave() runs before Magento re-initialises the configuration, so it
+     * must not provision: the provisioner would read the API key from before
+     * this save. The backend model has no provisioner to call at all.
+     */
+    public function testTheBackendModelNeverProvisionsItself(): void
+    {
+        $constructor = new \ReflectionMethod(MonkeyStore::class, '__construct');
+        $types = array_map(function (\ReflectionParameter $parameter) {
+            $type = $parameter->getType();
+            return $type instanceof \ReflectionNamedType ? $type->getName() : '';
+        }, $constructor->getParameters());
+
+        $this->assertNotContains(
+            \Ebizmarts\MailChimp\Model\Service\Admin\ConnectedSiteProvisioner::class,
+            $types
         );
     }
 
@@ -155,7 +147,7 @@ class MonkeyStorePixelTest extends TestCase
 
         $backend->afterSave();
 
-        $this->assertSame([], $this->provisioned);
+        $this->assertSame([], $this->queue->drain());
     }
 
     public function testAStoreViewThatWasAlreadyConnectedIsLeftAlone(): void
@@ -164,40 +156,25 @@ class MonkeyStorePixelTest extends TestCase
 
         $backend->afterSave();
 
-        $this->assertSame([], $this->provisioned);
+        $this->assertSame([], $this->queue->drain());
     }
 
     /**
      * The Pixel is a store-view setting, so a connection made at default or
      * website scope has no row to write and nothing to provision.
      */
-    public function testAConnectionWiderThanAStoreViewProvisionsNothing(): void
+    public function testAConnectionWiderThanAStoreViewQueuesNothing(): void
     {
         $backend = $this->backend(true, 0, 'default');
 
         $backend->afterSave();
 
-        $this->assertSame([], $this->provisioned);
-    }
-
-    /**
-     * A provisioning failure must not fail the connection: this runs inside the
-     * save of the field that connects the store.
-     */
-    public function testAFailureIsLoggedAndNeverFailsTheConnection(): void
-    {
-        $backend = $this->backend(true, 0, 'stores', new \RuntimeException('mailchimp is down'));
-
-        $backend->afterSave();
-
-        $this->assertCount(1, $this->provisioned);
-        $this->assertNotEmpty($this->logged);
-        $this->assertStringContainsString('could not provision the Pixel', $this->logged[0]);
+        $this->assertSame([], $this->queue->drain());
     }
 
     /**
      * One connection, one attempt: a second save after the first must not
-     * provision again.
+     * queue again.
      */
     public function testTheFlagIsConsumed(): void
     {
@@ -206,6 +183,6 @@ class MonkeyStorePixelTest extends TestCase
         $backend->afterSave();
         $backend->afterSave();
 
-        $this->assertCount(1, $this->provisioned);
+        $this->assertSame([7], $this->queue->drain());
     }
 }

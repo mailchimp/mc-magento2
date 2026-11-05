@@ -14,6 +14,7 @@
 namespace Ebizmarts\MailChimp\Observer;
 
 use Ebizmarts\MailChimp\Model\Service\Admin\ConnectedSiteProvisioner;
+use Ebizmarts\MailChimp\Model\Service\Pixel\NewConnectionQueue;
 use Magento\Framework\App\Config\ReinitableConfigInterface;
 use Magento\Framework\Event\ObserverInterface;
 use Magento\Framework\Event\Observer as EventObserver;
@@ -41,6 +42,10 @@ class ConfigObserver implements ObserverInterface
      * @var ReinitableConfigInterface
      */
     private $reinitableConfig;
+    /**
+     * @var NewConnectionQueue
+     */
+    private $newConnectionQueue;
 
     /**
      * ConfigObserver constructor.
@@ -49,19 +54,22 @@ class ConfigObserver implements ObserverInterface
      * @param \Ebizmarts\MailChimp\Helper\Data $helper
      * @param ConnectedSiteProvisioner $connectedSiteProvisioner
      * @param ReinitableConfigInterface $reinitableConfig
+     * @param NewConnectionQueue $newConnectionQueue
      */
     public function __construct(
         \Magento\Store\Model\StoreManager $storeManager,
         \Magento\Framework\Registry $registry,
         \Ebizmarts\MailChimp\Helper\Data $helper,
         ConnectedSiteProvisioner $connectedSiteProvisioner,
-        ReinitableConfigInterface $reinitableConfig
+        ReinitableConfigInterface $reinitableConfig,
+        NewConnectionQueue $newConnectionQueue
     ) {
         $this->_helper                  = $helper;
         $this->_storeManager            = $storeManager;
         $this->_registry                = $registry;
         $this->connectedSiteProvisioner = $connectedSiteProvisioner;
         $this->reinitableConfig         = $reinitableConfig;
+        $this->newConnectionQueue       = $newConnectionQueue;
     }
 
     public function execute(EventObserver $observer)
@@ -84,6 +92,66 @@ class ConfigObserver implements ObserverInterface
         $this->_registry->unregister('apiKey');
 
         $this->provisionPixelIfNeeded();
+        // After the pass above, not before it. That pass re-reads the config,
+        // so a store view enabled here first would be in front of it in this
+        // same request -- and if Mailchimp returned no fragment, provisioned a
+        // second time, without the bound-site-only rule.
+        $this->provisionNewConnections();
+    }
+
+    /**
+     * Turn the Pixel on for the store views this save connected.
+     *
+     * MonkeyStore::afterSave() decides which store views qualify -- a real
+     * connection, at store-view scope, with no Pixel value chosen yet -- and
+     * queues them, because it runs before the configuration is re-initialised
+     * and would provision with the values from before the save. This runs on
+     * the event Magento dispatches after the commit and the re-init, so the API
+     * key, the Mailchimp store and the active flag read here are the ones the
+     * merchant just saved.
+     *
+     * Only the connected site bound to the Mailchimp store is used: a
+     * standalone one cannot attribute to the store, so on a host that already
+     * has an attributing site the Pixel stays off and the provisioner logs why.
+     *
+     * A failure is logged and never fails the save. The merchant can still
+     * turn the Pixel on by hand, which provisions again.
+     *
+     * @return void
+     */
+    private function provisionNewConnections(): void
+    {
+        foreach ($this->newConnectionQueue->drain() as $storeId) {
+            try {
+                // Checked again against the committed configuration: the
+                // queue was filled before the save was known to have stuck.
+                if (!$this->_helper->isStoreConnected($storeId)) {
+                    continue;
+                }
+
+                $mailchimpStoreId = (string)$this->_helper->getConfigValue(
+                    \Ebizmarts\MailChimp\Helper\Data::XML_MAILCHIMP_STORE,
+                    $storeId
+                );
+                $baseUrl = $this->_storeManager->getStore($storeId)->getBaseUrl(UrlInterface::URL_TYPE_WEB);
+
+                $this->connectedSiteProvisioner->provision(
+                    (int)$storeId,
+                    $mailchimpStoreId,
+                    (string)parse_url($baseUrl, PHP_URL_HOST),
+                    true
+                );
+            } catch (\Throwable $e) {
+                // Deliberately \Throwable and deliberately swallowed: the
+                // store is connected by now, and a Mailchimp outage, a revoked
+                // key or an error anywhere in the provisioner must not turn
+                // that save into an error page.
+                $this->_helper->log(
+                    'ConfigObserver: could not provision the Pixel for newly connected store '
+                    . $storeId . ': ' . $e->getMessage()
+                );
+            }
+        }
     }
 
     /**

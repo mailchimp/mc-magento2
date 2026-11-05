@@ -15,7 +15,7 @@ namespace Ebizmarts\MailChimp\Model\Config\Backend;
 
 use Ebizmarts\MailChimp\Helper\Data;
 use Ebizmarts\MailChimp\Helper\Sync as SyncHelper;
-use Ebizmarts\MailChimp\Model\Service\Admin\ConnectedSiteProvisioner;
+use Ebizmarts\MailChimp\Model\Service\Pixel\NewConnectionQueue;
 use Magento\Config\Model\ResourceModel\Config\Data\CollectionFactory as ConfigDataCollectionFactory;
 use Magento\Config\Model\ResourceModel\Config;
 use Magento\Framework\App\Cache\TypeListInterface;
@@ -42,9 +42,9 @@ class MonkeyStore extends Value
     private $oldListId = null;
 
     /**
-     * @var ConnectedSiteProvisioner
+     * @var NewConnectionQueue
      */
-    private ConnectedSiteProvisioner $connectedSiteProvisioner;
+    private NewConnectionQueue $newConnectionQueue;
 
     /**
      * @var ConfigDataCollectionFactory
@@ -55,8 +55,7 @@ class MonkeyStore extends Value
      * Whether this save is the one that connects the store view.
      *
      * Read in beforeSave(), where the old value is still readable, and acted on
-     * in afterSave(), once the new one is persisted and the provisioner's own
-     * reads agree with it.
+     * in afterSave(), once the new one is persisted.
      *
      * @var bool
      */
@@ -73,7 +72,7 @@ class MonkeyStore extends Value
         Data $helper,
         SyncHelper $syncHelper,
         StoreManager $storeManager,
-        ConnectedSiteProvisioner $connectedSiteProvisioner,
+        NewConnectionQueue $newConnectionQueue,
         ConfigDataCollectionFactory $configDataCollectionFactory,
         ?AbstractResource $resource = null,
         ?AbstractDb $resourceCollection = null,
@@ -84,7 +83,7 @@ class MonkeyStore extends Value
         $this->resourceConfig   = $resourceConfig;
         $this->_date            = $date;
         $this->_storeManager    = $storeManager;
-        $this->connectedSiteProvisioner = $connectedSiteProvisioner;
+        $this->newConnectionQueue = $newConnectionQueue;
         $this->configDataCollectionFactory = $configDataCollectionFactory;
         parent::__construct($context, $registry, $config, $cacheTypeList, $resource, $resourceCollection, $data);
     }
@@ -221,7 +220,7 @@ class MonkeyStore extends Value
     }
 
     /**
-     * Turn the Pixel on for a store view that just connected.
+     * Queue the Pixel for a store view that just connected.
      *
      * Mailchimp asks for the Pixel to be active on every new connection, so the
      * connection itself provisions it rather than waiting for the merchant to
@@ -237,8 +236,14 @@ class MonkeyStore extends Value
      *     the store, so on a host that already has one the Pixel stays off and
      *     the reason is logged.
      *
-     * A provisioning failure never fails the connection: it is logged and the
-     * merchant can still turn the Pixel on by hand, which provisions again.
+     * This only decides; it does not call Mailchimp. afterSave() runs inside
+     * Config::save()'s transaction, before Magento re-initialises the
+     * configuration, so the provisioner's reads through the scope config would
+     * still see the values from before this save. On a first connection that
+     * includes the API key, which the OAuth wizard puts in the same Save Config
+     * as the store. The store view is queued instead, and
+     * Observer\ConfigObserver provisions it once the save is committed and the
+     * configuration re-initialised (see Model/Service/Pixel/NewConnectionQueue).
      *
      * @return $this
      */
@@ -263,24 +268,7 @@ class MonkeyStore extends Value
             return $this;
         }
 
-        try {
-            $baseUrl = $this->_storeManager->getStore($storeId)->getBaseUrl();
-            $this->connectedSiteProvisioner->provision(
-                $storeId,
-                (string)$this->getValue(),
-                (string)parse_url($baseUrl, PHP_URL_HOST),
-                true
-            );
-        } catch (\Throwable $e) {
-            // Deliberately \Throwable and deliberately swallowed. This runs
-            // inside the save of the field that connects the store, and a
-            // Mailchimp outage, a revoked key or an error anywhere in the
-            // provisioner must not leave the merchant unable to connect.
-            $this->_helper->log(
-                'MonkeyStore: could not provision the Pixel for store ' . $storeId
-                . ': ' . $e->getMessage()
-            );
-        }
+        $this->newConnectionQueue->add($storeId);
 
         return $this;
     }
