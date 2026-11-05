@@ -87,10 +87,17 @@ class PixelEnabled extends Field
     /**
      * The store view this field is being rendered for.
      *
-     * The group is store-view only, so the config page always carries the
-     * `store` parameter when this renders. A missing one means the field is
-     * somewhere it was not meant to be, and treating that as "not connected"
-     * leaves it locked rather than writable by accident.
+     * The group is store-view only, so on a multi-store install the config page
+     * carries the `store` parameter whenever this renders. A missing one there
+     * means the field is somewhere it was not meant to be, and treating that as
+     * "not connected" leaves it locked rather than writable by accident.
+     *
+     * Single-store mode is the exception. Magento hides the scope switcher and
+     * shows store-view-only fields on the Default Config page
+     * (`module-config/Model/Config/Structure/AbstractElement.php`), so there is
+     * never a `store` parameter. Without this the field would stay locked for
+     * good on those installs, even once connected. In that mode the install has
+     * one store view, so that is the one the field is about.
      *
      * @return int|null
      */
@@ -98,6 +105,16 @@ class PixelEnabled extends Field
     {
         $storeId = $this->getRequest()->getParam('store');
 
-        return $storeId === null || $storeId === '' ? null : (int)$storeId;
+        if ($storeId !== null && $storeId !== '') {
+            return (int)$storeId;
+        }
+
+        if ($this->_storeManager->isSingleStoreMode()) {
+            $store = $this->_storeManager->getDefaultStoreView();
+
+            return $store ? (int)$store->getId() : null;
+        }
+
+        return null;
     }
 }
