@@ -38,7 +38,8 @@ use Magento\Framework\Exception\LocalizedException;
  *      Always called as long as foreignId is known.
  *
  *   4. Persist via PixelStateWriter (url → fragment → enabled_for_store=1).
- *      Skipped when no new scriptUrl was retrieved (keeps existing DB value).
+ *      Skipped when no new scriptUrl was retrieved (keeps existing DB value),
+ *      and, for the connection hook ($boundSiteOnly), when step 3 failed.
  *
  * Binding semantics (learned in production):
  *   A connected-site binds to a store only via the auto-nest on creation when
@@ -81,11 +82,19 @@ class ConnectedSiteProvisioner
      * @param int    $storeId          Magento store ID
      * @param string $mailchimpStoreId Mailchimp ecommerce store ID
      * @param string $domain           Store domain (e.g. "example.com")
+     * @param bool   $boundSiteOnly    The connection hook's mode: use only the
+     *                                 site bound to the Mailchimp store, and save
+     *                                 nothing unless Mailchimp enabled the Pixel.
+     *                                 A merchant's own Yes passes false.
      * @return void
      * @throws LocalizedException
      */
-    public function provision(int $storeId, string $mailchimpStoreId, string $domain): void
-    {
+    public function provision(
+        int $storeId,
+        string $mailchimpStoreId,
+        string $domain,
+        bool $boundSiteOnly = false
+    ): void {
         $api = $this->helper->getApi($storeId);
 
         // ── Step 1: resolve foreignId, scriptUrl, fragment ───────────────────
@@ -98,14 +107,47 @@ class ConnectedSiteProvisioner
         $scriptUrl      = null;
         $scriptFragment = '';
 
-        [$foreignId, $scriptUrl, $scriptFragment] = $this->resolveFromEcommerceStore($api, $mailchimpStoreId);
+        [$foreignId, $scriptUrl, $scriptFragment, $lookupFailed] =
+            $this->resolveFromEcommerceStore($api, $mailchimpStoreId);
 
         // Fallback: create (or retrieve) a connected site manually.
-        if (!$foreignId) {
+        //
+        // Not taken when the caller asked for the bound site only, and the
+        // connection hook asks for exactly that. Per the binding semantics
+        // above, a standalone site cannot bind store_id afterwards, so on a host
+        // that already has an attributing site this fallback produces a pixel
+        // that attributes to nothing. Reaching that by a merchant's own click is
+        // one thing; reaching it automatically, for every second store view
+        // connected on a shared host, is another.
+        if (!$foreignId && !$boundSiteOnly) {
             [$foreignId, $scriptUrl] = $this->resolveFromConnectedSites($api, $mailchimpStoreId, $domain);
         }
 
         if (!$foreignId) {
+            if ($boundSiteOnly && $lookupFailed) {
+                // The lookup itself failed, so whether the store has a site of
+                // its own is unknown: not the shared-host case below. The error
+                // was logged where it was caught. Nothing is written.
+                $this->helper->log(
+                    'The API request to Mailchimp Store ' . $mailchimpStoreId
+                    . ' failed in Magento Store View ' . $storeId
+                    . '. Turning Pixel on manually on the configuration page will attempt the request again'
+                );
+                return;
+            }
+
+            if ($boundSiteOnly) {
+                // An expected outcome rather than a failure: the host already
+                // has an attributing site. The Pixel stays off and nothing is
+                // written, which leaves the toggle free of a value nobody chose.
+                $this->helper->log(
+                    'ConnectedSiteProvisioner: no connected site bound to Mailchimp store '
+                    . $mailchimpStoreId . ' for store ' . $storeId
+                    . ' — leaving the Pixel off. One host attributes through one site.'
+                );
+                return;
+            }
+
             throw new LocalizedException(
                 __('Unable to determine connected site for store %1.', $storeId)
             );
@@ -119,6 +161,20 @@ class ConnectedSiteProvisioner
             $api->call('/connected-sites/' . $foreignId . '/actions/enable-pixel', [], \Mailchimp::POST);
         } catch (\Mailchimp_Error | \Mailchimp_HttpError $e) {
             $this->helper->log('ConnectedSiteProvisioner: enable-pixel failed: ' . $e->getMessage());
+
+            // On the connection hook, save nothing. Saving the script would set
+            // the toggle to Yes for a Pixel Mailchimp never turned on, and the
+            // merchant could not fix it from the toggle: a later Yes provisions
+            // only a store view with no script saved (ConfigObserver::
+            // provisionPixelIfNeeded()). With nothing saved the toggle stays No,
+            // and the merchant's own Yes calls enable-pixel again.
+            if ($boundSiteOnly) {
+                $this->helper->log(
+                    'ConnectedSiteProvisioner: leaving the Pixel off for store ' . $storeId
+                    . ' because enable-pixel failed. Turning it on in the admin will try again.'
+                );
+                return;
+            }
         }
 
         // ── Step 3: persist ───────────────────────────────────────────────────
@@ -155,11 +211,13 @@ class ConnectedSiteProvisioner
     /**
      * Try to read the connected site already bound to the Mailchimp ecommerce store.
      *
-     * Returns [foreignId, scriptUrl, fragment] or [null, null, ''] when unavailable.
+     * Returns [foreignId, scriptUrl, fragment, false] when the store has one,
+     * [null, null, '', false] when the store has none, and [null, null, '', true]
+     * when the request failed, so the caller can tell the two apart.
      *
      * @param object $api
      * @param string $mailchimpStoreId
-     * @return array{0: string|null, 1: string|null, 2: string}
+     * @return array{0: string|null, 1: string|null, 2: string, 3: bool}
      */
     private function resolveFromEcommerceStore($api, string $mailchimpStoreId): array
     {
@@ -170,13 +228,15 @@ class ConnectedSiteProvisioner
             $fragment  = $storeData['connected_site']['site_script']['fragment'] ?? '';
 
             if ($foreignId) {
-                return [$foreignId, $scriptUrl, $fragment];
+                return [$foreignId, $scriptUrl, $fragment, false];
             }
         } catch (\Mailchimp_Error | \Mailchimp_HttpError $e) {
             $this->helper->log('ConnectedSiteProvisioner: GET /ecommerce/stores failed: ' . $e->getMessage());
+
+            return [null, null, '', true];
         }
 
-        return [null, null, ''];
+        return [null, null, '', false];
     }
 
     /**
