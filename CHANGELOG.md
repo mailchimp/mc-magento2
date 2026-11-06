@@ -1,5 +1,65 @@
 # Changelog
 
+## [103.4.87](https://github.com/mailchimp/mc-magento2/tree/103.4.87)
+
+[Full Changelog](https://github.com/mailchimp/mc-magento2/compare/103.4.86...103.4.87)
+
+**Implemented enhancements:**
+
+- Turn the Mailchimp Pixel on when a store view connects [\#2403](https://github.com/mailchimp/mc-magento2/pull/2403)
+
+  The Mailchimp Pixel is now on by default for newly connected stores, and it
+  follows your store's cookie settings. When a save connects a store view to a
+  Mailchimp store -- at store view, website or default scope -- the extension
+  enables the Pixel on the connected site bound to that Mailchimp store.
+
+  Store views that were already connected are left exactly as they were, and a
+  Pixel setting someone chose is never overridden. On a host whose Mailchimp
+  store has no connected site of its own the Pixel stays off and the reason is
+  logged, because a second site on the same host cannot attribute. A failure
+  never blocks the connection: it is logged, the Pixel stays off, and turning it
+  on in the configuration tries again. The Pixel toggle is locked until its
+  store view is connected, including in single-store mode.
+
+  The extension's status report also carries whether the Pixel is on and
+  whether its script is present.
+
+- Point the connect popup at the relay, and open it at the size the consent screen needs [\#2377](https://github.com/mailchimp/mc-magento2/pull/2377)
+
+  "Get API credentials" now opens a single ebizmarts URL instead of Mailchimp's
+  authorize endpoint, so the client id and the redirect address no longer ship
+  inside the extension. The merchant flow is unchanged: the key is shown to copy
+  into the API Key field. The popup opens at 1035x800, the size Mailchimp's
+  consent screen needs, a quarter of the way down the screen so the consent
+  button stays visible.
+
+- Add a security policy [\#2399](https://github.com/mailchimp/mc-magento2/pull/2399)
+
+  `SECURITY.md` says how to report a vulnerability privately, what makes a
+  report useful and what a reporter can expect.
+
+**Fixed bugs:**
+
+- Mirror an unsubscribe wherever Magento makes one, and do not lose it [\#2383](https://github.com/mailchimp/mc-magento2/pull/2383)
+
+  An unsubscribe through the link in Magento's emails, or through the admin
+  grid's mass action, never reached Mailchimp on this line: nothing hooked the
+  subscriber model's `unsubscribe()`, and the batch sync only sends subscribed
+  rows. It is now mirrored to Mailchimp once per unsubscribe, even when
+  Magento's own unsubscription email fails to send.
+
+- Compare the webhook key in constant time [\#2393](https://github.com/mailchimp/mc-magento2/pull/2393)
+
+  The key that authenticates Mailchimp's webhook calls was compared with `!=`.
+  It is now compared with `hash_equals()`, and a key sent as an array is refused
+  with a 403 instead of causing a 500. The key itself is unchanged, so existing
+  webhooks keep working.
+
+**Dependencies:**
+
+- Unchanged. The `ebizmarts/mailchimp-lib` floor stays at `>=3.0.52`; nothing in
+  this release asks anything new of the library.
+
 ## [103.4.86](https://github.com/mailchimp/mc-magento2/tree/103.4.86)
 
 [Full Changelog](https://github.com/mailchimp/mc-magento2/compare/103.4.85...103.4.86)
