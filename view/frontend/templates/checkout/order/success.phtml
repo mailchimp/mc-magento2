@@ -8,7 +8,8 @@ $interest = $block->getInterest();
 ?>
 <p>
     <?= $escaper->escapeHtml($block->getMessageBefore()) ?>
-<form class="form" action="<?= $escaper->escapeUrl($block->getFormUrl()) ?>" method="get" id="mailchimp-groups">
+<form class="form" action="<?= $escaper->escapeUrl($block->getFormUrl()) ?>" method="post" id="mailchimp-groups">
+    <?= $block->getBlockHtml('formkey') ?>
     <fieldset class="fieldset">
             <?php foreach ($interest as $i): ?>
                 <div class="field">
