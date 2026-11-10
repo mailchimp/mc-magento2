@@ -13,10 +13,13 @@
 
 namespace Ebizmarts\MailChimp\Controller\Checkout;
 
+use Ebizmarts\MailChimp\Helper\Data as MailChimpHelper;
 use Ebizmarts\MailChimp\Helper\Sync as SyncHelper;
+use Magento\Framework\App\Action\HttpPostActionInterface;
+use Magento\Framework\UrlInterface;
 use Magento\Store\Model\StoreManagerInterface;
 
-class Success extends \Magento\Framework\App\Action\Action
+class Success extends \Magento\Framework\App\Action\Action implements HttpPostActionInterface
 {
     /**
      * @var \Ebizmarts\MailChimp\Helper\Data
@@ -79,9 +82,18 @@ class Success extends \Magento\Framework\App\Action\Action
 
     public function execute()
     {
-        $params     = $this->getRequest()->getParams();
         $order = $this->_checkoutSession->getLastRealOrder();
-        $websiteId = (int)$this->storeManager->getStore($order->getStoreId())->getWebsiteId();
+        $storeId = $order->getStoreId();
+        $redirectUrl = $this->_helper->getBaserUrl($storeId, UrlInterface::URL_TYPE_WEB);
+        if (!$order->getId()
+            || !$this->_helper->isMailChimpEnabled($storeId)
+            || !$this->_helper->getConfigValue(MailChimpHelper::XML_INTEREST_IN_SUCCESS, $storeId)
+        ) {
+            return $this->_redirect($redirectUrl);
+        }
+        $group = $this->getRequest()->getParam('group');
+        $groups = ['group' => is_array($group) ? $group : []];
+        $websiteId = (int)$this->storeManager->getStore($storeId)->getWebsiteId();
         /**
          * @var $subscriber \Magento\Newsletter\Model\Subscriber
          * @var $interestGroup \Ebizmarts\MailChimp\Model\MailChimpInterestGroup
@@ -95,7 +107,7 @@ class Success extends \Magento\Framework\App\Action\Action
                     $subscriber->subscribe($subscriber->getEmail());
                 }
                 $interestGroup->getBySubscriberIdStoreId($subscriber->getSubscriberId(), $subscriber->getStoreId());
-                $interestGroup->setGroupdata($this->_helper->serialize($params));
+                $interestGroup->setGroupdata($this->_helper->serialize($groups));
                 $interestGroup->setSubscriberId($subscriber->getSubscriberId());
                 $interestGroup->setStoreId($subscriber->getStoreId());
                 $interestGroup->setUpdatedAt($this->_helper->getGmtDate());
@@ -106,7 +118,7 @@ class Success extends \Magento\Framework\App\Action\Action
                 $this->_subscriberFactory->create()->subscribe($order->getCustomerEmail());
                 $subscriber->loadBySubscriberEmail($order->getCustomerEmail(), $websiteId);
                 $interestGroup->getBySubscriberIdStoreId($subscriber->getSubscriberId(), $subscriber->getStoreId());
-                $interestGroup->setGroupdata($this->_helper->serialize($params));
+                $interestGroup->setGroupdata($this->_helper->serialize($groups));
                 $interestGroup->setSubscriberId($subscriber->getSubscriberId());
                 $interestGroup->setStoreId($subscriber->getStoreId());
                 $interestGroup->setUpdatedAt($this->_helper->getGmtDate());
@@ -117,10 +129,7 @@ class Success extends \Magento\Framework\App\Action\Action
         }
         $this->messageManager->addSuccessMessage(__('Thanks for sharing your interest with us'));
 
-        return $this->_redirect($this->_helper->getBaserUrl(
-            $order->getStoreId(),
-            \Magento\Framework\UrlInterface::URL_TYPE_WEB
-        ));
+        return $this->_redirect($redirectUrl);
     }
     protected function _updateSubscriber(
         $listId,
