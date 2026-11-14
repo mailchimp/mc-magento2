@@ -89,7 +89,7 @@ class Register extends Action
             $ret = $this->_http->post($registerDataJson);
         }
         $ret = json_decode($ret,true);
-        if ( !$ret['error']) {
+        if (is_array($ret) && empty($ret['error']) && !empty($ret['token'])) {
             $error = false;
             $token = $ret['token'];
             $this->_helper->saveConfigValue(Helper::XML_STATISTICS_TOKEN, $token,  $scopeId, $scope);
