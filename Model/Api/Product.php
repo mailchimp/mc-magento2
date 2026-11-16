@@ -90,6 +90,11 @@ class Product
     private $_productTypeBundle;
 
     /**
+     * @var array
+     */
+    private $productCategories = [];
+
+    /**
      * @param \Magento\Catalog\Model\ResourceModel\Product\CollectionFactory $productCollection
      * @param \Magento\Catalog\Model\ProductRepository $productRepository
      * @param \Ebizmarts\MailChimp\Helper\Data $helper
@@ -141,6 +146,7 @@ class Product
     }
     public function _sendProducts($magentoStoreId)
     {
+        $this->productCategories = [];
         $batchArray = [];
         $mailchimpStoreId = $this->_helper->getConfigValue(
             \Ebizmarts\MailChimp\Helper\Data::XML_MAILCHIMP_STORE,
@@ -675,6 +681,12 @@ class Product
         $categoryNames = [];
         $categoryName = null;
         if (is_array($categoryIds) && count($categoryIds)) {
+            $cacheIds = array_map('intval', $categoryIds);
+            sort($cacheIds);
+            $cacheKey = json_encode([$storeId, $cacheIds]);
+            if (isset($this->productCategories[$cacheKey])) {
+                return $this->productCategories[$cacheKey];
+            }
             $collection = $this->_categoryCollection->create();
             $collection->addAttributeToSelect(['name'])
                 ->setStoreId($storeId)
@@ -685,6 +697,7 @@ class Product
                 $categoryNames[] = $category->getName();
             }
             $categoryName = (count($categoryNames)) ? implode(" - ", $categoryNames) : 'None';
+            $this->productCategories[$cacheKey] = $categoryName;
         }
         return $categoryName;
     }
@@ -696,6 +709,7 @@ class Product
      */
     public function sendModifiedProduct(\Magento\Sales\Model\Order $order, $mailchimpStoreId, $magentoStoreId)
     {
+        $this->productCategories = [];
         $data = [];
         $batchId = \Ebizmarts\MailChimp\Helper\Data::IS_PRODUCT . '_' . $this->_helper->getGmtTimeStamp();
         $items = $order->getAllVisibleItems();
@@ -738,6 +752,7 @@ class Product
 
     public function sendQuoteModifiedProduct(\Magento\Quote\Model\Quote $quote, $mailchimpStoreId, $magentoStoreId)
     {
+        $this->productCategories = [];
         $data = [];
         $batchId = \Ebizmarts\MailChimp\Helper\Data::IS_PRODUCT . '_' . $this->_helper->getGmtTimeStamp();
         $items = $quote->getAllVisibleItems();
