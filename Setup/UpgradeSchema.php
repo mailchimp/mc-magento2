@@ -794,6 +794,10 @@ class UpgradeSchema implements UpgradeSchemaInterface
             $connection->createTable($table);
 
         }
+        if (version_compare($context->getVersion(), '102.3.80') < 0) {
+            // Nothing writes to or reads from this table any more.
+            $connection->dropTable($setup->getTable('mailchimp_notification'));
+        }
     }
 
 }
