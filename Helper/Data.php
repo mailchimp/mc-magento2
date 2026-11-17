@@ -220,6 +220,8 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     protected $resolver;
     /**
      * @var MailchimpNotificationFactory
+     * @deprecated Nothing is stored in mailchimp_notification any more; kept
+     *             so the constructor signature does not change.
      */
     protected $mailchimpNotificationFactory;
 
@@ -607,13 +609,18 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
             $this->_mlogger->mailchimpLog($message, $file);
         }
     }
+    /**
+     * Intentionally does nothing.
+     *
+     * mailchimp-lib calls this after every API call and on every API error.
+     * Libraries older than 3.0.53 call it without checking that it exists,
+     * so the method has to stay even though nothing is stored any more.
+     *
+     * @param mixed $data
+     * @return void
+     */
     public function saveNotification($data)
     {
-        $mailchimpNotification = $this->mailchimpNotificationFactory->create();
-        $mailchimpNotification->setNotificationData(json_encode($data));
-        $mailchimpNotification->setProcessed(false);
-        $mailchimpNotification->getResource()->save($mailchimpNotification);
-
     }
     /**
      * @return string
@@ -1294,16 +1301,6 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     public function encrypt($value)
     {
         return $this->_encryptor->encrypt($value);
-    }
-    public function buttonPressed($button, $result)
-    {
-        $data = [];
-        $data['storeURL'] = $this->_storeManager->getStore()->getBaseUrl();
-        $data['time'] = $this->getGmtDate();
-        $data['button']['action'] = $button;
-        $data['button']['result'] = $result;
-        $this->saveNotification($data);
-
     }
     public function switchLog($on)
     {
