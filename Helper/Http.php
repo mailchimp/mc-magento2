@@ -25,7 +25,7 @@ class Http
         MailChimpHelper $helper
     ) {
         $this->curl = $curl;
-        $this->url = $helper->getConfigValue(MailChimpHelper::SYNC_NOTIFICATION_URL);
+        $this->url = '';
         $token = $helper->getConfigValue(MailChimpHelper::SYNC_TOKEN);
         $headers = ['Authorization' => 'Bearer ' . $token,
             'Content-Type' => 'application/json'
