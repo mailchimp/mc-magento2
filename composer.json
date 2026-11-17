@@ -27,5 +27,17 @@
     "magento/framework": "103.0.*",
     "ebizmarts/mailchimp-lib": ">=3.0.52",
     "ext-json": "*"
+  },
+  "require-dev": {
+    "magento/magento-coding-standard": "^41",
+    "phpstan/phpstan": "^2.1",
+    "bitexpert/phpstan-magento": "^0.44",
+    "phpstan/extension-installer": "^1.4"
+  },
+  "config": {
+    "allow-plugins": {
+      "dealerdirect/phpcodesniffer-composer-installer": true,
+      "phpstan/extension-installer": true
+    }
   }
 }
