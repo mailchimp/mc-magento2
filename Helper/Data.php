@@ -56,10 +56,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     const XML_POPUP_FORM             = 'mailchimp/general/popup_form';
     const XML_POPUP_URL              = 'mailchimp/general/popup_url';
     const XML_CLEAN_ERROR_MONTHS     = 'mailchimp/ecommerce/clean_errors_months';
-    const XML_ENABLE_SUPPORT         = 'mailchimp/general/enable_support';
     const SYNC_TOKEN                 = 'mailchimp/statistics/token';
-    const SYNC_NOTIFICATION_URL       = 'mailchimp/statistics/notification_url';
-    const XML_CLEAN_SUPPORT_PERIOD    = 'mailchimp/general/clean_support_period';
     const XML_REGISTER_URL            = 'mailchimp/statistics/register_url';
     const XML_STATISTICS_TOKEN        = 'mailchimp/register/token';
 
@@ -327,12 +324,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     public function isMailChimpEnabled($store = null)
     {
         return $this->getConfigValue(self::XML_PATH_ACTIVE, $store);
-    }
-    public function isSupportEnabled()
-    {
-        return $this->getConfigValue(self::XML_ENABLE_SUPPORT);
-    }
-    /**
+    }    /**
      * @param null $store
      * @return mixed
      */
@@ -1310,12 +1302,6 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     public function encrypt($value)
     {
         return $this->_encryptor->encrypt($value);
-    }
-    public function switchLog($on)
-    {
-        $storeId = $this->_storeManager->getDefaultStoreView()->getId();
-        $scope = 'default';
-        $token = $this->getConfigValue(self::XML_STATISTICS_TOKEN, $storeId, $scope);
     }
     /**
      * @param \Magento\Quote\Model\Quote $quote
