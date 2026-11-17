@@ -33,17 +33,13 @@ class Mailchimp extends \Magento\Backend\Block\Template implements TabInterface
      * Mailchimp constructor.
      * @param \Magento\Backend\Block\Template\Context $context
      * @param \Magento\Framework\Registry $registry
-     * @param \Magento\Framework\Data\FormFactory $formFactory
      * @param \Magento\Store\Model\System\Store $systemStore
-     * @param \Ebizmarts\MailChimp\Helper\Data $helper
      * @param array $data
      */
     public function __construct(
         \Magento\Backend\Block\Template\Context $context,
         \Magento\Framework\Registry $registry,
-        \Magento\Framework\Data\FormFactory $formFactory,
         \Magento\Store\Model\System\Store $systemStore,
-        \Ebizmarts\MailChimp\Helper\Data $helper,
         array $data = []
     ) {
         $this->_coreRegistry = $registry;

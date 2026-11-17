@@ -75,7 +75,9 @@ class JsUrlTest extends TestCase
         // the new argument stayed optional.
         if ($cache !== null) {
             $property = new \ReflectionProperty(MailChimpHelper::class, '_cache');
-            $property->setAccessible(true);
+            if (PHP_VERSION_ID < 80100) {
+                $property->setAccessible(true);
+            }
             $property->setValue($helper, $cache);
         }
 
@@ -269,6 +271,7 @@ class JsUrlTest extends TestCase
      * @dataProvider unresolvableStoreProvider
      * @param mixed $answer
      */
+    #[\PHPUnit\Framework\Attributes\DataProvider('unresolvableStoreProvider')]
     public function testAnUnresolvableStoreIsAskedOnceNotOncePerRender($answer)
     {
         $cache  = $this->cache();

@@ -11,13 +11,28 @@
 
 namespace Ebizmarts\MailChimp\Model\Logger;
 
-class Logger extends \Monolog\Logger
+class Logger extends \Magento\Framework\Logger\Monolog
 {
+    /**
+     * @var \Magento\Framework\Filesystem\DirectoryList
+     */
+    private $directoryList;
+
+    public function __construct(
+        \Magento\Framework\Filesystem\DirectoryList $directoryList,
+        $name,
+        array $handlers = [],
+        array $processors = []
+    ) {
+        $this->directoryList = $directoryList;
+        parent::__construct($name, $handlers, $processors);
+    }
+
 
     public function mailchimpLog($message, $file)
     {
         if ($file) {
-            $fileName = BP. DIRECTORY_SEPARATOR .'var'. DIRECTORY_SEPARATOR.'log'.
+            $fileName = $this->directoryList->getRoot(). DIRECTORY_SEPARATOR .'var'. DIRECTORY_SEPARATOR.'log'.
                 DIRECTORY_SEPARATOR.$file.'_Request.log';
             $this->pushHandler(new \Monolog\Handler\StreamHandler($fileName));
         }

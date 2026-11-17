@@ -17,6 +17,11 @@ use Magento\Framework\Controller\ResultFactory;
 
 class GetResponse extends \Magento\Backend\App\Action
 {
+    /**
+     * @var \Ebizmarts\MailChimp\Model\ResourceModel\MailChimpSyncBatches
+     */
+    protected $mailChimpSyncBatchesResource;
+
     const MAX_RETRIES = 5;
     /**
      * @var ResultFactory
@@ -52,8 +57,10 @@ class GetResponse extends \Magento\Backend\App\Action
         \Ebizmarts\MailChimp\Model\MailChimpSyncBatchesFactory $_batchFactory,
         \Ebizmarts\MailChimp\Helper\Data $helper,
         \Ebizmarts\MailChimp\Model\Api\Result $result,
-        \Magento\Framework\Filesystem\Driver\File $driver
+        \Magento\Framework\Filesystem\Driver\File $driver,
+        \Ebizmarts\MailChimp\Model\ResourceModel\MailChimpSyncBatches $mailChimpSyncBatchesResource
     ) {
+        $this->mailChimpSyncBatchesResource = $mailChimpSyncBatchesResource;
         parent::__construct($context);
         $this->_resultFactory       = $context->getResultFactory();
         $this->_batchFactory        = $_batchFactory;
@@ -66,7 +73,7 @@ class GetResponse extends \Magento\Backend\App\Action
     {
         $batchId    = $this->getRequest()->getParam('id');
         $batches = $this->_batchFactory->create();
-        $batches->getResource()->load($batches, $batchId);
+        $this->mailChimpSyncBatchesResource->load($batches, $batchId);
         $batchId = $batches->getBatchId();
         $fileContent = [];
         $counter = 0;

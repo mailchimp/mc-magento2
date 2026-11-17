@@ -8,6 +8,11 @@ use Magento\Framework\View\Element\UiComponentFactory;
 use Magento\Ui\Component\Listing\Columns\Column;
 class Actions extends Column
 {
+    /**
+     * @var UrlInterface
+     */
+    private $urlBuilder;
+
     public function __construct(
         ContextInterface $context,
         UiComponentFactory $uiComponentFactory,

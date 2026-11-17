@@ -12,6 +12,16 @@ use Ebizmarts\MailChimp\Model\MailChimpErrors;
 class Sync extends AbstractHelper
 {
     /**
+     * @var \Ebizmarts\MailChimp\Model\ResourceModel\MailChimpSyncEcommerce
+     */
+    protected $mailChimpSyncEcommerceResource;
+
+    /**
+     * @var \Ebizmarts\MailChimp\Model\ResourceModel\MailChimpErrors
+     */
+    protected $mailChimpErrorsResource;
+
+    /**
      * @var MailChimpSyncEcommerceFactory
      */
     private $chimpSyncEcommerceFactory;
@@ -34,8 +44,12 @@ class Sync extends AbstractHelper
         Context $context,
         MailChimpSyncEcommerceFactory $chimpSyncEcommerceFactory,
         MailChimpErrors $mailChimpErrors,
-        MailChimpSyncEcommerce $chimpSyncEcommerce
+        MailChimpSyncEcommerce $chimpSyncEcommerce,
+        \Ebizmarts\MailChimp\Model\ResourceModel\MailChimpSyncEcommerce $mailChimpSyncEcommerceResource,
+        \Ebizmarts\MailChimp\Model\ResourceModel\MailChimpErrors $mailChimpErrorsResource
     ) {
+        $this->mailChimpSyncEcommerceResource = $mailChimpSyncEcommerceResource;
+        $this->mailChimpErrorsResource = $mailChimpErrorsResource;
         $this->chimpSyncEcommerceFactory = $chimpSyncEcommerceFactory;
         $this->mailChimpErrors = $mailChimpErrors;
         $this->chimpSyncEcommerce = $chimpSyncEcommerce;
@@ -89,7 +103,7 @@ class Sync extends AbstractHelper
                 if ($nullifyBatchId) {
                     $chimpSyncEcommerce->setBatchId(null);
                 }
-                $chimpSyncEcommerce->getResource()->save($chimpSyncEcommerce);
+                $this->mailChimpSyncEcommerceResource->save($chimpSyncEcommerce);
             }
         }
     }
@@ -134,8 +148,8 @@ class Sync extends AbstractHelper
     }
     public function resyncAllSubscribers($mailchimpList)
     {
-        $connection = $this->chimpSyncEcommerce->getResource()->getConnection();
-        $tableName = $this->chimpSyncEcommerce->getResource()->getMainTable();
+        $connection = $this->mailChimpSyncEcommerceResource->getConnection();
+        $tableName = $this->mailChimpSyncEcommerceResource->getMainTable();
         $connection->update(
             $tableName,
             ['mailchimp_sync_modified' => 1],
@@ -144,8 +158,8 @@ class Sync extends AbstractHelper
     }
     public function resyncProducts($mailchimpList)
     {
-        $connection = $this->chimpSyncEcommerce->getResource()->getConnection();
-        $tableName = $this->chimpSyncEcommerce->getResource()->getMainTable();
+        $connection = $this->mailChimpSyncEcommerceResource->getConnection();
+        $tableName = $this->mailChimpSyncEcommerceResource->getMainTable();
         $connection->update(
             $tableName,
             ['mailchimp_sync_modified' => 1],
@@ -157,13 +171,13 @@ class Sync extends AbstractHelper
     {
         try {
             // clean the errors table
-            $connection = $this->mailChimpErrors->getResource()->getConnection();
-            $tableName = $this->mailChimpErrors->getResource()->getMainTable();
+            $connection = $this->mailChimpErrorsResource->getConnection();
+            $tableName = $this->mailChimpErrorsResource->getMainTable();
             $connection->delete($tableName, "mailchimp_store_id = '".$mailchimpStore."'");
             // clean the syncecommerce table with errors
             if ($retry) {
-                $connection = $this->chimpSyncEcommerce->getResource()->getConnection();
-                $tableName = $this->chimpSyncEcommerce->getResource()->getMainTable();
+                $connection = $this->mailChimpSyncEcommerceResource->getConnection();
+                $tableName = $this->mailChimpSyncEcommerceResource->getMainTable();
                 $connection->delete(
                     $tableName,
                     "mailchimp_store_id = '" . $mailchimpStore . "' and mailchimp_sync_error is not null"

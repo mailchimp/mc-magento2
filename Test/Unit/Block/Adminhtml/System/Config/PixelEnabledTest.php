@@ -59,7 +59,9 @@ class PixelEnabledTest extends TestCase
         $this->inject($block, '_storeManager', $storeManager);
 
         $method = new \ReflectionMethod(PixelEnabled::class, 'resolveStoreId');
-        $method->setAccessible(true);
+        if (PHP_VERSION_ID < 80100) {
+            $method->setAccessible(true);
+        }
 
         return $method->invoke($block);
     }
@@ -71,7 +73,9 @@ class PixelEnabledTest extends TestCase
             $class = $class->getParentClass();
         }
         $p = $class->getProperty($property);
-        $p->setAccessible(true);
+        if (PHP_VERSION_ID < 80100) {
+            $p->setAccessible(true);
+        }
         $p->setValue($object, $value);
     }
 

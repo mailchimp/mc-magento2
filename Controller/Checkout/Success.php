@@ -22,6 +22,11 @@ use Magento\Store\Model\StoreManagerInterface;
 class Success extends \Magento\Framework\App\Action\Action implements HttpPostActionInterface
 {
     /**
+     * @var \Ebizmarts\MailChimp\Model\ResourceModel\MailChimpInterestGroup
+     */
+    protected $mailChimpInterestGroupResource;
+
+    /**
      * @var \Ebizmarts\MailChimp\Helper\Data
      */
     protected $_helper;
@@ -68,8 +73,10 @@ class Success extends \Magento\Framework\App\Action\Action implements HttpPostAc
         \Magento\Newsletter\Model\SubscriberFactory $subscriberFactory,
         \Ebizmarts\MailChimp\Model\MailChimpInterestGroupFactory $interestGroupFactory,
         SyncHelper $syncHelper,
-        StoreManagerInterface $storeManager
+        StoreManagerInterface $storeManager,
+        \Ebizmarts\MailChimp\Model\ResourceModel\MailChimpInterestGroup $mailChimpInterestGroupResource
     ) {
+        $this->mailChimpInterestGroupResource = $mailChimpInterestGroupResource;
         $this->_pageFactory         =$pageFactory;
         $this->_helper              = $helper;
         $this->_checkoutSession     = $checkoutSession;
@@ -111,7 +118,7 @@ class Success extends \Magento\Framework\App\Action\Action implements HttpPostAc
                 $interestGroup->setSubscriberId($subscriber->getSubscriberId());
                 $interestGroup->setStoreId($subscriber->getStoreId());
                 $interestGroup->setUpdatedAt($this->_helper->getGmtDate());
-                $interestGroup->getResource()->save($interestGroup);
+                $this->mailChimpInterestGroupResource->save($interestGroup);
                 $listId = $this->_helper->getGeneralList($order->getStoreId());
                 $this->_updateSubscriber($listId, $subscriber->getId(), $this->_helper->getGmtDate(), '', 1);
             } else {
@@ -122,7 +129,7 @@ class Success extends \Magento\Framework\App\Action\Action implements HttpPostAc
                 $interestGroup->setSubscriberId($subscriber->getSubscriberId());
                 $interestGroup->setStoreId($subscriber->getStoreId());
                 $interestGroup->setUpdatedAt($this->_helper->getGmtDate());
-                $interestGroup->getResource()->save($interestGroup);
+                $this->mailChimpInterestGroupResource->save($interestGroup);
             }
         } catch (\Exception $e) {
             $this->_helper->log($e->getMessage());

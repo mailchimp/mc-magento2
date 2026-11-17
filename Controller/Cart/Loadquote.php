@@ -18,6 +18,11 @@ use Ebizmarts\MailChimp\Model\RedirectUrlValidator;
 class Loadquote extends Action
 {
     /**
+     * @var \Magento\Quote\Model\ResourceModel\Quote
+     */
+    protected $quoteResource;
+
+    /**
      * @var PageFactory
      */
     protected $pageFactory;
@@ -80,8 +85,10 @@ class Loadquote extends Action
         SyncHelper $syncHelper,
         \Magento\Framework\Url $urlHelper,
         \Magento\Customer\Model\Url $customerUrl,
-        RedirectUrlValidator $redirectUrlValidator
+        RedirectUrlValidator $redirectUrlValidator,
+        \Magento\Quote\Model\ResourceModel\Quote $quoteResource
     ) {
+        $this->quoteResource = $quoteResource;
 
         $this->pageFactory      = $pageFactory;
         $this->_quote           = $quote;
@@ -108,7 +115,7 @@ class Loadquote extends Action
         $params     = $this->getRequest()->getParams();
         if (isset($params['id'])) {
             $quote = $this->_quote->create();
-            $quote->getResource()->load($quote, $params['id']);
+            $this->quoteResource->load($quote, $params['id']);
             $magentoStoreId = $quote->getStoreId();
             $mailchimpStoreId = $this->_helper->getConfigValue(
                 \Ebizmarts\MailChimp\Helper\Data::XML_MAILCHIMP_STORE,
@@ -152,7 +159,7 @@ class Loadquote extends Action
                 }
                 $quote->setData('mailchimp_abandonedcart_flag', true);
 
-                $quote->getResource()->save($quote);
+                $this->quoteResource->save($quote);
                 $this->_helper->sendCartEvent($quote);
                 if (!$quote->getCustomerId()) {
                     $this->_checkoutSession->setQuoteId($quote->getId());

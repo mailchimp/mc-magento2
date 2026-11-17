@@ -60,12 +60,9 @@ class CartTest extends TestCase
             $option->method('getProduct')->willReturn($child);
         }
 
-        $item = $this->getMockBuilder(QuoteItem::class)
+        $item = $this->getMockBuilder(\Ebizmarts\MailChimp\Test\Unit\Support\QuoteItemStub::class)
             ->disableOriginalConstructor()
-            ->onlyMethods(
-                ['getProductType', 'getOptionByCode', 'getProduct', 'getName', 'getPrice', 'getSku', 'getQty']
-            )
-            ->addMethods(['getProductId'])
+            ->onlyMethods(['getProductType', 'getOptionByCode', 'getProduct', 'getName', 'getPrice', 'getSku', 'getQty', 'getProductId'])
             ->getMock();
         $item->method('getProductId')->willReturn($productId);
         $item->method('getProductType')->willReturn($productType);
@@ -82,10 +79,9 @@ class CartTest extends TestCase
     private function makeBlock(array $items, float $grandTotal, string $quoteId, string $currency = 'USD'): Cart
     {
         // getId & getAllVisibleItems are declared on Quote; getGrandTotal is magic.
-        $quote = $this->getMockBuilder(\Magento\Quote\Model\Quote::class)
+        $quote = $this->getMockBuilder(\Ebizmarts\MailChimp\Test\Unit\Support\QuoteStub::class)
             ->disableOriginalConstructor()
-            ->onlyMethods(['getId', 'getAllVisibleItems'])
-            ->addMethods(['getGrandTotal'])
+            ->onlyMethods(['getId', 'getAllVisibleItems', 'getGrandTotal'])
             ->getMock();
         $quote->method('getId')->willReturn($quoteId);
         $quote->method('getGrandTotal')->willReturn($grandTotal);

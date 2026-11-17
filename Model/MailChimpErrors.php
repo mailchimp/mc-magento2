@@ -15,13 +15,30 @@ namespace Ebizmarts\MailChimp\Model;
 
 class MailChimpErrors extends \Magento\Framework\Model\AbstractModel
 {
+    /**
+     * @var \Ebizmarts\MailChimp\Model\ResourceModel\MailChimpErrors
+     */
+    protected $mailChimpErrorsResource;
+
+    public function __construct(
+        \Magento\Framework\Model\Context $context,
+        \Magento\Framework\Registry $registry,
+        \Ebizmarts\MailChimp\Model\ResourceModel\MailChimpErrors $mailChimpErrorsResource,
+        ?\Magento\Framework\Model\ResourceModel\AbstractResource $resource = null,
+        ?\Magento\Framework\Data\Collection\AbstractDb $resourceCollection = null,
+        array $data = []
+    ) {
+        $this->mailChimpErrorsResource = $mailChimpErrorsResource;
+        parent::__construct($context, $registry, $resource ?? $mailChimpErrorsResource, $resourceCollection, $data);
+    }
+
     protected function _construct()
     {
         $this->_init(\Ebizmarts\MailChimp\Model\ResourceModel\MailChimpErrors::class);
     }
     public function getByStoreIdType($storeId, $id, $type)
     {
-        $this->getResource()->getByStoreIdType($this, $storeId, $id, $type);
+        $this->mailChimpErrorsResource->getByStoreIdType($this, $storeId, $id, $type);
         return $this;
     }
     /**
@@ -34,11 +51,11 @@ class MailChimpErrors extends \Magento\Framework\Model\AbstractModel
      */
     public function deleteOverflowByStore($storeId, $keep, $limit)
     {
-        return $this->getResource()->deleteOverflowByStore($this, $storeId, $keep, $limit);
+        return $this->mailChimpErrorsResource->deleteOverflowByStore($this, $storeId, $keep, $limit);
     }
 
     public function deleteByStorePeriod($storeId, $interval, $limit)
     {
-        return $this->getResource()->deleteByStorePeriod($this, $storeId, $interval, $limit);
+        return $this->mailChimpErrorsResource->deleteByStorePeriod($this, $storeId, $interval, $limit);
     }
 }

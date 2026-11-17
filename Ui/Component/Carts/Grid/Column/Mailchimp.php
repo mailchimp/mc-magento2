@@ -13,6 +13,11 @@ use Magento\Framework\App\RequestInterface;
 class Mailchimp extends Column
 {
     /**
+     * @var Escaper
+     */
+    private $escaper;
+
+    /**
      * @var Repository
      */
     protected $_assetRepository;
@@ -21,7 +26,6 @@ class Mailchimp extends Column
         ContextInterface $context,
         UiComponentFactory $uiComponentFactory,
         Escaper $escaper,
-        MailChimpHelper $mailChimpHelper,
         Repository $assetRepository,
         RequestInterface $requestInterfase,
         array $components = [],

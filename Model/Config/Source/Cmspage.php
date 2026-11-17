@@ -16,20 +16,20 @@ namespace Ebizmarts\MailChimp\Model\Config\Source;
 class Cmspage
 {
     /**
-     * @var \Magento\Cms\Model\Page
+     * @var \Magento\Cms\Model\ResourceModel\Page\CollectionFactory
      */
     private $_page;
     /**
-     * @param \Magento\Cms\Model\Page $page
+     * @param \Magento\Cms\Model\ResourceModel\Page\CollectionFactory $page
      */
     public function __construct(
-        \Magento\Cms\Model\Page $page
+        \Magento\Cms\Model\ResourceModel\Page\CollectionFactory $page
     ) {
         $this->_page = $page;
     }
     public function toOptionArray()
     {
-        $pages = $this->_page->getCollection()->addOrder('title', 'asc');
+        $pages = $this->_page->create()->addOrder('title', 'asc');
         return ['checkout/cart' => 'Shopping Cart (default page)'] + $pages->toOptionIdArray();
     }
 }

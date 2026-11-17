@@ -14,10 +14,20 @@
 namespace Ebizmarts\MailChimp\Model\Api;
 
 use Ebizmarts\MailChimp\Helper\Sync as SyncHelper;
-use Ebizmarts\Mailchimp\Helper\Data as Helper;
+use Ebizmarts\MailChimp\Helper\Data as Helper;
 
 class Result
 {
+    /**
+     * @var \Ebizmarts\MailChimp\Model\ResourceModel\MailChimpSyncBatches
+     */
+    protected $mailChimpSyncBatchesResource;
+
+    /**
+     * @var \Ebizmarts\MailChimp\Model\ResourceModel\MailChimpErrors
+     */
+    protected $mailChimpErrorsResource;
+
     const MAILCHIMP_TEMP_DIR = 'Mailchimp';
 
     /**
@@ -83,8 +93,12 @@ class Result
         \Ebizmarts\MailChimp\Model\MailChimpErrorsFactory $chimpErrors,
         \Magento\Framework\Archive $archive,
         \Magento\Framework\Filesystem\Driver\File $driver,
-        \Magento\Framework\HTTP\Client\CurlFactory $curlFactory
+        \Magento\Framework\HTTP\Client\CurlFactory $curlFactory,
+        \Ebizmarts\MailChimp\Model\ResourceModel\MailChimpSyncBatches $mailChimpSyncBatchesResource,
+        \Ebizmarts\MailChimp\Model\ResourceModel\MailChimpErrors $mailChimpErrorsResource
     ) {
+        $this->mailChimpSyncBatchesResource = $mailChimpSyncBatchesResource;
+        $this->mailChimpErrorsResource = $mailChimpErrorsResource;
 
         $this->_batchCollection     = $batchCollection;
         $this->_helper              = $helper;
@@ -112,10 +126,10 @@ class Result
                     $this->processEachResponseFile($files, $item->getBatchId(), $mailchimpStoreId, $storeId);
                     $item->setStatus(\Ebizmarts\MailChimp\Helper\Data::BATCH_COMPLETED);
                     $item->setModifiedDate($this->_helper->getGmtDate());
-                    $item->getResource()->save($item);
+                    $this->mailChimpSyncBatchesResource->save($item);
                 } elseif ($files === false) {
                     $item->setStatus(\Ebizmarts\MailChimp\Helper\Data::BATCH_ERROR);
-                    $item->getResource()->save($item);
+                    $this->mailChimpSyncBatchesResource->save($item);
                     $this->syncHelper->deleteAllByBatchId($item->getBatchId());
                     continue;
                 } elseif (is_array($files)) {
@@ -175,13 +189,13 @@ class Result
         $item->setResponseAttempts($attempts);
 
         if ($attempts < self::MAX_RESPONSE_ATTEMPTS) {
-            $item->getResource()->save($item);
+            $this->mailChimpSyncBatchesResource->save($item);
 
             return false;
         }
 
         $item->setStatus(\Ebizmarts\MailChimp\Helper\Data::BATCH_ERROR);
-        $item->getResource()->save($item);
+        $this->mailChimpSyncBatchesResource->save($item);
         $this->syncHelper->markAllAsModifiedByBatchId($item->getBatchId());
         $this->_helper->log(
             "Giving up on the result of batch [" . $item->getBatchId() . "] after " . $attempts
@@ -363,7 +377,7 @@ class Result
                         $mailchimpErrors->setOriginalId($id);
                         $mailchimpErrors->setBatchId($batchId);
                         $mailchimpErrors->setStoreId($storeId);
-                        $mailchimpErrors->getResource()->save($mailchimpErrors);
+                        $this->mailChimpErrorsResource->save($mailchimpErrors);
                     } else {
                         $this->_updateSyncData(
                             $mailchimpStoreId,

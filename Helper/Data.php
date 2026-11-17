@@ -19,6 +19,26 @@ use Magento\Framework\App\ProductMetadataInterface;
 
 class Data extends \Magento\Framework\App\Helper\AbstractHelper
 {
+    /**
+     * @var \Magento\Framework\Filesystem\DirectoryList
+     */
+    private $directoryList;
+
+    /**
+     * @var \Ebizmarts\MailChimp\Model\ResourceModel\MailchimpNotification
+     */
+    protected $mailchimpNotificationResource;
+
+    /**
+     * @var \Ebizmarts\MailChimp\Model\ResourceModel\MailChimpSyncBatches
+     */
+    protected $mailChimpSyncBatchesResource;
+
+    /**
+     * @var \Ebizmarts\MailChimp\Model\ResourceModel\MailChimpStores
+     */
+    protected $mailChimpStoresResource;
+
     const XML_PATH_ACTIVE            = 'mailchimp/general/active';
     const XML_PATH_APIKEY            = 'mailchimp/general/apikey';
     const XML_PATH_APIKEY_LIST       = 'mailchimp/general/apikeylist';
@@ -355,10 +375,18 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         \Magento\Framework\Locale\Resolver $resolver,
         MailchimpNotificationFactory $mailchimpNotificationFactory,
         ProductMetadataInterface $productMetadata,
+        \Magento\Framework\Filesystem\DirectoryList $directoryList,
+        \Ebizmarts\MailChimp\Model\ResourceModel\MailchimpNotification $mailchimpNotificationResource,
+        \Ebizmarts\MailChimp\Model\ResourceModel\MailChimpSyncBatches $mailChimpSyncBatchesResource,
+        \Ebizmarts\MailChimp\Model\ResourceModel\MailChimpStores $mailChimpStoresResource,
         ?\Magento\Framework\App\CacheInterface $cache = null,
         ?\Magento\Framework\App\State $state = null
     ) {
+        $this->mailchimpNotificationResource = $mailchimpNotificationResource;
+        $this->mailChimpSyncBatchesResource = $mailChimpSyncBatchesResource;
+        $this->mailChimpStoresResource = $mailChimpStoresResource;
 
+        $this->directoryList = $directoryList;
         $this->_storeManager  = $storeManager;
         $this->_mlogger       = $logger;
         $this->_scopeConfig   = $context->getScopeConfig();
@@ -1018,7 +1046,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         $mailchimpNotification = $this->mailchimpNotificationFactory->create();
         $mailchimpNotification->setNotificationData(json_encode($data));
         $mailchimpNotification->setProcessed(false);
-        $mailchimpNotification->getResource()->save($mailchimpNotification);
+        $this->mailchimpNotificationResource->save($mailchimpNotification);
 
     }
     /**
@@ -1042,14 +1070,14 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
             $this->cancelAllPendingBatches($mailchimpStore);
         } catch (\Mailchimp_Error | \Mailchimp_HttpError $e) {
             $this->log($e->getFriendlyMessage());
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
             $this->log($e->getMessage());
         }
     }
     public function markAllBatchesAs($mailchimpStore, $fromStatus, $toStatus)
     {
-        $connection = $this->_syncBatches->getResource()->getConnection();
-        $tableName = $this->_syncBatches->getResource()->getMainTable();
+        $connection = $this->mailChimpSyncBatchesResource->getConnection();
+        $tableName = $this->mailChimpSyncBatchesResource->getMainTable();
         $connection->update(
             $tableName,
             ['status' => $toStatus],
@@ -1094,7 +1122,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     }
     public function getBaseDir()
     {
-        return BP;
+        return $this->directoryList->getRoot();
     }
 
     /**
@@ -1269,8 +1297,8 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
 
         $mcUserName = [];
         $allStores = [];
-        $connection = $this->_mailChimpStores->getResource()->getConnection();
-        $tableName = $this->_mailChimpStores->getResource()->getMainTable();
+        $connection = $this->mailChimpStoresResource->getConnection();
+        $tableName = $this->mailChimpStoresResource->getMainTable();
         $connection->truncateTable($tableName);
         $keys = $this->getAllApiKeys();
         foreach ($keys as $apiKey) {
@@ -1288,7 +1316,6 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
             // no site attached. Verified: before setApiKey the URL comes
             // through NULL, after it comes through set.
             $this->_api->setStoreURL($this->_storeManager->getStore()->getBaseUrl());
-
 
             try {
                 $apiStores = $this->_api->ecommerce->stores->get(null, null, null, self::MAXSTORES);
@@ -1354,7 +1381,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
                     if (isset($listInfo['name'])) {
                         $mstore->setListName($listInfo['name']);
                         $mstore->setMcAccountName($mcUserName[$apiKey]);
-                        $mstore->getResource()->save($mstore);
+                        $this->mailChimpStoresResource->save($mstore);
                     }
                 } catch (\Mailchimp_Error | \Mailchimp_HttpError $e) {
                     $this->log($e->getFriendlyMessage());
@@ -1761,7 +1788,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
                 }
             } catch (\Mailchimp_Error | \Mailchimp_HttpError $e) {
                 $this->log($e->getFriendlyMessage());
-            } catch (Exception $e) {
+            } catch (\Exception $e) {
                 $this->log($e->getMessage());
             }
         }

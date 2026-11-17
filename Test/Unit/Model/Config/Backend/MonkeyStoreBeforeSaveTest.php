@@ -126,7 +126,9 @@ class MonkeyStoreBeforeSaveTest extends TestCase
     private function inject($object, $class, $property, $value)
     {
         $p = new \ReflectionProperty($class, $property);
-        $p->setAccessible(true);
+        if (PHP_VERSION_ID < 80100) {
+            $p->setAccessible(true);
+        }
         $p->setValue($object, $value);
     }
 
@@ -194,6 +196,7 @@ class MonkeyStoreBeforeSaveTest extends TestCase
      * @dataProvider nonStoreProvider
      * @param mixed $value
      */
+    #[\PHPUnit\Framework\Attributes\DataProvider('nonStoreProvider')]
     public function testAValueThatIsNotAStoreIsRejectedWhileEcommerceIsActive($value)
     {
         $this->expectException(LocalizedException::class);
@@ -209,6 +212,7 @@ class MonkeyStoreBeforeSaveTest extends TestCase
      * @dataProvider nonStoreProvider
      * @param mixed $value
      */
+    #[\PHPUnit\Framework\Attributes\DataProvider('nonStoreProvider')]
     public function testTheSameValueIsAcceptedWhileEcommerceIsOff($value)
     {
         $this->save($this->backend(true), $value, 0);

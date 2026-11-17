@@ -21,7 +21,7 @@ class Delete extends \Ebizmarts\MailChimp\Controller\Adminhtml\Stores
         $storeId = (int) $this->getRequest()->getParam('id');
         if ($storeId) {
             $storeModel = $this->_mailchimpStoresFactory->create();
-            $storeModel->getResource()->load($storeModel, $storeId);
+            $this->mailChimpStoresResource->load($storeModel, $storeId);
             try {
                 $api = $this->_mhelper->getApiByApiKey($storeModel->getApikey(), true);
                 $api->ecommerce->stores->delete($storeModel->getStoreid());
@@ -33,6 +33,7 @@ class Delete extends \Ebizmarts\MailChimp\Controller\Adminhtml\Stores
                 return $resultRedirect->setPath('mailchimp/stores/edit', ['id'=>$storeId]);
             }
         }
+        return $this->getResponse();
     }
     protected function _isAllowed()
     {

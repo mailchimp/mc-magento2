@@ -16,6 +16,26 @@ namespace Ebizmarts\MailChimp\Cron;
 
 class Webhook
 {
+    /**
+     * @var \Magento\Customer\Model\ResourceModel\Customer
+     */
+    protected $customerResource;
+
+    /**
+     * @var \Ebizmarts\MailChimp\Model\ResourceModel\MailChimpInterestGroup
+     */
+    protected $mailChimpInterestGroupResource;
+
+    /**
+     * @var \Magento\Newsletter\Model\ResourceModel\Subscriber
+     */
+    protected $subscriberResource;
+
+    /**
+     * @var \Ebizmarts\MailChimp\Model\ResourceModel\MailChimpWebhookRequest
+     */
+    protected $mailChimpWebhookRequestResource;
+
     const ACTION_DELETE         = 'delete';
     const ACTION_UNSUBSCRIBE    = 'unsub';
 
@@ -83,8 +103,16 @@ class Webhook
         \Ebizmarts\MailChimp\Model\ResourceModel\MailChimpWebhookRequest\CollectionFactory $webhookCollection,
         \Ebizmarts\MailChimp\Model\MailChimpInterestGroupFactory $interestGroupFactory,
         \Magento\Store\Model\StoreManager $storeManager,
-        \Magento\Customer\Model\CustomerFactory $customer
+        \Magento\Customer\Model\CustomerFactory $customer,
+        \Magento\Customer\Model\ResourceModel\Customer $customerResource,
+        \Ebizmarts\MailChimp\Model\ResourceModel\MailChimpInterestGroup $mailChimpInterestGroupResource,
+        \Magento\Newsletter\Model\ResourceModel\Subscriber $subscriberResource,
+        \Ebizmarts\MailChimp\Model\ResourceModel\MailChimpWebhookRequest $mailChimpWebhookRequestResource
     ) {
+        $this->customerResource = $customerResource;
+        $this->mailChimpInterestGroupResource = $mailChimpInterestGroupResource;
+        $this->subscriberResource = $subscriberResource;
+        $this->mailChimpWebhookRequestResource = $mailChimpWebhookRequestResource;
 
         $this->_helper              = $helper;
         $this->_subscriberFactory   = $subscriberFactory;
@@ -138,7 +166,7 @@ class Webhook
                 $processed = self::PROCESSED_WITH_ERROR;
             }
             $item->setProcessed($processed);
-            $item->getResource()->save($item);
+            $this->mailChimpWebhookRequestResource->save($item);
         }
     }
     protected function _subscribe($data)
@@ -153,7 +181,7 @@ class Webhook
             foreach ($subscribers as $sub) {
                 if ($sub->getSubscriberStatus() != \Magento\Newsletter\Model\Subscriber::STATUS_SUBSCRIBED) {
                     $sub->setSubscriberStatus(\Magento\Newsletter\Model\Subscriber::STATUS_SUBSCRIBED);
-                    $sub->getResource()->save($sub);
+                    $this->subscriberResource->save($sub);
                 }
             }
         } else {
@@ -186,7 +214,7 @@ class Webhook
                 switch ($action) {
                     case self::ACTION_DELETE:
                         if ($this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_PATH_WEBHOOK_DELETE)) {
-                            $sub->getResource()->delete($sub);
+                            $this->subscriberResource->delete($sub);
                         } elseif ($sub->getSubscriberStatus()!=\Magento\Newsletter\Model\Subscriber::STATUS_UNSUBSCRIBED) {
                             $this->_subscribeMember($sub, \Magento\Newsletter\Model\Subscriber::STATUS_UNSUBSCRIBED);
                         }
@@ -209,7 +237,7 @@ class Webhook
          * @var $sub \Magento\Newsletter\Model\Subscriber
          */
         foreach ($subscribers as $sub) {
-            $sub->getResource()->delete($sub);
+            $this->subscriberResource->delete($sub);
         }
     }
     protected function _updateEmail($data)
@@ -226,7 +254,7 @@ class Webhook
             if ($oldSubscribers->count()) {
                 foreach ($oldSubscribers as $sub) {
                     $sub->setSubscriberEmail($newEmail);
-                    $sub->getResource()->save($sub);
+                    $this->subscriberResource->save($sub);
                 }
             } else {
                 $sub = $this->_subscriberFactory->create();
@@ -246,9 +274,9 @@ class Webhook
              */
             foreach ($customers as $c) {
                 $customer = $this->_customer->create();
-                $customer->getResource()->load($customer, $c->getEntityId());
+                $this->customerResource->load($customer, $c->getEntityId());
                 $this->_processMerges($customer,$data);
-                $customer->getResource()->save($customer);
+                $this->customerResource->save($customer);
             }
         } else {
             $subscribers = $this->_helper->loadListSubscribers($listId, $email);
@@ -309,7 +337,7 @@ class Webhook
                         $interestGroup->setSubscriberId($subscriber->getSubscriberId());
                         $interestGroup->setStoreId($subscriber->getStoreId());
                         $interestGroup->setUpdatedAt($this->_helper->getGmtDate());
-                        $interestGroup->getResource()->save($interestGroup);
+                        $this->mailChimpInterestGroupResource->save($interestGroup);
                     }
                 } else {
                     if (is_array($mapFields)) {
@@ -345,7 +373,7 @@ class Webhook
         $subscriber->setStatus($status);
         $subscriber->setSubscriberConfirmCode($subscriber->randomSequence());
         $subscriber->setIsStatusChanged(true);
-        $subscriber->getResource()->save($subscriber);
+        $this->subscriberResource->save($subscriber);
     }
     /**
      * Fetch every enabled store view's interest-group tree, once per process.

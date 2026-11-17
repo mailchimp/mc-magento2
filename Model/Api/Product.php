@@ -325,7 +325,7 @@ class Product
             "main_table.mailchimp_sync_deleted = 1 ".
             " and main_table.type = '".\Ebizmarts\MailChimp\Helper\Data::IS_PRODUCT."'".
             " and main_table.mailchimp_store_id = '".$mailchimpStoreId."'".
-            " and main_table.mailchimp_sent = ".\Ebizmarts\Mailchimp\Helper\Data::NEEDTORESYNC
+            " and main_table.mailchimp_sent = ".\Ebizmarts\MailChimp\Helper\Data::NEEDTORESYNC
         );
         $collection->getSelect()->limit(self::MAX);
         foreach ($collection as $item) {

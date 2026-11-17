@@ -8,6 +8,11 @@ use Magento\Framework\View\Element\UiComponentFactory;
 use Magento\Ui\Component\Listing\Columns\Column;
 class Customer extends Column
 {
+    /**
+     * @var Escaper
+     */
+    private $escaper;
+
     public function __construct(
         ContextInterface $context,
         UiComponentFactory $uiComponentFactory,

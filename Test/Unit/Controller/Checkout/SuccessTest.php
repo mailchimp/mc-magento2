@@ -31,6 +31,8 @@ class SuccessTest extends TestCase
     private const EMAIL = 'shopper@example.com';
     private const STORE_ID = 1;
 
+    private $interestGroupResource;
+
     private $helper;
 
     private $checkoutSession;
@@ -55,6 +57,7 @@ class SuccessTest extends TestCase
 
     protected function setUp(): void
     {
+        $this->interestGroupResource = $this->createMock(InterestGroupResource::class);
         $this->helper = $this->createMock(MailChimpHelper::class);
         $this->helper->method('getBaserUrl')->willReturn(self::BASE_URL);
         $this->helper->method('isMailChimpEnabled')->willReturnCallback(function () {
@@ -107,7 +110,8 @@ class SuccessTest extends TestCase
             $this->subscriberFactory,
             $this->interestGroupFactory,
             $this->syncHelper,
-            $storeManager
+            $storeManager,
+            $this->interestGroupResource
         );
     }
 
@@ -144,15 +148,14 @@ class SuccessTest extends TestCase
 
     private function makeInterestGroup(): MockObject
     {
-        $resource = $this->createMock(InterestGroupResource::class);
+        $resource = $this->interestGroupResource;
         $resource->expects($this->once())->method('save');
 
         $interestGroup = $this->getMockBuilder(MailChimpInterestGroup::class)
             ->disableOriginalConstructor()
-            ->onlyMethods(['getBySubscriberIdStoreId', 'getResource'])
+            ->onlyMethods(['getBySubscriberIdStoreId'])
             ->getMock();
         $interestGroup->method('getBySubscriberIdStoreId')->willReturnSelf();
-        $interestGroup->method('getResource')->willReturn($resource);
         $this->interestGroupFactory->method('create')->willReturn($interestGroup);
 
         return $interestGroup;

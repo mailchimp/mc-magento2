@@ -38,14 +38,12 @@ class CreateWebhook extends \Magento\Backend\App\Action
      * @param JsonFactory $resultJsonFactory
      * @param \Magento\Store\Model\StoreManagerInterface $storeManagerInterface
      * @param \Ebizmarts\MailChimp\Helper\Data $helper
-     * @param \Magento\Config\Model\ResourceModel\Config $config
      */
     public function __construct(
         \Magento\Backend\App\Action\Context $context,
         JsonFactory $resultJsonFactory,
         \Magento\Store\Model\StoreManagerInterface $storeManagerInterface,
-        \Ebizmarts\MailChimp\Helper\Data $helper,
-        \Magento\Config\Model\ResourceModel\Config $config
+        \Ebizmarts\MailChimp\Helper\Data $helper
     ) {
 
         parent::__construct($context);

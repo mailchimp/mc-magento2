@@ -16,6 +16,16 @@ namespace Ebizmarts\MailChimp\Cron;
 class Ecommerce
 {
     /**
+     * @var \Ebizmarts\MailChimp\Model\ResourceModel\MailChimpSyncEcommerce
+     */
+    protected $mailChimpSyncEcommerceResource;
+
+    /**
+     * @var \Ebizmarts\MailChimp\Model\ResourceModel\MailChimpSyncBatches
+     */
+    protected $mailChimpSyncBatchesResource;
+
+    /**
      * @var \Magento\Store\Model\StoreManager
      */
     private $_storeManager;
@@ -97,8 +107,12 @@ class Ecommerce
         \Ebizmarts\MailChimp\Model\Api\PromoRules $apiPromoRules,
         \Ebizmarts\MailChimp\Model\MailChimpSyncBatchesFactory $mailChimpSyncBatchesFactory,
         \Ebizmarts\MailChimp\Model\MailChimpSyncEcommerce $chimpSyncEcommerce,
-        \Magento\Framework\Filesystem\DirectoryList $dir
+        \Magento\Framework\Filesystem\DirectoryList $dir,
+        \Ebizmarts\MailChimp\Model\ResourceModel\MailChimpSyncEcommerce $mailChimpSyncEcommerceResource,
+        \Ebizmarts\MailChimp\Model\ResourceModel\MailChimpSyncBatches $mailChimpSyncBatchesResource
     ) {
+        $this->mailChimpSyncEcommerceResource = $mailChimpSyncEcommerceResource;
+        $this->mailChimpSyncBatchesResource = $mailChimpSyncBatchesResource;
 
         $this->_storeManager    = $storeManager;
         $this->_helper          = $helper;
@@ -118,8 +132,8 @@ class Ecommerce
     public function execute()
     {
 
-        $connection = $this->_chimpSyncEcommerce->getResource()->getConnection();
-        $tableName = $this->_chimpSyncEcommerce->getResource()->getMainTable();
+        $connection = $this->mailChimpSyncEcommerceResource->getConnection();
+        $tableName = $this->mailChimpSyncEcommerceResource->getMainTable();
         $connection->delete(
             $tableName,
             'batch_id is null and mailchimp_sync_modified != 1 and mailchimp_sync_error is null'
@@ -239,7 +253,7 @@ class Ecommerce
                         $syncBatches->setProductsModifiedCount($batchCounters[\Ebizmarts\MailChimp\Helper\Data::PRO_MOD]);
                         $syncBatches->setCartsModifiedCount($batchCounters[\Ebizmarts\MailChimp\Helper\Data::QUO_MOD]);
                         $syncBatches->setOrdersModifiedCount($batchCounters[\Ebizmarts\MailChimp\Helper\Data::ORD_MOD]);
-                        $syncBatches->getResource()->save($syncBatches);
+                        $this->mailChimpSyncBatchesResource->save($syncBatches);
                         $batchId = $batchResponse['id'];
                         $this->_showResume($batchId, $storeId);
                     }
@@ -402,8 +416,8 @@ class Ecommerce
             \Ebizmarts\MailChimp\Helper\Data::IS_CUSTOMER,
             \Ebizmarts\MailChimp\Helper\Data::IS_SUBSCRIBER
         ];
-        $connection = $this->_chimpSyncEcommerce->getResource()->getConnection();
-        $tableName = $this->_chimpSyncEcommerce->getResource()->getMainTable();
+        $connection = $this->mailChimpSyncEcommerceResource->getConnection();
+        $tableName = $this->mailChimpSyncEcommerceResource->getMainTable();
         foreach ($operations as $operation) {
             if (is_array($operation)) {
                 if (array_key_exists('operation_id', $operation)) {
@@ -412,18 +426,14 @@ class Ecommerce
                         $type = $operationId[0];
                         if (!in_array($type, $types)) {
                             $type = '';
-                        } else {
-                            if ($type == \Ebizmarts\MailChimp\Helper\Data::IS_SUBSCRIBER) {
-                                $storeId = $listId;
-                            } else {
-                                $storeId = $mailchimpStoreId;
-                            }
                         }
                     }
                     if (isset($operationId[2])) {
                         $relatedId = $operationId[2];
                     }
                     if ($type && $relatedId) {
+                        $storeId = $type == \Ebizmarts\MailChimp\Helper\Data::IS_SUBSCRIBER
+                            ? $listId : $mailchimpStoreId;
                         $connection->update(
                             $tableName,
                             [

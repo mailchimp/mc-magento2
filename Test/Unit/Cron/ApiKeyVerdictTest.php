@@ -71,7 +71,9 @@ class ApiKeyVerdictTest extends TestCase
             ->getMock();
 
         $prop = new \ReflectionProperty(Ecommerce::class, '_helper');
-        $prop->setAccessible(true);
+        if (PHP_VERSION_ID < 80100) {
+            $prop->setAccessible(true);
+        }
         $prop->setValue($cron, $helper);
 
         $this->apiRoot = $api->root;
@@ -87,7 +89,9 @@ class ApiKeyVerdictTest extends TestCase
     private function ping(Ecommerce $cron, $storeId)
     {
         $m = new \ReflectionMethod(Ecommerce::class, '_ping');
-        $m->setAccessible(true);
+        if (PHP_VERSION_ID < 80100) {
+            $m->setAccessible(true);
+        }
 
         return $m->invoke($cron, $storeId);
     }

@@ -17,6 +17,11 @@ use Ebizmarts\MailChimp\Helper\Data as MailChimpHelper;
 
 class Products extends Column
 {
+    /**
+     * @var \Magento\Catalog\Model\ResourceModel\Product
+     */
+    private $productResource;
+
     private const SUPPORTED_PRODUCT_TYPES = [
         ProductType::TYPE_SIMPLE,
         ProductType::TYPE_VIRTUAL,
@@ -77,9 +82,11 @@ class Products extends Column
         \Magento\Framework\View\Asset\Repository $assetRepository,
         \Ebizmarts\MailChimp\Model\MailChimpErrorsFactory $mailChimpErrorsFactory,
         SyncCollectionFactory $syncCollectionFactory,
+        \Magento\Catalog\Model\ResourceModel\Product $productResource,
         array $components = [],
         array $data = [])
     {
+        $this->productResource = $productResource;
         $this->_productFactory = $productFactory;
         $this->productCollectionFactory = $productCollectionFactory;
         $this->_requestInterface = $requestInterface;
@@ -101,8 +108,11 @@ class Products extends Column
                 /**
                  * @var $product \Magento\Catalog\Model\Product
                  */
-                $product = $productsMap[$item['entity_id']]
-                    ?? $this->_productFactory->create()->load($item['entity_id']); // Backwards Compatibility
+                $product = $productsMap[$item['entity_id']] ?? null;
+                if ($product === null) {
+                    $product = $this->_productFactory->create();
+                    $this->productResource->load($product, $item['entity_id']);
+                }
                 if (key_exists($item['entity_id'],$syncMap)) {
                     $sync = $syncMap[$item['entity_id']]->getMailchimpSent();
                 } else {

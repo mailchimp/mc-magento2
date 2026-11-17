@@ -18,6 +18,11 @@ use Ebizmarts\MailChimp\Helper\Sync as SyncHelper;
 class Save
 {
     /**
+     * @var \Ebizmarts\MailChimp\Model\ResourceModel\MailChimpInterestGroup
+     */
+    protected $mailChimpInterestGroupResource;
+
+    /**
      * @var \Ebizmarts\MailChimp\Helper\Data
      */
     protected $helper;
@@ -56,8 +61,10 @@ class Save
         \Magento\Customer\Model\Session $customerSession,
         \Magento\Newsletter\Model\SubscriberFactory $subscriberFactory,
         \Ebizmarts\MailChimp\Model\MailChimpInterestGroupFactory $interestGroupFactory,
-        \Magento\Framework\App\Request\Http $request
+        \Magento\Framework\App\Request\Http $request,
+        \Ebizmarts\MailChimp\Model\ResourceModel\MailChimpInterestGroup $mailChimpInterestGroupResource
     ) {
+        $this->mailChimpInterestGroupResource = $mailChimpInterestGroupResource;
         $this->helper               = $helper;
         $this->syncHelper           = $syncHelper;
         $this->customerSession      = $customerSession;
@@ -87,7 +94,7 @@ class Save
                 $interestGroup->setSubscriberId($subscriber->getSubscriberId());
                 $interestGroup->setStoreId($subscriber->getStoreId());
                 $interestGroup->setUpdatedAt($this->helper->getGmtDate());
-                $interestGroup->getResource()->save($interestGroup);
+                $this->mailChimpInterestGroupResource->save($interestGroup);
                 $listId = $this->helper->getGeneralList($subscriber->getStoreId());
                 $this->_updateSubscriber($listId, $subscriber->getId(), $this->helper->getGmtDate(), null, 1);
             } else {
@@ -98,7 +105,7 @@ class Save
                 $interestGroup->setSubscriberId($subscriber->getSubscriberId());
                 $interestGroup->setStoreId($subscriber->getStoreId());
                 $interestGroup->setUpdatedAt($this->helper->getGmtDate());
-                $interestGroup->getResource()->save($interestGroup);
+                $this->mailChimpInterestGroupResource->save($interestGroup);
             }
         } catch (\Exception $e) {
             $this->helper->log($e->getMessage());

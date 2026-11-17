@@ -32,35 +32,24 @@ class BatchGiveUpTest extends TestCase
     private $logged = [];
 
     /**
-     * A batch row that behaves like the model: magic getters and setters over
-     * data, and a resource whose save() the code calls directly.
+     * A batch row with magic getters and setters over data.
      *
      * @param  int $attempts
      * @return object
      */
     private function batchRow($attempts)
     {
-        return new class($attempts) {
-            public $data;
-            public $saves = 0;
-            public function __construct($attempts)
-            {
-                $this->data = ['batch_id' => 'abc123', 'status' => 'pending', 'response_attempts' => $attempts];
-            }
-            public function getBatchId() { return $this->data['batch_id']; }
-            public function getStatus() { return $this->data['status']; }
-            public function getResponseAttempts() { return $this->data['response_attempts']; }
-            public function setStatus($v) { $this->data['status'] = $v; return $this; }
-            public function setResponseAttempts($v) { $this->data['response_attempts'] = $v; return $this; }
-            public function getResource()
-            {
-                return new class($this) {
-                    private $row;
-                    public function __construct($row) { $this->row = $row; }
-                    public function save($item) { $this->row->saves++; }
-                };
-            }
-        };
+        $row = $this->getMockBuilder(\Ebizmarts\MailChimp\Model\MailChimpSyncBatches::class)
+            ->disableOriginalConstructor()
+            ->onlyMethods([])
+            ->getMock();
+        $row->setData([
+            'batch_id' => 'abc123',
+            'status' => 'pending',
+            'response_attempts' => $attempts,
+            'saves' => 0
+        ]);
+        return $row;
     }
 
     /**
@@ -91,9 +80,17 @@ class BatchGiveUpTest extends TestCase
             public function log($message) { $this->test->recordLog($message); }
         };
 
-        foreach (['syncHelper' => $syncHelper, '_helper' => $helper] as $name => $value) {
+        $resource = $this->createMock(\Ebizmarts\MailChimp\Model\ResourceModel\MailChimpSyncBatches::class);
+        $resource->method('save')->willReturnCallback(function ($row) use ($resource) {
+            $row->setData('saves', $row->getData('saves') + 1);
+            return $resource;
+        });
+
+        foreach (['syncHelper' => $syncHelper, '_helper' => $helper, 'mailChimpSyncBatchesResource' => $resource] as $name => $value) {
             $property = new \ReflectionProperty(Result::class, $name);
-            $property->setAccessible(true);
+            if (PHP_VERSION_ID < 80100) {
+                $property->setAccessible(true);
+            }
             $property->setValue($result, $value);
         }
 
@@ -114,7 +111,9 @@ class BatchGiveUpTest extends TestCase
     private function giveUp($result, $row)
     {
         $method = new \ReflectionMethod(Result::class, 'giveUpOnResponse');
-        $method->setAccessible(true);
+        if (PHP_VERSION_ID < 80100) {
+            $method->setAccessible(true);
+        }
 
         return $method->invoke($result, $row);
     }
@@ -216,6 +215,6 @@ class BatchGiveUpTest extends TestCase
         $row = $this->batchRow(0);
 
         $this->giveUp($result, $row);
-        $this->assertSame(1, $row->saves);
+        $this->assertSame(1, $row->getData('saves'));
     }
 }

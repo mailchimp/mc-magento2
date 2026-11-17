@@ -25,7 +25,7 @@ use PHPUnit\Framework\TestCase;
  * reads its queue two lines later. On a five-minute cron that is the whole tree
  * per store view per run whether or not anything consumes it.
  *
- * Its one consumer is _getGroups(), reached only from a `profile` webhook row
+ * Its one consumer is _fetchGroups(), reached only from a `profile` webhook row
  * carrying a GROUPINGS merge field, so these pin that the work now happens
  * there and happens once.
  */
@@ -142,7 +142,11 @@ class WebhookLazyGroupsTest extends TestCase
             $collectionFactory,
             $this->createMock(MailChimpInterestGroupFactory::class),
             $storeManager,
-            $this->createMock(CustomerFactory::class)
+            $this->createMock(CustomerFactory::class),
+            $this->createMock(\Magento\Customer\Model\ResourceModel\Customer::class),
+            $this->createMock(\Ebizmarts\MailChimp\Model\ResourceModel\MailChimpInterestGroup::class),
+            $this->createMock(\Magento\Newsletter\Model\ResourceModel\Subscriber::class),
+            $this->createMock(\Ebizmarts\MailChimp\Model\ResourceModel\MailChimpWebhookRequest::class)
         );
     }
 
@@ -150,10 +154,12 @@ class WebhookLazyGroupsTest extends TestCase
      * @param  Webhook $cron
      * @return array
      */
-    private function getGroups(Webhook $cron)
+    private function fetchGroups(Webhook $cron)
     {
         $method = new \ReflectionMethod(Webhook::class, '_getGroups');
-        $method->setAccessible(true);
+        if (PHP_VERSION_ID < 80100) {
+            $method->setAccessible(true);
+        }
 
         return $method->invoke($cron, 'Group', 'cat-1');
     }
@@ -180,7 +186,7 @@ class WebhookLazyGroupsTest extends TestCase
     {
         $cron = $this->cron(1, [['id' => 'cat-1']]);
 
-        $groups = $this->getGroups($cron);
+        $groups = $this->fetchGroups($cron);
 
         $this->assertSame(2, $this->apiCalls);            // 1 categories + 1 interests
         $this->assertSame(['i-cat-1' => 'i-cat-1'], $groups);
@@ -194,9 +200,9 @@ class WebhookLazyGroupsTest extends TestCase
     {
         $cron = $this->cron(1, [['id' => 'cat-1']]);
 
-        $this->getGroups($cron);
-        $this->getGroups($cron);
-        $this->getGroups($cron);
+        $this->fetchGroups($cron);
+        $this->fetchGroups($cron);
+        $this->fetchGroups($cron);
 
         $this->assertSame(2, $this->apiCalls);
     }
@@ -211,9 +217,9 @@ class WebhookLazyGroupsTest extends TestCase
     {
         $cron = $this->cron(1, []);
 
-        $this->getGroups($cron);
-        $this->getGroups($cron);
-        $this->getGroups($cron);
+        $this->fetchGroups($cron);
+        $this->fetchGroups($cron);
+        $this->fetchGroups($cron);
 
         $this->assertSame(1, $this->apiCalls);            // the categories call, once
     }

@@ -16,6 +16,11 @@ namespace Ebizmarts\MailChimp\Model\Plugin;
 class AccountManagement
 {
     /**
+     * @var \Magento\Quote\Model\ResourceModel\Quote
+     */
+    protected $quoteResource;
+
+    /**
      * @var \Ebizmarts\MailChimp\Helper\Data
      */
     protected $_helper;
@@ -43,8 +48,10 @@ class AccountManagement
         \Ebizmarts\MailChimp\Helper\Data $helper,
         \Magento\Checkout\Model\Session $checkoutSession,
         \Magento\Quote\Model\QuoteFactory $quote,
-        \Magento\Store\Model\StoreManagerInterface $storeManager
+        \Magento\Store\Model\StoreManagerInterface $storeManager,
+        \Magento\Quote\Model\ResourceModel\Quote $quoteResource
     ) {
+        $this->quoteResource = $quoteResource;
     
         $this->_helper  = $helper;
         $this->_quote   = $quote;
@@ -70,10 +77,10 @@ class AccountManagement
             $quoteId = $this->_session->getQuoteId();
             if ($quoteId) {
                 $quote = $this->_quote->create();
-                $quote->getResource()->load($quote, $quoteId);
+                $this->quoteResource->load($quote, $quoteId);
                 $quote->setCustomerEmail($customerEmail);
                 $quote->setUpdatedAt(date('Y-m-d H:i:s'));
-                $quote->getResource()->save($quote);
+                $this->quoteResource->save($quote);
             }
         }
         return$ret;

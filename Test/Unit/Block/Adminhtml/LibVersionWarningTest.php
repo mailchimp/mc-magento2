@@ -36,7 +36,9 @@ class LibVersionWarningTest extends TestCase
         $hint = (new \ReflectionClass(Hint::class))->newInstanceWithoutConstructor();
 
         $p = new \ReflectionProperty(Hint::class, '_moduleVersion');
-        $p->setAccessible(true);
+        if (PHP_VERSION_ID < 80100) {
+            $p->setAccessible(true);
+        }
         $p->setValue($hint, $moduleVersion);
 
         return $hint;
@@ -69,6 +71,7 @@ class LibVersionWarningTest extends TestCase
      * @dataProvider olderProvider
      * @param string $installed
      */
+    #[\PHPUnit\Framework\Attributes\DataProvider('olderProvider')]
     public function testAnOlderLibraryWarns($installed)
     {
         $this->assertSame($installed, $this->hint($installed)->checkLibVersion());
@@ -94,6 +97,7 @@ class LibVersionWarningTest extends TestCase
      * @dataProvider currentProvider
      * @param string $installed
      */
+    #[\PHPUnit\Framework\Attributes\DataProvider('currentProvider')]
     public function testALibraryAtOrAboveTheFloorIsSilent($installed)
     {
         $this->assertFalse($this->hint($installed)->checkLibVersion());

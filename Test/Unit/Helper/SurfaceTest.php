@@ -108,7 +108,9 @@ class SurfaceTest extends TestCase
 
         foreach (['_api' => $api, '_request' => $request, '_state' => $state] as $name => $value) {
             $property = new \ReflectionProperty(MailChimpHelper::class, $name);
-            $property->setAccessible(true);
+            if (PHP_VERSION_ID < 80100) {
+                $property->setAccessible(true);
+            }
             $property->setValue($helper, $value);
         }
 
@@ -122,7 +124,9 @@ class SurfaceTest extends TestCase
     private function apply($helper)
     {
         $method = new \ReflectionMethod(MailChimpHelper::class, 'applySurface');
-        $method->setAccessible(true);
+        if (PHP_VERSION_ID < 80100) {
+            $method->setAccessible(true);
+        }
         $method->invoke($helper);
     }
 
@@ -216,6 +220,7 @@ class SurfaceTest extends TestCase
      * @param array  $segments
      * @param string $composed  what those segments compose, for the record
      */
+    #[\PHPUnit\Framework\Attributes\DataProvider('nonStringSegmentProvider')]
     public function testASegmentThatIsNotAStringIsNotADispatchWeCanName($segments, $composed)
     {
         $request = $this->request($segments);
@@ -243,6 +248,7 @@ class SurfaceTest extends TestCase
      * @dataProvider emptyActionProvider
      * @param mixed $action
      */
+    #[\PHPUnit\Framework\Attributes\DataProvider('emptyActionProvider')]
     public function testAnActionWithNothingInItIsNotReported($action)
     {
         $api = $this->api();

@@ -41,18 +41,17 @@ class CheckoutTest extends TestCase
         float $shipping,
         float $discountAmount
     ): \Magento\Quote\Model\Quote {
-        $address = $this->getMockBuilder(\Magento\Quote\Model\Quote\Address::class)
+        $address = $this->getMockBuilder(\Ebizmarts\MailChimp\Test\Unit\Support\QuoteAddressStub::class)
             ->disableOriginalConstructor()
-            ->addMethods(['getTaxAmount', 'getShippingAmount', 'getDiscountAmount'])
+            ->onlyMethods(['getTaxAmount', 'getShippingAmount', 'getDiscountAmount'])
             ->getMock();
         $address->method('getTaxAmount')->willReturn($tax);
         $address->method('getShippingAmount')->willReturn($shipping);
         $address->method('getDiscountAmount')->willReturn(-$discountAmount); // Magento stores as negative
 
-        $quote = $this->getMockBuilder(\Magento\Quote\Model\Quote::class)
+        $quote = $this->getMockBuilder(\Ebizmarts\MailChimp\Test\Unit\Support\QuoteStub::class)
             ->disableOriginalConstructor()
-            ->onlyMethods(['getId', 'getAllVisibleItems', 'getShippingAddress'])
-            ->addMethods(['getSubtotal', 'getGrandTotal', 'getCouponCode'])
+            ->onlyMethods(['getId', 'getAllVisibleItems', 'getShippingAddress', 'getSubtotal', 'getGrandTotal', 'getCouponCode'])
             ->getMock();
         $quote->method('getId')->willReturn($id);
         $quote->method('getAllVisibleItems')->willReturn($items);
@@ -98,12 +97,9 @@ class CheckoutTest extends TestCase
             $option->method('getProduct')->willReturn($child);
         }
 
-        $item = $this->getMockBuilder(QuoteItem::class)
+        $item = $this->getMockBuilder(\Ebizmarts\MailChimp\Test\Unit\Support\QuoteItemStub::class)
             ->disableOriginalConstructor()
-            ->onlyMethods(
-                ['getProductType', 'getOptionByCode', 'getProduct', 'getName', 'getPrice', 'getSku', 'getQty']
-            )
-            ->addMethods(['getProductId'])
+            ->onlyMethods(['getProductType', 'getOptionByCode', 'getProduct', 'getName', 'getPrice', 'getSku', 'getQty', 'getProductId'])
             ->getMock();
         $item->method('getProductId')->willReturn($productId);
         $item->method('getProductType')->willReturn($productType);

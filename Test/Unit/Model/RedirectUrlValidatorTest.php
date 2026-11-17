@@ -42,6 +42,7 @@ class RedirectUrlValidatorTest extends TestCase
     /**
      * @dataProvider safeUrlProvider
      */
+    #[\PHPUnit\Framework\Attributes\DataProvider('safeUrlProvider')]
     public function testSafeUrlsAreAccepted($url)
     {
         $this->assertTrue($this->validator->isSafe($url, 1));
@@ -60,6 +61,7 @@ class RedirectUrlValidatorTest extends TestCase
     /**
      * @dataProvider unsafeUrlProvider
      */
+    #[\PHPUnit\Framework\Attributes\DataProvider('unsafeUrlProvider')]
     public function testUnsafeUrlsAreRejected($url)
     {
         $this->assertFalse($this->validator->isSafe($url, 1));
