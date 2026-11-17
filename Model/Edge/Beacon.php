@@ -21,7 +21,7 @@ use Magento\Store\Model\StoreManagerInterface;
  * Hourly status report to the ebizmarts service: register once, then ping forever.
  *
  * Additive by design. Nothing here touches the existing registration to
- * users-mc4mage, the hourly batch push or enable_support.
+ * users-mc4mage.
  */
 class Beacon
 {

@@ -19,10 +19,9 @@ use Magento\Framework\App\ResourceConnection;
  * it is failing. Two questions, two indexed reads.
  *
  * SHOPPER DATA NEVER LEAVES THE STORE, BY CONSTRUCTION.
- * `mailchimp_errors.errors` holds the raw Mailchimp error body and
- * `mailchimp_notification.notification_data` holds request params and
- * responses; both can carry customer details. Neither is selected here. Only
- * the surrounding facts travel: when, and what kind.
+ * `mailchimp_errors.errors` holds the raw Mailchimp error body, which can
+ * carry customer details. It is not selected here. Only the surrounding facts
+ * travel: when, and what kind.
  */
 class LivenessSignals
 {
