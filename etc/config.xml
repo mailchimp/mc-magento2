@@ -3,15 +3,11 @@
         xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Store:etc/config.xsd">
     <default>
         <mailchimp>
-            <general>
-                <clean_support_period>7</clean_support_period>
-            </general>
             <ecommerce>
                 <all_customers>Yes</all_customers>
             </ecommerce>
             <statistics>
                 <token>f71334c7039eb7f6574676bd5f43b6bc</token>
-                <notification_url>https://logs-mc4mage.ebizmarts.com/batches</notification_url>
                 <register_url>https://users-mc4mage.ebizmarts.com</register_url>
             </statistics>
         </mailchimp>
