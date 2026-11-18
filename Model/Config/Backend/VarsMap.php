@@ -57,6 +57,7 @@ class VarsMap extends \Magento\Framework\App\Config\Value
         $value = $this->getValue();
         $value = $this->_varsHelper->makeArrayFieldValue($value);
         $this->setValue($value);
+        return $this;
     }
 
     /**

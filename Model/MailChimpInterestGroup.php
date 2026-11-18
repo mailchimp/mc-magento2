@@ -15,6 +15,23 @@ namespace Ebizmarts\MailChimp\Model;
 
 class MailChimpInterestGroup extends \Magento\Framework\Model\AbstractModel
 {
+    /**
+     * @var \Ebizmarts\MailChimp\Model\ResourceModel\MailChimpInterestGroup
+     */
+    protected $mailChimpInterestGroupResource;
+
+    public function __construct(
+        \Magento\Framework\Model\Context $context,
+        \Magento\Framework\Registry $registry,
+        \Ebizmarts\MailChimp\Model\ResourceModel\MailChimpInterestGroup $mailChimpInterestGroupResource,
+        ?\Magento\Framework\Model\ResourceModel\AbstractResource $resource = null,
+        ?\Magento\Framework\Data\Collection\AbstractDb $resourceCollection = null,
+        array $data = []
+    ) {
+        $this->mailChimpInterestGroupResource = $mailChimpInterestGroupResource;
+        parent::__construct($context, $registry, $resource ?? $mailChimpInterestGroupResource, $resourceCollection, $data);
+    }
+
     protected function _construct()
     {
         parent::_construct();
@@ -22,7 +39,7 @@ class MailChimpInterestGroup extends \Magento\Framework\Model\AbstractModel
     }
     public function getBySubscriberIdStoreId($subscriberId, $storeId)
     {
-        $this->getResource()->getBySubscriberIdStoreId($this, $subscriberId, $storeId);
+        $this->mailChimpInterestGroupResource->getBySubscriberIdStoreId($this, $subscriberId, $storeId);
         return $this;
     }
 }

@@ -86,7 +86,11 @@ class WebhookLoadGroupsTest extends TestCase
             $this->createMock(CollectionFactory::class),
             $this->createMock(MailChimpInterestGroupFactory::class),
             $storeManager,
-            $this->createMock(CustomerFactory::class)
+            $this->createMock(CustomerFactory::class),
+            $this->createMock(\Magento\Customer\Model\ResourceModel\Customer::class),
+            $this->createMock(\Ebizmarts\MailChimp\Model\ResourceModel\MailChimpInterestGroup::class),
+            $this->createMock(\Magento\Newsletter\Model\ResourceModel\Subscriber::class),
+            $this->createMock(\Ebizmarts\MailChimp\Model\ResourceModel\MailChimpWebhookRequest::class)
         );
     }
 
@@ -97,7 +101,9 @@ class WebhookLoadGroupsTest extends TestCase
     private function loadGroups(Webhook $cron)
     {
         $method = new \ReflectionMethod(Webhook::class, '_loadGroups');
-        $method->setAccessible(true);
+        if (PHP_VERSION_ID < 80100) {
+            $method->setAccessible(true);
+        }
         $method->invoke($cron);
     }
 

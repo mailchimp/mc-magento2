@@ -12,6 +12,11 @@ use Ebizmarts\MailChimp\Helper\Http as MailChimpHttp;
 class SyncStatistics
 {
     /**
+     * @var \Ebizmarts\MailChimp\Model\ResourceModel\MailchimpNotification
+     */
+    protected $mailchimpNotificationResource;
+
+    /**
      * @var MailChimpHelper
      */
     private $helper;
@@ -41,9 +46,11 @@ class SyncStatistics
         MailchimpNotificationFactory $mailchimpNotificationFactory,
         MailchimpNotification $mailchimpNotification,
         MailchimpHttp $mailchimpHttp,
-        StoreManager $storeManager
+        StoreManager $storeManager,
+        \Ebizmarts\MailChimp\Model\ResourceModel\MailchimpNotification $mailchimpNotificationResource
     )
     {
+        $this->mailchimpNotificationResource = $mailchimpNotificationResource;
         $this->helper = $helper;
         $this->mailchimpNotificationCollectionFactory = $mailchimpNotificationCollectionFactory;
         $this->mailchimpNotificationFactory = $mailchimpNotificationFactory;
@@ -131,10 +138,10 @@ class SyncStatistics
             } catch (\Exception $e) {
                 $this->helper->log($e->getMessage());
                 $mailchimpNotification = $this->mailchimpNotificationFactory->create();
-                $mailchimpNotification->getResource()->load($mailchimpNotification, $id);
+                $this->mailchimpNotificationResource->load($mailchimpNotification, $id);
                 $mailchimpNotification->setProcessed(true);
                 $mailchimpNotification->setSyncedAt($this->helper->getGmtDate());
-                $mailchimpNotification->getResource()->save($mailchimpNotification);
+                $this->mailchimpNotificationResource->save($mailchimpNotification);
                 continue;
             }
             $json['data'] = $jsonData;
@@ -151,10 +158,10 @@ class SyncStatistics
                         $id = $r['id'];
                         if (!$r['error']) {
                             $mailchimpNotification = $this->mailchimpNotificationFactory->create();
-                            $mailchimpNotification->getResource()->load($mailchimpNotification, $id);
+                            $this->mailchimpNotificationResource->load($mailchimpNotification, $id);
                             $mailchimpNotification->setProcessed(true);
                             $mailchimpNotification->setSyncedAt($this->helper->getGmtDate());
-                            $mailchimpNotification->getResource()->save($mailchimpNotification);
+                            $this->mailchimpNotificationResource->save($mailchimpNotification);
                         }
                     } else {
                         $this->helper->log("Sync notification failed to sync");

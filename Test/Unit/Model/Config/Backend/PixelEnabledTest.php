@@ -56,7 +56,9 @@ class PixelEnabledTest extends TestCase
         };
 
         $events = new \ReflectionProperty(AbstractModel::class, '_eventManager');
-        $events->setAccessible(true);
+        if (PHP_VERSION_ID < 80100) {
+            $events->setAccessible(true);
+        }
         $events->setValue($backend, $this->createMock(ManagerInterface::class));
 
         $backend->setValue($posted);

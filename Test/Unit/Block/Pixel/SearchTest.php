@@ -36,9 +36,9 @@ class SearchTest extends TestCase
         $helper = $this->createMock(MailChimpHelper::class);
 
         // getSearchData() reads the result count off the current search query.
-        $query = $this->getMockBuilder(Query::class)
+        $query = $this->getMockBuilder(\Ebizmarts\MailChimp\Test\Unit\Support\QueryStub::class)
             ->disableOriginalConstructor()
-            ->addMethods(['getNumResults'])
+            ->onlyMethods(['getNumResults'])
             ->getMock();
         $query->method('getNumResults')->willReturn(7);
 

@@ -24,6 +24,11 @@ use Magento\Framework\Controller\ResultInterface;
 
 class Index extends Action implements CsrfAwareActionInterface
 {
+    /**
+     * @var \Ebizmarts\MailChimp\Model\ResourceModel\MailChimpWebhookRequest
+     */
+    protected $mailChimpWebhookRequestResource;
+
     const WEBHOOK__PATH = 'mailchimp/webhook/index';
     /**
      * @var ResultFactory
@@ -50,8 +55,10 @@ class Index extends Action implements CsrfAwareActionInterface
         Context $context,
         \Ebizmarts\MailChimp\Helper\Data $helper,
         \Ebizmarts\MailChimp\Model\MailChimpWebhookRequestFactory $chimpWebhookRequestFactory,
-        \Magento\Framework\HTTP\PhpEnvironment\RemoteAddress $remoteAddress
+        \Magento\Framework\HTTP\PhpEnvironment\RemoteAddress $remoteAddress,
+        \Ebizmarts\MailChimp\Model\ResourceModel\MailChimpWebhookRequest $mailChimpWebhookRequestResource
     ) {
+        $this->mailChimpWebhookRequestResource = $mailChimpWebhookRequestResource;
     
         parent::__construct($context);
         $this->_resultFactory              = $context->getResultFactory();
@@ -112,7 +119,7 @@ class Index extends Action implements CsrfAwareActionInterface
                     $chimpRequest->setFiredAt($request['fired_at']);
                     $chimpRequest->setDataRequest($this->_helper->serialize($request['data']));
                     $chimpRequest->setProcessed(false);
-                    $chimpRequest->getResource()->save($chimpRequest);
+                    $this->mailChimpWebhookRequestResource->save($chimpRequest);
                     $result->setHttpResponseCode(200);
                 } catch(\Exception $e) {
                     $this->_helper->log($e->getMessage());

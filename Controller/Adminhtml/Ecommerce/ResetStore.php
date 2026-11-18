@@ -79,6 +79,7 @@ class ResetStore extends \Magento\Backend\App\Action
         try {
             $resultJson = $this->resultJsonFactory->create();
         } catch (ValidatorException $e) {
+            $resultJson = $this->resultFactory->create(\Magento\Framework\Controller\ResultFactory::TYPE_JSON);
             $valid = 0;
             $message = $e->getMessage();
         }

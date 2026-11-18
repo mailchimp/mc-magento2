@@ -104,6 +104,7 @@ class ConfigSnapshotTest extends TestCase
      * @dataProvider storeScopedProvider
      * @param string $path
      */
+    #[\PHPUnit\Framework\Attributes\DataProvider('storeScopedProvider')]
     public function testEverySettingIsReadAtTheStoreView($path)
     {
         $this->snapshot([MailChimpHelper::XML_PATH_WEBHOOK_ACTIVE => 1])->forStore(7);

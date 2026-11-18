@@ -101,9 +101,7 @@ class GenerateStatistics
             }
         }
         $data['jobs'] = $this->getJobs();
-        if (!empty($data)) {
-            $this->helper->saveNotification($data);
-        }
+        $this->helper->saveNotification($data);
     }
     private function getMagentoTotals($storeId)
     {

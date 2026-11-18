@@ -17,6 +17,11 @@ use Magento\Framework\Controller\ResultFactory;
 
 class Getresponse extends \Magento\Backend\App\Action
 {
+    /**
+     * @var \Ebizmarts\MailChimp\Model\ResourceModel\MailChimpErrors
+     */
+    protected $mailChimpErrorsResource;
+
     const MAX_RETRIES = 5;
     /**
      * @var ResultFactory
@@ -52,8 +57,10 @@ class Getresponse extends \Magento\Backend\App\Action
         \Ebizmarts\MailChimp\Model\MailChimpErrorsFactory $errorsFactory,
         \Ebizmarts\MailChimp\Helper\Data $helper,
         \Ebizmarts\MailChimp\Model\Api\Result $result,
-        \Magento\Framework\Filesystem\Driver\File $driver
+        \Magento\Framework\Filesystem\Driver\File $driver,
+        \Ebizmarts\MailChimp\Model\ResourceModel\MailChimpErrors $mailChimpErrorsResource
     ) {
+        $this->mailChimpErrorsResource = $mailChimpErrorsResource;
         parent::__construct($context);
         $this->_resultFactory       = $context->getResultFactory();
         $this->_errorsFactory       = $errorsFactory;
@@ -66,7 +73,7 @@ class Getresponse extends \Magento\Backend\App\Action
     {
         $errorId    = $this->getRequest()->getParam('id');
         $errors = $this->_errorsFactory->create();
-        $errors->getResource()->load($errors, $errorId);
+        $this->mailChimpErrorsResource->load($errors, $errorId);
         $batchId = $errors->getBatchId();
         $fileContent = [];
         $counter = 0;

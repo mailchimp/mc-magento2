@@ -62,8 +62,9 @@ class SubscriberInterestTest extends TestCase
             public function getSelect() { return $this->select; }
             public function getIterator(): \Traversable { return new \ArrayIterator([]); }
         };
-        $collectionFactory = $this->getMockBuilder(\stdClass::class)
-            ->addMethods(['create'])
+        $collectionFactory = $this->getMockBuilder(\Magento\Newsletter\Model\ResourceModel\Subscriber\CollectionFactory::class)
+            ->disableOriginalConstructor()
+            ->onlyMethods(['create'])
             ->getMock();
         $collectionFactory->method('create')->willReturn($collection);
 
@@ -74,7 +75,9 @@ class SubscriberInterestTest extends TestCase
 
         foreach (['_helper' => $helper, '_subscriberCollection' => $collectionFactory] as $name => $value) {
             $prop = new \ReflectionProperty(Subscriber::class, $name);
-            $prop->setAccessible(true);
+            if (PHP_VERSION_ID < 80100) {
+                $prop->setAccessible(true);
+            }
             $prop->setValue($api, $value);
         }
 
@@ -105,17 +108,17 @@ class SubscriberInterestTest extends TestCase
      */
     private function syncSubscriber(Subscriber $api, $storeId)
     {
-        // addMethods, not onlyMethods: these are magic getters on the Magento
-        // model rather than declared methods.
-        $subscriber = $this->getMockBuilder(\Magento\Newsletter\Model\Subscriber::class)
+        $subscriber = $this->getMockBuilder(\Ebizmarts\MailChimp\Test\Unit\Support\SubscriberStub::class)
             ->disableOriginalConstructor()
-            ->addMethods(['getSubscriberId', 'getStoreId'])
+            ->onlyMethods(['getSubscriberId', 'getStoreId'])
             ->getMock();
         $subscriber->method('getSubscriberId')->willReturn(7);
         $subscriber->method('getStoreId')->willReturn($storeId);
 
         $m = new \ReflectionMethod(Subscriber::class, '_getInterest');
-        $m->setAccessible(true);
+        if (PHP_VERSION_ID < 80100) {
+            $m->setAccessible(true);
+        }
         $m->invoke($api, $subscriber);
     }
 
@@ -170,7 +173,9 @@ class SubscriberInterestTest extends TestCase
         $this->assertSame([1, 2], $this->fetchedFor);
 
         $prop = new \ReflectionProperty(Subscriber::class, '_interest');
-        $prop->setAccessible(true);
+        if (PHP_VERSION_ID < 80100) {
+            $prop->setAccessible(true);
+        }
         $this->assertSame(['cat-b' => ['category' => []]], $prop->getValue($api));
     }
 

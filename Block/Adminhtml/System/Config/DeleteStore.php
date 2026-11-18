@@ -33,14 +33,9 @@ class DeleteStore extends \Magento\Config\Block\System\Config\Form\Field
     ) {
     
         $this->_helper = $helper;
-        parent::__construct($context, $data);
+        parent::__construct($context, ['template' => 'system/config/deletestore.phtml'] + $data);
     }
 
-    protected function _construct()
-    {
-        parent::_construct();
-        $this->setTemplate('system/config/deletestore.phtml');
-    }
 
     protected function _getElementHtml(\Magento\Framework\Data\Form\Element\AbstractElement $element)
     {

@@ -63,7 +63,9 @@ class MapFieldsTest extends TestCase
         // key the test asks for. Injecting it flat would send getCustomerAtts()
         // to the attribute collection, which is not doubled here.
         $property = new \ReflectionProperty(MailChimpHelper::class, 'customerAtt');
-        $property->setAccessible(true);
+        if (PHP_VERSION_ID < 80100) {
+            $property->setAccessible(true);
+        }
         $property->setValue($helper, ['default' => $attributes, '1' => $attributes, '2' => $attributes]);
 
         return $helper;
@@ -173,7 +175,9 @@ class MapFieldsTest extends TestCase
         $helper = $this->helper([1 => json_encode([10 => 'FNAME'])]);
 
         $property = new \ReflectionProperty(MailChimpHelper::class, 'customerAtt');
-        $property->setAccessible(true);
+        if (PHP_VERSION_ID < 80100) {
+            $property->setAccessible(true);
+        }
         $property->setValue($helper, [
             'default' => [10 => ['attCode' => 'whichever_view_was_first', 'isDate' => false, 'isAddress' => false, 'options' => []]],
             '1'       => [10 => ['attCode' => 'firstname', 'isDate' => false, 'isAddress' => false, 'options' => []]],

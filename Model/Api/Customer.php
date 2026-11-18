@@ -18,6 +18,11 @@ use Ebizmarts\MailChimp\Helper\Sync as SyncHelper;
 
 class Customer
 {
+    /**
+     * @var \Magento\Customer\Model\ResourceModel\Customer
+     */
+    protected $customerResource;
+
     const MAX           = 100;
     /**
      * @var \Ebizmarts\MailChimp\Helper\Data
@@ -75,8 +80,10 @@ class Customer
         \Magento\Sales\Model\ResourceModel\Order\CollectionFactory $orderCollection,
         \Magento\Directory\Model\CountryFactory $countryFactory,
         \Magento\Customer\Model\Address $address,
-        \Magento\Newsletter\Model\SubscriberFactory $subscriberFactory
+        \Magento\Newsletter\Model\SubscriberFactory $subscriberFactory,
+        \Magento\Customer\Model\ResourceModel\Customer $customerResource
     ) {
+        $this->customerResource = $customerResource;
         $this->_helper              = $helper;
         $this->_collection          = $collection;
         $this->_orderCollection     = $orderCollection;
@@ -111,7 +118,7 @@ class Customer
 
         foreach ($collection as $item) {
             $customer = $this->_customerFactory->create();
-            $customer->getResource()->load($customer, $item->getId());
+            $this->customerResource->load($customer, $item->getId());
             $data           = $this->_buildCustomerData($customer);
             $customerJson   = '';
 

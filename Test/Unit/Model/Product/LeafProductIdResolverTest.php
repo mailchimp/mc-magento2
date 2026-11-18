@@ -38,10 +38,9 @@ class LeafProductIdResolverTest extends TestCase
      */
     private function quoteItem(string $productType, int $productId, $simpleOption = null): QuoteItem
     {
-        $item = $this->getMockBuilder(QuoteItem::class)
+        $item = $this->getMockBuilder(\Ebizmarts\MailChimp\Test\Unit\Support\QuoteItemStub::class)
             ->disableOriginalConstructor()
-            ->onlyMethods(['getProductType', 'getOptionByCode'])
-            ->addMethods(['getProductId'])
+            ->onlyMethods(['getProductType', 'getOptionByCode', 'getProductId'])
             ->getMock();
         $item->method('getProductType')->willReturn($productType);
         $item->method('getProductId')->willReturn($productId);

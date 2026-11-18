@@ -12,6 +12,11 @@ use Ebizmarts\MailChimp\Helper\Sync as SyncHelper;
 class Customers extends Column
 {
     /**
+     * @var \Magento\Customer\Model\ResourceModel\Customer
+     */
+    private $customerResource;
+
+    /**
      * @var RequestInterface
      */
     protected $_requestInterface;
@@ -57,9 +62,11 @@ class Customers extends Column
         \Ebizmarts\MailChimp\Helper\Data $helper,
         SyncHelper $syncHelper,
         \Ebizmarts\MailChimp\Model\MailChimpErrorsFactory $mailChimpErrorsFactory,
+        \Magento\Customer\Model\ResourceModel\Customer $customerResource,
         array $components = [],
         array $data = [])
     {
+        $this->customerResource = $customerResource;
         $this->_requestInterface = $requestInterface;
         $this->_assetRepository = $assetRepository;
         $this->_customerFactory = $customerFactory;
@@ -77,7 +84,8 @@ class Customers extends Column
                 /**
                  * @var $customer \Magento\Customer\Model\Customer
                  */
-                $customer = $this->_customerFactory->create()->load($item['entity_id']);
+                $customer = $this->_customerFactory->create();
+                $this->customerResource->load($customer, $item['entity_id']);
                 $params = ['_secure' => $this->_requestInterface->isSecure()];
                 $alt = '';
                 $url = '';

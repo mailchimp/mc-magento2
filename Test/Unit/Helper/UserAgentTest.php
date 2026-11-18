@@ -41,11 +41,15 @@ class UserAgentTest extends TestCase
         $helper->method('getModuleVersion')->willReturn($moduleVersion);
 
         $prop = new \ReflectionProperty(MailChimpHelper::class, 'productMetadata');
-        $prop->setAccessible(true);
+        if (PHP_VERSION_ID < 80100) {
+            $prop->setAccessible(true);
+        }
         $prop->setValue($helper, $metadata);
 
         $method = new \ReflectionMethod(MailChimpHelper::class, 'userAgent');
-        $method->setAccessible(true);
+        if (PHP_VERSION_ID < 80100) {
+            $method->setAccessible(true);
+        }
 
         return $method->invoke($helper);
     }

@@ -97,7 +97,9 @@ class InterestGroupsTest extends TestCase
         $factory->method('create')->willReturn($group);
 
         $prop = new \ReflectionProperty(MailChimpHelper::class, '_interestGroupFactory');
-        $prop->setAccessible(true);
+        if (PHP_VERSION_ID < 80100) {
+            $prop->setAccessible(true);
+        }
         $prop->setValue($helper, $factory);
     }
 

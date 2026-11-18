@@ -15,6 +15,23 @@ namespace Ebizmarts\MailChimp\Model;
 
 class MailChimpSyncEcommerce extends \Magento\Framework\Model\AbstractModel
 {
+    /**
+     * @var \Ebizmarts\MailChimp\Model\ResourceModel\MailChimpSyncEcommerce
+     */
+    protected $mailChimpSyncEcommerceResource;
+
+    public function __construct(
+        \Magento\Framework\Model\Context $context,
+        \Magento\Framework\Registry $registry,
+        \Ebizmarts\MailChimp\Model\ResourceModel\MailChimpSyncEcommerce $mailChimpSyncEcommerceResource,
+        ?\Magento\Framework\Model\ResourceModel\AbstractResource $resource = null,
+        ?\Magento\Framework\Data\Collection\AbstractDb $resourceCollection = null,
+        array $data = []
+    ) {
+        $this->mailChimpSyncEcommerceResource = $mailChimpSyncEcommerceResource;
+        parent::__construct($context, $registry, $resource ?? $mailChimpSyncEcommerceResource, $resourceCollection, $data);
+    }
+
     protected function _construct()
     {
         parent::_construct();
@@ -23,44 +40,44 @@ class MailChimpSyncEcommerce extends \Magento\Framework\Model\AbstractModel
 
     public function getByStoreIdType($storeId, $id, $type)
     {
-        $this->getResource()->getByStoreIdType($this, $storeId, $id, $type);
+        $this->mailChimpSyncEcommerceResource->getByStoreIdType($this, $storeId, $id, $type);
         return $this;
     }
     public function markAllAsDeleted($id, $type, $relatedDeletedId)
     {
-        $this->getResource()->markAllAsDeleted($this, $id, $type, $relatedDeletedId);
+        $this->mailChimpSyncEcommerceResource->markAllAsDeleted($this, $id, $type, $relatedDeletedId);
         return $this;
     }
     public function markEcommorceAsNotDeleted($id, $type)
     {
-        $this->getResource()->markEcommorceAsNotDeleted($this, $id, $type);
+        $this->mailChimpSyncEcommerceResource->markEcommorceAsNotDeleted($this, $id, $type);
         return $this;
     }
     public function markAllAsModified($id, $type)
     {
-        $this->getResource()->markAllAsModified($this, $id, $type);
+        $this->mailChimpSyncEcommerceResource->markAllAsModified($this, $id, $type);
         return $this;
     }
     public function deleteAllByIdType($id, $type, $mailchimpStoreId)
     {
-        $this->getResource()->deleteAllByIdType($this, $id, $type, $mailchimpStoreId);
+        $this->mailChimpSyncEcommerceResource->deleteAllByIdType($this, $id, $type, $mailchimpStoreId);
         return $this;
     }
     public function markAllAsModifiedByBatchId($batchId)
     {
-        $this->getResource()->markAllAsModifiedByBatchId($this, $batchId);
+        $this->mailChimpSyncEcommerceResource->markAllAsModifiedByBatchId($this, $batchId);
         return $this;
     }
     public function deleteAllByBatchid($batchId)
     {
-        $this->getResource()->deleteAllByBatchid($this, $batchId);
+        $this->mailChimpSyncEcommerceResource->deleteAllByBatchid($this, $batchId);
     }
     public function deleteByTypeAndId($type, $id, $mailchimpStoreId)
     {
-        $this->getResource()->deleteByTypeAndId($this, $type, $id, $mailchimpStoreId);
+        $this->mailChimpSyncEcommerceResource->deleteByTypeAndId($this, $type, $id, $mailchimpStoreId);
     }
     public function markAllAsModifiedByIds($mailchimpStoreId, $ids, $type)
     {
-        $this->getResource()->markAllAsModifiedByIds($this, $mailchimpStoreId, $ids, $type);
+        $this->mailChimpSyncEcommerceResource->markAllAsModifiedByIds($this, $mailchimpStoreId, $ids, $type);
     }
 }

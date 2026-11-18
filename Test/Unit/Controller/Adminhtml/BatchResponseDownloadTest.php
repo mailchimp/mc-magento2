@@ -44,6 +44,7 @@ class BatchResponseDownloadTest extends TestCase
      * @dataProvider controllerProvider
      * @param string $path
      */
+    #[\PHPUnit\Framework\Attributes\DataProvider('controllerProvider')]
     public function testNothingButAnArrayReachesTheLoop($path)
     {
         $source = file_get_contents($path);
@@ -83,6 +84,7 @@ class BatchResponseDownloadTest extends TestCase
      * @dataProvider controllerProvider
      * @param string $path
      */
+    #[\PHPUnit\Framework\Attributes\DataProvider('controllerProvider')]
     public function testEachGuardLeavesTheLoop($path)
     {
         $source = file_get_contents($path);
@@ -110,6 +112,7 @@ class BatchResponseDownloadTest extends TestCase
      * @dataProvider controllerProvider
      * @param string $path
      */
+    #[\PHPUnit\Framework\Attributes\DataProvider('controllerProvider')]
     public function testTheTwoStatesAreNotCollapsedIntoOneMessage($path)
     {
         $source = file_get_contents($path);

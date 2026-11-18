@@ -139,6 +139,7 @@ class ConnectedSiteProvisionerTest extends TestCase
     /**
      * @dataProvider mailchimpFailureProvider
      */
+    #[\PHPUnit\Framework\Attributes\DataProvider('mailchimpFailureProvider')]
     public function testAFailedEnablePixelOnConnectionSavesNothing(\Throwable $error): void
     {
         $writer = $this->createMock(PixelStateWriter::class);
@@ -181,6 +182,7 @@ class ConnectedSiteProvisionerTest extends TestCase
      *
      * @dataProvider mailchimpFailureProvider
      */
+    #[\PHPUnit\Framework\Attributes\DataProvider('mailchimpFailureProvider')]
     public function testAFailedStoreLookupOnConnectionIsLoggedAsAFailedRequest(\Throwable $error): void
     {
         $writer = $this->createMock(PixelStateWriter::class);

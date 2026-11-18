@@ -22,6 +22,11 @@ use Ebizmarts\MailChimp\Model\MailChimpStoresFactory;
 class Stores extends Action
 {
     /**
+     * @var \Ebizmarts\MailChimp\Model\ResourceModel\MailChimpStores
+     */
+    protected $mailChimpStoresResource;
+
+    /**
      * @var Registry
      */
     protected $_coreRegistry;
@@ -51,8 +56,10 @@ class Stores extends Action
         Registry $registry,
         PageFactory $resultPageFactory,
         MailChimpStoresFactory $storesFactory,
-        \Ebizmarts\MailChimp\Helper\Data $helper
+        \Ebizmarts\MailChimp\Helper\Data $helper,
+        \Ebizmarts\MailChimp\Model\ResourceModel\MailChimpStores $mailChimpStoresResource
     ) {
+        $this->mailChimpStoresResource = $mailChimpStoresResource;
 
         parent::__construct($context);
         $this->_coreRegistry            = $registry;

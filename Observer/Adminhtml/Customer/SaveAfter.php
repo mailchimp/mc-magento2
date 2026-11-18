@@ -17,6 +17,11 @@ use Ebizmarts\MailChimp\Helper\Sync as SyncHelper;
 class SaveAfter implements \Magento\Framework\Event\ObserverInterface
 {
     /**
+     * @var \Ebizmarts\MailChimp\Model\ResourceModel\MailChimpInterestGroup
+     */
+    protected $mailChimpInterestGroupResource;
+
+    /**
      * @var \Ebizmarts\MailChimp\Helper\Data
      */
     protected $helper;
@@ -43,8 +48,10 @@ class SaveAfter implements \Magento\Framework\Event\ObserverInterface
         \Ebizmarts\MailChimp\Helper\Data $helper,
         \Magento\Newsletter\Model\SubscriberFactory $subscriberFactory,
         \Ebizmarts\MailChimp\Model\MailChimpInterestGroupFactory $interestGroupFactory,
-        SyncHelper $syncHelper
+        SyncHelper $syncHelper,
+        \Ebizmarts\MailChimp\Model\ResourceModel\MailChimpInterestGroup $mailChimpInterestGroupResource
     ) {
+        $this->mailChimpInterestGroupResource = $mailChimpInterestGroupResource;
         $this->helper               = $helper;
         $this->subscriberFactory    = $subscriberFactory;
         $this->interestGroupFactory = $interestGroupFactory;
@@ -81,7 +88,7 @@ class SaveAfter implements \Magento\Framework\Event\ObserverInterface
                     $interestGroup->setSubscriberId($subscriber->getSubscriberId());
                     $interestGroup->setStoreId($subscriber->getStoreId());
                     $interestGroup->setUpdatedAt($this->helper->getGmtDate());
-                    $interestGroup->getResource()->save($interestGroup);
+                    $this->mailChimpInterestGroupResource->save($interestGroup);
                     $this->syncHelper->markRegisterAsModified(
                         $subscriber->getId(),
                         \Ebizmarts\MailChimp\Helper\Data::IS_SUBSCRIBER
@@ -94,7 +101,7 @@ class SaveAfter implements \Magento\Framework\Event\ObserverInterface
                     $interestGroup->setSubscriberId($subscriber->getSubscriberId());
                     $interestGroup->setStoreId($subscriber->getStoreId());
                     $interestGroup->setUpdatedAt($this->helper->getGmtDate());
-                    $interestGroup->getResource()->save($interestGroup);
+                    $this->mailChimpInterestGroupResource->save($interestGroup);
                 }
             } catch (\Exception $e) {
                 $this->helper->log($e->getMessage());

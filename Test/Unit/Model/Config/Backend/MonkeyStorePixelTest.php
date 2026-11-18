@@ -154,7 +154,9 @@ class MonkeyStorePixelTest extends TestCase
     private function inject($object, $class, $property, $value): void
     {
         $p = new \ReflectionProperty($class, $property);
-        $p->setAccessible(true);
+        if (PHP_VERSION_ID < 80100) {
+            $p->setAccessible(true);
+        }
         $p->setValue($object, $value);
     }
 

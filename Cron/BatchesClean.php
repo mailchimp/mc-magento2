@@ -15,6 +15,16 @@ namespace Ebizmarts\MailChimp\Cron;
 class BatchesClean
 {
     /**
+     * @var \Ebizmarts\MailChimp\Model\ResourceModel\MailChimpSyncBatches
+     */
+    protected $mailChimpSyncBatchesResource;
+
+    /**
+     * @var \Ebizmarts\MailChimp\Model\ResourceModel\MailChimpErrors
+     */
+    protected $mailChimpErrorsResource;
+
+    /**
      * @var \Ebizmarts\MailChimp\Helper\Data
      */
     protected $helper;
@@ -36,8 +46,12 @@ class BatchesClean
     public function __construct(
         \Ebizmarts\MailChimp\Helper\Data $helper,
         \Ebizmarts\MailChimp\Model\MailChimpSyncBatches $mailChimpSyncBatches,
-        \Ebizmarts\MailChimp\Model\MailChimpErrors $chimpErrors
+        \Ebizmarts\MailChimp\Model\MailChimpErrors $chimpErrors,
+        \Ebizmarts\MailChimp\Model\ResourceModel\MailChimpSyncBatches $mailChimpSyncBatchesResource,
+        \Ebizmarts\MailChimp\Model\ResourceModel\MailChimpErrors $mailChimpErrorsResource
     ) {
+        $this->mailChimpSyncBatchesResource = $mailChimpSyncBatchesResource;
+        $this->mailChimpErrorsResource = $mailChimpErrorsResource;
         $this->helper               = $helper;
         $this->mailChimpSyncBatches = $mailChimpSyncBatches;
         $this->mailChimpErrors      = $chimpErrors;
@@ -45,8 +59,8 @@ class BatchesClean
     public function execute()
     {
         try {
-            $connection = $this->mailChimpSyncBatches->getResource()->getConnection();
-            $tableName = $this->mailChimpSyncBatches->getResource()->getMainTable();
+            $connection = $this->mailChimpSyncBatchesResource->getConnection();
+            $tableName = $this->mailChimpSyncBatchesResource->getMainTable();
             $quoteInto = $connection->quoteInto(
                 'status IN("completed","canceled") and ( date_add(modified_date, interval ? month) < now() OR modified_date IS NULL)',
                 1
@@ -57,13 +71,13 @@ class BatchesClean
         }
 
         try {
-            $connection = $this->mailChimpSyncBatches->getResource()->getConnection();
-            $tableName = $this->mailChimpSyncBatches->getResource()->getMainTable();
+            $connection = $this->mailChimpSyncBatchesResource->getConnection();
+            $tableName = $this->mailChimpSyncBatchesResource->getMainTable();
             $select = $connection->select();
             $select->from($tableName, ['batch_id']);
             $existingBatchIds = $connection->fetchCol($select);
-            $connection = $this->mailChimpErrors->getResource()->getConnection();
-            $tableName = $this->mailChimpErrors->getResource()->getMainTable();
+            $connection = $this->mailChimpErrorsResource->getConnection();
+            $tableName = $this->mailChimpErrorsResource->getMainTable();
             if ($existingBatchIds) {
                 $connection->delete($tableName, [
                     'batch_id NOT IN (?)' => $existingBatchIds,
