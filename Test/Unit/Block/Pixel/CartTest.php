@@ -81,7 +81,7 @@ class CartTest extends TestCase
         // getId & getAllVisibleItems are declared on Quote; getGrandTotal is magic.
         $quote = $this->getMockBuilder(\Ebizmarts\MailChimp\Test\Unit\Support\QuoteStub::class)
             ->disableOriginalConstructor()
-            ->onlyMethods(['getId', 'getAllVisibleItems', 'getGrandTotal'])
+            ->onlyMethods(['getId', 'getAllVisibleItems', 'getSubtotal', 'getGrandTotal', 'getCouponCode'])
             ->getMock();
         $quote->method('getId')->willReturn($quoteId);
         $quote->method('getGrandTotal')->willReturn($grandTotal);
