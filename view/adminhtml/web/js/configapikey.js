@@ -38,8 +38,7 @@ define(
                 "registerUrl": "",
                 "scope": "",
                 "scopeId": "",
-                "registerToken": "",
-                "switchurl": ""
+                "registerToken": ""
             },
 
             _init: function () {
@@ -88,13 +87,6 @@ define(
                     if (ecommerceEnabled == 0 && abandonedCartEnabled == 1) {
                         self._changeAbandonedCart();
                     }
-                });
-                $('#mailchimp_general_enable_support').change(function () {
-                    var supportenabled = $('#mailchimp_general_enable_support').find(':selected').val();
-                    self._switchsupport(supportenabled);
-                });
-                $('#mailchimp_support').click(function () {
-                    self._showSupport();
                 });
                 var ecommerceEnabled = $('#mailchimp_ecommerce_active').find(':selected').val();
                 var abandonedCartEnabled = $('#mailchimp_abandonedcart_active').find(':selected').val();
@@ -328,9 +320,6 @@ define(
                     }
                 });
             },
-            _showSupport: function () {
-                alert({content: "By leveraging remote diagnostics for the Mailchimp for Magento plugin, our technical team can pinpoint and resolve syncing issues while ensuring that no sensitive data is involved in the troubleshooting process."});
-            },
             _showRegistationDetails: function () {
                 var registerUrl = this.options.registerUrl;
                 var detailsUrl = this.options.detailsUrl;
@@ -398,24 +387,6 @@ define(
                         );
                     }
                 )
-            },
-            _switchsupport: function (supportenabled) {
-                var scope = this.options.scope;
-                var scopeId = this.options.scopeId;
-                var switchurl = this.options.switchurl;
-
-                $.ajax({
-                    url: switchurl,
-                    data: {'form_key': window.FORM_KEY, 'scope': scope, 'scopeId': scopeId,'onoff': supportenabled},
-                    dataType: 'json',
-                    type: 'POST',
-                    showLoader: true
-                }).done(function (data) {
-                    if (data.error == 1) {
-                        alert({content: data.message});
-                        $('#mailchimp_general_enable_support option[value="0"]').prop('selected', 'selected');
-                    }
-                })
             },
             _loadDetails: function () {
                 var registerUrl = this.options.registerUrl;
