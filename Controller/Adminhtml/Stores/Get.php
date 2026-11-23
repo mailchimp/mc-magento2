@@ -59,11 +59,8 @@ class Get extends Action
                     if ($store['list_id']=='') {
                         continue;
                     }
-                    // `total_contacts` is returned only when
-                    // include_total_contacts is set, so a caller that needs it
-                    // has to ask on every read. Asking only on the statistics
-                    // cron leaves every other single-audience read returning a
-                    // response without it.
+                    // `total_contacts` is returned only when include_total_contacts
+                    // is set, so a caller that needs it has to ask on every read.
                     $list = $api->lists->getLists(
                         $store['list_id'],
                         null,

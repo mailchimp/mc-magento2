@@ -16,10 +16,10 @@ use Ebizmarts\MailChimp\Helper\Data as MailChimpHelper;
 /**
  * How this store view is configured, as flat scalars.
  *
- * The one artefact worth keeping from the support-log lane. For "this merchant
- * says X is not syncing" it answers more than anything else we hold, and the
- * lane that carries it today also carries request and response bodies -- which
- * means shopper emails and addresses -- so it cannot simply be left where it is.
+ * The one artefact worth keeping from the retired support-log upload. For "this
+ * merchant says X is not syncing" it answers more than anything else we hold.
+ * That upload also carried request and response bodies -- which means shopper
+ * emails and addresses -- so the snapshot travels here on its own instead.
  *
  * Flat, one key per setting, because the receiving whitelist takes a type and a
  * cap per key and has no path into a nested object. Nesting would arrive, be
