@@ -96,7 +96,6 @@ class ResetLocalErrors extends \Magento\Backend\App\Action
             'valid' => (int)$valid,
             'message' => $message,
         ];
-        $this->helper->buttonPressed("ResetLocalErrors",$ret);
         return $resultJson->setData($ret);
     }
     protected function _isAllowed()

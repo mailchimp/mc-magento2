@@ -16,7 +16,8 @@ class Uninstall implements UninstallInterface
             'mailchimp_sync_ecommerce',
             'mailchimp_stores',
             'mailchimp_webhook_request',
-            'mailchimp_interest_group'
+            'mailchimp_interest_group',
+            'mailchimp_notification'
         ];
         $tablesFields = [
             'sales_order' => [
