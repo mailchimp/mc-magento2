@@ -18,6 +18,7 @@ use Ebizmarts\MailChimp\Model\Edge\ConfigSnapshot;
 use Ebizmarts\MailChimp\Model\Edge\LivenessSignals;
 use Ebizmarts\MailChimp\Model\Edge\NotificationDelivery;
 use Ebizmarts\MailChimp\Model\Edge\Response;
+use Ebizmarts\MailChimp\Model\ServiceStatus;
 use Magento\Framework\App\Config\ScopeConfigInterface;
 use Magento\Framework\App\ProductMetadataInterface;
 use Magento\Framework\Notification\NotifierInterface;
@@ -115,7 +116,8 @@ class BeaconTest extends TestCase
             $config,
             $this->createMock(NotificationDelivery::class),
             $metadata,
-            $this->scopeConfig
+            $this->scopeConfig,
+            $this->createMock(ServiceStatus::class)
         );
     }
 
@@ -272,7 +274,8 @@ class BeaconTest extends TestCase
             $this->createMock(ConfigSnapshot::class),
             $this->createMock(NotificationDelivery::class),
             $metadata,
-            $this->createMock(ScopeConfigInterface::class)
+            $this->createMock(ScopeConfigInterface::class),
+            $this->createMock(ServiceStatus::class)
         ))->execute();
     }
 
@@ -475,7 +478,8 @@ class BeaconTest extends TestCase
             $config,
             new NotificationDelivery($client, $helper, $this->createMock(NotifierInterface::class)),
             $metadata,
-            $this->createMock(ScopeConfigInterface::class)
+            $this->createMock(ScopeConfigInterface::class),
+            $this->createMock(ServiceStatus::class)
         );
 
         $beacon->execute();
@@ -555,7 +559,8 @@ class BeaconTest extends TestCase
             $config,
             $this->createMock(NotificationDelivery::class),
             $metadata,
-            $scopeConfig
+            $scopeConfig,
+            $this->createMock(ServiceStatus::class)
         ))->execute();
 
         $this->assertCount(1, $slotWrites, 'the cron slot was written once per store view instead of once');
@@ -637,7 +642,8 @@ class BeaconTest extends TestCase
             $config,
             $this->createMock(NotificationDelivery::class),
             $metadata,
-            $this->createMock(ScopeConfigInterface::class)
+            $this->createMock(ScopeConfigInterface::class),
+            $this->createMock(ServiceStatus::class)
         );
     }
 
@@ -761,7 +767,8 @@ class BeaconTest extends TestCase
             $config,
             $this->createMock(NotificationDelivery::class),
             $metadata,
-            $this->createMock(ScopeConfigInterface::class)
+            $this->createMock(ScopeConfigInterface::class),
+            $this->createMock(ServiceStatus::class)
         ))->execute();
     }
 
@@ -849,7 +856,8 @@ class BeaconTest extends TestCase
                 $config,
                 $this->createMock(NotificationDelivery::class),
                 $metadata,
-                $this->createMock(ScopeConfigInterface::class)
+                $this->createMock(ScopeConfigInterface::class),
+                $this->createMock(ServiceStatus::class)
             ),
             $client,
         ];

@@ -67,6 +67,10 @@ class Ecommerce
      * @var \Magento\Framework\Filesystem\DirectoryList
      */
     private $_dir;
+    /**
+     * @var \Ebizmarts\MailChimp\Model\ServiceStatus
+     */
+    private $serviceStatus;
 
     /**
      * Ecommerce constructor.
@@ -83,6 +87,7 @@ class Ecommerce
      * @param \Ebizmarts\MailChimp\Model\MailChimpSyncBatchesFactory $mailChimpSyncBatchesFactory
      * @param \Ebizmarts\MailChimp\Model\MailChimpSyncEcommerce $chimpSyncEcommerce
      * @param \Magento\Framework\Filesystem\DirectoryList $dir
+     * @param \Ebizmarts\MailChimp\Model\ServiceStatus|null $serviceStatus
      */
     public function __construct(
         \Magento\Store\Model\StoreManager $storeManager,
@@ -97,7 +102,8 @@ class Ecommerce
         \Ebizmarts\MailChimp\Model\Api\PromoRules $apiPromoRules,
         \Ebizmarts\MailChimp\Model\MailChimpSyncBatchesFactory $mailChimpSyncBatchesFactory,
         \Ebizmarts\MailChimp\Model\MailChimpSyncEcommerce $chimpSyncEcommerce,
-        \Magento\Framework\Filesystem\DirectoryList $dir
+        \Magento\Framework\Filesystem\DirectoryList $dir,
+        ?\Ebizmarts\MailChimp\Model\ServiceStatus $serviceStatus = null
     ) {
 
         $this->_storeManager    = $storeManager;
@@ -113,6 +119,8 @@ class Ecommerce
         $this->_apiPromoCodes   = $apiPromoCodes;
         $this->_apiPromoRules   = $apiPromoRules;
         $this->_dir             = $dir;
+        $this->serviceStatus    = $serviceStatus ?: \Magento\Framework\App\ObjectManager::getInstance()
+            ->get(\Ebizmarts\MailChimp\Model\ServiceStatus::class);
     }
 
     public function execute()
@@ -127,6 +135,19 @@ class Ecommerce
 
         foreach ($this->_storeManager->getStores() as $storeId => $val) {
             if ($this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_PATH_ACTIVE, $storeId)) {
+                // Paused by the service: every call would raise before leaving,
+                // so skip the store quietly instead of logging the same error and
+                // "not available" on every run. The admin notice says why.
+                if ($this->serviceStatus->isPaused($storeId)) {
+                    // Deliberate, and makes no call: getApi() hands this key to
+                    // the library, and the library's hourly status check runs
+                    // only for keys it was handed in the process. Without it a
+                    // paused store with no edge token would never ask, so it
+                    // would never hear the service resume it, nor report that
+                    // it is paused.
+                    $this->_helper->getApi($storeId);
+                    continue;
+                }
                 if (!$this->_ping($storeId)) {
                     $this->_helper->log("MailChimp is not available for store $storeId, skipping");
                     continue;

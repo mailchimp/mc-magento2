@@ -12,6 +12,7 @@
 namespace Ebizmarts\MailChimp\Model\Edge;
 
 use Ebizmarts\MailChimp\Helper\Data as MailChimpHelper;
+use Ebizmarts\MailChimp\Model\ServiceStatus;
 use Magento\Framework\App\Config\ScopeConfigInterface;
 use Magento\Framework\App\ProductMetadataInterface;
 use Magento\Store\Model\ScopeInterface;
@@ -73,6 +74,11 @@ class Beacon
     private $scopeConfig;
 
     /**
+     * @var ServiceStatus
+     */
+    private $serviceStatus;
+
+    /**
      * @var bool the cron slot has been settled for this process
      */
     private $slotClaimed = false;
@@ -90,6 +96,7 @@ class Beacon
      * @param NotificationDelivery     $notifications
      * @param ProductMetadataInterface $productMetadata
      * @param ScopeConfigInterface     $scopeConfig
+     * @param ServiceStatus|null       $serviceStatus
      */
     public function __construct(
         StoreManagerInterface $storeManager,
@@ -99,7 +106,8 @@ class Beacon
         ConfigSnapshot $config,
         NotificationDelivery $notifications,
         ProductMetadataInterface $productMetadata,
-        ScopeConfigInterface $scopeConfig
+        ScopeConfigInterface $scopeConfig,
+        ?ServiceStatus $serviceStatus = null
     ) {
         $this->storeManager    = $storeManager;
         $this->helper          = $helper;
@@ -109,6 +117,8 @@ class Beacon
         $this->notifications   = $notifications;
         $this->productMetadata = $productMetadata;
         $this->scopeConfig     = $scopeConfig;
+        $this->serviceStatus   = $serviceStatus
+            ?: \Magento\Framework\App\ObjectManager::getInstance()->get(ServiceStatus::class);
     }
 
     /**
@@ -166,6 +176,12 @@ class Beacon
         $token = (string)$this->helper->getConfigValue(MailChimpHelper::XML_EDGE_TOKEN, $storeId);
 
         if ($token === '') {
+            if ($this->serviceStatus->isPaused($storeId)) {
+                // Registering needs the account, and a paused store cannot ask
+                // Mailchimp for it. The library's own status check still
+                // reaches the service (see Cron\Ecommerce).
+                return;
+            }
             $token = $this->register($storeId, $storeUrl);
             if ($token === null) {
                 // Nothing written. The remote upsert is idempotent, so the next
@@ -238,6 +254,7 @@ class Beacon
         $body = array_merge(
             ['store_url' => $storeUrl],
             $this->versionBlock(),
+            $this->statusIdentity($storeId),
             $this->signals->forStore($storeId),
             $this->config->forStore($storeId)
         );
@@ -251,7 +268,7 @@ class Beacon
             $body['received'] = $pendingAcks;
         }
 
-        if ($this->shouldSendAccountBlock($storeId, $storeUrl)) {
+        if ($this->shouldSendAccountBlock($storeId, $storeUrl) && !$this->serviceStatus->isPaused($storeId)) {
             // Deliberately outside any try that wraps the ping itself: a
             // Mailchimp outage must not make every installation look dead.
             $account = $this->accountBlock($storeId);
@@ -296,10 +313,93 @@ class Beacon
             $this->configDirty = true;
         }
 
+        $this->applyControl($storeId, $response->getData());
+
         // The acks just sent are gone as far as the service is concerned, so
         // nothing is still pending. Passed in rather than re-read: see
         // NotificationDelivery::rememberForAck.
         $this->notifications->handle($storeId, $token, $response->getData(), []);
+    }
+
+    /**
+     * What the service needs to return a service status for this store's API
+     * key, and the status the library has stored for it now.
+     *
+     * The ping's own identity is a hash of account and store, which the service
+     * cannot map to the library's installation id (a hash of the API key), so
+     * a ping that does not send it gets no status. Sent only when the library
+     * can act on one.
+     *
+     * @param  int $storeId
+     * @return array install_id, lib_version, dc, and svc_state, svc_ref,
+     *               svc_code, svc_since when the library can honour a status
+     */
+    private function statusIdentity($storeId)
+    {
+        if (!method_exists(\Mailchimp::class, 'applyControl')
+            || !method_exists(\Mailchimp_Telemetry::class, 'installId')
+        ) {
+            return [];
+        }
+
+        try {
+            $apiKey = (string)$this->helper->getApiKey($storeId);
+        } catch (\Throwable $e) {
+            return [];
+        }
+        if ($apiKey === '') {
+            return [];
+        }
+
+        $identity = ['install_id' => \Mailchimp_Telemetry::installId($apiKey)];
+
+        if (method_exists(\Mailchimp_Telemetry::class, 'libVersion')) {
+            $libVersion = (string)\Mailchimp_Telemetry::libVersion();
+            if ($libVersion !== '') {
+                $identity['lib_version'] = $libVersion;
+            }
+        }
+
+        $dash = strrpos($apiKey, '-');
+        if ($dash !== false && method_exists(\Mailchimp_Telemetry::class, 'validDc')) {
+            $dc = \Mailchimp_Telemetry::validDc(substr($apiKey, $dash + 1));
+            if ($dc !== null) {
+                $identity['dc'] = $dc;
+            }
+        }
+
+        $report = $this->serviceStatus->report($storeId);
+
+        return is_array($report) ? array_merge($identity, $report) : $identity;
+    }
+
+    /**
+     * Hand a service status from the ping reply to the library, which
+     * verifies it. The module never verifies or stores it itself.
+     *
+     * @param  int   $storeId
+     * @param  array $data the ping reply
+     * @return void
+     */
+    private function applyControl($storeId, array $data)
+    {
+        if (!isset($data['control']) || !is_array($data['control'])) {
+            return;
+        }
+
+        try {
+            $api = $this->helper->getApi($storeId);
+            if (method_exists($api, 'applyControl')) {
+                $api->applyControl($data['control']);
+            }
+        } catch (\Throwable $e) {
+            $this->helper->log(
+                'Could not hand the service status to the library for store ' . $storeId . ': ' . $e->getMessage()
+            );
+        }
+        // Later store views with the same key in this run must see what was
+        // just applied, not what was read before it.
+        $this->serviceStatus->reset();
     }
 
     /**

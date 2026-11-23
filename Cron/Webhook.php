@@ -77,6 +77,11 @@ class Webhook
      * @param \Magento\Store\Model\StoreManager $storeManager
      * @param \Magento\Customer\Model\CustomerFactory $customer
      */
+    /**
+     * @var \Ebizmarts\MailChimp\Model\ServiceStatus|null
+     */
+    private $serviceStatus = null;
+
     public function __construct(
         \Ebizmarts\MailChimp\Helper\Data $helper,
         \Magento\Newsletter\Model\SubscriberFactory $subscriberFactory,
@@ -257,7 +262,7 @@ class Webhook
                 $subscriber->setSubscriberEmail($email);
 
                 $stores = $this->_helper->getMagentoStoreIdsByListId($listId);
-                if (count($stores)) {
+                if (count($stores) && !$this->isPaused($stores[0])) {
                     $subscriber->setStoreId($stores[0]);
                     try {
                         $api = $this->_helper->getApi($stores[0]);
@@ -390,6 +395,9 @@ class Webhook
             if ($this->_helper->isApiKeyFailed($storeId)) {
                 continue;
             }
+            if ($this->isPaused($storeId)) {
+                continue;
+            }
             $listId =$this->_helper->getDefaultList($storeId);
             if (!$listId||$listId==-1) {
                 $this->_helper->log("ListId [$listId] is invalid for Store [$storeId]");
@@ -431,5 +439,28 @@ class Webhook
             }
         }
         return $rc;
+    }
+
+    /**
+     * Whether the QoS service has paused this store view's Mailchimp calls.
+     * While it has, the call would only raise before leaving and log a line,
+     * so it is skipped. Resolved on first use, and never paused when it cannot
+     * be resolved, which is the behaviour without a service status.
+     *
+     * @param  int|string|null $storeId
+     * @return bool
+     */
+    private function isPaused($storeId)
+    {
+        try {
+            if ($this->serviceStatus === null) {
+                $this->serviceStatus = \Magento\Framework\App\ObjectManager::getInstance()
+                    ->get(\Ebizmarts\MailChimp\Model\ServiceStatus::class);
+            }
+
+            return $this->serviceStatus->isPaused($storeId);
+        } catch (\Throwable $e) {
+            return false;
+        }
     }
 }
