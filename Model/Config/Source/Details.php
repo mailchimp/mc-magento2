@@ -131,7 +131,7 @@ class Details implements \Magento\Framework\Option\ArrayInterface
 
                         $ret = $this->httpClient->post($registerDataJson);
                         $ret = json_decode($ret,true);
-                        if ( !$ret['error']) {
+                        if (is_array($ret) && empty($ret['error']) && !empty($ret['token'])) {
                             $error = false;
                             $token = $ret['token'];
                             $this->_helper->saveConfigValue(MailChimpHelper::XML_STATISTICS_TOKEN, $token,  $storeId, $scope);
