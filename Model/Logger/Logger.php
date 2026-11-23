@@ -26,14 +26,9 @@ class Logger extends \Monolog\Logger
             if ($message===null) {
                 $message = "NULL";
             }
-            if (is_array($message)) {
-                $message = json_encode($message, JSON_PRETTY_PRINT);
-            }
-            if (is_object($message)) {
-                $message = json_encode($message, JSON_PRETTY_PRINT);
-            }
-            if (!empty(json_last_error())) {
-                $message = (string)json_last_error();
+            if (is_array($message) || is_object($message)) {
+                $encoded = json_encode($message, JSON_PRETTY_PRINT);
+                $message = $encoded === false ? json_last_error_msg() : $encoded;
             }
             $message = (string)$message;
         } catch (\Exception $e) {
