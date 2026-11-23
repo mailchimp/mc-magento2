@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Ebizmarts_MailChimp Magento Component
+ *
+ * @category    Ebizmarts
+ * @package     Ebizmarts_MailChimp
+ * @author      Ebizmarts Team <info@ebizmarts.com>
+ * @copyright   Ebizmarts (http://ebizmarts.com)
+ * @license     http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ */
+-->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
+    <type name="Magento\Framework\Notification\MessageList">
+        <arguments>
+            <argument name="messages" xsi:type="array">
+                <item name="ebizmarts_mailchimp_sync_hold" xsi:type="string">Ebizmarts\MailChimp\Model\System\Message\SyncHold</item>
+            </argument>
+        </arguments>
+    </type>
+</config>

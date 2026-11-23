@@ -69,6 +69,10 @@ class Ecommerce
      * @var \Magento\Framework\Filesystem\DirectoryList
      */
     private $_dir;
+    /**
+     * @var \Ebizmarts\MailChimp\Model\SyncHold
+     */
+    private $syncHold;
 
     /**
      * Ecommerce constructor.
@@ -85,6 +89,7 @@ class Ecommerce
      * @param \Ebizmarts\MailChimp\Model\MailChimpSyncBatchesFactory $mailChimpSyncBatchesFactory
      * @param \Ebizmarts\MailChimp\Model\MailChimpSyncEcommerce $chimpSyncEcommerce
      * @param \Magento\Framework\Filesystem\DirectoryList $dir
+     * @param \Ebizmarts\MailChimp\Model\SyncHold|null $syncHold
      */
     public function __construct(
         \Magento\Store\Model\StoreManager $storeManager,
@@ -99,7 +104,8 @@ class Ecommerce
         \Ebizmarts\MailChimp\Model\Api\PromoRules $apiPromoRules,
         \Ebizmarts\MailChimp\Model\MailChimpSyncBatchesFactory $mailChimpSyncBatchesFactory,
         \Ebizmarts\MailChimp\Model\MailChimpSyncEcommerce $chimpSyncEcommerce,
-        \Magento\Framework\Filesystem\DirectoryList $dir
+        \Magento\Framework\Filesystem\DirectoryList $dir,
+        \Ebizmarts\MailChimp\Model\SyncHold $syncHold = null
     ) {
 
         $this->_storeManager    = $storeManager;
@@ -115,6 +121,8 @@ class Ecommerce
         $this->_apiPromoCodes   = $apiPromoCodes;
         $this->_apiPromoRules   = $apiPromoRules;
         $this->_dir             = $dir;
+        $this->syncHold         = $syncHold ?: \Magento\Framework\App\ObjectManager::getInstance()
+            ->get(\Ebizmarts\MailChimp\Model\SyncHold::class);
     }
 
     public function execute()
@@ -129,6 +137,12 @@ class Ecommerce
 
         foreach ($this->_storeManager->getStores() as $storeId => $val) {
             if ($this->_helper->getConfigValue(\Ebizmarts\MailChimp\Helper\Data::XML_PATH_ACTIVE, $storeId)) {
+                // Paused by ebizmarts: every call would raise before leaving, so
+                // skip the store quietly instead of logging the same error and
+                // "not available" on every run. The admin banner says why.
+                if ($this->syncHold->isBlocking($storeId)) {
+                    continue;
+                }
                 if (!$this->_ping($storeId)) {
                     $this->_helper->log("MailChimp is not available for store $storeId, skipping");
                     continue;
