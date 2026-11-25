@@ -1,5 +1,50 @@
 # Changelog
 
+## [103.4.88](https://github.com/mailchimp/mc-magento2/tree/103.4.88)
+
+[Full Changelog](https://github.com/mailchimp/mc-magento2/compare/103.4.87...103.4.88)
+
+**Implemented enhancements:**
+
+- Show the QoS service status in the admin and pause sync while the service asks to [\#2416](https://github.com/mailchimp/mc-magento2/pull/2416)
+
+  `mailchimp-lib` 3.0.54 honours a service status returned by the QoS service:
+  while it pauses an API key, the library makes no Mailchimp calls for it. The
+  admin now shows that status as a notice at the top of every admin page, with
+  what it means, what to do, the store views it affects and a reference. It is
+  critical while sync is paused, and a warning when a pause is scheduled. It
+  goes away on its own when the service resumes sync.
+
+  While a store view is paused, the module skips the work that would only fail:
+  the ecommerce sync, the subscriber calls and the webhook calls that need
+  Mailchimp. A profile webhook received during a pause keeps the customer's
+  stored interest groups. Changes made in Magento during a pause, including
+  unsubscribes, are not sent to Mailchimp.
+
+- Stop storing Mailchimp API calls, and remove the support log upload [\#2409](https://github.com/mailchimp/mc-magento2/pull/2409)
+
+  Every Mailchimp API call was saved to `mailchimp_notification` with its full
+  request and response, and nothing read that table except the support log
+  upload. Calls are no longer stored, and the table is dropped on
+  `setup:upgrade`. The "Enable Support" and "Clean support period" settings
+  are removed, along with the two statistics crons that fed the table.
+
+**Fixed bugs:**
+
+- Submit the order-success interest form by POST with a form key [\#2406](https://github.com/mailchimp/mc-magento2/pull/2406)
+
+  The interest form on the order success page now posts with a form key, and
+  `mailchimp/checkout/success` accepts POST only. Only the submitted groups are
+  stored. A request with no order in the checkout session is redirected
+  instead of ending in an error.
+
+**Dependencies:**
+
+- The `ebizmarts/mailchimp-lib` floor goes from `>=3.0.52` to `>=3.0.54`, the
+  first version that honours a service status. Below it nothing breaks: the
+  module finds no service status and nothing is paused. An app/code
+  installation running an older library is told so in the admin, as before.
+
 ## [103.4.87](https://github.com/mailchimp/mc-magento2/tree/103.4.87)
 
 [Full Changelog](https://github.com/mailchimp/mc-magento2/compare/103.4.86...103.4.87)
