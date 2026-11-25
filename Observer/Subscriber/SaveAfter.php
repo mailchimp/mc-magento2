@@ -39,6 +39,11 @@ class SaveAfter implements \Magento\Framework\Event\ObserverInterface
     protected $_storeManager;
 
     /**
+     * @var \Ebizmarts\MailChimp\Model\ServiceStatus|null
+     */
+    private $serviceStatus = null;
+
+    /**
      * @param \Ebizmarts\MailChimp\Model\MailChimpSyncEcommerce $ecommerce
      * @param \Ebizmarts\MailChimp\Helper\Data $helper
      * @param \Ebizmarts\MailChimp\Model\Api\Subscriber $subscriberApi
@@ -73,7 +78,8 @@ class SaveAfter implements \Magento\Framework\Event\ObserverInterface
             $subscriberOld = $factory->loadBySubscriberEmail($subscriber->getSubscriberEmail(), $websiteId);
         }
         if ($this->_helper->isMailChimpEnabled($subscriber->getStoreId())&&$isCustomer&&
-            $subscriberOld->getEmail()&&$subscriber->getEmail()!=$subscriberOld->getEmail()) {
+            $subscriberOld->getEmail()&&$subscriber->getEmail()!=$subscriberOld->getEmail()
+            && !$this->isPaused($subscriberOld->getStoreId())) {
             $api = $this->_helper->getApi($subscriberOld->getStoreId());
             $mergeVars = $this->_helper->getMergeVarsBySubscriber($subscriberOld, $subscriberOld->getEmail());
             $status = 'unsubscribed';
@@ -98,5 +104,28 @@ class SaveAfter implements \Magento\Framework\Event\ObserverInterface
 
         }
         $this->_subscriberApi->update($subscriber);
+    }
+
+    /**
+     * Whether the QoS service has paused this store view's Mailchimp calls.
+     * While it has, the call would only raise before leaving and log a line,
+     * so it is skipped. Resolved on first use, and never paused when it cannot
+     * be resolved, which is the behaviour without a service status.
+     *
+     * @param  int|string|null $storeId
+     * @return bool
+     */
+    private function isPaused($storeId)
+    {
+        try {
+            if ($this->serviceStatus === null) {
+                $this->serviceStatus = \Magento\Framework\App\ObjectManager::getInstance()
+                    ->get(\Ebizmarts\MailChimp\Model\ServiceStatus::class);
+            }
+
+            return $this->serviceStatus->isPaused($storeId);
+        } catch (\Throwable $e) {
+            return false;
+        }
     }
 }
