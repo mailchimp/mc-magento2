@@ -292,6 +292,16 @@ class Webhook
         $websiteId = (int)$customer->getWebsiteId();
         foreach($data['merges'] as $key=> $value) {
             if (!empty($value)) {
+                if ($key=='GROUPINGS' && $this->isPaused($customer->getStoreId())) {
+                    // The group names in the webhook are matched against the
+                    // audience's tree, which cannot be read from Mailchimp while
+                    // the store is paused. Matching against nothing would save
+                    // empty selections over the customer's stored ones, and the
+                    // next sync would send every interest unchecked. Keep them as
+                    // they are; the other merge fields need no call and still
+                    // apply.
+                    continue;
+                }
                 if ($key=='GROUPINGS') {
                     $groups = ['group' => []];
                     foreach($value as $item) {
